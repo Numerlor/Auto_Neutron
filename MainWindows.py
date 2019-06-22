@@ -1,12 +1,13 @@
-from PyQt5 import QtWidgets, QtCore, QtGui
 import csv
 import json
 import sys
 from os import environ, listdir
 from os.path import getctime
 
-import workers
+from PyQt5 import QtWidgets, QtCore, QtGui
+
 import popups
+import workers
 
 
 class Ui_MainWindow(QtWidgets.QMainWindow):
@@ -31,7 +32,8 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.save_action = QtWidgets.QAction("Save route", self)
         self.copy_action = QtWidgets.QAction("Copy", self)
         self.settings_action = QtWidgets.QAction("Settings", self)
-        self.save_on_quit = self.settings.value("save_on_quit",type=bool)
+        self.about_action = QtWidgets.QAction("About", self)
+        self.save_on_quit = self.settings.value("save_on_quit", type=bool)
 
         self.last_index = 0
 
@@ -101,13 +103,16 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.change_action.triggered.connect(self.change_item_text)
         self.save_action.triggered.connect(self.save_route_signal.emit)
         self.settings_action.triggered.connect(self.sett_pop)
+        self.about_action.triggered.connect(self.licenses_pop)
 
         self.addAction(self.settings_action)
         self.addAction(self.save_action)
+        self.addAction(self.about_action)
         self.MainTable.addAction(self.save_action)
         self.MainTable.addAction(self.settings_action)
         self.MainTable.addAction(self.change_action)
         self.MainTable.addAction(self.copy_action)
+        self.MainTable.addAction(self.about_action)
 
     def send_changed(self, item):
         if item.column() == 0:
@@ -186,13 +191,13 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             pass
 
         if dark:
-            text_color = QtGui.QColor(240,240,240)
+            text_color = QtGui.QColor(240, 240, 240)
         else:
-            text_color = QtGui.QColor(0,0,0)
+            text_color = QtGui.QColor(0, 0, 0)
 
         for row in range(0, index):
-            for i in range(0,4):
-                self.MainTable.item(row, i).setForeground(QtGui.QColor(150,150,150))
+            for i in range(0, 4):
+                self.MainTable.item(row, i).setForeground(QtGui.QColor(150, 150, 150))
         for row in range(index, self.MainTable.rowCount()):
             for i in range(0, 4):
                 self.MainTable.item(row, i).setForeground(text_color)
@@ -204,6 +209,10 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
     def quit_pop(self, prompt, modal):
         d = popups.QuitDialog(self, prompt, modal)
         d.setupUi()
+
+    def licenses_pop(self):
+        w = popups.LicensePop(self)
+        w.setup()
 
     def retranslateUi(self):
         self.setWindowTitle("Auto Neutron")
@@ -460,7 +469,7 @@ class UiDialog(QtWidgets.QDialog):
     def get_journals(self):
         try:
             self.journals = sorted([self.jpath + file for file in listdir(self.jpath) if file.endswith(".log")],
-                              key=getctime, reverse=True)
+                                   key=getctime, reverse=True)
         except FileNotFoundError:
             d = popups.QuitDialog(self, "Journal folder not detected")
             d.setupUi()
@@ -485,7 +494,7 @@ class UiDialog(QtWidgets.QDialog):
         with open(self.journals[index], encoding='utf-8') as f:
             lines = f.readlines()
         try:
-            self.source.setText(next(json.loads(lines[i])['StarSystem'] for i in range(len(lines)-1, -1, -1) if
+            self.source.setText(next(json.loads(lines[i])['StarSystem'] for i in range(len(lines) - 1, -1, -1) if
                                      '", "event":"FSDJump"' in lines[i] or 'Z", "event":"Location"' in lines[i]))
         except StopIteration:
             self.source.clear()
