@@ -340,3 +340,23 @@ class QuitDialog(QtWidgets.QDialog):
     @staticmethod
     def exit():
         sys.exit()
+
+
+class LicensePop(QtWidgets.QDialog):
+    def __init__(self, parent):
+        super(LicensePop, self).__init__(parent)
+        self.text = QtWidgets.QTextBrowser()
+        self.layout = QtWidgets.QVBoxLayout()
+
+    def setup(self):
+        self.setFixedSize(297, 62)
+        self.text.setText("Auto Neutron Copyright (C) 2019 Numerlor\n"
+                          "This program comes with ABSOLUTELY NO WARRANTY.\n"
+                          "This is free software, and you are welcome to redistribute it")
+        self.text.append('under certain conditions; <a href="https://www.gnu.org/licenses/">click here</a> for details')
+        self.layout.addWidget(self.text)
+        self.text.setOpenExternalLinks(True)
+        self.setLayout(self.layout)
+        self.setWindowFlag(QtCore.Qt.WindowContextHelpButtonHint, False)
+        self.layout.setContentsMargins(0,0,0,0)
+        self.show()
