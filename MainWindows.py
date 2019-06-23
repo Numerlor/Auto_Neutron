@@ -38,7 +38,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.save_on_quit = self.settings.value("save_on_quit", type=bool)
 
         self.last_index = 0
-
+        self.total_jumps = 0
     def setupUi(self):
         self.resize(self.settings.value("window/size", type=QtCore.QSize))
         self.move(self.settings.value("window/pos", type=QtCore.QPoint))
@@ -158,7 +158,8 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         except TypeError:
             pass
         self.start_worker(journal, table_data, index)
-        self.MainTable.horizontalHeaderItem(3).setText(f"Jumps ({sum(jum[3] for jum in table_data)})")
+        self.total_jumps = sum(jum[3] for jum in table_data)
+        self.MainTable.horizontalHeaderItem(3).setText(f"Jumps ({self.total_jumps}/{self.total_jumps})")
         for row in table_data:
             self.insert_row(row)
 
@@ -193,6 +194,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             pass
 
     def grayout(self, index, dark):
+        self.update_jumps(index)
         self.last_index = index
         try:
             self.MainTable.itemChanged.disconnect()
@@ -222,6 +224,10 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
     def licenses_pop(self):
         w = popups.LicensePop(self)
         w.setup()
+
+    def update_jumps(self, index):
+        remaining_jumps = sum(int(self.MainTable.item(i, 3).text()) for i in range(index, self.MainTable.rowCount()))
+        self.MainTable.horizontalHeaderItem(3).setText(f"Jumps ({remaining_jumps}/{self.total_jumps})")
 
     def new_route(self):
         self.thread.quit()
