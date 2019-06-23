@@ -172,7 +172,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.worker.moveToThread(self.thread)
         self.thread.started.connect(self.worker.main)
         self.worker.sys_signal.connect(self.grayout)
-        self.worker.quit_signal.connect(self.quit_pop)
+        self.worker.route_finished_signal.connect(self.end_route_pop)
         self.worker.game_shut_signal.connect(self.restart_worker)
         self.thread.start()
 
@@ -220,6 +220,12 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
     def quit_pop(self, prompt, modal):
         d = popups.QuitDialog(self, prompt, modal)
         d.setupUi()
+
+    def end_route_pop(self):
+        w = popups.RouteFinishedPop(self)
+        w.setup()
+        w.close_signal.connect(self.disconnect_signals)
+        w.new_route_signal.connect(self.new_route)
 
     def licenses_pop(self):
         w = popups.LicensePop(self)
