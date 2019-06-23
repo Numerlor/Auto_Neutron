@@ -16,6 +16,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
     script_settings = QtCore.pyqtSignal(tuple)  # worker settings from SettingsPop
     window_quit_signal = QtCore.pyqtSignal(bool)  # if window was closed, close ahk script
     save_route_signal = QtCore.pyqtSignal()  # signal to save current route
+    quit_worker_signal = QtCore.pyqtSignal()
 
     def __init__(self, settings, application):
         super(Ui_MainWindow, self).__init__()
@@ -31,6 +32,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.change_action = QtWidgets.QAction("Edit", self)
         self.save_action = QtWidgets.QAction("Save route", self)
         self.copy_action = QtWidgets.QAction("Copy", self)
+        self.new_route_action = QtWidgets.QAction("Start a new route", self)
         self.settings_action = QtWidgets.QAction("Settings", self)
         self.about_action = QtWidgets.QAction("About", self)
         self.save_on_quit = self.settings.value("save_on_quit", type=bool)
@@ -104,13 +106,16 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.save_action.triggered.connect(self.save_route_signal.emit)
         self.settings_action.triggered.connect(self.sett_pop)
         self.about_action.triggered.connect(self.licenses_pop)
+        self.new_route_action.triggered.connect(self.new_route)
 
         self.addAction(self.settings_action)
         self.addAction(self.save_action)
+        self.addAction(self.new_route_action)
         self.addAction(self.about_action)
         self.MainTable.addAction(self.save_action)
         self.MainTable.addAction(self.change_action)
         self.MainTable.addAction(self.copy_action)
+        self.MainTable.addAction(self.new_route_action)
         self.MainTable.addAction(self.settings_action)
         self.MainTable.addAction(self.about_action)
 
@@ -148,6 +153,10 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         ui.data_signal.connect(self.pop_table)
 
     def pop_table(self, journal, table_data, index):
+        try:
+            self.MainTable.itemChanged.disconnect()
+        except TypeError:
+            pass
         self.start_worker(journal, table_data, index)
         self.MainTable.horizontalHeaderItem(3).setText(f"Jumps ({sum(jum[3] for jum in table_data)})")
         for row in table_data:
@@ -213,6 +222,14 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
     def licenses_pop(self):
         w = popups.LicensePop(self)
         w.setup()
+
+    def new_route(self):
+        self.thread.quit()
+        self.quit_worker_signal.emit()
+        self.MainTable.horizontalHeaderItem(3).setText("Jumps")
+        self.MainTable.clearContents()
+        self.MainTable.setRowCount(0)
+        self.show_w()
 
     def retranslateUi(self):
         self.setWindowTitle("Auto Neutron")

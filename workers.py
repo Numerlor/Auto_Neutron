@@ -19,6 +19,7 @@ class AhkWorker(QtCore.QThread):
         self.bind = self.settings.value("bind")
         self.dark = self.settings.value("window/dark", type=bool)
         self.start_index = start_index
+        self.loop = True
         # set index according to last saved route or new plot, default index 1
         if start_index > 0:
             self.list_index = start_index
@@ -32,6 +33,7 @@ class AhkWorker(QtCore.QThread):
         parent.script_settings.connect(self.update_script)
         parent.window_quit_signal.connect(self.exit_and_save)
         parent.save_route_signal.connect(self.save_route)
+        parent.quit_worker_signal.connect(self.quit_loop)
 
     def main(self):
         shutdown = False
@@ -68,6 +70,7 @@ class AhkWorker(QtCore.QThread):
                     break
 
     def set_index(self, index):
+        print("index")
         self.list_index = index
         self.close_ahk()
         hotkey = Hotkey(self.ahk, self.bind, self.script.replace("|SYSTEMDATA|", self.data_values[self.list_index][0]))
@@ -75,6 +78,7 @@ class AhkWorker(QtCore.QThread):
         self.sys_signal.emit(self.list_index, self.dark)
 
     def update_sys(self, index, new_sys):
+        print("update sys")
         self.data_values[index][0] = new_sys
         if self.list_index == index:
             self.close_ahk()
@@ -95,8 +99,8 @@ class AhkWorker(QtCore.QThread):
     def close_ahk(self):
         try:
             self.hotkey.stop()
-        except Exception as e:
-            print(e)
+        except RuntimeError:
+            pass
 
     def exit_and_save(self, save_route):
         if save_route:
@@ -106,9 +110,14 @@ class AhkWorker(QtCore.QThread):
     def save_route(self):
         self.settings.setValue("last_route", (self.list_index, self.data_values))
 
+    def quit_loop(self):
+        print("loop")
+        self.loop = False
+        self.close_ahk()
+
     def follow_file(self, file):
         file.seek(0, 2)
-        while True:
+        while self.loop:
             loopline = file.readline()
             if not loopline:
                 self.sleep(1)
