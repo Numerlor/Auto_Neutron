@@ -163,39 +163,21 @@ class SpanshPlot(QtCore.QThread):
                     if job_json['status'] == "queued":
                         self.sleep(1)
                     else:
-                        data = []
-                        valid = False
-                        for stuff in job_json['result']['system_jumps']:
-                            tlist = []
-                            tlist.append(stuff['system'])
-                            tlist.append(round(float(stuff['distance_jumped']), 2))
-                            tlist.append(round(float(stuff['distance_left']), 2))
-                            tlist.append(int(stuff['jumps']))
-                            data.append(tlist)
-                            valid = True
-                        if valid:
-                            self.finished_signal.emit(data)
-                            break
-                entered = False
-                while job_json['status'] == "queued":
-                    entered = True
-                    self.sleep(4)
-                    encodedjob = requests.get("https://spansh.co.uk/api/results/" + job_id)
-                    decodedjob = encodedjob.content.decode()
-                    job_json = json.loads(decodedjob)
-                if entered:
-                    data = []
-                    valid = False
-                    for stuff in job_json['result']['system_jumps']:
-                        tlist = []
-                        tlist.append(stuff['system'])
-                        tlist.append(round(float(stuff['distance_jumped']), 2))
-                        tlist.append(round(float(stuff['distance_left']), 2))
-                        tlist.append(int(stuff['jumps']))
-                        data.append(tlist)
-                        valid = True
-                    if valid:
-                        self.finished_signal.emit(data)
+                        self.finished_signal.emit([[data['system'], round(float(data['distance_jumped']), 2),
+                                                    round(float(data['distance_left']), 2), int(data['jumps'])]
+                                                   for data in job_json['result']['system_jumps']])
+                        break
+                    entered = False
+                    while job_json['status'] == "queued":
+                        entered = True
+                        self.sleep(4)
+                        encodedjob = requests.get("https://spansh.co.uk/api/results/" + job_id)
+                        decodedjob = encodedjob.content.decode()
+                        job_json = json.loads(decodedjob)
+                    if entered:
+                        self.finished_signal.emit([[data['system'], round(float(data['distande_jumped']), 2),
+                                                    round(float(data['distance_left']), 2), int(data['jumps'])]
+                                                   for data in job_json['result']['system_jumps']])
 
 
 class NearestRequest(QtCore.QThread):
