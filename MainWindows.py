@@ -72,6 +72,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         header.setSectionResizeMode(2, QtWidgets.QHeaderView.Stretch)
         header.setSectionResizeMode(3, QtWidgets.QHeaderView.Stretch)
         header.disconnect()
+        self.MainTable.verticalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
 
         self.gridLayout.addWidget(self.MainTable, 0, 0, 1, 1)
         self.setCentralWidget(self.centralwidget)
@@ -164,7 +165,6 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             self.insert_row(row)
 
         self.MainTable.itemChanged.connect(self.send_changed)
-        self.MainTable.verticalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
 
     def start_worker(self, journal, data_values, index):
         self.thread = QtCore.QThread()
