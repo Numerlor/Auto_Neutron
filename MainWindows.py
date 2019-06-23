@@ -109,9 +109,9 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.addAction(self.save_action)
         self.addAction(self.about_action)
         self.MainTable.addAction(self.save_action)
-        self.MainTable.addAction(self.settings_action)
         self.MainTable.addAction(self.change_action)
         self.MainTable.addAction(self.copy_action)
+        self.MainTable.addAction(self.settings_action)
         self.MainTable.addAction(self.about_action)
 
     def send_changed(self, item):
@@ -510,6 +510,7 @@ class UiDialog(QtWidgets.QDialog):
         self.thread.start()
 
     def sp_finish_act(self, data):
+        self.settings.setValue("last_range", self.ran_spinbox.value())
         self.data_signal.emit(self.journals[self.sp_comb.currentIndex()], data, -1)
         self.plotter.quit()
         self.hide()
