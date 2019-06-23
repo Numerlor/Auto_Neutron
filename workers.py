@@ -70,7 +70,6 @@ class AhkWorker(QtCore.QThread):
                     break
 
     def set_index(self, index):
-        print("index")
         self.list_index = index
         self.close_ahk()
         hotkey = Hotkey(self.ahk, self.bind, self.script.replace("|SYSTEMDATA|", self.data_values[self.list_index][0]))
@@ -78,7 +77,6 @@ class AhkWorker(QtCore.QThread):
         self.sys_signal.emit(self.list_index, self.dark)
 
     def update_sys(self, index, new_sys):
-        print("update sys")
         self.data_values[index][0] = new_sys
         if self.list_index == index:
             self.close_ahk()
@@ -111,7 +109,6 @@ class AhkWorker(QtCore.QThread):
         self.settings.setValue("last_route", (self.list_index, self.data_values))
 
     def quit_loop(self):
-        print("loop")
         self.loop = False
         self.close_ahk()
 
