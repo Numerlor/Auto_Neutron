@@ -311,7 +311,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
                                               "ClipOld ="
                                               "SetKeyDelay, 1, 2\n"
                                               "send, {enter}\n"))
-
+            self.settings.setValue("last_route", (0, [[]]))
             self.settings.sync()
             self.write_ahk_path()
 
@@ -529,14 +529,11 @@ class UiDialog(QtWidgets.QDialog):
             self.source.clear()
 
     def sp_submit_act(self):
-        self.plotter = workers.SpanshPlot()
-        self.thread = QtCore.QThread()
-        self.plotter.moveToThread(self.thread)
+        self.plotter = workers.SpanshPlot(self.eff_spinbox.value(), self.ran_spinbox.value(),
+                                          self.source.text(), self.destination.text())
         self.plotter.status_signal.connect(self.change_status)
         self.plotter.finished_signal.connect(self.sp_finish_act)
-        self.thread.started.connect(lambda: self.plotter.plot(self.eff_spinbox.value(), self.ran_spinbox.value(),
-                                                              self.source.text(), self.destination.text()))
-        self.thread.start()
+        self.plotter.start()
 
     def sp_finish_act(self, data):
         self.settings.setValue("last_range", self.ran_spinbox.value())
