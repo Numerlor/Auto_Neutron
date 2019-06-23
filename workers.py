@@ -127,8 +127,15 @@ class SpanshPlot(QtCore.QThread):
     finished_signal = QtCore.pyqtSignal(list)  # signal containing output
     status_signal = QtCore.pyqtSignal(str)  # signal for updating statusbar
 
-    def __init__(self):
+    def __init__(self, efficiency, jrange, source, to):
         super(SpanshPlot, self).__init__()
+        self.efficiency = efficiency
+        self.jrange = jrange
+        self.source = source
+        self.to = to
+
+    def run(self):
+        self.plot(self.efficiency, self.jrange, self.source, self.to)
 
     def plot(self, efficiency, jrange, source, to):
         try:
