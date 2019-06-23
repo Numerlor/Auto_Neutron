@@ -1,12 +1,13 @@
-from PyQt5 import QtCore
-import requests
 import json
+
+import requests
+from PyQt5 import QtCore
 from ahk import Hotkey, AHK
 
 
 class AhkWorker(QtCore.QThread):
     sys_signal = QtCore.pyqtSignal(int, bool)  # signal to move grayout to index
-    quit_signal = QtCore.pyqtSignal(str, bool)  # forced quit signal
+    route_finished_signal = QtCore.pyqtSignal()  # route end reached signal
     game_shut_signal = QtCore.pyqtSignal(list, int)  # signal for game shutdown
 
     def __init__(self, parent, journal, data_values, settings, start_index):
@@ -58,7 +59,7 @@ class AhkWorker(QtCore.QThread):
                     self.list_index += 1
                     if self.list_index == len(self.data_values):
                         self.close_ahk()
-                        self.quit_signal.emit("End of route reached", True)
+                        self.route_finished_signal.emit()
                         break
                     self.hotkey = Hotkey(self.ahk, self.bind,
                                          self.script.replace("|SYSTEMDATA|", self.data_values[self.list_index][0]))

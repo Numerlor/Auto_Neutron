@@ -7,9 +7,6 @@ from PyQt5 import QtWidgets, QtCore, QtGui
 import workers
 
 
-# TODO replace QuitPop with a script reset popup
-
-
 class Nearest(QtWidgets.QDialog):
     closed_signal = QtCore.pyqtSignal()  # signal sent when window is closed
 
@@ -329,7 +326,7 @@ class QuitDialog(QtWidgets.QDialog):
         font.setPointSize(12)
         self.label.setFont(font)
         self.pushButton.setMaximumWidth(95)
-        self.pushButton.pressed.connect(self.exit)
+        self.pushButton.pressed.connect(sys.exit)
 
         self.setModal(self.modal)
 
@@ -337,9 +334,50 @@ class QuitDialog(QtWidgets.QDialog):
         self.setWindowFlag(QtCore.Qt.WindowContextHelpButtonHint, False)
         self.show()
 
-    @staticmethod
-    def exit():
-        sys.exit()
+
+class RouteFinishedPop(QtWidgets.QDialog):
+    close_signal = QtCore.pyqtSignal()
+    new_route_signal = QtCore.pyqtSignal()
+
+    def __init__(self, parent):
+        super(RouteFinishedPop, self).__init__(parent)
+        self.main_layout = QtWidgets.QVBoxLayout()
+        self.label = QtWidgets.QLabel()
+        self.quit_button = QtWidgets.QPushButton()
+        self.new_route_button = QtWidgets.QPushButton()
+        self.button_layout = QtWidgets.QHBoxLayout()
+
+    def setup(self):
+        self.setLayout(self.main_layout)
+        self.main_layout.setContentsMargins(7, 20, 7, 10)
+        self.main_layout.addWidget(self.label, alignment=QtCore.Qt.AlignCenter)
+        self.main_layout.addSpacerItem(QtWidgets.QSpacerItem(1, 1
+                                                             , QtWidgets.QSizePolicy.Fixed,
+                                                             QtWidgets.QSizePolicy.MinimumExpanding))
+        self.main_layout.addLayout(self.button_layout)
+        self.button_layout.addWidget(self.new_route_button)
+        self.button_layout.addSpacerItem(QtWidgets.QSpacerItem(1, 1
+                                                               , QtWidgets.QSizePolicy.MinimumExpanding,
+                                                               QtWidgets.QSizePolicy.Fixed))
+        self.button_layout.addWidget(self.quit_button)
+
+        self.quit_button.pressed.connect(sys.exit)
+        self.new_route_button.pressed.connect(self.new_route_signal.emit)
+        self.new_route_button.pressed.connect(self.hide)
+        self.retranslateUi()
+        self.show()
+
+    def retranslateUi(self):
+        self.label.setText("Route finished")
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.label.setFont(font)
+        self.quit_button.setText("Quit")
+        self.new_route_button.setText("New route")
+
+    def closeEvent(self, *args, **kwargs):
+        super(QtWidgets.QDialog, self).closeEvent(*args, **kwargs)
+        self.close_signal.emit()
 
 
 class LicensePop(QtWidgets.QDialog):
@@ -358,5 +396,5 @@ class LicensePop(QtWidgets.QDialog):
         self.text.setOpenExternalLinks(True)
         self.setLayout(self.layout)
         self.setWindowFlag(QtCore.Qt.WindowContextHelpButtonHint, False)
-        self.layout.setContentsMargins(0,0,0,0)
+        self.layout.setContentsMargins(0, 0, 0, 0)
         self.show()
