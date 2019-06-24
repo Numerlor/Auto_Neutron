@@ -130,7 +130,8 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         w.settings_signal.connect(self.change_editable_settings)
 
     def copy(self):
-        QtWidgets.QApplication.clipboard().setText(self.MainTable.currentItem().text())
+        if self.MainTable.currentItem() is not None:
+            QtWidgets.QApplication.clipboard().setText(self.MainTable.currentItem().text())
 
     def change_item_text(self):
         item = self.MainTable.currentItem()
@@ -149,7 +150,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             self.MainTable.setItem(row_pos, i, item)
 
     def show_w(self):
-        ui = UiDialog(self, self.settings)
+        ui = PlotStartDialog(self, self.settings)
         ui.setupUi()
         ui.data_signal.connect(self.pop_table)
 
@@ -233,11 +234,15 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
     def update_jumps(self, index):
         remaining_jumps = sum(int(self.MainTable.item(i, 3).text()) for i in range(index, self.MainTable.rowCount()))
-        self.MainTable.horizontalHeaderItem(3).setText(f"Jumps ({remaining_jumps}/{self.total_jumps})")
+        if self.total_jumps != 0:
+            self.MainTable.horizontalHeaderItem(3).setText(f"Jumps ({remaining_jumps}/{self.total_jumps})")
 
     def new_route(self):
-        self.thread.quit()
         self.quit_worker_signal.emit()
+        try:
+            self.thread.quit()
+        except AttributeError:
+            pass
         self.MainTable.horizontalHeaderItem(3).setText("Jumps")
         self.MainTable.clearContents()
         self.MainTable.setRowCount(0)
@@ -311,7 +316,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
                                               "ClipOld ="
                                               "SetKeyDelay, 1, 2\n"
                                               "send, {enter}\n"))
-            self.settings.setValue("last_route", (0, [[]]))
+            self.settings.setValue("last_route", ())
             self.settings.sync()
             self.write_ahk_path()
 
@@ -335,11 +340,11 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.window_quit_signal.emit(self.save_on_quit)
 
 
-class UiDialog(QtWidgets.QDialog):
+class PlotStartDialog(QtWidgets.QDialog):
     data_signal = QtCore.pyqtSignal(str, list, int)
 
     def __init__(self, parent, settings):
-        super(UiDialog, self).__init__(parent)
+        super(PlotStartDialog, self).__init__(parent)
         self.settings = settings
         self.jpath = self.settings.value("paths/journal")
         self.cpath = self.settings.value("paths/CSV")
@@ -528,6 +533,9 @@ class UiDialog(QtWidgets.QDialog):
         except StopIteration:
             self.source.clear()
 
+    def update_destination(self, system):
+        self.destination.setText(system)
+
     def sp_submit_act(self):
         self.plotter = workers.SpanshPlot(self.eff_spinbox.value(), self.ran_spinbox.value(),
                                           self.source.text(), self.destination.text())
@@ -539,7 +547,7 @@ class UiDialog(QtWidgets.QDialog):
         self.settings.setValue("last_range", self.ran_spinbox.value())
         self.data_signal.emit(self.journals[self.sp_comb.currentIndex()], data, -1)
         self.plotter.quit()
-        self.hide()
+        self.close()
 
     def change_status(self, message):
         self.status.showMessage(message)
@@ -576,7 +584,7 @@ class UiDialog(QtWidgets.QDialog):
                     data.append(tlist)
                 if valid:
                     self.data_signal.emit(self.journals[self.cs_comb.currentIndex()], data, -1)
-                    self.hide()
+                    self.close()
                 else:
                     self.status.showMessage("Error loading csv file")
 
@@ -590,23 +598,23 @@ class UiDialog(QtWidgets.QDialog):
         else:
             if last_route[0] == len(last_route[1]):
                 self.data_signal.emit(self.journals[self.last_comb.currentIndex()], last_route[1], 1)
-                self.hide()
+                self.close()
             else:
                 self.data_signal.emit(self.journals[self.last_comb.currentIndex()], last_route[1], last_route[0])
-                self.hide()
+                self.close()
 
     def show_nearest(self):
         self.nearest.setEnabled(False)
         n_win = popups.Nearest(self)
         n_win.setupUi()
         n_win.closed_signal.connect(self.enable_button)
+        n_win.destination_signal.connect(self.update_destination)
 
     def enable_button(self):
         self.nearest.setEnabled(True)
 
     def closeEvent(self, *args, **kwargs):
         super(QtWidgets.QDialog, self).closeEvent(*args, **kwargs)
-        sys.exit()
 
 
 def change_to_dark(application):
