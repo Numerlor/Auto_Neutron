@@ -320,7 +320,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             open(self.settings.value("paths/ahk")).close()
         except FileNotFoundError:
             ahk_path = QtWidgets.QFileDialog.getOpenFileName(filter="AutoHotKey (AutoHotKey*.exe)",
-                                                             caption="Select AHK's executable")
+                                                             caption="Select AutoHotkey's executable")
             if len(ahk_path[0]) == 0:
                 sys.exit()
             else:
