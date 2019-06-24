@@ -42,10 +42,14 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
     def setupUi(self):
         self.resize(self.settings.value("window/size", type=QtCore.QSize))
         self.move(self.settings.value("window/pos", type=QtCore.QPoint))
-        self.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
 
         # connect and add actions
         self.setup_actions()
+        # set context menus to custom
+        self.MainTable.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.MainTable.customContextMenuRequested.connect(self.table_context)
+        self.customContextMenuRequested.connect(self.main_context)
 
         self.gridLayout.setContentsMargins(0, 0, 0, 0)
         self.gridLayout.setSpacing(0)
@@ -62,7 +66,6 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.MainTable.setHorizontalHeaderItem(3, item)
         self.MainTable.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
         self.MainTable.setAlternatingRowColors(True)
-        self.MainTable.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
         self.MainTable.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.MainTable.verticalHeader().setVisible(False)
 
@@ -109,16 +112,25 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.about_action.triggered.connect(self.licenses_pop)
         self.new_route_action.triggered.connect(self.new_route)
 
-        self.addAction(self.settings_action)
-        self.addAction(self.save_action)
-        self.addAction(self.new_route_action)
-        self.addAction(self.about_action)
-        self.MainTable.addAction(self.save_action)
-        self.MainTable.addAction(self.change_action)
-        self.MainTable.addAction(self.copy_action)
-        self.MainTable.addAction(self.new_route_action)
-        self.MainTable.addAction(self.settings_action)
-        self.MainTable.addAction(self.about_action)
+    def main_context(self, location):
+        menu = QtWidgets.QMenu()
+        menu.addAction(self.new_route_action)
+        menu.addSeparator()
+        menu.addAction(self.save_action)
+        menu.addAction(self.settings_action)
+        menu.addAction(self.about_action)
+        menu.exec_(self.mapToGlobal(location))
+
+    def table_context(self, location):
+        menu = QtWidgets.QMenu()
+        menu.addAction(self.copy_action)
+        menu.addAction(self.change_action)
+        menu.addAction(self.save_action)
+        menu.addSeparator()
+        menu.addAction(self.new_route_action)
+        menu.addAction(self.settings_action)
+        menu.addAction(self.about_action)
+        menu.exec_(self.MainTable.viewport().mapToGlobal(location))
 
     def send_changed(self, item):
         if item.column() == 0:
