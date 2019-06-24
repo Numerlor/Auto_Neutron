@@ -9,6 +9,7 @@ import workers
 
 class Nearest(QtWidgets.QDialog):
     closed_signal = QtCore.pyqtSignal()  # signal sent when window is closed
+    destination_signal = QtCore.pyqtSignal(str)  # signal containing destination to input into destination line edit
 
     # lightly modified auto generated
     def __init__(self, parent):
@@ -43,7 +44,7 @@ class Nearest(QtWidgets.QDialog):
 
     def setupUi(self):
         self.resize(207, 191)
-        self.main_layout.setContentsMargins(2, 2, 2, 2)
+        self.main_layout.setContentsMargins(2, 2, 20, 2)
         self.main_layout.setSpacing(2)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
@@ -67,23 +68,23 @@ class Nearest(QtWidgets.QDialog):
         self.main_horizontal.addLayout(self.coords_vertical)
         self.system_main.setMaximumWidth(68)
         self.system_horizontal.addWidget(self.system_main)
-        self.system_horizontal.addWidget(self.system_output)
+        self.system_horizontal.addWidget(self.system_output, alignment=QtCore.Qt.AlignRight)
         self.output_vertical.addLayout(self.system_horizontal)
         self.distance_main.setMaximumWidth(45)
         self.distance_horizontal.addWidget(self.distance_main)
-        self.distance_horizontal.addWidget(self.distance_output)
+        self.distance_horizontal.addWidget(self.distance_output, alignment=QtCore.Qt.AlignRight)
         self.output_vertical.addLayout(self.distance_horizontal)
         self.x_main.setMaximumWidth(15)
         self.x_horizontal.addWidget(self.x_main)
-        self.x_horizontal.addWidget(self.x_output)
+        self.x_horizontal.addWidget(self.x_output, alignment=QtCore.Qt.AlignRight)
         self.output_vertical.addLayout(self.x_horizontal)
         self.y_main.setMaximumWidth(15)
         self.y_horizontal.addWidget(self.y_main)
-        self.y_horizontal.addWidget(self.y_output)
+        self.y_horizontal.addWidget(self.y_output, alignment=QtCore.Qt.AlignRight)
         self.output_vertical.addLayout(self.y_horizontal)
         self.z_main.setMaximumWidth(15)
         self.z_horizontal.addWidget(self.z_main)
-        self.z_horizontal.addWidget(self.z_output)
+        self.z_horizontal.addWidget(self.z_output, alignment=QtCore.Qt.AlignRight)
         self.output_vertical.addLayout(self.z_horizontal)
         self.main_horizontal.addLayout(self.output_vertical)
         self.frame_layout.addLayout(self.main_horizontal, 0, 0, 1, 1)
@@ -106,6 +107,12 @@ class Nearest(QtWidgets.QDialog):
         self.x_edit.textChanged.connect(self.ena_button)
         self.y_edit.textChanged.connect(self.ena_button)
         self.z_edit.textChanged.connect(self.ena_button)
+
+        self.system_output.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
+        self.system_output.setCursor(QtCore.Qt.IBeamCursor)
+        self.system_output.mouseDoubleClickEvent = self.set_destination
+
+        self.setWindowFlag(QtCore.Qt.WindowContextHelpButtonHint, False)
         self.show()
 
     def ena_button(self):
@@ -135,6 +142,9 @@ class Nearest(QtWidgets.QDialog):
 
     def change_status(self, message):
         self.status.showMessage(message)
+
+    def set_destination(self, event):
+        self.destination_signal.emit(self.system_output.text())
 
     def retranslateUi(self):
         self.setWindowTitle("Nearest")
