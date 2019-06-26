@@ -39,6 +39,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
         self.last_index = 0
         self.total_jumps = 0
+
     def setupUi(self):
         self.resize(self.settings.value("window/size", type=QtCore.QSize))
         self.move(self.settings.value("window/pos", type=QtCore.QPoint))
@@ -446,6 +447,7 @@ class PlotStartDialog(QtWidgets.QDialog):
         self.nearest.pressed.connect(self.show_nearest)
         self.sp_submit.pressed.connect(self.sp_submit_act)
         self.sp_comb.currentIndexChanged.connect(self.update_source)
+        self.sp_comb.currentIndexChanged.connect(self.current_range)
 
         self.gridLayout_4.addWidget(self.ran_spinbox, 3, 0, 1, 1)
         self.gridLayout_4.addWidget(self.efficiency, 4, 0, 1, 1)
@@ -534,16 +536,28 @@ class PlotStartDialog(QtWidgets.QDialog):
                 self.sp_comb.addItems(options)
                 self.last_comb.addItems(options)
                 self.update_source(0)
+                self.current_range(0)
 
     def update_source(self, index):
         # set source system to last visited in currently selected journal
         with open(self.journals[index], encoding='utf-8') as f:
-            lines = f.readlines()
+            lines = [json.loads(line) for line in f]
         try:
-            self.source.setText(next(json.loads(lines[i])['StarSystem'] for i in range(len(lines) - 1, -1, -1) if
-                                     '", "event":"FSDJump"' in lines[i] or 'Z", "event":"Location"' in lines[i]))
+            self.source.setText(next(lines[i]['StarSystem'] for i in range(len(lines) - 1, -1, -1)
+                                     if lines[i]['event'] == "FSDJump" or lines[i]['event'] == "Location"))
         except StopIteration:
             self.source.clear()
+
+    def current_range(self, index):
+        with open(self.journals[index], encoding='utf-8') as f:
+            lines = [json.loads(line) for line in f]
+        try:
+            self.ran_spinbox.setValue(next(round(float(lines[i]['MaxJumpRange']), 2)
+                                           for i in range(len(lines) - 1, -1, -1) if lines[i]['event'] == "Loadout"))
+            print(next(round(float(lines[i]['MaxJumpRange']), 2)
+                       for i in range(len(lines) - 1, -1, -1) if lines[i]['event'] == "Loadout"))
+        except StopIteration:
+            self.ran_spinbox.setValue(5)
 
     def update_destination(self, system):
         self.destination.setText(system)
