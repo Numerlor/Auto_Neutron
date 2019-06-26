@@ -1,4 +1,6 @@
+import itertools
 import json
+from math import ceil
 
 import requests
 from PyQt5 import QtCore
@@ -153,31 +155,23 @@ class SpanshPlot(QtCore.QThread):
                     self.status_signal.emit("Destination system invalid")
                 else:
                     self.status_signal.emit("An error has occured when contacting Spansh's API")
+
             except KeyError:
                 job_id = job_json['job']
                 self.status_signal.emit("Plotting")
-                for _ in range(20):
+
+                for sleep_base in itertools.count(1, 5):
                     encodedjob = requests.get("https://spansh.co.uk/api/results/" + job_id)
                     decodedjob = encodedjob.content.decode()
                     job_json = json.loads(decodedjob)
                     if job_json['status'] == "queued":
-                        self.sleep(1)
+                        # 1, 1, 2, 2, 3, 4, 6, 7, 9, 12, 15, 17, 20, 24, 27, 30, 30, 30, ...
+                        self.sleep(min(ceil(ceil((sleep_base / 10) ** 2) / 1.9), 30))
                     else:
                         self.finished_signal.emit([[data['system'], round(float(data['distance_jumped']), 2),
                                                     round(float(data['distance_left']), 2), int(data['jumps'])]
                                                    for data in job_json['result']['system_jumps']])
                         break
-                    entered = False
-                    while job_json['status'] == "queued":
-                        entered = True
-                        self.sleep(4)
-                        encodedjob = requests.get("https://spansh.co.uk/api/results/" + job_id)
-                        decodedjob = encodedjob.content.decode()
-                        job_json = json.loads(decodedjob)
-                    if entered:
-                        self.finished_signal.emit([[data['system'], round(float(data['distande_jumped']), 2),
-                                                    round(float(data['distance_left']), 2), int(data['jumps'])]
-                                                   for data in job_json['result']['system_jumps']])
 
 
 class NearestRequest(QtCore.QThread):
