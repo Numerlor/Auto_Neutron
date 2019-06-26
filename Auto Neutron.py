@@ -25,6 +25,7 @@ class ExceptionHandler:
         for line in exception_lines:
             f.write(line)
         f.flush()
+        f.close()
         sys.__excepthook__(exctype, value, tb)
 
 
