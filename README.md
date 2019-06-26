@@ -12,3 +12,9 @@ The Auto Neutron app works by starting a new AutoHotkey script (located in setti
 * Built in neutron plotter using Spansh's api
 * Saving of routes
 * Skipping jumps using doubleclick
+
+![Main Window](https://i.imgur.com/R7ULASo.png)
+
+![Route selector](https://i.imgur.com/kdnm85Q.png)
+
+![Settings](https://i.imgur.com/98DsYX0.png)
