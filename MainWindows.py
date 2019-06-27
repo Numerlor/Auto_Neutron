@@ -1,6 +1,5 @@
 import csv
 import json
-import sys
 from os import environ, listdir
 from os.path import getctime
 
@@ -14,7 +13,9 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
     double_signal = QtCore.pyqtSignal(int)  # double click signal to set worker to new clicked row
     edit_signal = QtCore.pyqtSignal(int, str)  # send edited system to worker if changed
     script_settings = QtCore.pyqtSignal(tuple)  # worker settings from SettingsPop
+    script_mode_signal = QtCore.pyqtSignal(bool)
     window_quit_signal = QtCore.pyqtSignal(bool)  # if window was closed, close ahk script
+    worker_set_ahk_signal = QtCore.pyqtSignal()
     save_route_signal = QtCore.pyqtSignal()  # signal to save current route
     quit_worker_signal = QtCore.pyqtSignal()
 
@@ -277,6 +278,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         item.setTextAlignment(QtCore.Qt.AlignCenter)
 
     def change_editable_settings(self, values):
+        self.script_mode_signal.emit(values[7])
         self.script_settings.emit((values[0], values[1], values[2]))
         if values[2]:
             self.dark = True
@@ -295,13 +297,13 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.MainTable.setFont(font)
 
     def write_default_settings(self):
-        if not self.settings.value("paths/AHK"):
+        if not self.settings.value("paths/journal"):
             self.resize(800, 600)
             self.move(300, 300)
             self.settings.setValue("paths/journal",
                                    f"{environ['userprofile']}/Saved Games/Frontier Developments/Elite Dangerous/")
             self.jpath = f"{environ['userprofile']}/Saved Games/Frontier Developments/Elite Dangerous/"
-            self.settings.setValue("paths/ahk", environ['PROGRAMW6432'] + "\\AutoHotkey\\AutoHotkey.exe")
+            self.settings.setValue("paths/ahk", environ['PROGRAMW6432'] + "\\AutoHotkkey\\AutoHotkey.exe")
             self.settings.setValue("save_on_quit", True)
             self.settings.setValue("paths/csv", "")
             self.settings.setValue("window/size", QtCore.QSize(800, 600))
@@ -337,12 +339,15 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             open(self.settings.value("paths/ahk")).close()
         except FileNotFoundError:
             ahk_path = QtWidgets.QFileDialog.getOpenFileName(filter="AutoHotKey (AutoHotKey*.exe)",
-                                                             caption="Select AutoHotkey's executable")
+                                                             caption="Select AutoHotkey's executable "
+                                                                     "if you wish to use AHK")
             if len(ahk_path[0]) == 0:
-                sys.exit()
+                self.settings.setValue("copy_mode", True)
+                self.settings.setValue("paths/AHK", "")
             else:
                 self.settings.setValue("paths/AHK", ahk_path[0])
-                self.settings.sync()
+                self.settings.setValue("copy_mode", False)
+            self.settings.sync()
 
     def closeEvent(self, *args, **kwargs):
         super(QtWidgets.QMainWindow, self).closeEvent(*args, **kwargs)

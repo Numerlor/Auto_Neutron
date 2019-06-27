@@ -253,6 +253,9 @@ class SettingsPop(QtWidgets.QDialog):
         self.bold_check = QtWidgets.QCheckBox(self)
         self.pushButton = QtWidgets.QPushButton(self)
         self.save_on_quit = QtWidgets.QCheckBox(self)
+        self.copy_layout = QtWidgets.QHBoxLayout()
+        self.ahk_button = QtWidgets.QPushButton()
+        self.copy_check = QtWidgets.QCheckBox(self)
         self.settings = settings
         self.status = QtWidgets.QStatusBar(self)
 
@@ -272,6 +275,8 @@ class SettingsPop(QtWidgets.QDialog):
         self.main_bind_edit.setToolTip(
             "Bind to trigger the script, # for win key, ! for alt, ^ for control, + for shift")
         self.save_on_quit.setText("Save route on window close")
+        self.copy_check.setText("Copy mode")
+        self.ahk_button.setText("AHK Path")
 
         self.main_bind_edit.setText(self.settings.value("bind"))
         self.script_edit.setText(self.settings.value("script"))
@@ -280,11 +285,16 @@ class SettingsPop(QtWidgets.QDialog):
         self.font_size_combo.setValue(self.settings.value("font/size", type=int))
         self.bold_check.setChecked(self.settings.value("font/bold", type=bool))
         self.save_on_quit.setChecked(self.settings.value("save_on_quit", type=bool))
-
+        self.copy_check.setChecked(self.settings.value("copy_mode", type=bool))
+        if self.settings.value("paths/AHK") == "":
+            self.copy_check.setDisabled(True)
         self.verticalLayout.addWidget(self.main_bind_edit)
         self.verticalLayout.addWidget(self.script_edit)
         self.verticalLayout.addWidget(self.dark_check)
         self.verticalLayout.addWidget(self.save_on_quit)
+        self.copy_layout.addWidget(self.copy_check)
+        self.copy_layout.addWidget(self.ahk_button)
+        self.verticalLayout.addLayout(self.copy_layout)
         self.horizontalLayout.addWidget(self.font_combo)
         self.horizontalLayout.addWidget(self.font_size_combo)
         self.horizontalLayout.addWidget(self.bold_check, alignment=QtCore.Qt.AlignRight)
@@ -292,13 +302,22 @@ class SettingsPop(QtWidgets.QDialog):
         self.verticalLayout.addWidget(self.pushButton, alignment=QtCore.Qt.AlignCenter)
         self.verticalLayout.addWidget(self.status)
 
+        self.ahk_button.pressed.connect(self.ahk_dialog)
         self.setWindowFlag(QtCore.Qt.WindowContextHelpButtonHint, False)
         self.show()
+
+    def ahk_dialog(self):
+        ahk_path = QtWidgets.QFileDialog.getOpenFileName(filter="AutoHotKey (AutoHotKey*.exe)",
+                                                         caption="Select AutoHotkey's executable")
+        if len(ahk_path[0]) != 0:
+            self.settings.setValue("paths/AHK", ahk_path[0])
+            self.copy_check.setDisabled(False)
+        self.settings.sync()
 
     def save_settings(self):
         values = [self.main_bind_edit.text(), self.script_edit.toPlainText(), self.dark_check.isChecked(),
                   self.font_combo.currentFont(), self.font_size_combo.value(), self.bold_check.isChecked(),
-                  self.save_on_quit.isChecked()]
+                  self.save_on_quit.isChecked(), self.copy_check.isChecked()]
 
         if "|SYSTEMDATA|" not in values[1]:
             self.status.showMessage('Script must include "|SYSTEMDATA|"')
@@ -310,6 +329,7 @@ class SettingsPop(QtWidgets.QDialog):
             self.settings.setValue("font/size", values[4])
             self.settings.setValue("font/bold", values[5])
             self.settings.setValue("save_on_quit", values[6])
+            self.settings.setValue("copy_mode", values[7])
             self.settings.sync()
             self.settings_signal.emit(values)
 

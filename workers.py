@@ -5,6 +5,7 @@ from math import ceil
 import requests
 from PyQt5 import QtCore
 from ahk import Hotkey, AHK
+from pyperclip import copy as set_clip
 
 
 class AhkWorker(QtCore.QThread):
@@ -17,11 +18,12 @@ class AhkWorker(QtCore.QThread):
         self.journal = journal
         self.data_values = data_values
         self.settings = settings
-        self.ahk = AHK(executable_path=self.settings.value("paths/AHK"))
         self.script = self.settings.value("script")
         self.bind = self.settings.value("bind")
         self.dark = self.settings.value("window/dark", type=bool)
-        self.start_index = start_index
+        self.copy = self.settings.value("copy_mode", type=bool)
+        if not self.copy:
+            self.ahk = AHK(executable_path=self.settings.value("paths/AHK"))
         self.loop = True
         # set index according to last saved route or new plot, default index 1
         if start_index > 0:
@@ -37,6 +39,7 @@ class AhkWorker(QtCore.QThread):
         parent.window_quit_signal.connect(self.exit_and_save)
         parent.save_route_signal.connect(self.save_route)
         parent.quit_worker_signal.connect(self.quit_loop)
+        parent.script_mode_signal.connect(self.set_copy)
 
     def main(self):
         shutdown = False
@@ -48,24 +51,24 @@ class AhkWorker(QtCore.QThread):
                     shutdown = True
                     self.game_shut_signal.emit(self.data_values, self.list_index)
         if not shutdown:
-            self.hotkey = Hotkey(self.ahk, self.bind,
-                                 self.script.replace("|SYSTEMDATA|", self.data_values[self.list_index][0]))
+            self.copy_or_ahk_start()
+
             self.sys_signal.emit(self.list_index, self.dark)
-            self.hotkey.start()
             for line in self.follow_file(open(self.journal, encoding='utf-8')):
-                self.script = self.settings.value("script")
-                self.bind = self.settings.value("bind")
                 loaded = json.loads(line)
                 if loaded['event'] == "FSDJump" and loaded['StarSystem'] == self.data_values[self.list_index][0]:
-                    self.close_ahk()
                     self.list_index += 1
                     if self.list_index == len(self.data_values):
                         self.close_ahk()
                         self.route_finished_signal.emit()
                         break
-                    self.hotkey = Hotkey(self.ahk, self.bind,
-                                         self.script.replace("|SYSTEMDATA|", self.data_values[self.list_index][0]))
-                    self.hotkey.start()
+                    if self.copy:
+                        set_clip(self.data_values[self.list_index][0])
+                    else:
+                        self.close_ahk()
+                        self.hotkey = Hotkey(self.ahk, self.bind,
+                                             self.script.replace("|SYSTEMDATA|", self.data_values[self.list_index][0]))
+                        self.hotkey.start()
                     self.sys_signal.emit(self.list_index, self.dark)
                 elif loaded['event'] == "Shutdown":
                     self.game_shut_signal.emit(self.data_values, self.list_index)
@@ -74,33 +77,59 @@ class AhkWorker(QtCore.QThread):
 
     def set_index(self, index):
         self.list_index = index
-        self.close_ahk()
-        hotkey = Hotkey(self.ahk, self.bind, self.script.replace("|SYSTEMDATA|", self.data_values[self.list_index][0]))
-        hotkey.start()
+        if self.copy:
+            set_clip(self.data_values[self.list_index][0])
+        else:
+            self.close_ahk()
+            hotkey = Hotkey(self.ahk, self.bind,
+                            self.script.replace("|SYSTEMDATA|", self.data_values[self.list_index][0]))
+            hotkey.start()
         self.sys_signal.emit(self.list_index, self.dark)
 
     def update_sys(self, index, new_sys):
         self.data_values[index][0] = new_sys
         if self.list_index == index:
-            self.close_ahk()
-            self.hotkey = Hotkey(self.ahk, self.bind,
-                                 self.script.replace("|SYSTEMDATA|", self.data_values[self.list_index][0]))
-            self.hotkey.start()
+            if self.copy:
+                set_clip(self.data_values[self.list_index][0])
+            else:
+                self.close_ahk()
+                self.hotkey = Hotkey(self.ahk, self.bind,
+                                     self.script.replace("|SYSTEMDATA|", self.data_values[self.list_index][0]))
+                self.hotkey.start()
 
     def update_script(self, tup):
         self.bind = tup[0]
         self.script = tup[1]
         self.dark = tup[2]
+        if not self.copy:
+            self.close_ahk()
+            self.hotkey = Hotkey(self.ahk, self.bind,
+                                 self.script.replace("|SYSTEMDATA|", self.data_values[self.list_index][0]))
+            self.hotkey.start()
 
-        self.close_ahk()
-        self.hotkey = Hotkey(self.ahk, self.bind,
-                             self.script.replace("|SYSTEMDATA|", self.data_values[self.list_index][0]))
-        self.hotkey.start()
+    def set_copy(self, setting):
+        self.copy = setting
+        if self.copy:
+            self.close_ahk()
+            set_clip(self.data_values[self.list_index][0])
+        else:
+            self.ahk = AHK(executable_path=self.settings.value("paths/AHK"))
+            self.hotkey = Hotkey(self.ahk, self.bind,
+                                 self.script.replace("|SYSTEMDATA|", self.data_values[self.list_index][0]))
+            self.hotkey.start()
+
+    def copy_or_ahk_start(self):
+        if self.copy:
+            set_clip(self.data_values[self.list_index][0])
+        else:
+            self.hotkey = Hotkey(self.ahk, self.bind,
+                                 self.script.replace("|SYSTEMDATA|", self.data_values[self.list_index][0]))
+            self.hotkey.start()
 
     def close_ahk(self):
         try:
             self.hotkey.stop()
-        except RuntimeError:
+        except (RuntimeError, AttributeError):
             pass
 
     def exit_and_save(self, save_route):
