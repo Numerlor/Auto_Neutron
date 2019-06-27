@@ -96,7 +96,7 @@ class AhkWorker(QtCore.QThread):
         self.hotkey = Hotkey(self.ahk, self.bind,
                              self.script.replace("|SYSTEMDATA|", self.data_values[self.list_index][0]))
         self.hotkey.start()
-        
+
     def close_ahk(self):
         try:
             self.hotkey.stop()
@@ -178,16 +178,23 @@ class NearestRequest(QtCore.QThread):
     finished_signal = QtCore.pyqtSignal(dict)  # output signal
     status_signal = QtCore.pyqtSignal(str)  # statusbar change signal
 
-    def __init__(self):
+    def __init__(self, link, params):
         super(NearestRequest, self).__init__()
+        self.link = link
+        self.params = params
+
+    def run(self):
+        self.request(self.link, self.params)
 
     def request(self, request_link, parameters):
         try:
             self.status_signal.emit("Waiting for spansh")
             job_request = requests.get(request_link, params=parameters)
         except requests.exceptions.ConnectionError:
-            self.status_signal.emit("Unable to establish a connection to spansh")
+            self.status_signal.emit("Unable to establish a connection to Spansh")
         else:
-            response = json.loads(job_request.content.decode())
-            self.finished_signal.emit(response['system'])
-
+            if job_request.ok:
+                response = json.loads(job_request.content.decode())
+                self.finished_signal.emit(response['system'])
+            else:
+                self.status_signal.emit("An error has occured while communicating with Spansh's API")
