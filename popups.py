@@ -122,17 +122,15 @@ class Nearest(QtWidgets.QDialog):
             self.get_button.setEnabled(False)
 
     def get_nearest(self):
-        self.nearest_thread = QtCore.QThread()
-        self.nearest_worker = workers.NearestRequest()
-        self.nearest_worker.moveToThread(self.nearest_thread)
+        self.nearest_worker = workers.NearestRequest("https://spansh.co.uk/api/nearest",
+                                                     f"x={self.x_edit.text()}&y={self.y_edit.text()}"
+                                                     f"&z={self.z_edit.text()}")
         self.nearest_worker.finished_signal.connect(self.nearest_finished)
         self.nearest_worker.status_signal.connect(self.change_status)
-        self.nearest_thread.started.connect(lambda: self.nearest_worker.request("https://spansh.co.uk/api/nearest",
-                                                                                f"x={self.x_edit.text()}&y={self.y_edit.text()}&z={self.z_edit.text()}"))
-        self.nearest_thread.start()
+        self.nearest_worker.start()
 
     def nearest_finished(self, system):
-        self.nearest_thread.quit()
+        self.nearest_worker.quit()
         self.status.clearMessage()
         self.system_output.setText(str(system['name']))
         self.distance_output.setText(str(round(system['distance'], 2)) + " Ly")
