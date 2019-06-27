@@ -306,7 +306,6 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             self.settings.setValue("paths/ahk", environ['PROGRAMW6432'] + "\\AutoHotkey\\AutoHotkey.exe")
             self.settings.setValue("save_on_quit", True)
             self.settings.setValue("paths/csv", "")
-            self.settings.setValue("last_range", 0)
             self.settings.setValue("window/size", QtCore.QSize(800, 600))
             self.settings.setValue("window/pos", QtCore.QPoint(100, 100))
             self.settings.setValue("window/dark", False)
@@ -442,7 +441,6 @@ class PlotStartDialog(QtWidgets.QDialog):
         self.ran_spinbox.setAccelerated(True)
         self.ran_spinbox.setRange(10, 100)
         self.ran_spinbox.setSingleStep(0.01)
-        self.ran_spinbox.setValue(self.settings.value("last_range", type=float))
 
         self.source.textChanged.connect(self.button_on_filled_fields)
         self.destination.textChanged.connect(self.button_on_filled_fields)
@@ -572,7 +570,6 @@ class PlotStartDialog(QtWidgets.QDialog):
         self.plotter.start()
 
     def sp_finish_act(self, data):
-        self.settings.setValue("last_range", self.ran_spinbox.value())
         self.data_signal.emit(self.journals[self.sp_comb.currentIndex()], data, -1)
         self.plotter.quit()
         self.close()
