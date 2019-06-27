@@ -552,8 +552,6 @@ class PlotStartDialog(QtWidgets.QDialog):
         try:
             self.ran_spinbox.setValue(next(round(float(lines[i]['MaxJumpRange']), 2)
                                            for i in range(len(lines) - 1, -1, -1) if lines[i]['event'] == "Loadout"))
-            print(next(round(float(lines[i]['MaxJumpRange']), 2)
-                       for i in range(len(lines) - 1, -1, -1) if lines[i]['event'] == "Loadout"))
         except StopIteration:
             self.ran_spinbox.setValue(5)
 
@@ -590,18 +588,18 @@ class PlotStartDialog(QtWidgets.QDialog):
                         break
                     try:
                         tlist.append(round(float(stuff['Distance To Arrival']), 2))
-                    except ValueError:
+                    except (ValueError, KeyError):
                         valid = False
                         break
 
                     try:
                         tlist.append(round(float(stuff['Distance Remaining']), 2))
-                    except ValueError:
+                    except (ValueError, KeyError):
                         valid = False
                         break
                     try:
                         tlist.append(int(stuff['Jumps']))
-                    except ValueError:
+                    except (ValueError, KeyError):
                         valid = False
                         break
                     data.append(tlist)
@@ -610,6 +608,7 @@ class PlotStartDialog(QtWidgets.QDialog):
                     self.close()
                 else:
                     self.status.showMessage("Error loading csv file")
+                    self.cs_submit.setEnabled(True)
 
         except FileNotFoundError:
             self.status.showMessage("Invalid path to CSV file")
