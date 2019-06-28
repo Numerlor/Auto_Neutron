@@ -635,9 +635,6 @@ class PlotStartDialog(QtWidgets.QDialog):
     def enable_button(self):
         self.nearest.setEnabled(True)
 
-    def closeEvent(self, *args, **kwargs):
-        super(QtWidgets.QDialog, self).closeEvent(*args, **kwargs)
-
 
 def change_to_dark(application):
     p = QtGui.QPalette()
