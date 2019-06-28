@@ -308,7 +308,8 @@ class SettingsPop(QtWidgets.QDialog):
 
     def ahk_dialog(self):
         ahk_path = QtWidgets.QFileDialog.getOpenFileName(filter="AutoHotKey (AutoHotKey*.exe)",
-                                                         caption="Select AutoHotkey's executable")
+                                                         caption="Select AutoHotkey's executable",
+                                                         directory="C:/")
         if len(ahk_path[0]) != 0:
             self.settings.setValue("paths/AHK", ahk_path[0])
             self.copy_check.setDisabled(False)
