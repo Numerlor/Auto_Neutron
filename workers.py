@@ -73,7 +73,6 @@ class AhkWorker(QtCore.QThread):
                     self.sys_signal.emit(self.list_index, self.dark)
                 elif loaded['event'] == "Shutdown":
                     self.game_shut_signal.emit(self.data_values, self.list_index)
-                    print("Oiboi")
                     self.close_ahk()
                     break
 
