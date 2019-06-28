@@ -392,7 +392,7 @@ class LicensePop(QtWidgets.QDialog):
     def __init__(self, parent):
         super(LicensePop, self).__init__(parent)
         self.text = QtWidgets.QTextBrowser()
-        self.layout = QtWidgets.QVBoxLayout()
+        self.main_layout = QtWidgets.QVBoxLayout()
 
     def setup(self):
         self.setFixedSize(297, 62)
@@ -400,9 +400,42 @@ class LicensePop(QtWidgets.QDialog):
                           "This program comes with ABSOLUTELY NO WARRANTY.\n"
                           "This is free software, and you are welcome to redistribute it")
         self.text.append('under certain conditions; <a href="https://www.gnu.org/licenses/">click here</a> for details')
-        self.layout.addWidget(self.text)
+        self.main_layout.addWidget(self.text)
         self.text.setOpenExternalLinks(True)
-        self.setLayout(self.layout)
+        self.setLayout(self.main_layout)
         self.setWindowFlag(QtCore.Qt.WindowContextHelpButtonHint, False)
-        self.layout.setContentsMargins(0, 0, 0, 0)
+        self.main_layout.setContentsMargins(0, 0, 0, 0)
+        self.show()
+
+
+class CrashPop(QtWidgets.QDialog):
+    def __init__(self, traceback):
+        super(CrashPop, self).__init__()
+        self.label = QtWidgets.QLabel()
+        self.text_browser = QtWidgets.QTextBrowser()
+        self.quit_button = QtWidgets.QPushButton()
+        self.main_layout = QtWidgets.QVBoxLayout(self)
+        self.traceback = traceback
+
+    def setup(self):
+        self.setFixedSize(400, 250)
+        self.label.setText("An unexpected error has occured")
+        self.quit_button.setText("Quit")
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.label.setFont(font)
+
+        for line in self.traceback:
+            self.text_browser.append(line)
+
+        self.quit_button.pressed.connect(sys.exit)
+        self.quit_button.setMaximumWidth(125)
+        self.main_layout.addWidget(self.label)
+        self.main_layout.addWidget(self.text_browser)
+        self.main_layout.addWidget(self.quit_button, alignment=QtCore.Qt.AlignCenter)
+        self.setLayout(self.main_layout)
+        self.setWindowFlag(QtCore.Qt.WindowContextHelpButtonHint, False)
+        self.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, False)
+        self.setModal(True)
+
         self.show()
