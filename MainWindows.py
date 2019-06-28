@@ -340,7 +340,8 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         except FileNotFoundError:
             ahk_path = QtWidgets.QFileDialog.getOpenFileName(filter="AutoHotKey (AutoHotKey*.exe)",
                                                              caption="Select AutoHotkey's executable "
-                                                                     "if you wish to use AHK")
+                                                                     "if you wish to use AHK",
+                                                             directory="C:/")
             if len(ahk_path[0]) == 0:
                 self.settings.setValue("copy_mode", True)
                 self.settings.setValue("paths/AHK", "")
@@ -507,7 +508,7 @@ class PlotStartDialog(QtWidgets.QDialog):
 
     def change_path(self):
         file_dialog = QtWidgets.QFileDialog()
-        fpath = file_dialog.getOpenFileName(filter="csv (*.csv)")
+        fpath = file_dialog.getOpenFileName(filter="csv (*.csv)", directory=self.cpath[:self.cpath.rfind("/")])
         if len(fpath[0]) > 0:
             self.cpath = fpath[0]
             self.path_label.setText("Current path: " + fpath[0])
