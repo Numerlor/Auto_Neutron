@@ -13,6 +13,9 @@ The Auto Neutron app works by starting a new AutoHotkey script (located in setti
 * Saving of routes
 * Skipping jumps using doubleclick
 
+### Copy mode
+Allows app to be used without ahk, copies systems to clipboard on every waypoint instead of starting an ahk instance
+
 ![Main Window](https://i.imgur.com/R7ULASo.png)
 
 ![Route selector](https://i.imgur.com/kdnm85Q.png)
