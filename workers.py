@@ -51,8 +51,12 @@ class AhkWorker(QtCore.QThread):
                     shutdown = True
                     self.game_shut_signal.emit(self.data_values, self.list_index)
         if not shutdown:
-            self.copy_or_ahk_start()
-
+            if self.copy:
+                set_clip(self.data_values[self.list_index][0])
+            else:
+                self.hotkey = Hotkey(self.ahk, self.bind,
+                                     self.script.replace("|SYSTEMDATA|", self.data_values[self.list_index][0]))
+                self.hotkey.start()
             self.sys_signal.emit(self.list_index, self.dark)
             for line in self.follow_file(open(self.journal, encoding='utf-8')):
                 loaded = json.loads(line)
@@ -65,13 +69,11 @@ class AhkWorker(QtCore.QThread):
                     if self.copy:
                         set_clip(self.data_values[self.list_index][0])
                     else:
-                        self.close_ahk()
-                        self.hotkey = Hotkey(self.ahk, self.bind,
-                                             self.script.replace("|SYSTEMDATA|", self.data_values[self.list_index][0]))
-                        self.hotkey.start()
+                        self.reset_ahk()
                     self.sys_signal.emit(self.list_index, self.dark)
                 elif loaded['event'] == "Shutdown":
                     self.game_shut_signal.emit(self.data_values, self.list_index)
+                    print("Oiboi")
                     self.close_ahk()
                     break
 
@@ -92,20 +94,14 @@ class AhkWorker(QtCore.QThread):
             if self.copy:
                 set_clip(self.data_values[self.list_index][0])
             else:
-                self.close_ahk()
-                self.hotkey = Hotkey(self.ahk, self.bind,
-                                     self.script.replace("|SYSTEMDATA|", self.data_values[self.list_index][0]))
-                self.hotkey.start()
+                self.reset_ahk()
 
     def update_script(self, tup):
         self.bind = tup[0]
         self.script = tup[1]
         self.dark = tup[2]
         if not self.copy:
-            self.close_ahk()
-            self.hotkey = Hotkey(self.ahk, self.bind,
-                                 self.script.replace("|SYSTEMDATA|", self.data_values[self.list_index][0]))
-            self.hotkey.start()
+            self.reset_ahk()
 
     def set_copy(self, setting):
         self.copy = setting
@@ -114,17 +110,13 @@ class AhkWorker(QtCore.QThread):
             set_clip(self.data_values[self.list_index][0])
         else:
             self.ahk = AHK(executable_path=self.settings.value("paths/AHK"))
-            self.hotkey = Hotkey(self.ahk, self.bind,
-                                 self.script.replace("|SYSTEMDATA|", self.data_values[self.list_index][0]))
-            self.hotkey.start()
+            self.reset_ahk()
 
-    def copy_or_ahk_start(self):
-        if self.copy:
-            set_clip(self.data_values[self.list_index][0])
-        else:
-            self.hotkey = Hotkey(self.ahk, self.bind,
-                                 self.script.replace("|SYSTEMDATA|", self.data_values[self.list_index][0]))
-            self.hotkey.start()
+    def reset_ahk(self):
+        self.close_ahk()
+        self.hotkey = Hotkey(self.ahk, self.bind,
+                             self.script.replace("|SYSTEMDATA|", self.data_values[self.list_index][0]))
+        self.hotkey.start()
 
     def close_ahk(self):
         try:
