@@ -29,13 +29,12 @@ class ExceptionHandler:
         f.close()
         sys.__excepthook__(exctype, value, tb)
 
-        global w
         try:
-            w.close()
-        except NameError:
+            self.w.close()
+        except AttributeError:
             pass
-        w = popups.CrashPop(exc)
-        w.setup()
+        self.w = popups.CrashPop(exc)
+        self.w.setup()
 
 
 if __name__ == "__main__":
