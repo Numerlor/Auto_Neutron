@@ -9,8 +9,6 @@ import popups
 import workers
 
 
-# TODO selectable copy mode/ forced if ahk path wasn't provided/is invalid
-
 class Ui_MainWindow(QtWidgets.QMainWindow):
     double_signal = QtCore.pyqtSignal(int)  # double click signal to set worker to new clicked row
     edit_signal = QtCore.pyqtSignal(int, str)  # send edited system to worker if changed
