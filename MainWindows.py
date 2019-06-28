@@ -305,7 +305,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             self.settings.setValue("paths/journal",
                                    f"{environ['userprofile']}/Saved Games/Frontier Developments/Elite Dangerous/")
             self.jpath = f"{environ['userprofile']}/Saved Games/Frontier Developments/Elite Dangerous/"
-            self.settings.setValue("paths/ahk", environ['PROGRAMW6432'] + "\\AutoHotkkey\\AutoHotkey.exe")
+            self.settings.setValue("paths/ahk", environ['PROGRAMW6432'] + "\\AutoHotkey\\AutoHotkey.exe")
             self.settings.setValue("save_on_quit", True)
             self.settings.setValue("paths/csv", "")
             self.settings.setValue("window/size", QtCore.QSize(800, 600))
