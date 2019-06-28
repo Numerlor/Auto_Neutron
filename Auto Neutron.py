@@ -5,6 +5,7 @@ import traceback
 from PyQt5 import QtWidgets, QtCore, QtGui
 
 import MainWindows
+import popups
 from temp_saves import write_image, write_templates
 
 
@@ -19,15 +20,22 @@ class ExceptionHandler:
     def __init__(self, output_file):
         self.path = output_file
 
-    def handler(self, exctype, value, tb):
+    def handler(self, exctype, value, tb, exc=[]):
         f = open(self.path, 'w')
-        exception_lines = traceback.format_exception(exctype, value, tb)
-        for line in exception_lines:
+        exc.extend(traceback.format_exception(exctype, value, tb))
+        for line in exc:
             f.write(line)
         f.flush()
         f.close()
         sys.__excepthook__(exctype, value, tb)
-        sys.exit(1)
+
+        global w
+        try:
+            w.close()
+        except NameError:
+            pass
+        w = popups.CrashPop(exc)
+        w.setup()
 
 
 if __name__ == "__main__":
