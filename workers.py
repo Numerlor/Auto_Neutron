@@ -50,6 +50,7 @@ class AhkWorker(QtCore.QThread):
                 if j['event'] == "Shutdown":
                     shutdown = True
                     self.game_shut_signal.emit(self.data_values, self.list_index)
+
         if not shutdown:
             if self.copy:
                 set_clip(self.data_values[self.list_index][0])
@@ -96,20 +97,22 @@ class AhkWorker(QtCore.QThread):
                 self.reset_ahk()
 
     def update_script(self, tup):
-        self.bind = tup[0]
-        self.script = tup[1]
+        if self.bind != tup[0] or self.script != tup[1]:
+            self.bind = tup[0]
+            self.script = tup[1]
+            if not self.copy:
+                self.reset_ahk()
         self.dark = tup[2]
-        if not self.copy:
-            self.reset_ahk()
 
     def set_copy(self, setting):
-        self.copy = setting
-        if self.copy:
-            self.close_ahk()
-            set_clip(self.data_values[self.list_index][0])
-        else:
-            self.ahk = AHK(executable_path=self.settings.value("paths/AHK"))
-            self.reset_ahk()
+        if setting is not self.copy:
+            self.copy = setting
+            if self.copy:
+                self.close_ahk()
+                set_clip(self.data_values[self.list_index][0])
+            else:
+                self.ahk = AHK(executable_path=self.settings.value("paths/AHK"))
+                self.reset_ahk()
 
     def reset_ahk(self):
         self.close_ahk()
