@@ -8,6 +8,53 @@ import popups
 import workers
 
 
+class SpinBoxDelegate(QtWidgets.QStyledItemDelegate):
+    def createEditor(self, parent, QStyleOptionViewItem, QModelIndex):
+        editor = QtWidgets.QSpinBox(parent)
+        editor.setFrame(False)
+        editor.setMinimum(0)
+        editor.setMaximum(10_000)
+        editor.setAccelerated(True)
+        editor.setButtonSymbols(QtWidgets.QAbstractSpinBox.NoButtons)
+        return editor
+
+    def setEditorData(self, QWidget, QModelIndex):
+        value = int(QModelIndex.model().data(QModelIndex, QtCore.Qt.EditRole))
+
+        QWidget.setValue(value)
+
+    def setModelData(self, QWidget, QAbstractItemModel, QModelIndex):
+        QWidget.interpretText()
+        value = QWidget.value()
+        QAbstractItemModel.setData(QModelIndex, value, QtCore.Qt.EditRole)
+
+    def updateEditorGeometry(self, QWidget, QStyleOptionViewItem, QModelIndex):
+        QWidget.setGeometry(QStyleOptionViewItem.rect)
+
+
+class DoubleSpinBoxDelegate(QtWidgets.QStyledItemDelegate):
+    def createEditor(self, parent, QStyleOptionViewItem, QModelIndex):
+        editor = QtWidgets.QDoubleSpinBox(parent)
+        editor.setFrame(False)
+        editor.setMinimum(0)
+        editor.setMaximum(1_000_000)
+        editor.setDecimals(2)
+        editor.setAccelerated(True)
+        editor.setButtonSymbols(QtWidgets.QAbstractSpinBox.NoButtons)
+        return editor
+
+    def setEditorData(self, QWidget, QModelIndex):
+        value = float(QModelIndex.model().data(QModelIndex, QtCore.Qt.EditRole))
+        QWidget.setValue(value)
+
+    def setModelData(self, QWidget, QAbstractItemModel, QModelIndex):
+        value = QWidget.text()
+        QAbstractItemModel.setData(QModelIndex, value, QtCore.Qt.EditRole)
+
+    def updateEditorGeometry(self, QWidget, QStyleOptionViewItem, QModelIndex):
+        QWidget.setGeometry(QStyleOptionViewItem.rect)
+
+
 class Ui_MainWindow(QtWidgets.QMainWindow):
     double_signal = QtCore.pyqtSignal(int)  # double click signal to set worker to new clicked row
     edit_signal = QtCore.pyqtSignal(int, str)  # send edited system to worker if changed
@@ -37,6 +84,8 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.about_action = QtWidgets.QAction("About", self)
         self.save_on_quit = self.settings.value("save_on_quit", type=bool)
 
+        self.spin_delegate = SpinBoxDelegate()
+        self.double_spin_delegate = DoubleSpinBoxDelegate()
         self.last_index = 0
         self.total_jumps = 0
 
@@ -57,14 +106,10 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         # build table
         self.MainTable.setGridStyle(QtCore.Qt.NoPen)
         self.MainTable.setColumnCount(4)
-        item = QtWidgets.QTableWidgetItem()
-        self.MainTable.setHorizontalHeaderItem(0, item)
-        item = QtWidgets.QTableWidgetItem()
-        self.MainTable.setHorizontalHeaderItem(1, item)
-        item = QtWidgets.QTableWidgetItem()
-        self.MainTable.setHorizontalHeaderItem(2, item)
-        item = QtWidgets.QTableWidgetItem()
-        self.MainTable.setHorizontalHeaderItem(3, item)
+        for i in range(4):
+            item = QtWidgets.QTableWidgetItem()
+            self.MainTable.setHorizontalHeaderItem(i, item)
+
         self.MainTable.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
         self.MainTable.setAlternatingRowColors(True)
         self.MainTable.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
@@ -75,7 +120,12 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
         header.setSectionResizeMode(2, QtWidgets.QHeaderView.Stretch)
         header.setSectionResizeMode(3, QtWidgets.QHeaderView.Fixed)
+        header.setHighlightSections(False)
         header.disconnect()
+
+        self.MainTable.setItemDelegateForColumn(1, self.double_spin_delegate)
+        self.MainTable.setItemDelegateForColumn(2, self.double_spin_delegate)
+        self.MainTable.setItemDelegateForColumn(3, self.spin_delegate)
 
         self.gridLayout.addWidget(self.MainTable, 0, 0, 1, 1)
         self.setCentralWidget(self.centralwidget)
@@ -137,7 +187,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             self.MainTable.resizeColumnToContents(0)
             self.edit_signal.emit(item.row(), item.text())
         elif item.column() == 3:
-            self.MainTable.resizeColumnToContents(3)
+            self.update_jumps(self.last_index)
 
     def sett_pop(self):
         w = popups.SettingsPop(self, self.settings)
@@ -175,13 +225,11 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         except TypeError:
             pass
         self.start_worker(journal, table_data, index)
-        self.total_jumps = sum(jum[3] for jum in table_data)
-        self.MainTable.horizontalHeaderItem(3).setText(f"Jumps ({self.total_jumps}/{self.total_jumps})")
+        self.update_jumps(0)
         for row in table_data:
             self.insert_row(row)
 
         self.MainTable.resizeColumnToContents(0)
-        self.MainTable.resizeColumnToContents(3)
         self.MainTable.resizeRowsToContents()
         self.MainTable.itemChanged.connect(self.send_changed)
 
@@ -251,9 +299,14 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         w.setup()
 
     def update_jumps(self, index):
-        remaining_jumps = sum(int(self.MainTable.item(i, 3).text()) for i in range(index, self.MainTable.rowCount()))
-        if self.total_jumps != 0:
-            self.MainTable.horizontalHeaderItem(3).setText(f"Jumps ({remaining_jumps}/{self.total_jumps})")
+        total_jumps = sum(int(self.MainTable.item(i, 3).text()) for i in range(self.MainTable.rowCount()))
+        if total_jumps != 0:
+            remaining_jumps = sum(
+                int(self.MainTable.item(i, 3).text()) for i in range(index, self.MainTable.rowCount()))
+            self.MainTable.horizontalHeaderItem(3).setText(f"Jumps {remaining_jumps}/{total_jumps}")
+            self.MainTable.resizeColumnToContents(3)
+        else:
+            self.MainTable.horizontalHeaderItem(3).setText("Jumps")
 
     def new_route(self):
         self.quit_worker_signal.emit()
