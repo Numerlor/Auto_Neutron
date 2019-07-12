@@ -14,7 +14,6 @@ class SpinBoxDelegate(QtWidgets.QStyledItemDelegate):
         editor.setFrame(False)
         editor.setMinimum(0)
         editor.setMaximum(10_000)
-        editor.setAccelerated(True)
         editor.setButtonSymbols(QtWidgets.QAbstractSpinBox.NoButtons)
         return editor
 
@@ -39,7 +38,6 @@ class DoubleSpinBoxDelegate(QtWidgets.QStyledItemDelegate):
         editor.setMinimum(0)
         editor.setMaximum(1_000_000)
         editor.setDecimals(2)
-        editor.setAccelerated(True)
         editor.setButtonSymbols(QtWidgets.QAbstractSpinBox.NoButtons)
         return editor
 
