@@ -1,7 +1,6 @@
 import csv
 import json
-from os import environ, listdir
-from os.path import getctime
+import os
 
 from PyQt5 import QtWidgets, QtCore, QtGui
 
@@ -72,12 +71,11 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.MainTable.verticalHeader().setVisible(False)
 
         header = self.MainTable.horizontalHeader()
-        header.setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(0, QtWidgets.QHeaderView.Fixed)
         header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
         header.setSectionResizeMode(2, QtWidgets.QHeaderView.Stretch)
-        header.setSectionResizeMode(3, QtWidgets.QHeaderView.Stretch)
+        header.setSectionResizeMode(3, QtWidgets.QHeaderView.Fixed)
         header.disconnect()
-        self.MainTable.verticalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
 
         self.gridLayout.addWidget(self.MainTable, 0, 0, 1, 1)
         self.setCentralWidget(self.centralwidget)
@@ -136,7 +134,10 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
     def send_changed(self, item):
         if item.column() == 0:
+            self.MainTable.resizeColumnToContents(0)
             self.edit_signal.emit(item.row(), item.text())
+        elif item.column() == 3:
+            self.MainTable.resizeColumnToContents(3)
 
     def sett_pop(self):
         w = popups.SettingsPop(self, self.settings)
@@ -179,6 +180,9 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         for row in table_data:
             self.insert_row(row)
 
+        self.MainTable.resizeColumnToContents(0)
+        self.MainTable.resizeColumnToContents(3)
+        self.MainTable.resizeRowsToContents()
         self.MainTable.itemChanged.connect(self.send_changed)
 
     def start_worker(self, journal, data_values, index):
@@ -295,15 +299,18 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         font.setPointSize(values[4])
         font.setBold(values[5])
         self.MainTable.setFont(font)
+        self.MainTable.resizeColumnToContents(0)
+        self.MainTable.resizeColumnToContents(3)
+        self.MainTable.resizeRowsToContents()
 
     def write_default_settings(self):
         if not self.settings.value("paths/journal"):
             self.resize(800, 600)
             self.move(300, 300)
             self.settings.setValue("paths/journal",
-                                   f"{environ['userprofile']}/Saved Games/Frontier Developments/Elite Dangerous/")
-            self.jpath = f"{environ['userprofile']}/Saved Games/Frontier Developments/Elite Dangerous/"
-            self.settings.setValue("paths/ahk", environ['PROGRAMW6432'] + "\\AutoHotkey\\AutoHotkey.exe")
+                                   f"{os.environ['userprofile']}/Saved Games/Frontier Developments/Elite Dangerous/")
+            self.jpath = f"{os.environ['userprofile']}/Saved Games/Frontier Developments/Elite Dangerous/"
+            self.settings.setValue("paths/ahk", os.environ['PROGRAMW6432'] + "\\AutoHotkey\\AutoHotkey.exe")
             self.settings.setValue("save_on_quit", True)
             self.settings.setValue("paths/csv", "")
             self.settings.setValue("window/size", QtCore.QSize(800, 600))
@@ -340,7 +347,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         except FileNotFoundError:
             ahk_path = QtWidgets.QFileDialog.getOpenFileName(filter="AutoHotKey (AutoHotKey*.exe)",
                                                              caption="Select AutoHotkey's executable "
-                                                                     "if you wish to use AHK",
+                                                                     "if you wish to use it, cancel for copy mode",
                                                              directory="C:/")
             if len(ahk_path[0]) == 0:
                 self.settings.setValue("copy_mode", True)
@@ -407,6 +414,7 @@ class PlotStartDialog(QtWidgets.QDialog):
         self.gridLayout.setSpacing(0)
         self.gridLayout.addWidget(self.tabWidget)
         self.gridLayout.addLayout(self.status_layout, 1, 0, 1, 1)
+        self.status.setSizeGripEnabled(False)
         self.status_layout.addWidget(self.status)
 
         # CSV
@@ -520,8 +528,8 @@ class PlotStartDialog(QtWidgets.QDialog):
 
     def get_journals(self):
         try:
-            self.journals = sorted([self.jpath + file for file in listdir(self.jpath) if file.endswith(".log")],
-                                   key=getctime, reverse=True)
+            self.journals = sorted([self.jpath + file for file in os.listdir(self.jpath) if file.endswith(".log")],
+                                   key=os.path.getctime, reverse=True)
         except FileNotFoundError:
             d = popups.QuitDialog(self, "Journal folder not detected")
             d.setupUi()
@@ -559,7 +567,7 @@ class PlotStartDialog(QtWidgets.QDialog):
             self.ran_spinbox.setValue(next(round(float(lines[i]['MaxJumpRange']), 2)
                                            for i in range(len(lines) - 1, -1, -1) if lines[i]['event'] == "Loadout"))
         except StopIteration:
-            self.ran_spinbox.setValue(5)
+            self.ran_spinbox.setValue(50)
 
     def update_destination(self, system):
         self.destination.setText(system)
@@ -581,43 +589,40 @@ class PlotStartDialog(QtWidgets.QDialog):
 
     def cs_submit_act(self, cpath):
         self.cs_submit.setEnabled(False)
-        try:
-            with open(cpath, encoding='utf-8') as f:
+        if os.stat(cpath).st_size > 2_097_152:
+            self.status.showMessage("File too large")
+            self.cs_submit.setEnabled(True)
+        else:
+            try:
+                with open(cpath, encoding='utf-8') as f:
+                    data = []
+                    valid = True
+                    for stuff in csv.DictReader(f, delimiter=','):
+                        if stuff is None:
+                            valid = False
+                            break
+                        else:
+                            try:
+                                tlist = [
+                                    stuff['System Name'],
+                                    round(float(stuff['Distance To Arrival']), 2),
+                                    round(float(stuff['Distance Remaining']), 2),
+                                    int(stuff['Jumps'])
+                                ]
+                            except (ValueError, KeyError):
+                                valid = False
+                                break
 
-                data = []
-                valid = True
-                for stuff in csv.DictReader(f, delimiter=','):
-                    tlist = []
-                    tlist.append(stuff['System Name'])
-                    if stuff is None:
-                        valid = False
-                        break
-                    try:
-                        tlist.append(round(float(stuff['Distance To Arrival']), 2))
-                    except (ValueError, KeyError):
-                        valid = False
-                        break
+                            data.append(tlist)
+                    if valid:
+                        self.data_signal.emit(self.journals[self.cs_comb.currentIndex()], data, -1)
+                        self.close()
+                    else:
+                        self.status.showMessage("Error loading csv file")
+                        self.cs_submit.setEnabled(True)
 
-                    try:
-                        tlist.append(round(float(stuff['Distance Remaining']), 2))
-                    except (ValueError, KeyError):
-                        valid = False
-                        break
-                    try:
-                        tlist.append(int(stuff['Jumps']))
-                    except (ValueError, KeyError):
-                        valid = False
-                        break
-                    data.append(tlist)
-                if valid:
-                    self.data_signal.emit(self.journals[self.cs_comb.currentIndex()], data, -1)
-                    self.close()
-                else:
-                    self.status.showMessage("Error loading csv file")
-                    self.cs_submit.setEnabled(True)
-
-        except FileNotFoundError:
-            self.status.showMessage("Invalid path to CSV file")
+            except FileNotFoundError:
+                self.status.showMessage("Invalid path to CSV file")
 
     def last_submit_act(self):
         last_route = self.settings.value("last_route")
