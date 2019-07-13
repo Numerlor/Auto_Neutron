@@ -61,7 +61,8 @@ class AhkWorker(QtCore.QThread):
             self.sys_signal.emit(self.list_index, self.dark)
             for line in self.follow_file(open(self.journal, encoding='utf-8')):
                 loaded = json.loads(line)
-                if loaded['event'] == "FSDJump" and loaded['StarSystem'] == self.data_values[self.list_index][0]:
+                if loaded['event'] == "FSDJump" and loaded['StarSystem'].casefold(
+                ) == self.data_values[self.list_index][0].casefold():
                     self.list_index += 1
                     if self.list_index == len(self.data_values):
                         self.close_ahk()
