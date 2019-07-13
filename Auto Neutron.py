@@ -6,7 +6,6 @@ from PyQt5 import QtWidgets, QtCore, QtGui
 
 import MainWindows
 import popups
-from temp_saves import write_image, write_templates
 
 
 # https://stackoverflow.com/a/44352931
@@ -38,16 +37,14 @@ class ExceptionHandler:
 
 
 if __name__ == "__main__":
-    # save ahk templates and file image to temp file
-    write_templates(resource_path("ahk"))
-    write_image(resource_path(""))
-    QtCore.QCoreApplication.setApplicationName("Auto Neutron")
-    QtCore.QCoreApplication.setOrganizationName("Numerlor")
+    app = QtWidgets.QApplication(sys.argv)
+    app.setWindowIcon(QtGui.QIcon(resource_path("image.png")))
+    app.setApplicationName("Auto Neutron")
+    app.setOrganizationName("Numerlor")
+
     path = QtCore.QStandardPaths.writableLocation(QtCore.QStandardPaths.AppConfigLocation)
     # save traceback to logfile if Exception is raised
     sys.excepthook = ExceptionHandler(path + "/traceback.log").handler
-    app = QtWidgets.QApplication(sys.argv)
-    app.setWindowIcon(QtGui.QIcon(resource_path("image.png")))
     # create org and app folders if not found
     if not os.path.isdir(path):
         if not os.path.isdir(path[:path.rfind("/")]):
