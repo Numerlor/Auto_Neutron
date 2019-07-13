@@ -1,6 +1,7 @@
 import csv
 import json
 import os
+import sys
 
 from PyQt5 import QtWidgets, QtCore, QtGui
 
@@ -214,8 +215,8 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
     def show_w(self):
         ui = PlotStartDialog(self, self.settings)
-        ui.setupUi()
         ui.data_signal.connect(self.pop_table)
+        ui.setupUi()
 
     def pop_table(self, journal, table_data, index):
         try:
@@ -541,6 +542,7 @@ class PlotStartDialog(QtWidgets.QDialog):
         self.get_journals()
         self.setModal(True)
         self.show()
+        self.check_dropped_files()
 
     def retranslateUi(self):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), "CSV")
@@ -622,6 +624,11 @@ class PlotStartDialog(QtWidgets.QDialog):
 
     def update_destination(self, system):
         self.destination.setText(system)
+
+    def check_dropped_files(self):
+        files = [file for file in sys.argv if file.endswith("csv")]
+        if len(files) > 0:
+            self.cs_submit_act(files[0])
 
     def sp_submit_act(self):
         self.plotter = workers.SpanshPlot(self.eff_spinbox.value(), self.ran_spinbox.value(),
