@@ -295,11 +295,14 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         w.setup()
 
     def update_jumps(self, index):
-        total_jumps = sum(int(self.MainTable.item(i, 3).text()) for i in range(self.MainTable.rowCount()))
+        total_jumps = sum(
+            int(self.MainTable.item(i, 3).text()) for i in range(self.MainTable.rowCount()))
         if total_jumps != 0:
             remaining_jumps = sum(
-                int(self.MainTable.item(i, 3).text()) for i in range(index, self.MainTable.rowCount()))
-            self.MainTable.horizontalHeaderItem(3).setText(f"Jumps {remaining_jumps}/{total_jumps}")
+                int(self.MainTable.item(i, 3).text()) for i in
+                range(index, self.MainTable.rowCount()))
+            self.MainTable.horizontalHeaderItem(3).setText(
+                f"Jumps {remaining_jumps}/{total_jumps}")
             self.MainTable.resizeColumnToContents(3)
         else:
             self.MainTable.horizontalHeaderItem(3).setText("Jumps")
@@ -357,9 +360,13 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             self.resize(800, 600)
             self.move(300, 300)
             self.settings.setValue("paths/journal",
-                                   f"{os.environ['userprofile']}/Saved Games/Frontier Developments/Elite Dangerous/")
-            self.jpath = f"{os.environ['userprofile']}/Saved Games/Frontier Developments/Elite Dangerous/"
-            self.settings.setValue("paths/ahk", os.environ['PROGRAMW6432'] + "\\AutoHotkey\\AutoHotkey.exe")
+                                   (f"{os.environ['userprofile']}/Saved Games/"
+                                    f"Frontier Developments/Elite Dangerous/"))
+            self.jpath = (f"{os.environ['userprofile']}/Saved Games/"
+                          f"Frontier Developments/Elite Dangerous/")
+            self.settings.setValue("paths/ahk",
+                                   (f"{os.environ['PROGRAMW6432']}/"
+                                    f"AutoHotkey/AutoHotkey.exe"))
             self.settings.setValue("save_on_quit", True)
             self.settings.setValue("paths/csv", "")
             self.settings.setValue("window/size", QtCore.QSize(800, 600))
@@ -375,7 +382,8 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
                                               "send, {Numpad7}\n"
                                               "; wait for map to open\n"
                                               "sleep, 850\n"
-                                              ";navigate to second map tab and focus on search field\n"
+                                              ";navigate to second map tab "
+                                              "and focus on search field\n"
                                               "send, e\n"
                                               "send, {Space}\n"
                                               "ClipOld := ClipboardAll\n"
@@ -394,10 +402,12 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         try:
             open(self.settings.value("paths/ahk")).close()
         except FileNotFoundError:
-            ahk_path = QtWidgets.QFileDialog.getOpenFileName(filter="AutoHotKey (AutoHotKey*.exe)",
-                                                             caption="Select AutoHotkey's executable "
-                                                                     "if you wish to use it, cancel for copy mode",
-                                                             directory="C:/")
+            ahk_path = QtWidgets.QFileDialog.getOpenFileName(
+                filter="AutoHotKey (AutoHotKey*.exe)",
+                caption="Select AutoHotkey's executable "
+                        "if you wish to use it, cancel for copy mode",
+                directory="C:/")
+
             if len(ahk_path[0]) == 0:
                 self.settings.setValue("copy_mode", True)
                 self.settings.setValue("paths/AHK", "")
@@ -470,7 +480,8 @@ class PlotStartDialog(QtWidgets.QDialog):
         self.path_button.setMaximumWidth(95)
         if len(self.cpath) > 0:
             self.cs_submit.setEnabled(True)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred,
+                                           QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHeightForWidth(self.cs_comb.sizePolicy().hasHeightForWidth())
         self.cs_comb.setSizePolicy(sizePolicy)
         self.cs_comb.setMaximumWidth(95)
@@ -481,14 +492,16 @@ class PlotStartDialog(QtWidgets.QDialog):
         self.path_button.pressed.connect(self.change_path)
 
         self.horizontalLayout.addWidget(self.path_button, alignment=QtCore.Qt.AlignLeft)
-        spacerItem = QtWidgets.QSpacerItem(30, 20, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Minimum)
+        spacerItem = QtWidgets.QSpacerItem(30, 20, QtWidgets.QSizePolicy.Fixed,
+                                           QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
         self.gridLayout_2.addLayout(self.horizontalLayout, 2, 0, 1, 1)
         self.horizontalLayout_2.addWidget(self.cs_comb, alignment=QtCore.Qt.AlignLeft)
         self.horizontalLayout_2.addWidget(self.cs_submit, alignment=QtCore.Qt.AlignRight)
         self.gridLayout_2.addLayout(self.horizontalLayout_2, 4, 0, 1, 1)
         self.gridLayout_2.addWidget(self.path_label, 1, 0, 1, 1)
-        spacerItem1 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        spacerItem1 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum,
+                                            QtWidgets.QSizePolicy.Expanding)
         self.gridLayout_2.addItem(spacerItem1, 3, 0, 1, 1)
 
         # Spansh
@@ -517,7 +530,8 @@ class PlotStartDialog(QtWidgets.QDialog):
         self.gridLayout_4.addWidget(self.range, 2, 0, 1, 1)
         self.gridLayout_4.addWidget(self.source, 0, 0, 1, 1)
         self.gridLayout_4.addWidget(self.nearest, 5, 1, 1, 1)
-        spacerItem2 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        spacerItem2 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum,
+                                            QtWidgets.QSizePolicy.Expanding)
         self.gridLayout_4.addItem(spacerItem2, 6, 0, 1, 1)
         self.gridLayout_4.addWidget(self.eff_spinbox, 5, 0, 1, 1)
         self.gridLayout_4.addWidget(self.sp_submit, 7, 1, 1, 1)
@@ -566,7 +580,8 @@ class PlotStartDialog(QtWidgets.QDialog):
 
     def change_path(self):
         file_dialog = QtWidgets.QFileDialog()
-        fpath = file_dialog.getOpenFileName(filter="csv (*.csv)", directory=self.cpath[:self.cpath.rfind("/")])
+        fpath = file_dialog.getOpenFileName(filter="csv (*.csv)",
+                                            directory=self.cpath[:self.cpath.rfind("/")])
         if len(fpath[0]) > 0:
             self.cpath = fpath[0]
             self.path_label.setText("Current path: " + fpath[0])
@@ -579,8 +594,9 @@ class PlotStartDialog(QtWidgets.QDialog):
 
     def get_journals(self):
         try:
-            self.journals = sorted([self.jpath + file for file in os.listdir(self.jpath) if file.endswith(".log")],
-                                   key=os.path.getctime, reverse=True)
+            self.journals = sorted(
+                [self.jpath + file for file in os.listdir(self.jpath) if file.endswith(".log")],
+                key=os.path.getctime, reverse=True)
         except FileNotFoundError:
             d = popups.QuitDialog(self, "Journal folder not detected")
             d.setupUi()
@@ -606,8 +622,10 @@ class PlotStartDialog(QtWidgets.QDialog):
         with open(self.journals[index], encoding='utf-8') as f:
             lines = [json.loads(line) for line in f]
         try:
-            self.source.setText(next(lines[i]['StarSystem'] for i in range(len(lines) - 1, -1, -1)
-                                     if lines[i]['event'] == "FSDJump" or lines[i]['event'] == "Location"))
+            self.source.setText(next(lines[i]['StarSystem'] for i
+                                     in range(len(lines) - 1, -1, -1)
+                                     if lines[i]['event'] == "FSDJump"
+                                     or lines[i]['event'] == "Location"))
         except StopIteration:
             self.source.clear()
 
@@ -616,7 +634,8 @@ class PlotStartDialog(QtWidgets.QDialog):
             lines = [json.loads(line) for line in f]
         try:
             self.ran_spinbox.setValue(next(round(float(lines[i]['MaxJumpRange']), 2)
-                                           for i in range(len(lines) - 1, -1, -1) if lines[i]['event'] == "Loadout"))
+                                           for i in range(len(lines) - 1, -1, -1)
+                                           if lines[i]['event'] == "Loadout"))
         except StopIteration:
             self.ran_spinbox.setValue(50)
 
@@ -629,8 +648,10 @@ class PlotStartDialog(QtWidgets.QDialog):
             self.cs_submit_act(files[0])
 
     def sp_submit_act(self):
-        self.plotter = workers.SpanshPlot(self.eff_spinbox.value(), self.ran_spinbox.value(),
-                                          self.source.text(), self.destination.text(), self)
+        self.plotter = workers.SpanshPlot(self.eff_spinbox.value(),
+                                          self.ran_spinbox.value(),
+                                          self.source.text(),
+                                          self.destination.text(), self)
         self.plotter.status_signal.connect(self.change_status)
         self.plotter.finished_signal.connect(self.sp_finish_act)
         self.plotter.start()
@@ -688,10 +709,12 @@ class PlotStartDialog(QtWidgets.QDialog):
             self.last_submit.setEnabled(True)
         else:
             if last_route[0] == len(last_route[1]):
-                self.data_signal.emit(self.journals[self.last_comb.currentIndex()], last_route[1], 1)
+                self.data_signal.emit(self.journals[self.last_comb.currentIndex()],
+                                      last_route[1], 1)
                 self.close()
             else:
-                self.data_signal.emit(self.journals[self.last_comb.currentIndex()], last_route[1], last_route[0])
+                self.data_signal.emit(self.journals[self.last_comb.currentIndex()],
+                                      last_route[1], last_route[0])
                 self.close()
 
     def show_nearest(self):

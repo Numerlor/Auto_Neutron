@@ -59,7 +59,8 @@ class AhkWorker(QtCore.QThread):
                 set_clip(self.data_values[self.list_index][0])
             else:
                 self.hotkey = Hotkey(self.ahk, self.bind,
-                                     self.script.replace("|SYSTEMDATA|", self.data_values[self.list_index][0]))
+                                     self.script.replace("|SYSTEMDATA|",
+                                                         self.data_values[self.list_index][0]))
                 self.hotkey.start()
             self.sys_signal.emit(self.list_index, self.dark)
             for line in self.follow_file(open(self.journal, encoding='utf-8')):
@@ -88,7 +89,8 @@ class AhkWorker(QtCore.QThread):
         else:
             self.close_ahk()
             hotkey = Hotkey(self.ahk, self.bind,
-                            self.script.replace("|SYSTEMDATA|", self.data_values[self.list_index][0]))
+                            self.script.replace("|SYSTEMDATA|",
+                                                self.data_values[self.list_index][0]))
             hotkey.start()
         self.sys_signal.emit(self.list_index, self.dark)
 
@@ -120,8 +122,10 @@ class AhkWorker(QtCore.QThread):
 
     def reset_ahk(self):
         self.close_ahk()
-        self.hotkey = Hotkey(self.ahk, self.bind,
-                             self.script.replace("|SYSTEMDATA|", self.data_values[self.list_index][0]))
+        self.hotkey = Hotkey(self.ahk,
+                             self.bind,
+                             self.script.replace("|SYSTEMDATA|",
+                                                 self.data_values[self.list_index][0]))
         self.hotkey.start()
 
     def close_ahk(self):
@@ -192,12 +196,13 @@ class SpanshPlot(QtCore.QThread):
                     decodedjob = encodedjob.content.decode()
                     job_json = json.loads(decodedjob)
                     if job_json['status'] == "queued":
-                        # 1, 1, 2, 2, 3, 4, 6, 7, 9, 12, 15, 17, 20, 24, 27, 30, 30, 30, ...
+                        # 1, 1, 2, 2, 3, 4, 6, 7, 9, 12, 15, 17, 20, 24, 27, 30, 30, 30, …
                         self.sleep(min(ceil(ceil((sleep_base / 10) ** 2) / 1.9), 30))
                     else:
-                        self.finished_signal.emit([[data['system'], round(float(data['distance_jumped']), 2),
-                                                    round(float(data['distance_left']), 2), int(data['jumps'])]
-                                                   for data in job_json['result']['system_jumps']])
+                        self.finished_signal.emit(
+                            [[data['system'], round(float(data['distance_jumped']), 2),
+                              round(float(data['distance_left']), 2), int(data['jumps'])]
+                             for data in job_json['result']['system_jumps']])
                         break
 
 
@@ -224,4 +229,5 @@ class NearestRequest(QtCore.QThread):
                 response = json.loads(job_request.content.decode())
                 self.finished_signal.emit(response['system'])
             else:
-                self.status_signal.emit("An error has occured while communicating with Spansh's API")
+                self.status_signal.emit(
+                    "An error has occured while communicating with Spansh's API")

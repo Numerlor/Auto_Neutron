@@ -8,8 +8,10 @@ import workers
 
 
 class Nearest(QtWidgets.QDialog):
-    closed_signal = QtCore.pyqtSignal()  # signal sent when window is closed
-    destination_signal = QtCore.pyqtSignal(str)  # signal containing destination to input into destination line edit
+    # signal sent when window is closed
+    closed_signal = QtCore.pyqtSignal()
+    # signal containing destination to input into destination line edit
+    destination_signal = QtCore.pyqtSignal(str)
 
     # lightly modified auto generated
     def __init__(self, parent):
@@ -46,7 +48,8 @@ class Nearest(QtWidgets.QDialog):
         self.resize(207, 191)
         self.main_layout.setContentsMargins(2, 2, 20, 2)
         self.main_layout.setSpacing(2)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.main_layout_frame.sizePolicy().hasHeightForWidth())
@@ -116,15 +119,19 @@ class Nearest(QtWidgets.QDialog):
         self.show()
 
     def ena_button(self):
-        if len(self.x_edit.text()) != 0 and len(self.y_edit.text()) != 0 and len(self.z_edit.text()) != 0:
+        if (len(self.x_edit.text()) != 0
+                and len(self.y_edit.text()) != 0
+                and len(self.z_edit.text()) != 0):
             self.get_button.setEnabled(True)
         else:
             self.get_button.setEnabled(False)
 
     def get_nearest(self):
         self.nearest_worker = workers.NearestRequest("https://spansh.co.uk/api/nearest",
-                                                     f"x={self.x_edit.text()}&y={self.y_edit.text()}"
-                                                     f"&z={self.z_edit.text()}", self)
+                                                     f"x={self.x_edit.text()}"
+                                                     f"&y={self.y_edit.text()}"
+                                                     f"&z={self.z_edit.text()}"
+                                                     , self)
         self.nearest_worker.finished_signal.connect(self.nearest_finished)
         self.nearest_worker.status_signal.connect(self.change_status)
         self.nearest_worker.start()
@@ -164,7 +171,7 @@ class GameShutPop(QtWidgets.QDialog):
     close_signal = QtCore.pyqtSignal()
 
     def __init__(self, parent, settings, route, index):
-        super(QtWidgets.QDialog, self).__init__(parent)
+        super(GameShutPop, self).__init__(parent)
         self.verticalLayout = QtWidgets.QVBoxLayout(self)
         self.label = QtWidgets.QLabel(self)
         self.horizontalLayout = QtWidgets.QHBoxLayout()
@@ -188,7 +195,9 @@ class GameShutPop(QtWidgets.QDialog):
 
         self.jour_ver.addWidget(self.pushButton, alignment=QtCore.Qt.AlignLeft)
         self.jour_ver.addWidget(self.comboBox, alignment=QtCore.Qt.AlignCenter)
-        self.jour_ver.addSpacerItem(QtWidgets.QSpacerItem(1, 1, QtWidgets.QSizePolicy.MinimumExpanding))
+        self.jour_ver.addSpacerItem(QtWidgets.QSpacerItem(
+            1, 1,
+            QtWidgets.QSizePolicy.MinimumExpanding))
 
         self.save_quit_lay.addWidget(self.save_button, alignment=QtCore.Qt.AlignRight)
         self.save_quit_lay.addWidget(self.pushButton_2, alignment=QtCore.Qt.AlignRight)
@@ -197,9 +206,11 @@ class GameShutPop(QtWidgets.QDialog):
         self.horizontalLayout.addLayout(self.save_quit_lay)
 
         self.verticalLayout.addWidget(self.label, alignment=QtCore.Qt.AlignCenter)
-        self.verticalLayout.addSpacerItem(QtWidgets.QSpacerItem(1, 1
-                                                                , QtWidgets.QSizePolicy.Fixed,
-                                                                QtWidgets.QSizePolicy.MinimumExpanding))
+        self.verticalLayout.addSpacerItem(QtWidgets.QSpacerItem(
+            1, 1,
+            QtWidgets.QSizePolicy.Fixed,
+            QtWidgets.QSizePolicy.MinimumExpanding))
+
         self.verticalLayout.setContentsMargins(6, 20, 6, 6)
         self.verticalLayout.addLayout(self.horizontalLayout)
 
@@ -225,10 +236,14 @@ class GameShutPop(QtWidgets.QDialog):
 
     def populate_combo(self):
         self.comboBox.addItems(["Last journal", "Second to last",
-                                "Third to last"][:len([file for file in listdir(self.jpath) if file.endswith(".log")])])
+                                "Third to last"][:len([file for file
+                                                       in listdir(self.jpath)
+                                                       if file.endswith(".log")])])
 
     def load_journal(self):
-        journals = sorted([self.jpath + file for file in listdir(self.jpath) if file.endswith(".log")],
+        journals = sorted([self.jpath + file for file
+                           in listdir(self.jpath)
+                           if file.endswith(".log")],
                           key=getctime, reverse=True)
         self.worker_signal.emit(journals[self.comboBox.currentIndex()], self.route, self.index)
         self.hide()
@@ -273,7 +288,8 @@ class SettingsPop(QtWidgets.QDialog):
         self.bold_check.setText("Bold")
         self.pushButton.setText("Save settings")
         self.main_bind_edit.setToolTip(
-            "Bind to trigger the script, # for win key, ! for alt, ^ for control, + for shift")
+            "Bind to trigger the script, # for win key, "
+            "! for alt, ^ for control, + for shift")
         self.save_on_quit.setText("Save route on window close")
         self.copy_check.setText("Copy mode")
         self.ahk_button.setText("AHK Path")
@@ -307,17 +323,20 @@ class SettingsPop(QtWidgets.QDialog):
         self.show()
 
     def ahk_dialog(self):
-        ahk_path = QtWidgets.QFileDialog.getOpenFileName(filter="AutoHotKey (AutoHotKey*.exe)",
-                                                         caption="Select AutoHotkey's executable",
-                                                         directory="C:/")
+        ahk_path = QtWidgets.QFileDialog.getOpenFileName(
+            filter="AutoHotKey (AutoHotKey*.exe)",
+            caption="Select AutoHotkey's executable",
+            directory="C:/")
+
         if len(ahk_path[0]) != 0:
             self.settings.setValue("paths/AHK", ahk_path[0])
             self.copy_check.setDisabled(False)
         self.settings.sync()
 
     def save_settings(self):
-        values = [self.main_bind_edit.text(), self.script_edit.toPlainText(), self.dark_check.isChecked(),
-                  self.font_combo.currentFont(), self.font_size_combo.value(), self.bold_check.isChecked(),
+        values = [self.main_bind_edit.text(), self.script_edit.toPlainText(),
+                  self.dark_check.isChecked(), self.font_combo.currentFont(),
+                  self.font_size_combo.value(), self.bold_check.isChecked(),
                   self.save_on_quit.isChecked(), self.copy_check.isChecked()]
 
         if "|SYSTEMDATA|" not in values[1]:
@@ -380,14 +399,18 @@ class RouteFinishedPop(QtWidgets.QDialog):
         self.setLayout(self.main_layout)
         self.main_layout.setContentsMargins(7, 20, 7, 10)
         self.main_layout.addWidget(self.label, alignment=QtCore.Qt.AlignCenter)
-        self.main_layout.addSpacerItem(QtWidgets.QSpacerItem(1, 1
-                                                             , QtWidgets.QSizePolicy.Fixed,
-                                                             QtWidgets.QSizePolicy.MinimumExpanding))
+        self.main_layout.addSpacerItem(QtWidgets.QSpacerItem(
+            1, 1,
+            QtWidgets.QSizePolicy.Fixed,
+            QtWidgets.QSizePolicy.MinimumExpanding))
+
         self.main_layout.addLayout(self.button_layout)
         self.button_layout.addWidget(self.new_route_button)
-        self.button_layout.addSpacerItem(QtWidgets.QSpacerItem(1, 1
-                                                               , QtWidgets.QSizePolicy.MinimumExpanding,
-                                                               QtWidgets.QSizePolicy.Fixed))
+        self.button_layout.addSpacerItem(QtWidgets.QSpacerItem(
+            1, 1,
+            QtWidgets.QSizePolicy.MinimumExpanding,
+            QtWidgets.QSizePolicy.Fixed))
+
         self.button_layout.addWidget(self.quit_button)
 
         self.quit_button.pressed.connect(sys.exit)
@@ -420,7 +443,8 @@ class LicensePop(QtWidgets.QDialog):
         self.text.setText("Auto Neutron Copyright (C) 2019 Numerlor\n"
                           "This program comes with ABSOLUTELY NO WARRANTY.\n"
                           "This is free software, and you are welcome to redistribute it")
-        self.text.append('under certain conditions; <a href="https://www.gnu.org/licenses/">click here</a> for details')
+        self.text.append('under certain conditions; <a href="https://www'
+                         '.gnu.org/licenses/">click here</a> for details')
         self.main_layout.addWidget(self.text)
         self.text.setOpenExternalLinks(True)
         self.setLayout(self.main_layout)
