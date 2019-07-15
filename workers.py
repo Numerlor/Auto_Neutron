@@ -65,8 +65,10 @@ class AhkWorker(QtCore.QThread):
             self.sys_signal.emit(self.list_index, self.dark)
             for line in self.follow_file(open(self.journal, encoding='utf-8')):
                 loaded = json.loads(line)
-                if loaded['event'] == "FSDJump" and loaded['StarSystem'].casefold(
-                ) == self.data_values[self.list_index][0].casefold():
+                if (loaded['event'] == "FSDJump" and
+                        loaded['StarSystem'].casefold() ==
+                        self.data_values[self.list_index][0].casefold()):
+
                     self.list_index += 1
                     if self.list_index == len(self.data_values):
                         self.close_ahk()
@@ -173,8 +175,11 @@ class SpanshPlot(QtCore.QThread):
     def plot(self, efficiency, jrange, source, to):
         try:
             job_request = requests.get("https://spansh.co.uk/api/route",
-                                       params=f"efficiency={efficiency}&range={jrange}"
-                                       f"&from={source}&to={to}")
+                                       params=
+                                       f"efficiency={efficiency}"
+                                       f"&range={jrange}"
+                                       f"&from={source}"
+                                       f"&to={to}")
         except requests.exceptions.ConnectionError:
             self.status_signal.emit("Cannot establish a connection to Spansh")
         else:
@@ -200,8 +205,10 @@ class SpanshPlot(QtCore.QThread):
                         self.sleep(min(ceil(ceil((sleep_base / 10) ** 2) / 1.9), 30))
                     else:
                         self.finished_signal.emit(
-                            [[data['system'], round(float(data['distance_jumped']), 2),
-                              round(float(data['distance_left']), 2), int(data['jumps'])]
+                            [[data['system'],
+                              round(float(data['distance_jumped']), 2),
+                              round(float(data['distance_left']), 2),
+                              int(data['jumps'])]
                              for data in job_json['result']['system_jumps']])
                         break
 

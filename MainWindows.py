@@ -296,11 +296,14 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
     def update_jumps(self, index):
         total_jumps = sum(
-            int(self.MainTable.item(i, 3).text()) for i in range(self.MainTable.rowCount()))
+            int(self.MainTable.item(i, 3).text()) for i in
+            range(self.MainTable.rowCount()))
+
         if total_jumps != 0:
             remaining_jumps = sum(
                 int(self.MainTable.item(i, 3).text()) for i in
                 range(index, self.MainTable.rowCount()))
+
             self.MainTable.horizontalHeaderItem(3).setText(
                 f"Jumps {remaining_jumps}/{total_jumps}")
             self.MainTable.resizeColumnToContents(3)
@@ -530,8 +533,11 @@ class PlotStartDialog(QtWidgets.QDialog):
         self.gridLayout_4.addWidget(self.range, 2, 0, 1, 1)
         self.gridLayout_4.addWidget(self.source, 0, 0, 1, 1)
         self.gridLayout_4.addWidget(self.nearest, 5, 1, 1, 1)
-        spacerItem2 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum,
-                                            QtWidgets.QSizePolicy.Expanding)
+        spacerItem2 = QtWidgets.QSpacerItem(
+            20, 40,
+            QtWidgets.QSizePolicy.Minimum,
+            QtWidgets.QSizePolicy.Expanding)
+
         self.gridLayout_4.addItem(spacerItem2, 6, 0, 1, 1)
         self.gridLayout_4.addWidget(self.eff_spinbox, 5, 0, 1, 1)
         self.gridLayout_4.addWidget(self.sp_submit, 7, 1, 1, 1)
@@ -595,7 +601,8 @@ class PlotStartDialog(QtWidgets.QDialog):
     def get_journals(self):
         try:
             self.journals = sorted(
-                [self.jpath + file for file in os.listdir(self.jpath) if file.endswith(".log")],
+                [self.jpath + file for file in os.listdir(self.jpath)
+                 if file.endswith(".log")],
                 key=os.path.getctime, reverse=True)
         except FileNotFoundError:
             d = popups.QuitDialog(self, "Journal folder not detected")
