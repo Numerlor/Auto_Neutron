@@ -124,7 +124,7 @@ class Nearest(QtWidgets.QDialog):
     def get_nearest(self):
         self.nearest_worker = workers.NearestRequest("https://spansh.co.uk/api/nearest",
                                                      f"x={self.x_edit.text()}&y={self.y_edit.text()}"
-                                                     f"&z={self.z_edit.text()}")
+                                                     f"&z={self.z_edit.text()}", self)
         self.nearest_worker.finished_signal.connect(self.nearest_finished)
         self.nearest_worker.status_signal.connect(self.change_status)
         self.nearest_worker.start()
@@ -160,7 +160,7 @@ class Nearest(QtWidgets.QDialog):
 
 class GameShutPop(QtWidgets.QDialog):
     worker_signal = QtCore.pyqtSignal(str, list, int)  # signal to start new worker
-    # signal to disconenct all main window singals if app is not quit or new worker is not started
+    # signal to disconnect all main window signals if app is not quit or new worker is not started
     close_signal = QtCore.pyqtSignal()
 
     def __init__(self, parent, settings, route, index):

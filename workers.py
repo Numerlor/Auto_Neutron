@@ -14,7 +14,7 @@ class AhkWorker(QtCore.QThread):
     game_shut_signal = QtCore.pyqtSignal(list, int)  # signal for game shutdown
 
     def __init__(self, parent, journal, data_values, settings, start_index):
-        super(AhkWorker, self).__init__()
+        super(AhkWorker, self).__init__(parent)
         self.journal = journal
         self.data_values = data_values
         self.settings = settings
@@ -40,6 +40,9 @@ class AhkWorker(QtCore.QThread):
         parent.save_route_signal.connect(self.save_route)
         parent.quit_worker_signal.connect(self.quit_loop)
         parent.script_mode_signal.connect(self.set_copy)
+
+    def run(self):
+        self.main()
 
     def main(self):
         shutdown = False
@@ -153,8 +156,8 @@ class SpanshPlot(QtCore.QThread):
     finished_signal = QtCore.pyqtSignal(list)  # signal containing output
     status_signal = QtCore.pyqtSignal(str)  # signal for updating statusbar
 
-    def __init__(self, efficiency, jrange, source, to):
-        super(SpanshPlot, self).__init__()
+    def __init__(self, efficiency, jrange, source, to, parent=None):
+        super(SpanshPlot, self).__init__(parent)
         self.efficiency = efficiency
         self.jrange = jrange
         self.source = source
@@ -202,8 +205,8 @@ class NearestRequest(QtCore.QThread):
     finished_signal = QtCore.pyqtSignal(dict)  # output signal
     status_signal = QtCore.pyqtSignal(str)  # statusbar change signal
 
-    def __init__(self, link, params):
-        super(NearestRequest, self).__init__()
+    def __init__(self, link, params, parent=None):
+        super(NearestRequest, self).__init__(parent)
         self.link = link
         self.params = params
 
