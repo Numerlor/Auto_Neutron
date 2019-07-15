@@ -1,3 +1,4 @@
+import ctypes
 import os
 import sys
 import traceback
@@ -6,6 +7,7 @@ from PyQt5 import QtWidgets, QtCore, QtGui
 
 import MainWindows
 import popups
+from appinfo import *
 
 
 # https://stackoverflow.com/a/44352931
@@ -37,10 +39,11 @@ class ExceptionHandler:
 
 
 if __name__ == "__main__":
+    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(APPID)
     app = QtWidgets.QApplication(sys.argv)
-    app.setWindowIcon(QtGui.QIcon(resource_path("image.png")))
-    app.setApplicationName("Auto Neutron")
-    app.setOrganizationName("Numerlor")
+    app.setWindowIcon(QtGui.QIcon(resource_path("icons/icons_library.ico")))
+    app.setApplicationName(APP)
+    app.setOrganizationName(ORG)
 
     path = QtCore.QStandardPaths.writableLocation(QtCore.QStandardPaths.AppConfigLocation)
     # save traceback to logfile if Exception is raised
