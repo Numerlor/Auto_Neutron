@@ -233,18 +233,15 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.MainTable.itemChanged.connect(self.send_changed)
 
     def start_worker(self, journal, data_values, index):
-        self.thread = QtCore.QThread()
         self.worker = workers.AhkWorker(self, journal, data_values, self.settings, index)
-        self.worker.moveToThread(self.thread)
-        self.thread.started.connect(self.worker.main)
         self.worker.sys_signal.connect(self.grayout)
         self.worker.route_finished_signal.connect(self.end_route_pop)
         self.worker.game_shut_signal.connect(self.restart_worker)
-        self.thread.start()
+        self.worker.start()
 
     def restart_worker(self, route_data, route_index):
-        self.thread.quit()
-        while not self.thread.isFinished():
+        self.worker.quit()
+        while not self.worker.isFinished():
             QtCore.QThread.sleep(1)
         rw = popups.GameShutPop(self, self.settings, route_data, route_index)
         rw.setupUi()
@@ -310,7 +307,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
     def new_route(self):
         self.quit_worker_signal.emit()
         try:
-            self.thread.quit()
+            self.worker.quit()
         except AttributeError:
             pass
         self.MainTable.horizontalHeaderItem(3).setText("Jumps")
@@ -577,7 +574,8 @@ class PlotStartDialog(QtWidgets.QDialog):
             self.settings.sync()
             self.cs_submit.setEnabled(True)
         else:
-            self.cs_submit.setEnabled(False)
+            if not self.cpath:
+                self.cs_submit.setEnabled(False)
 
     def get_journals(self):
         try:
@@ -632,7 +630,7 @@ class PlotStartDialog(QtWidgets.QDialog):
 
     def sp_submit_act(self):
         self.plotter = workers.SpanshPlot(self.eff_spinbox.value(), self.ran_spinbox.value(),
-                                          self.source.text(), self.destination.text())
+                                          self.source.text(), self.destination.text(), self)
         self.plotter.status_signal.connect(self.change_status)
         self.plotter.finished_signal.connect(self.sp_finish_act)
         self.plotter.start()
@@ -683,9 +681,11 @@ class PlotStartDialog(QtWidgets.QDialog):
                 self.status.showMessage("Invalid path to CSV file")
 
     def last_submit_act(self):
+        self.last_submit.setEnabled(False)
         last_route = self.settings.value("last_route")
         if last_route is None or len(last_route) == 0:
             self.status.showMessage("No last route found")
+            self.last_submit.setEnabled(True)
         else:
             if last_route[0] == len(last_route[1]):
                 self.data_signal.emit(self.journals[self.last_comb.currentIndex()], last_route[1], 1)
