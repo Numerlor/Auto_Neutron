@@ -7,7 +7,7 @@ from PyQt5 import QtWidgets, QtCore, QtGui
 
 import popups
 import workers
-from dicts import SHIP_STATS
+from appinfo import SHIP_STATS
 
 
 class SpinBoxDelegate(QtWidgets.QStyledItemDelegate):
