@@ -1,5 +1,6 @@
 import itertools
 import json
+import winsound
 from math import ceil
 
 import requests
@@ -156,6 +157,38 @@ class AhkWorker(QtCore.QThread):
                 self.sleep(1)
                 continue
             yield loopline
+
+
+class FuelAlert(QtCore.QThread):
+    def __init__(self, max_fuel, file, parent=None):
+        super(FuelAlert, self).__init__(parent)
+        self.file = file
+        self.max_fuel = max_fuel
+        self.loop = True
+
+    def run(self):
+        self.main(self.file, self.max_fuel)
+
+    def main(self, path, jump_fuel):
+        hold = False
+        for line in self.follow_file(open(path)):
+            if len(line) > 0:
+                loaded = json.loads(line)
+                try:
+                    if loaded['Fuel']['FuelMain'] < jump_fuel and not hold:
+                        hold = True
+                        winsound.MessageBeep()
+                    if loaded['Fuel']['FuelMain'] > jump_fuel:
+                        hold = False
+                except KeyError:
+                    pass
+
+    def follow_file(self, file):
+        while self.loop:
+            file.seek(0, 0)
+            loopline = file.readline()
+            yield loopline
+            self.msleep(100)
 
 
 class SpanshPlot(QtCore.QThread):

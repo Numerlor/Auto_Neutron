@@ -88,6 +88,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.double_spin_delegate = DoubleSpinBoxDelegate()
         self.last_index = 0
         self.total_jumps = 0
+        self.max_fuel = 9999999999
 
     def setupUi(self):
         self.resize(self.settings.value("window/size", type=QtCore.QSize))
@@ -217,6 +218,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
     def show_w(self):
         ui = PlotStartDialog(self, self.settings)
         ui.data_signal.connect(self.pop_table)
+        ui.fuel_signal.connect(self.set_max_fuel)
         ui.setupUi()
 
     def pop_table(self, journal, table_data, index):
@@ -239,6 +241,14 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.worker.route_finished_signal.connect(self.end_route_pop)
         self.worker.game_shut_signal.connect(self.restart_worker)
         self.worker.start()
+
+        status_file = (f"{os.environ['userprofile']}/Saved Games/"
+                       f"Frontier Developments/Elite Dangerous/Status.json")
+        self.sound_worker = workers.FuelAlert(self.max_fuel, status_file, self)
+        self.sound_worker.start()
+
+    def set_max_fuel(self, value):
+        self.max_fuel = value
 
     def restart_worker(self, route_data, route_index):
         self.worker.quit()
@@ -430,6 +440,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
 class PlotStartDialog(QtWidgets.QDialog):
     data_signal = QtCore.pyqtSignal(str, list, int)
+    fuel_signal = QtCore.pyqtSignal(int)
 
     def __init__(self, parent, settings):
         super(PlotStartDialog, self).__init__(parent)
@@ -680,6 +691,7 @@ class PlotStartDialog(QtWidgets.QDialog):
                         ** (1 / size_const) / (mass + fuel + cargo))
 
             self.jump_range = jump_range
+            self.fuel_signal.emit(max_fuel)
             self.ran_spinbox.setValue(self.jump_range(ship_cargo))
             self.cargo.setMaximum(cargo_cap)
             self.cargo.setValue(ship_cargo)
