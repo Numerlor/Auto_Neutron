@@ -500,7 +500,7 @@ class PlotStartDialog(QtWidgets.QDialog):
         self.gridLayout_4 = QtWidgets.QGridLayout(self.tab_2)
         self.source = QtWidgets.QLineEdit(self.tab_2)
         self.nearest = QtWidgets.QPushButton(self.tab_2)
-        self.cargo = QtWidgets.QSlider(orientation=QtCore.Qt.Horizontal)
+        self.cargo_slider = QtWidgets.QSlider(orientation=QtCore.Qt.Horizontal)
         self.cargo_label = QtWidgets.QLabel()
         self.sp_comb = QtWidgets.QComboBox(self.tab_2)
         self.sp_submit = QtWidgets.QPushButton(self.tab_2, enabled=False)
@@ -572,12 +572,12 @@ class PlotStartDialog(QtWidgets.QDialog):
         self.sp_submit.pressed.connect(self.sp_submit_act)
         self.sp_comb.currentIndexChanged.connect(self.update_source)
         self.sp_comb.currentIndexChanged.connect(self.current_range)
-        self.cargo.valueChanged.connect(self.update_range)
+        self.cargo_slider.valueChanged.connect(self.update_range)
 
         self.gridLayout_4.addWidget(self.source, 0, 0, 1, 1)
         self.gridLayout_4.addWidget(self.destination, 1, 0, 1, 1)
         self.gridLayout_4.addWidget(self.cargo_label, 2, 0, 1, 1)
-        self.gridLayout_4.addWidget(self.cargo, 3, 0, 1, 1)
+        self.gridLayout_4.addWidget(self.cargo_slider, 3, 0, 1, 1)
         self.gridLayout_4.addWidget(self.range, 4, 0, 1, 1)
         self.gridLayout_4.addWidget(self.ran_spinbox, 5, 0, 1, 1)
         self.gridLayout_4.addWidget(self.efficiency, 6, 0, 1, 1)
@@ -690,16 +690,27 @@ class PlotStartDialog(QtWidgets.QDialog):
         with open(self.journals[index], encoding='utf-8') as f:
             lines = [json.loads(line) for line in f]
         try:
+            # get last loadout event line
             loadout = next(lines[i] for i in range(len(lines) - 1, -1, -1)
                            if lines[i]['event'] == "Loadout"
                            and lines[i]['MaxJumpRange'] != 0)
+            # get last cargo event line
             ship_cargo = next(lines[i] for i in range(len(lines) - 1, -1, -1)
                               if lines[i]['event'] == "Cargo"
                               and lines[i]['Vessel'] == "Ship")['Count']
-            self.cargo.setDisabled(False)
+
+        except StopIteration:
+            self.ran_spinbox.setValue(50)
+            self.cargo_slider.setDisabled(True)
+
+        else:
+            # both loadout and cargo found, enable cargo_slider slider
+            self.cargo_slider.setDisabled(False)
+            # grab ship stats
             cargo_cap = loadout['CargoCapacity']
             self.fuel = loadout['FuelCapacity']['Main']
             self.mass = loadout['UnladenMass']
+            # get FSD and FSD booster
             modules = (i for i in loadout['Modules']
                        if i['Slot'] == "FrameShiftDrive"
                        or "fsdbooster" in i['Item'])
@@ -715,17 +726,14 @@ class PlotStartDialog(QtWidgets.QDialog):
                                 self.optimal_mass = blueprint['Value']
                             elif blueprint['Label'] == "MaxFuelPerJump":
                                 self.max_fuel = blueprint['Value']
+
                 if "fsdbooster" in item['Item']:
                     self.boost = SHIP_STATS['Booster'][item['Item']]
 
             self.fuel_signal.emit(self.max_fuel)
-            self.ran_spinbox.setValue(self.jump_range(ship_cargo))
-            self.cargo.setMaximum(cargo_cap)
-            self.cargo.setValue(ship_cargo)
-
-        except StopIteration:
-            self.ran_spinbox.setValue(50)
-            self.cargo.setDisabled(True)
+            self.ran_spinbox.setValue(self.calculate_range(ship_cargo))
+            self.cargo_slider.setMaximum(cargo_cap)
+            self.cargo_slider.setValue(ship_cargo)
 
     def calculate_range(self, cargo):
         return (self.boost + self.optimal_mass *
@@ -733,7 +741,7 @@ class PlotStartDialog(QtWidgets.QDialog):
                 ** (1 / self.size_const) / (self.mass + self.fuel + cargo))
 
     def update_range(self, cargo):
-        self.ran_spinbox.setValue(self.jump_range(cargo))
+        self.ran_spinbox.setValue(self.calculate_range(cargo))
 
     def update_destination(self, system):
         self.destination.setText(system)
