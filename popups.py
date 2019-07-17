@@ -271,6 +271,11 @@ class SettingsPop(QtWidgets.QDialog):
         self.copy_layout = QtWidgets.QHBoxLayout()
         self.ahk_button = QtWidgets.QPushButton()
         self.copy_check = QtWidgets.QCheckBox(self)
+
+        self.alert_layout = QtWidgets.QHBoxLayout()
+        self.alert_sound_check = QtWidgets.QCheckBox(self)
+        self.alert_visual_check = QtWidgets.QCheckBox(self)
+
         self.settings = settings
         self.status = QtWidgets.QStatusBar(self)
 
@@ -283,16 +288,7 @@ class SettingsPop(QtWidgets.QDialog):
         self.pushButton.setMaximumWidth(95)
         self.pushButton.pressed.connect(self.save_settings)
 
-        self.setWindowTitle("Settings")
-        self.dark_check.setText("Dark theme")
-        self.bold_check.setText("Bold")
-        self.pushButton.setText("Save settings")
-        self.main_bind_edit.setToolTip(
-            "Bind to trigger the script, # for win key, "
-            "! for alt, ^ for control, + for shift")
-        self.save_on_quit.setText("Save route on window close")
-        self.copy_check.setText("Copy mode")
-        self.ahk_button.setText("AHK Path")
+        self.retranslate_ui()
 
         self.main_bind_edit.setText(self.settings.value("bind"))
         self.script_edit.setText(self.settings.value("script"))
@@ -302,12 +298,19 @@ class SettingsPop(QtWidgets.QDialog):
         self.bold_check.setChecked(self.settings.value("font/bold", type=bool))
         self.save_on_quit.setChecked(self.settings.value("save_on_quit", type=bool))
         self.copy_check.setChecked(self.settings.value("copy_mode", type=bool))
+        self.alert_sound_check.setChecked(self.settings.value("alerts/audio", type=bool))
+        self.alert_visual_check.setChecked(self.settings.value("alerts/visual", type=bool))
+
         if self.settings.value("paths/AHK") == "":
             self.copy_check.setDisabled(True)
         self.verticalLayout.addWidget(self.main_bind_edit)
         self.verticalLayout.addWidget(self.script_edit)
         self.verticalLayout.addWidget(self.dark_check)
         self.verticalLayout.addWidget(self.save_on_quit)
+
+        self.alert_layout.addWidget(self.alert_visual_check)
+        self.alert_layout.addWidget(self.alert_sound_check)
+        self.verticalLayout.addLayout(self.alert_layout)
         self.copy_layout.addWidget(self.copy_check)
         self.copy_layout.addWidget(self.ahk_button)
         self.verticalLayout.addLayout(self.copy_layout)
@@ -337,7 +340,9 @@ class SettingsPop(QtWidgets.QDialog):
         values = [self.main_bind_edit.text(), self.script_edit.toPlainText(),
                   self.dark_check.isChecked(), self.font_combo.currentFont(),
                   self.font_size_combo.value(), self.bold_check.isChecked(),
-                  self.save_on_quit.isChecked(), self.copy_check.isChecked()]
+                  self.save_on_quit.isChecked(), self.copy_check.isChecked(),
+                  self.alert_sound_check.isChecked(),
+                  self.alert_visual_check.isChecked()]
 
         if "|SYSTEMDATA|" not in values[1]:
             self.status.showMessage('Script must include "|SYSTEMDATA|"')
@@ -350,8 +355,24 @@ class SettingsPop(QtWidgets.QDialog):
             self.settings.setValue("font/bold", values[5])
             self.settings.setValue("save_on_quit", values[6])
             self.settings.setValue("copy_mode", values[7])
+            self.settings.setValue("alerts/audio", values[8])
+            self.settings.setValue("alerts/visual", values[9])
             self.settings.sync()
             self.settings_signal.emit(values)
+
+    def retranslate_ui(self):
+        self.setWindowTitle("Settings")
+        self.dark_check.setText("Dark theme")
+        self.bold_check.setText("Bold")
+        self.pushButton.setText("Save settings")
+        self.main_bind_edit.setToolTip(
+            "Bind to trigger the script, # for win key, "
+            "! for alt, ^ for control, + for shift")
+        self.save_on_quit.setText("Save route on window close")
+        self.copy_check.setText("Copy mode")
+        self.ahk_button.setText("AHK Path")
+        self.alert_visual_check.setText("Taskbar fuel alert")
+        self.alert_sound_check.setText("Sound fuel alert")
 
 
 class QuitDialog(QtWidgets.QDialog):

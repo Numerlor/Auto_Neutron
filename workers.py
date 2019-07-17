@@ -158,6 +158,47 @@ class AhkWorker(QtCore.QThread):
             yield loopline
 
 
+class FuelAlert(QtCore.QThread):
+    flash_signal = QtCore.pyqtSignal()
+
+    def __init__(self, max_fuel, file, parent):
+        super(FuelAlert, self).__init__(parent)
+        self.file = file
+        self.max_fuel = max_fuel
+        self.loop = True
+        parent.stop_sound_worker_signal.connect(self.stop_loop)
+
+    def run(self):
+        self.main(self.file, self.max_fuel * 0.9)
+
+    def main(self, path, jump_fuel):
+        hold = False
+        for line in self.follow_file(open(path)):
+            if len(line) > 0:
+                loaded = json.loads(line)
+                try:
+                    # notify when fuel is low and fsd is in cooldown
+                    if (loaded['Fuel']['FuelMain'] < jump_fuel
+                            and not hold
+                            and f"{loaded['Flags']:b}"[-18] == "0"):
+                        hold = True
+                        self.flash_signal.emit()
+                    elif loaded['Fuel']['FuelMain'] > jump_fuel:
+                        hold = False
+                except KeyError:
+                    pass
+
+    def stop_loop(self):
+        self.loop = False
+
+    def follow_file(self, file):
+        while self.loop:
+            file.seek(0, 0)
+            loopline = file.readline()
+            self.sleep(2)
+            yield loopline
+
+
 class SpanshPlot(QtCore.QThread):
     finished_signal = QtCore.pyqtSignal(list)  # signal containing output
     status_signal = QtCore.pyqtSignal(str)  # signal for updating statusbar
