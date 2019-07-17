@@ -7,7 +7,7 @@ from PyQt5 import QtWidgets, QtCore, QtGui
 
 import popups
 import workers
-from dicts import SHIP_STATS
+from appinfo import SHIP_STATS
 
 
 class SpinBoxDelegate(QtWidgets.QStyledItemDelegate):
@@ -663,6 +663,7 @@ class PlotStartDialog(QtWidgets.QDialog):
             ship_cargo = next(lines[i] for i in range(len(lines) - 1, -1, -1)
                               if lines[i]['event'] == "Cargo"
                               and lines[i]['Vessel'] == "Ship")['Count']
+            self.cargo.setDisabled(False)
             cargo_cap = loadout['CargoCapacity']
             fuel = loadout['FuelCapacity']['Main']
             mass = loadout['UnladenMass']
@@ -672,10 +673,8 @@ class PlotStartDialog(QtWidgets.QDialog):
             boost = 0
             for item in modules:
                 if item['Slot'] == "FrameShiftDrive":
-                    max_fuel = SHIP_STATS['MaxUsage'][item['Item']]
-                    optimal_mass = SHIP_STATS['OptimalMass'][item['Item']]
-                    size_const = SHIP_STATS['SConst'][item['Item'][-12:-7]]
-                    class_const = SHIP_STATS['RConst'][item['Item'][-6:]]
+                    (max_fuel, optimal_mass, size_const,
+                     class_const) = SHIP_STATS['FSD'][item['Item']]
 
                     if 'Engineering' in item.keys():
                         for blueprint in item['Engineering']['Modifiers']:
@@ -698,6 +697,7 @@ class PlotStartDialog(QtWidgets.QDialog):
 
         except StopIteration:
             self.ran_spinbox.setValue(50)
+            self.cargo.setDisabled(True)
 
     def update_range(self, cargo):
         self.ran_spinbox.setValue(self.jump_range(cargo))
