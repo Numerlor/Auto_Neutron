@@ -772,11 +772,11 @@ class PlotStartDialog(QtWidgets.QDialog):
 
     def cs_submit_act(self, cpath):
         self.cs_submit.setEnabled(False)
-        if os.stat(cpath).st_size > 2_097_152:
-            self.status.showMessage("File too large")
-            self.cs_submit.setEnabled(True)
-        else:
-            try:
+        try:
+            if os.stat(cpath).st_size > 2_097_152:
+                self.status.showMessage("File too large")
+                self.cs_submit.setEnabled(True)
+            else:
                 with open(cpath, encoding='utf-8') as f:
                     data = []
                     valid = True
@@ -804,8 +804,8 @@ class PlotStartDialog(QtWidgets.QDialog):
                         self.status.showMessage("Error loading csv file")
                         self.cs_submit.setEnabled(True)
 
-            except FileNotFoundError:
-                self.status.showMessage("Invalid path to CSV file")
+        except FileNotFoundError:
+            self.status.showMessage("Invalid path to CSV file")
 
     def last_submit_act(self):
         self.last_submit.setEnabled(False)
