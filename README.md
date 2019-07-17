@@ -12,6 +12,7 @@ The Auto Neutron app works by starting a new AutoHotkey script (located in setti
 * Built in neutron plotter using Spansh's api
 * Saving of routes
 * Skipping jumps using doubleclick
+* Low fuel alert when fuel is lower than 90% of max FSD usage
 
 ### Copy mode
 Allows app to be used without ahk, copies systems to clipboard on every waypoint instead of starting an ahk instance
