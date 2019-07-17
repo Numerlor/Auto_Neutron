@@ -261,7 +261,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             self.stop_sound_worker_signal.emit()
             self.sound_worker.quit()
             self.sound_worker.flash_signal.disconnect()
-        except (AttributeError, TypeError):
+        except TypeError:
             pass
 
     def set_max_fuel(self, value):
@@ -275,6 +275,8 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
     def restart_worker(self, route_data, route_index):
         self.worker.quit()
+        if self.sound_alert or self.visual_alert:
+            self.stop_sound_worker()
         while not self.worker.isFinished():
             QtCore.QThread.sleep(1)
         rw = popups.GameShutPop(self, self.settings, route_data, route_index)

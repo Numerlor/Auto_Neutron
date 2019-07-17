@@ -180,7 +180,7 @@ class FuelAlert(QtCore.QThread):
                     # notify when fuel is low and fsd is in cooldown
                     if (loaded['Fuel']['FuelMain'] < jump_fuel
                             and not hold
-                            and f"{loaded['Flags']:b}"[-18] == "0"):
+                            and f"{loaded['Flags']:b}"[-19] == "1"):
                         hold = True
                         self.flash_signal.emit()
                     elif loaded['Fuel']['FuelMain'] > jump_fuel:
