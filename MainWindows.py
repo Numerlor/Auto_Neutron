@@ -662,10 +662,8 @@ class PlotStartDialog(QtWidgets.QDialog):
             boost = 0
             for item in modules:
                 if item['Slot'] == "FrameShiftDrive":
-                    max_fuel = SHIP_STATS['MaxUsage'][item['Item']]
-                    optimal_mass = SHIP_STATS['OptimalMass'][item['Item']]
-                    size_const = SHIP_STATS['SConst'][item['Item'][-12:-7]]
-                    class_const = SHIP_STATS['RConst'][item['Item'][-6:]]
+                    (max_fuel, optimal_mass, size_const,
+                     class_const) = SHIP_STATS['FSD'][item['Item']]
 
                     if 'Engineering' in item.keys():
                         for blueprint in item['Engineering']['Modifiers']:
