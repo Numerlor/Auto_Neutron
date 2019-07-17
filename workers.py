@@ -169,7 +169,7 @@ class FuelAlert(QtCore.QThread):
         parent.stop_sound_worker_signal.connect(self.stop_loop)
 
     def run(self):
-        self.main(self.file, self.max_fuel)
+        self.main(self.file, self.max_fuel * 0.9)
 
     def main(self, path, jump_fuel):
         hold = False
@@ -177,7 +177,10 @@ class FuelAlert(QtCore.QThread):
             if len(line) > 0:
                 loaded = json.loads(line)
                 try:
-                    if loaded['Fuel']['FuelMain'] < jump_fuel and not hold:
+                    # notify when fuel is low and fsd is in cooldown
+                    if (loaded['Fuel']['FuelMain'] < jump_fuel
+                            and not hold
+                            and f"{loaded['Flags']:b}"[-18] == "0"):
                         hold = True
                         self.flash_signal.emit()
                     elif loaded['Fuel']['FuelMain'] > jump_fuel:
@@ -192,7 +195,7 @@ class FuelAlert(QtCore.QThread):
         while self.loop:
             file.seek(0, 0)
             loopline = file.readline()
-            self.sleep(3)
+            self.sleep(2)
             yield loopline
 
 
