@@ -652,6 +652,7 @@ class PlotStartDialog(QtWidgets.QDialog):
             ship_cargo = next(lines[i] for i in range(len(lines) - 1, -1, -1)
                               if lines[i]['event'] == "Cargo"
                               and lines[i]['Vessel'] == "Ship")['Count']
+            self.cargo.setDisabled(False)
             cargo_cap = loadout['CargoCapacity']
             fuel = loadout['FuelCapacity']['Main']
             mass = loadout['UnladenMass']
@@ -686,6 +687,7 @@ class PlotStartDialog(QtWidgets.QDialog):
 
         except StopIteration:
             self.ran_spinbox.setValue(50)
+            self.cargo.setDisabled(True)
 
     def update_range(self, cargo):
         self.ran_spinbox.setValue(self.jump_range(cargo))
