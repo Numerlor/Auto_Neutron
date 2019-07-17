@@ -64,6 +64,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
     worker_set_ahk_signal = QtCore.pyqtSignal()
     save_route_signal = QtCore.pyqtSignal()  # signal to save current route
     quit_worker_signal = QtCore.pyqtSignal()
+    stop_sound_worker_signal = QtCore.pyqtSignal()
 
     def __init__(self, settings, application):
         super(Ui_MainWindow, self).__init__()
@@ -83,6 +84,9 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.settings_action = QtWidgets.QAction("Settings", self)
         self.about_action = QtWidgets.QAction("About", self)
         self.save_on_quit = self.settings.value("save_on_quit", type=bool)
+
+        self.sound_alert = self.settings.value("alerts/audio", type=bool)
+        self.visual_alert = self.settings.value("alerts/visual", type=bool)
 
         self.spin_delegate = SpinBoxDelegate()
         self.double_spin_delegate = DoubleSpinBoxDelegate()
@@ -242,13 +246,32 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.worker.game_shut_signal.connect(self.restart_worker)
         self.worker.start()
 
+        if self.visual_alert or self.sound_alert:
+            self.start_sound_worker()
+
+    def start_sound_worker(self):
         status_file = (f"{os.environ['userprofile']}/Saved Games/"
                        f"Frontier Developments/Elite Dangerous/Status.json")
         self.sound_worker = workers.FuelAlert(self.max_fuel, status_file, self)
+        self.sound_worker.flash_signal.connect(self.flash_taskbar)
         self.sound_worker.start()
+
+    def stop_sound_worker(self):
+        try:
+            self.stop_sound_worker_signal.emit()
+            self.sound_worker.quit()
+            self.sound_worker.flash_signal.disconnect()
+        except (AttributeError, TypeError):
+            pass
 
     def set_max_fuel(self, value):
         self.max_fuel = value
+
+    def flash_taskbar(self):
+        if self.visual_alert:
+            self.application.alert(self.centralwidget, 5000)
+        if self.sound_alert:
+            self.application.beep()
 
     def restart_worker(self, route_data, route_index):
         self.worker.quit()
@@ -359,6 +382,14 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             change_to_default(self.application)
             self.grayout(self.last_index, False)
 
+        if (values[8] or values[9]
+                and not any((self.sound_alert, self.visual_alert))):
+            self.start_sound_worker()
+        elif not values[8] and not values[9]:
+            self.stop_sound_worker()
+        self.sound_alert = values[8]
+        self.visual_alert = values[9]
+
         self.save_on_quit = values[6]
 
         font = values[3]
@@ -391,6 +422,8 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             self.settings.setValue("font/size", 11)
             self.settings.setValue("font/bold", False)
             self.settings.setValue("bind", "F5")
+            self.settings.setValue("alerts/audio", False)
+            self.settings.setValue("alerts/visual", False)
             self.settings.setValue("script", ("SetKeyDelay, 50, 50\n"
                                               ";bind to open map\n"
                                               "send, {Numpad7}\n"
@@ -665,32 +698,27 @@ class PlotStartDialog(QtWidgets.QDialog):
                               and lines[i]['Vessel'] == "Ship")['Count']
             self.cargo.setDisabled(False)
             cargo_cap = loadout['CargoCapacity']
-            fuel = loadout['FuelCapacity']['Main']
-            mass = loadout['UnladenMass']
+            self.fuel = loadout['FuelCapacity']['Main']
+            self.mass = loadout['UnladenMass']
             modules = (i for i in loadout['Modules']
                        if i['Slot'] == "FrameShiftDrive"
                        or "fsdbooster" in i['Item'])
-            boost = 0
+            self.boost = 0
             for item in modules:
                 if item['Slot'] == "FrameShiftDrive":
-                    (max_fuel, optimal_mass, size_const,
-                     class_const) = SHIP_STATS['FSD'][item['Item']]
+                    (self.max_fuel, self.optimal_mass, self.size_const,
+                     self.class_const) = SHIP_STATS['FSD'][item['Item']]
 
                     if 'Engineering' in item.keys():
                         for blueprint in item['Engineering']['Modifiers']:
                             if blueprint['Label'] == "FSDOptimalMass":
-                                optimal_mass = blueprint['Value']
+                                self.optimal_mass = blueprint['Value']
                             elif blueprint['Label'] == "MaxFuelPerJump":
-                                max_fuel = blueprint['Value']
+                                self.max_fuel = blueprint['Value']
                 if "fsdbooster" in item['Item']:
-                    boost = SHIP_STATS['Booster'][item['Item']]
+                    self.boost = SHIP_STATS['Booster'][item['Item']]
 
-            def jump_range(cargo):
-                return (boost + optimal_mass * (1000 * max_fuel / class_const)
-                        ** (1 / size_const) / (mass + fuel + cargo))
-
-            self.jump_range = jump_range
-            self.fuel_signal.emit(max_fuel)
+            self.fuel_signal.emit(self.max_fuel)
             self.ran_spinbox.setValue(self.jump_range(ship_cargo))
             self.cargo.setMaximum(cargo_cap)
             self.cargo.setValue(ship_cargo)
@@ -698,6 +726,11 @@ class PlotStartDialog(QtWidgets.QDialog):
         except StopIteration:
             self.ran_spinbox.setValue(50)
             self.cargo.setDisabled(True)
+
+    def calculate_range(self, cargo):
+        return (self.boost + self.optimal_mass *
+                (1000 * self.max_fuel / self.class_const)
+                ** (1 / self.size_const) / (self.mass + self.fuel + cargo))
 
     def update_range(self, cargo):
         self.ran_spinbox.setValue(self.jump_range(cargo))

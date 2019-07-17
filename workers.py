@@ -1,6 +1,5 @@
 import itertools
 import json
-import winsound
 from math import ceil
 
 import requests
@@ -160,11 +159,14 @@ class AhkWorker(QtCore.QThread):
 
 
 class FuelAlert(QtCore.QThread):
-    def __init__(self, max_fuel, file, parent=None):
+    flash_signal = QtCore.pyqtSignal()
+
+    def __init__(self, max_fuel, file, parent):
         super(FuelAlert, self).__init__(parent)
         self.file = file
         self.max_fuel = max_fuel
         self.loop = True
+        parent.stop_sound_worker_signal.connect(self.stop_loop)
 
     def run(self):
         self.main(self.file, self.max_fuel)
@@ -177,18 +179,21 @@ class FuelAlert(QtCore.QThread):
                 try:
                     if loaded['Fuel']['FuelMain'] < jump_fuel and not hold:
                         hold = True
-                        winsound.MessageBeep()
-                    if loaded['Fuel']['FuelMain'] > jump_fuel:
+                        self.flash_signal.emit()
+                    elif loaded['Fuel']['FuelMain'] > jump_fuel:
                         hold = False
                 except KeyError:
                     pass
+
+    def stop_loop(self):
+        self.loop = False
 
     def follow_file(self, file):
         while self.loop:
             file.seek(0, 0)
             loopline = file.readline()
+            self.sleep(3)
             yield loopline
-            self.msleep(100)
 
 
 class SpanshPlot(QtCore.QThread):
