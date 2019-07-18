@@ -166,7 +166,10 @@ class FuelAlert(QtCore.QThread):
         self.file = file
         self.max_fuel = max_fuel
         self.loop = True
+        self.alert = False
+
         parent.stop_sound_worker_signal.connect(self.stop_loop)
+        parent.next_jump_signal.connect(self.change_alert)
 
     def run(self):
         self.main(self.file, self.max_fuel * 0.9)
@@ -177,10 +180,13 @@ class FuelAlert(QtCore.QThread):
             if len(line) > 0:
                 loaded = json.loads(line)
                 try:
-                    # notify when fuel is low and fsd is in cooldown
+                    # notify when fuel is low,
+                    # fsd is in cooldown and ship in supercruise
                     if (loaded['Fuel']['FuelMain'] < jump_fuel
                             and not hold
-                            and f"{loaded['Flags']:b}"[-19] == "1"):
+                            and f"{loaded['Flags']:b}"[-19] == "1"
+                            and f"{loaded['Flags']:b}"[-5] == "1"
+                            and self.alert):
                         hold = True
                         self.flash_signal.emit()
                     elif loaded['Fuel']['FuelMain'] > jump_fuel:
@@ -188,11 +194,15 @@ class FuelAlert(QtCore.QThread):
                 except KeyError:
                     pass
 
+    def change_alert(self, status):
+        self.alert = status
+
     def stop_loop(self):
         self.loop = False
 
     def follow_file(self, file):
         while self.loop:
+            print("I'm on {}".format(self))
             file.seek(0, 0)
             loopline = file.readline()
             self.sleep(2)
