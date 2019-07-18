@@ -202,7 +202,6 @@ class FuelAlert(QtCore.QThread):
 
     def follow_file(self, file):
         while self.loop:
-            print("I'm on {}".format(self))
             file.seek(0, 0)
             loopline = file.readline()
             self.sleep(2)
