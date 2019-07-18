@@ -1,4 +1,5 @@
 import sys
+from collections import namedtuple
 from os import listdir
 from os.path import getctime
 
@@ -254,7 +255,7 @@ class GameShutPop(QtWidgets.QDialog):
 
 
 class SettingsPop(QtWidgets.QDialog):
-    settings_signal = QtCore.pyqtSignal(list)  # signal containing new settings
+    settings_signal = QtCore.pyqtSignal(tuple)  # signal containing new settings
 
     def __init__(self, parent, settings: QtCore.QSettings):
         super(SettingsPop, self).__init__(parent)
@@ -337,12 +338,17 @@ class SettingsPop(QtWidgets.QDialog):
         self.settings.sync()
 
     def save_settings(self):
-        values = [self.main_bind_edit.text(), self.script_edit.toPlainText(),
-                  self.dark_check.isChecked(), self.font_combo.currentFont(),
-                  self.font_size_combo.value(), self.bold_check.isChecked(),
-                  self.save_on_quit.isChecked(), self.copy_check.isChecked(),
-                  self.alert_sound_check.isChecked(),
-                  self.alert_visual_check.isChecked()]
+        settings = namedtuple("settings_values", (
+            "bind", "script", "dark_mode",
+            "font", "font_size", "font_bold",
+            "save_route", "copy_mode", "alert_audio",
+            "alert_visual"))
+        values = settings(self.main_bind_edit.text(), self.script_edit.toPlainText(),
+                          self.dark_check.isChecked(), self.font_combo.currentFont(),
+                          self.font_size_combo.value(), self.bold_check.isChecked(),
+                          self.save_on_quit.isChecked(), self.copy_check.isChecked(),
+                          self.alert_sound_check.isChecked(),
+                          self.alert_visual_check.isChecked())
 
         if "|SYSTEMDATA|" not in values[1]:
             self.status.showMessage('Script must include "|SYSTEMDATA|"')
