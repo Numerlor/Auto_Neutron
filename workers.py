@@ -17,6 +17,7 @@ class AhkWorker(QtCore.QThread):
         super(AhkWorker, self).__init__(parent)
         self.journal = journal
         self.data_values = data_values
+        self.systems = [data[0].casefold() for data in data_values]
         self.settings = settings
         self.script = self.settings.value("script")
         self.bind = self.settings.value("bind")
@@ -56,26 +57,25 @@ class AhkWorker(QtCore.QThread):
 
         if not shutdown:
             if self.copy:
-                set_clip(self.data_values[self.list_index][0])
+                set_clip(self.systems[self.list_index])
             else:
                 self.hotkey = Hotkey(self.ahk, self.bind,
                                      self.script.replace("|SYSTEMDATA|",
-                                                         self.data_values[self.list_index][0]))
+                                                         self.systems[self.list_index]))
                 self.hotkey.start()
             self.sys_signal.emit(self.list_index, self.dark)
             for line in self.follow_file(open(self.journal, encoding='utf-8')):
                 loaded = json.loads(line)
                 if (loaded['event'] == "FSDJump" and
-                        loaded['StarSystem'].casefold() ==
-                        self.data_values[self.list_index][0].casefold()):
+                        loaded['StarSystem'].casefold() in self.systems):
+                    self.list_index = self.systems.index(loaded['StarSystem'].casefold()) + 1
 
-                    self.list_index += 1
                     if self.list_index == len(self.data_values):
                         self.close_ahk()
                         self.route_finished_signal.emit()
                         break
                     if self.copy:
-                        set_clip(self.data_values[self.list_index][0])
+                        set_clip(self.systems[self.list_index])
                     else:
                         self.reset_ahk()
                     self.sys_signal.emit(self.list_index, self.dark)
@@ -87,20 +87,21 @@ class AhkWorker(QtCore.QThread):
     def set_index(self, index):
         self.list_index = index
         if self.copy:
-            set_clip(self.data_values[self.list_index][0])
+            set_clip(self.systems[self.list_index])
         else:
             self.close_ahk()
             hotkey = Hotkey(self.ahk, self.bind,
                             self.script.replace("|SYSTEMDATA|",
-                                                self.data_values[self.list_index][0]))
+                                                self.systems[self.list_index]))
             hotkey.start()
         self.sys_signal.emit(self.list_index, self.dark)
 
     def update_sys(self, index, new_sys):
         self.data_values[index][0] = new_sys
+        self.systems[index] = new_sys.casefold()
         if self.list_index == index:
             if self.copy:
-                set_clip(self.data_values[self.list_index][0])
+                set_clip(self.systems[self.list_index])
             else:
                 self.reset_ahk()
 
@@ -117,7 +118,7 @@ class AhkWorker(QtCore.QThread):
             self.copy = setting
             if self.copy:
                 self.close_ahk()
-                set_clip(self.data_values[self.list_index][0])
+                set_clip(self.systems[self.list_index])
             else:
                 self.ahk = AHK(executable_path=self.settings.value("paths/AHK"))
                 self.reset_ahk()
@@ -127,7 +128,7 @@ class AhkWorker(QtCore.QThread):
         self.hotkey = Hotkey(self.ahk,
                              self.bind,
                              self.script.replace("|SYSTEMDATA|",
-                                                 self.data_values[self.list_index][0]))
+                                                 self.systems[self.list_index]))
         self.hotkey.start()
 
     def close_ahk(self):
