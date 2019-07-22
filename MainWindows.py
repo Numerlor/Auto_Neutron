@@ -92,6 +92,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.last_index = 0
         self.total_jumps = 0
         self.max_fuel = 9999999999
+        self.workers_started = False
 
     def setupUi(self):
         self.resize(self.settings.value("window/size", type=QtCore.QSize))
@@ -231,13 +232,12 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             self.MainTable.horizontalHeaderItem(3).setText("Jumps")
 
     def new_route(self):
-        self.quit_worker_signal.emit()
-        try:
+        if self.workers_started:
+            self.quit_worker_signal.emit()
             self.worker.quit()
-        except AttributeError:
-            pass
-        if any((self.visual_alert, self.sound_alert)):
-            self.stop_sound_worker()
+            if any((self.visual_alert, self.sound_alert)):
+                self.stop_sound_worker()
+
         self.MainTable.horizontalHeaderItem(3).setText("Jumps")
         self.MainTable.clearContents()
         self.MainTable.setRowCount(0)
@@ -252,6 +252,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
         if self.visual_alert or self.sound_alert:
             self.start_sound_worker()
+        self.workers_started = True
 
     def restart_worker(self, route_data, route_index):
         self.worker.quit()
