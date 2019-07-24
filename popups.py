@@ -259,40 +259,117 @@ class SettingsPop(QtWidgets.QDialog):
 
     def __init__(self, parent, settings: QtCore.QSettings):
         super(SettingsPop, self).__init__(parent)
-        self.verticalLayout = QtWidgets.QVBoxLayout(self)
-        self.main_bind_edit = QtWidgets.QLineEdit(self)
-        self.script_edit = QtWidgets.QTextEdit(self)
-        self.dark_check = QtWidgets.QCheckBox(self)
-        self.horizontalLayout = QtWidgets.QHBoxLayout()
-        self.font_combo = QtWidgets.QFontComboBox(self)
-        self.font_size_combo = QtWidgets.QSpinBox(self)
-        self.bold_check = QtWidgets.QCheckBox(self)
-        self.pushButton = QtWidgets.QPushButton(self)
-        self.save_on_quit = QtWidgets.QCheckBox(self)
+        self.widget_save_layout = QtWidgets.QVBoxLayout()
+        self.main_bind_edit = QtWidgets.QLineEdit()
+        self.script_edit = QtWidgets.QTextEdit()
+        self.dark_check = QtWidgets.QCheckBox()
+        self.horizontalLayout = QtWidgets.QHBoxLayout(self)
+        self.font_layout = QtWidgets.QHBoxLayout()
+        self.font_combo = QtWidgets.QFontComboBox()
+        self.font_size_combo = QtWidgets.QSpinBox()
+        self.bold_check = QtWidgets.QCheckBox()
+        self.pushButton = QtWidgets.QPushButton()
+        self.save_on_quit = QtWidgets.QCheckBox()
         self.copy_layout = QtWidgets.QHBoxLayout()
         self.ahk_button = QtWidgets.QPushButton()
-        self.copy_check = QtWidgets.QCheckBox(self)
+        self.copy_check = QtWidgets.QCheckBox()
 
         self.alert_layout = QtWidgets.QHBoxLayout()
-        self.alert_sound_check = QtWidgets.QCheckBox(self)
-        self.alert_visual_check = QtWidgets.QCheckBox(self)
+        self.threshold_layout = QtWidgets.QHBoxLayout()
+        self.alert_threshold_spin = QtWidgets.QSpinBox()
+        self.alert_threshold_label = QtWidgets.QLabel()
+        self.alert_sound_check = QtWidgets.QCheckBox()
+        self.alert_visual_check = QtWidgets.QCheckBox()
+        self.alert_path_layout = QtWidgets.QHBoxLayout()
+        self.alert_path = QtWidgets.QLineEdit()
+        self.alert_dialog_button = QtWidgets.QToolButton()
 
         self.settings = settings
-        self.status = QtWidgets.QStatusBar(self)
+        self.status = QtWidgets.QStatusBar()
+
+        self.selector = QtWidgets.QListWidget(self)
+
+        self.widget_selector = QtWidgets.QStackedWidget(self)
+        self.appearance_layout = QtWidgets.QVBoxLayout()
+        self.appearance = QtWidgets.QWidget()
+        self.behaviour_layout = QtWidgets.QVBoxLayout()
+        self.behaviour = QtWidgets.QWidget()
+        self.alerts_layout = QtWidgets.QVBoxLayout()
+        self.alerts = QtWidgets.QWidget()
+        self.script_layout = QtWidgets.QVBoxLayout()
+        self.script = QtWidgets.QWidget()
 
     def setupUi(self):
         self.resize(265, 371)
         self.main_bind_edit.setMaximumWidth(100)
+        spacer = QtWidgets.QSpacerItem(1, 1, QtWidgets.QSizePolicy.Expanding,
+                                       QtWidgets.QSizePolicy.Expanding)
 
         self.horizontalLayout.setSpacing(0)
+        self.horizontalLayout.setContentsMargins(4, 4, 4, 4)
         self.font_size_combo.setMaximumWidth(50)
         self.pushButton.setMaximumWidth(95)
         self.pushButton.pressed.connect(self.save_settings)
 
+        self.horizontalLayout.addWidget(self.selector)
+        self.selector.addItems(("Appearance", "Behaviour", "Alerts", "AHK script"))
+        self.selector.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        self.selector.setMinimumWidth(self.selector.sizeHintForColumn(0) + 5)
+
+        self.selector.currentRowChanged.connect(self.widget_selector.setCurrentIndex)
+        self.widget_selector.addWidget(self.appearance)
+        self.widget_selector.addWidget(self.behaviour)
+        self.widget_selector.addWidget(self.alerts)
+        self.widget_selector.addWidget(self.script)
+
+        self.widget_save_layout.setContentsMargins(0, 0, 0, 0)
+        self.widget_save_layout.addWidget(self.widget_selector)
+        self.widget_save_layout.addWidget(self.pushButton, alignment=QtCore.Qt.AlignRight)
+        self.horizontalLayout.addLayout(self.widget_save_layout)
+
+        self.font_layout.addWidget(self.font_combo)
+        self.font_layout.addWidget(self.font_size_combo)
+
+        self.appearance_layout.addLayout(self.font_layout)
+        self.appearance_layout.addWidget(self.bold_check)
+        self.appearance_layout.addWidget(self.dark_check)
+        self.appearance_layout.addSpacerItem(spacer)
+        self.appearance.setLayout(self.appearance_layout)
+
+        self.script_layout.addWidget(self.main_bind_edit)
+        self.script_layout.addWidget(self.script_edit)
+        self.script.setLayout(self.script_layout)
+
+        self.copy_layout.addWidget(self.copy_check)
+        self.copy_layout.addWidget(self.ahk_button)
+        self.behaviour_layout.addWidget(self.save_on_quit)
+
+        self.behaviour_layout.addLayout(self.copy_layout)
+        self.behaviour_layout.addSpacerItem(spacer)
+        self.behaviour.setLayout(self.behaviour_layout)
+
+        self.alert_threshold_spin.setSuffix("%")
+        self.alert_threshold_spin.setMaximum(300)
+        self.alert_threshold_spin.setAccelerated(True)
+        self.alert_threshold_label.setWordWrap(True)
+        self.alert_dialog_button.pressed.connect(self.sound_path_dialog)
+        self.alert_path_layout.addWidget(self.alert_path)
+        self.alert_path_layout.addWidget(self.alert_dialog_button)
+        self.alert_layout.addWidget(self.alert_visual_check)
+        self.alert_layout.addWidget(self.alert_sound_check)
+        self.alerts_layout.addLayout(self.alert_layout)
+        self.threshold_layout.addWidget(self.alert_threshold_label)
+        self.threshold_layout.addWidget(self.alert_threshold_spin)
+        self.alerts_layout.addLayout(self.alert_path_layout)
+        self.alerts_layout.addLayout(self.threshold_layout)
+        self.alerts_layout.addSpacerItem(spacer)
+        self.alerts.setLayout(self.alerts_layout)
         self.retranslate_ui()
 
         self.main_bind_edit.setText(self.settings.value("bind"))
         self.script_edit.setText(self.settings.value("script"))
+        self.alert_path.setText(self.settings.value("paths/alert"))
+        self.alert_threshold_spin.setValue(self.settings.value("alerts/threshold", type=int))
         self.dark_check.setChecked(self.settings.value("window/dark", type=bool))
         self.font_combo.setCurrentFont(self.settings.value("font/font", type=QtGui.QFont))
         self.font_size_combo.setValue(self.settings.value("font/size", type=int))
@@ -304,26 +381,10 @@ class SettingsPop(QtWidgets.QDialog):
 
         if self.settings.value("paths/AHK") == "":
             self.copy_check.setDisabled(True)
-        self.verticalLayout.addWidget(self.main_bind_edit)
-        self.verticalLayout.addWidget(self.script_edit)
-        self.verticalLayout.addWidget(self.dark_check)
-        self.verticalLayout.addWidget(self.save_on_quit)
-
-        self.alert_layout.addWidget(self.alert_visual_check)
-        self.alert_layout.addWidget(self.alert_sound_check)
-        self.verticalLayout.addLayout(self.alert_layout)
-        self.copy_layout.addWidget(self.copy_check)
-        self.copy_layout.addWidget(self.ahk_button)
-        self.verticalLayout.addLayout(self.copy_layout)
-        self.horizontalLayout.addWidget(self.font_combo)
-        self.horizontalLayout.addWidget(self.font_size_combo)
-        self.horizontalLayout.addWidget(self.bold_check, alignment=QtCore.Qt.AlignRight)
-        self.verticalLayout.addLayout(self.horizontalLayout)
-        self.verticalLayout.addWidget(self.pushButton, alignment=QtCore.Qt.AlignCenter)
-        self.verticalLayout.addWidget(self.status)
 
         self.ahk_button.pressed.connect(self.ahk_dialog)
         self.setWindowFlag(QtCore.Qt.WindowContextHelpButtonHint, False)
+        self.resize(self.width(), self.script_edit.height() / 2)
         self.show()
 
     def ahk_dialog(self):
@@ -337,18 +398,27 @@ class SettingsPop(QtWidgets.QDialog):
             self.copy_check.setDisabled(False)
         self.settings.sync()
 
+    def sound_path_dialog(self):
+        sound_path = QtWidgets.QFileDialog.getOpenFileName(
+            caption="Notification audio file", )
+        if len(sound_path[0]) != 0:
+            self.alert_path.setText(sound_path[0])
+        self.settings.sync()
+
     def save_settings(self):
         settings = namedtuple("settings_values", (
             "bind", "script", "dark_mode",
             "font", "font_size", "font_bold",
             "save_route", "copy_mode", "alert_audio",
-            "alert_visual"))
+            "alert_visual", "alert_threshold", "alert_path"))
         values = settings(self.main_bind_edit.text(), self.script_edit.toPlainText(),
                           self.dark_check.isChecked(), self.font_combo.currentFont(),
                           self.font_size_combo.value(), self.bold_check.isChecked(),
                           self.save_on_quit.isChecked(), self.copy_check.isChecked(),
                           self.alert_sound_check.isChecked(),
-                          self.alert_visual_check.isChecked())
+                          self.alert_visual_check.isChecked(),
+                          self.alert_threshold_spin.value(),
+                          self.alert_path.text())
 
         if "|SYSTEMDATA|" not in values[1]:
             self.status.showMessage('Script must include "|SYSTEMDATA|"')
@@ -363,6 +433,8 @@ class SettingsPop(QtWidgets.QDialog):
             self.settings.setValue("copy_mode", values[7])
             self.settings.setValue("alerts/audio", values[8])
             self.settings.setValue("alerts/visual", values[9])
+            self.settings.setValue("alerts/threshold", values[10])
+            self.settings.setValue("paths/alert", values[11])
             self.settings.sync()
             self.settings_signal.emit(values)
 
@@ -379,7 +451,8 @@ class SettingsPop(QtWidgets.QDialog):
         self.ahk_button.setText("AHK Path")
         self.alert_visual_check.setText("Taskbar fuel alert")
         self.alert_sound_check.setText("Sound fuel alert")
-
+        self.alert_threshold_label.setText("Threshold for warning in % of max fuel usage per jump")
+        self.alert_dialog_button.setText("...")
 
 class QuitDialog(QtWidgets.QDialog):
     def __init__(self, parent, prompt, modal):
