@@ -3,7 +3,7 @@ import json
 from math import ceil
 
 import requests
-from PyQt5 import QtCore
+from PyQt5 import QtCore, QtMultimedia
 from ahk import Hotkey, AHK
 from pyperclip import copy as set_clip
 
@@ -289,3 +289,15 @@ class NearestRequest(QtCore.QThread):
             else:
                 self.status_signal.emit(
                     "An error has occured while communicating with Spansh's API")
+
+
+class SoundPlayer(QtCore.QObject):
+
+    def __init__(self, path):
+        self.sound_file = QtMultimedia.QMediaPlayer()
+        self.sound_file.setMedia(QtMultimedia.QMediaContent(
+            QtCore.QUrl.fromLocalFile(path)))
+        self.sound_file.setVolume(100)
+
+    def play(self):
+        self.sound_file.play()
