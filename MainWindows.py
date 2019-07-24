@@ -86,6 +86,8 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
         self.sound_alert = self.settings.value("alerts/audio", type=bool)
         self.visual_alert = self.settings.value("alerts/visual", type=bool)
+        self.sound_path = self.settings.value("paths/alert")
+        self.modifier = self.settings.value("alerts/threshold", type=int)
 
         self.spin_delegate = SpinBoxDelegate()
         self.double_spin_delegate = DoubleSpinBoxDelegate()
@@ -318,9 +320,10 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.MainTable.itemChanged.connect(self.send_changed)
 
     def start_sound_worker(self):
+        self.player = workers.SoundPlayer(self.sound_path)
         status_file = (f"{os.environ['userprofile']}/Saved Games/"
                        f"Frontier Developments/Elite Dangerous/Status.json")
-        self.sound_worker = workers.FuelAlert(self.max_fuel, status_file, self)
+        self.sound_worker = workers.FuelAlert(self.max_fuel, status_file, self, self.modifier)
         self.sound_worker.flash_signal.connect(self.fuel_alert)
         self.sound_worker.start()
 
@@ -339,7 +342,10 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         if self.visual_alert:
             self.application.alert(self.centralwidget, 5000)
         if self.sound_alert:
-            self.application.beep()
+            if self.sound_path:
+                self.player.play()
+            else:
+                self.application.beep()
 
     def show_w(self):
         ui = PlotStartDialog(self, self.settings)
@@ -382,7 +388,8 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
         self.dark = values[2]
         self.set_theme()
-        self.grayout(self.last_index, self.dark)
+        if self.MainTable.rowCount() != 0:
+            self.grayout(self.last_index, self.dark)
 
         if (values[8] or values[9]
                 and not any((self.sound_alert, self.visual_alert))):
@@ -393,7 +400,15 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.visual_alert = values[9]
 
         self.save_on_quit = values[6]
+        if self.modifier != values[10] and any((self.sound_alert, self.visual_alert)):
+            self.stop_sound_worker()
+            self.modifier = values[10]
+            self.start_sound_worker()
+        else:
+            self.modifier = values[10]
 
+        self.sound_path = values[11]
+        self.player = workers.SoundPlayer(values[11])
         font = values[3]
         font.setPointSize(values[4])
         font.setBold(values[5])
@@ -426,6 +441,8 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             self.settings.setValue("bind", "F5")
             self.settings.setValue("alerts/audio", False)
             self.settings.setValue("alerts/visual", False)
+            self.settings.setValue("alerts/threshold", 150)
+            self.settings.setValue("paths/alert", "")
             self.settings.setValue("script", ("SetKeyDelay, 50, 50\n"
                                               ";bind to open map\n"
                                               "send, {Numpad7}\n"

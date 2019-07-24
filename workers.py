@@ -162,18 +162,19 @@ class AhkWorker(QtCore.QThread):
 class FuelAlert(QtCore.QThread):
     flash_signal = QtCore.pyqtSignal()
 
-    def __init__(self, max_fuel, file, parent):
+    def __init__(self, max_fuel, file, parent, modifier):
         super(FuelAlert, self).__init__(parent)
         self.file = file
         self.max_fuel = max_fuel
         self.loop = True
         self.alert = False
+        self.modifier = modifier
 
         parent.stop_sound_worker_signal.connect(self.stop_loop)
         parent.next_jump_signal.connect(self.change_alert)
 
     def run(self):
-        self.main(self.file, self.max_fuel * 0.9)
+        self.main(self.file, self.max_fuel * (self.modifier / 100))
 
     def main(self, path, jump_fuel):
         hold = False
