@@ -283,6 +283,7 @@ class SettingsPop(QtWidgets.QDialog):
         self.alert_path_layout = QtWidgets.QHBoxLayout()
         self.alert_path = QtWidgets.QLineEdit()
         self.alert_dialog_button = QtWidgets.QToolButton()
+        self.alert_path_label = QtWidgets.QLabel()
 
         self.settings = settings
         self.status = QtWidgets.QStatusBar()
@@ -360,6 +361,7 @@ class SettingsPop(QtWidgets.QDialog):
         self.alerts_layout.addLayout(self.alert_layout)
         self.threshold_layout.addWidget(self.alert_threshold_label)
         self.threshold_layout.addWidget(self.alert_threshold_spin)
+        self.alerts_layout.addWidget(self.alert_path_label)
         self.alerts_layout.addLayout(self.alert_path_layout)
         self.alerts_layout.addLayout(self.threshold_layout)
         self.alerts_layout.addSpacerItem(spacer)
@@ -453,6 +455,8 @@ class SettingsPop(QtWidgets.QDialog):
         self.alert_sound_check.setText("Sound fuel alert")
         self.alert_threshold_label.setText("Threshold for warning in % of max fuel usage per jump")
         self.alert_dialog_button.setText("...")
+        self.alert_path_label.setText("Custom sound alert file")
+
 
 class QuitDialog(QtWidgets.QDialog):
     def __init__(self, parent, prompt, modal):
