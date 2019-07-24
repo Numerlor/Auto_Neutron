@@ -465,9 +465,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             self.write_ahk_path()
 
     def write_ahk_path(self):
-        try:
-            open(self.settings.value("paths/ahk")).close()
-        except FileNotFoundError:
+        if not os.path.exists((self.settings.value("paths/ahk"))):
             ahk_path = QtWidgets.QFileDialog.getOpenFileName(
                 filter="AutoHotKey (AutoHotKey*.exe)",
                 caption="Select AutoHotkey's executable "
