@@ -166,15 +166,16 @@ class FuelAlert(QtCore.QThread):
         self.max_fuel = max_fuel
         self.loop = True
         self.alert = False
-        self.modifier = modifier
 
+        self.set_jump_fuel(modifier)
         parent.stop_alert_worker_signal.connect(self.stop_loop)
         parent.next_jump_signal.connect(self.change_alert)
+        parent.modifier_signal.connect(self.set_jump_fuel)
 
     def run(self):
-        self.main(self.file, self.max_fuel * (self.modifier / 100))
+        self.main(self.file)
 
-    def main(self, path, jump_fuel):
+    def main(self, path):
         hold = False
         for line in self.follow_file(open(path)):
             if len(line) > 0:
@@ -182,17 +183,20 @@ class FuelAlert(QtCore.QThread):
                 try:
                     # notify when fuel is low,
                     # fsd is in cooldown and ship in supercruise
-                    if (loaded['Fuel']['FuelMain'] < jump_fuel
+                    if (loaded['Fuel']['FuelMain'] < self.jump_fuel
                             and not hold
                             and f"{loaded['Flags']:b}"[-19] == "1"
                             and f"{loaded['Flags']:b}"[-5] == "1"
                             and self.alert):
                         hold = True
                         self.alert_signal.emit()
-                    elif loaded['Fuel']['FuelMain'] > jump_fuel:
+                    elif loaded['Fuel']['FuelMain'] > self.jump_fuel:
                         hold = False
                 except KeyError:
                     pass
+
+    def set_jump_fuel(self, modifier):
+        self.jump_fuel = self.max_fuel * modifier / 100
 
     def change_alert(self, status):
         self.alert = status
@@ -290,8 +294,7 @@ class NearestRequest(QtCore.QThread):
                     "An error has occured while communicating with Spansh's API")
 
 
-class SoundPlayer(QtCore.QObject):
-
+class SoundPlayer:
     def __init__(self, path):
         self.sound_file = QtMultimedia.QMediaPlayer()
         self.sound_file.setMedia(QtMultimedia.QMediaContent(

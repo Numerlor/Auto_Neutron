@@ -54,6 +54,6 @@ if __name__ == "__main__":
             os.mkdir(path[:path.rfind("/")])
         os.mkdir(path)
     settings = QtCore.QSettings(path + "/config.ini", QtCore.QSettings.IniFormat)
-    ui = MainWindows.Nexus(settings)
+    ui = MainWindows.Hub(settings)
     ui.startup()
     sys.exit(app.exec_())
