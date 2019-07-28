@@ -58,7 +58,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
     next_jump_signal = QtCore.pyqtSignal(bool)
 
     def __init__(self, parent):
-        super(Ui_MainWindow, self).__init__(parent)
+        super(Ui_MainWindow, self).__init__()
         self.parent_class = parent
         self.centralwidget = QtWidgets.QWidget(self)
         self.gridLayout = QtWidgets.QGridLayout(self.centralwidget)
@@ -193,9 +193,6 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.MainTable.clearContents()
         self.MainTable.setRowCount(0)
 
-
-
-
     def pop_table(self, journal, table_data, index):
         try:
             self.MainTable.itemChanged.disconnect()
@@ -308,7 +305,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.window_quit_signal.emit(self.save_on_quit)
 
 
-class Nexus(QtWidgets.QWidget):
+class Nexus(QtCore.QObject):
     script_settings = QtCore.pyqtSignal(tuple)  # worker settings from SettingsPop
     script_mode_signal = QtCore.pyqtSignal(bool)
     window_quit_signal = QtCore.pyqtSignal(bool)  # if window was closed, close ahk script
@@ -417,33 +414,33 @@ class Nexus(QtWidgets.QWidget):
             self.stop_sound_worker()
         while not self.worker.isFinished():
             QtCore.QThread.sleep(1)
-        w = popups.GameShutPop(self, self.settings, route_data, route_index)
+        w = popups.GameShutPop(self.main_window, self.settings, route_data, route_index)
         w.setupUi()
         w.worker_signal.connect(self.start_worker)
         w.close_signal.connect(self.main_window.disconnect_signals)
 
     def show_w(self):
-        w = PlotStartDialog(self, self.settings)
+        w = PlotStartDialog(self.main_window, self.settings)
         w.data_signal.connect(self.main_window.pop_table)
         w.fuel_signal.connect(self.set_max_fuel)
         w.setupUi()
 
     def quit_pop(self, prompt, modal):
-        w = popups.QuitDialog(self, prompt, modal)
+        w = popups.QuitDialog(self.main_window, prompt, modal)
         w.setupUi()
 
     def end_route_pop(self):
-        w = popups.RouteFinishedPop(self)
+        w = popups.RouteFinishedPop(self.main_window)
         w.setup()
         w.close_signal.connect(self.disconnect_signals)
         w.new_route_signal.connect(self.new_route)
 
     def licenses_pop(self):
-        w = popups.LicensePop(self)
+        w = popups.LicensePop(self.main_window)
         w.setup()
 
     def sett_pop(self):
-        w = popups.SettingsPop(self, self.settings)
+        w = popups.SettingsPop(self.main_window, self.settings)
         w.setupUi()
         w.settings_signal.connect(self.change_editable_settings)
 
@@ -509,6 +506,7 @@ class Nexus(QtWidgets.QWidget):
                 self.settings.setValue("paths/AHK", ahk_path[0])
                 self.settings.setValue("copy_mode", False)
             self.settings.sync()
+
 
 def change_to_dark(application):
     p = QtGui.QPalette()
