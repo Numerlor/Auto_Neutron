@@ -53,14 +53,14 @@ class DoubleSpinBoxDelegate(QtWidgets.QStyledItemDelegate):
         QWidget.setGeometry(QStyleOptionViewItem.rect)
 
 
-class Ui_MainWindow(QtWidgets.QMainWindow):
+class MainWindow(QtWidgets.QMainWindow):
     double_signal = QtCore.pyqtSignal(int)  # double click signal to set worker to new clicked row
     edit_signal = QtCore.pyqtSignal(int, str)  # send edited system to worker if changed
     next_jump_signal = QtCore.pyqtSignal(bool)
 
-    def __init__(self, parent, dark):
-        super(Ui_MainWindow, self).__init__()
-        self.parent_class = parent
+    def __init__(self, hub, dark):
+        super(MainWindow, self).__init__()
+        self.hub = hub
         self.dark = dark
         self.centralwidget = QtWidgets.QWidget(self)
         self.gridLayout = QtWidgets.QGridLayout(self.centralwidget)
@@ -75,9 +75,9 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.settings_action = QtWidgets.QAction("Settings", self)
         self.about_action = QtWidgets.QAction("About", self)
 
-        self.setupUi()
+        self.setup_ui()
 
-    def setupUi(self):
+    def setup_ui(self):
         # connect and add actions
         self.connect_signals()
         # set context menus to custom
@@ -119,7 +119,6 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         p.setColor(QtGui.QPalette.HighlightedText, QtGui.QColor(0, 123, 255))
         self.MainTable.setPalette(p)
         self.retranslateUi()
-        self.show()
 
     def connect_signals(self):
         self.MainTable.customContextMenuRequested.connect(self.table_context)
@@ -129,10 +128,10 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.copy_action.triggered.connect(self.copy)
         self.change_action.triggered.connect(self.change_item_text)
 
-        self.save_action.triggered.connect(self.parent_class.save_route_signal.emit)
-        self.settings_action.triggered.connect(self.parent_class.sett_pop)
-        self.about_action.triggered.connect(self.parent_class.licenses_pop)
-        self.new_route_action.triggered.connect(self.parent_class.new_route)
+        self.save_action.triggered.connect(self.hub.save_route_signal.emit)
+        self.settings_action.triggered.connect(self.hub.sett_pop)
+        self.about_action.triggered.connect(self.hub.licenses_pop)
+        self.new_route_action.triggered.connect(self.hub.new_route)
 
     def main_context(self, location):
         menu = QtWidgets.QMenu()
@@ -200,7 +199,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             self.MainTable.itemChanged.disconnect()
         except TypeError:
             pass
-        self.parent_class.start_worker(journal, table_data, index)
+        self.hub.start_worker(journal, table_data, index)
         self.update_jumps(0)
         for row in table_data:
             self.insert_row(row)
@@ -272,7 +271,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
     def closeEvent(self, *args, **kwargs):
         super(QtWidgets.QMainWindow, self).closeEvent(*args, **kwargs)
-        self.parent_class.quit(self.size(), self.pos())
+        self.hub.quit(self.size(), self.pos())
 
 
 class Nexus(QtCore.QObject):
@@ -285,10 +284,10 @@ class Nexus(QtCore.QObject):
 
     stop_alert_worker_signal = QtCore.pyqtSignal()
 
-    def __init__(self, settings, application):
+    def __init__(self, settings):
         super().__init__()
         self.settings = settings
-        self.application = application
+        self.application = QtWidgets.QApplication.instance()
         self.jpath = self.settings.value("paths/journal")
         self.dark = self.settings.value("window/dark", type=bool)
 
@@ -300,10 +299,10 @@ class Nexus(QtCore.QObject):
 
         self.last_index = 0
         self.total_jumps = 0
-        self.max_fuel = 9999999999
+        self.max_fuel = 999
         self.workers_started = False
 
-        self.main_window = Ui_MainWindow(self, self.dark)
+        self.main_window = MainWindow(self, self.dark)
 
     def startup(self):
         self.set_theme()
@@ -312,7 +311,7 @@ class Nexus(QtCore.QObject):
         self.edit_signal = self.main_window.edit_signal
         self.next_jump_signal = self.main_window.next_jump_signal
         self.show_window()
-        self.show_w()
+        self.initial_pop()
 
     def new_route(self):
         if self.workers_started:
@@ -321,7 +320,7 @@ class Nexus(QtCore.QObject):
             if any((self.visual_alert, self.sound_alert)):
                 self.stop_alert_worker()
         self.main_window.reset_table()
-        self.show_w()
+        self.initial_pop()
 
     def show_window(self):
         self.main_window.resize(self.settings.value("window/size", type=QtCore.QSize))
@@ -336,7 +335,7 @@ class Nexus(QtCore.QObject):
         self.player = workers.SoundPlayer(self.sound_path)
         status_file = (f"{os.environ['userprofile']}/Saved Games/"
                        f"Frontier Developments/Elite Dangerous/Status.json")
-        self.sound_worker = workers.FuelAlert(self.max_fuel, status_file, self, self.modifier)
+        self.sound_worker = workers.FuelAlert(self, self.max_fuel, status_file, self.modifier)
         self.sound_worker.alert_signal.connect(self.fuel_alert)
         self.sound_worker.start()
 
@@ -360,14 +359,10 @@ class Nexus(QtCore.QObject):
             else:
                 self.application.beep()
 
-    def set_theme(self):
-        if self.dark:
-            change_to_dark(self.application)
-        else:
-            change_to_default(self.application)
-
     def start_worker(self, journal, data_values, index):
-        self.worker = workers.AhkWorker(self, journal, data_values, self.settings, index)
+        settings = (self.settings.value("script"), self.settings.value("bind"),
+                    self.dark, self.settings.value("copy_mode", type=bool))
+        self.worker = workers.AhkWorker(self, journal, data_values, settings, index)
         self.worker.sys_signal.connect(self.main_window.grayout)
         self.worker.route_finished_signal.connect(self.end_route_pop)
         self.worker.game_shut_signal.connect(self.restart_worker)
@@ -384,33 +379,39 @@ class Nexus(QtCore.QObject):
         while not self.worker.isFinished():
             QtCore.QThread.sleep(1)
         w = popups.GameShutPop(self.main_window, self.settings, route_data, route_index)
-        w.setupUi()
+        w.show()
         w.worker_signal.connect(self.start_worker)
         w.close_signal.connect(self.main_window.disconnect_signals)
 
-    def show_w(self):
+    def set_theme(self):
+        if self.dark:
+            change_to_dark(self.application)
+        else:
+            change_to_default(self.application)
+
+    def initial_pop(self):
         w = PlotStartDialog(self.main_window, self.settings)
         w.data_signal.connect(self.main_window.pop_table)
         w.fuel_signal.connect(self.set_max_fuel)
-        w.setupUi()
+        w.show()
 
     def quit_pop(self, prompt, modal):
         w = popups.QuitDialog(self.main_window, prompt, modal)
-        w.setupUi()
+        w.show()
 
     def end_route_pop(self):
         w = popups.RouteFinishedPop(self.main_window)
-        w.setup()
+        w.show()
         w.close_signal.connect(self.disconnect_signals)
         w.new_route_signal.connect(self.new_route)
 
     def licenses_pop(self):
         w = popups.LicensePop(self.main_window)
-        w.setup()
+        w.show()
 
     def sett_pop(self):
         w = popups.SettingsPop(self.main_window, self.settings)
-        w.setupUi()
+        w.show()
         w.settings_signal.connect(self.change_editable_settings)
 
     def change_editable_settings(self, values):

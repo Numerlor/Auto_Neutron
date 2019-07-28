@@ -51,7 +51,9 @@ class PlotStartDialog(QtWidgets.QDialog):
         self.status_layout = QtWidgets.QVBoxLayout(self)
         self.status = QtWidgets.QStatusBar()
 
-    def setupUi(self):
+        self.setup_ui()
+
+    def setup_ui(self):
         self.setMinimumSize(233, 241)
         self.resize(233, 241)
         self.tabWidget.addTab(self.tab, "")
@@ -148,7 +150,6 @@ class PlotStartDialog(QtWidgets.QDialog):
         self.retranslateUi()
         self.get_journals()
         self.setModal(True)
-        self.show()
         self.check_dropped_files()
 
     def retranslateUi(self):

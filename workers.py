@@ -19,10 +19,8 @@ class AhkWorker(QtCore.QThread):
         self.data_values = data_values
         self.systems = [data[0].casefold() for data in data_values]
         self.settings = settings
-        self.script = self.settings.value("script")
-        self.bind = self.settings.value("bind")
-        self.dark = self.settings.value("window/dark", type=bool)
-        self.copy = self.settings.value("copy_mode", type=bool)
+        self.script, self.bind, self.dark, self.copy = settings
+
         if not self.copy:
             self.ahk = AHK(executable_path=self.settings.value("paths/AHK"))
         self.loop = True
@@ -162,14 +160,14 @@ class AhkWorker(QtCore.QThread):
 class FuelAlert(QtCore.QThread):
     alert_signal = QtCore.pyqtSignal()
 
-    def __init__(self, max_fuel, file, parent, modifier):
+    def __init__(self, parent, max_fuel, file, modifier):
         super(FuelAlert, self).__init__(parent)
         self.file = file
         self.max_fuel = max_fuel
         self.loop = True
         self.alert = False
         self.modifier = modifier
-        print(parent)
+
         parent.stop_alert_worker_signal.connect(self.stop_loop)
         parent.next_jump_signal.connect(self.change_alert)
 
