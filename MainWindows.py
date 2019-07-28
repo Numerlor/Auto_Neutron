@@ -274,7 +274,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.hub.quit(self.size(), self.pos())
 
 
-class Nexus(QtCore.QObject):
+class Hub(QtCore.QObject):
     script_settings = QtCore.pyqtSignal(tuple)  # worker settings from SettingsPop
     script_mode_signal = QtCore.pyqtSignal(bool)
     window_quit_signal = QtCore.pyqtSignal(bool)  # if window was closed, close ahk script
@@ -283,6 +283,7 @@ class Nexus(QtCore.QObject):
     quit_worker_signal = QtCore.pyqtSignal()
 
     stop_alert_worker_signal = QtCore.pyqtSignal()
+    modifier_signal = QtCore.pyqtSignal(int)
 
     def __init__(self, settings):
         super().__init__()
@@ -385,9 +386,9 @@ class Nexus(QtCore.QObject):
 
     def set_theme(self):
         if self.dark:
-            change_to_dark(self.application)
+            change_to_dark()
         else:
-            change_to_default(self.application)
+            change_to_default()
 
     def initial_pop(self):
         w = PlotStartDialog(self.main_window, self.settings)
@@ -430,12 +431,12 @@ class Nexus(QtCore.QObject):
         self.visual_alert = values[9]
 
         self.save_on_quit = values[6]
-        if self.modifier != values[10] and any((self.sound_alert, self.visual_alert)):
+        if any((self.sound_alert, self.visual_alert)):
             self.stop_alert_worker()
-            self.modifier = values[10]
             self.start_alert_worker()
-        else:
-            self.modifier = values[10]
+
+        self.modifier = values[10]
+        self.modifier_signal.emit(values[10])
 
         self.sound_path = values[11]
         self.player = workers.SoundPlayer(values[11])
@@ -515,7 +516,7 @@ class Nexus(QtCore.QObject):
             self.settings.sync()
 
 
-def change_to_dark(application):
+def change_to_dark():
     p = QtGui.QPalette()
     p.setColor(QtGui.QPalette.Window, QtGui.QColor(53, 53, 53))
     p.setColor(QtGui.QPalette.WindowText, QtGui.QColor(247, 247, 247))
@@ -526,10 +527,12 @@ def change_to_dark(application):
     p.setColor(QtGui.QPalette.AlternateBase, QtGui.QColor(45, 45, 45))
     p.setColor(QtGui.QPalette.ToolTipText, QtCore.Qt.white)
     p.setColor(QtGui.QPalette.ButtonText, QtCore.Qt.white)
-    application.setStyle("Fusion")
-    application.setPalette(p)
+    app = QtWidgets.QApplication.instance()
+    app.setStyle("Fusion")
+    app.setPalette(p)
 
 
-def change_to_default(application):
-    application.setStyle("Fusion")
-    application.setPalette(application.style().standardPalette())
+def change_to_default():
+    app = QtWidgets.QApplication.instance()
+    app.setStyle("Fusion")
+    app.setPalette(app.style().standardPalette())
