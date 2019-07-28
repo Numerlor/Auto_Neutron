@@ -1,6 +1,7 @@
 import os
 
 from PyQt5 import QtWidgets, QtCore, QtGui
+from pyperclip import copy as set_clip
 
 import popups
 import workers
@@ -57,9 +58,10 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
     edit_signal = QtCore.pyqtSignal(int, str)  # send edited system to worker if changed
     next_jump_signal = QtCore.pyqtSignal(bool)
 
-    def __init__(self, parent):
+    def __init__(self, parent, dark):
         super(Ui_MainWindow, self).__init__()
         self.parent_class = parent
+        self.dark = dark
         self.centralwidget = QtWidgets.QWidget(self)
         self.gridLayout = QtWidgets.QGridLayout(self.centralwidget)
         self.MainTable = QtWidgets.QTableWidget(self.centralwidget)
@@ -111,8 +113,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
         self.gridLayout.addWidget(self.MainTable, 0, 0, 1, 1)
         self.setCentralWidget(self.centralwidget)
-        # write settings if not defined, check ahk path
-        # color management
+
         p = self.MainTable.palette()
         p.setColor(QtGui.QPalette.Highlight, QtGui.QColor(255, 255, 255, 0))
         p.setColor(QtGui.QPalette.HighlightedText, QtGui.QColor(0, 123, 255))
@@ -127,6 +128,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         # actions
         self.copy_action.triggered.connect(self.copy)
         self.change_action.triggered.connect(self.change_item_text)
+
         self.save_action.triggered.connect(self.parent_class.save_route_signal.emit)
         self.settings_action.triggered.connect(self.parent_class.sett_pop)
         self.about_action.triggered.connect(self.parent_class.licenses_pop)
@@ -154,7 +156,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
     def copy(self):
         if self.MainTable.currentItem() is not None:
-            self.application.clipboard().setText(self.MainTable.currentItem().text())
+            set_clip(self.MainTable.currentItem().text())
 
     def change_item_text(self):
         item = self.MainTable.currentItem()
@@ -231,7 +233,6 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             self.MainTable.itemChanged.disconnect()
         except TypeError:
             pass
-
         if dark:
             text_color = QtGui.QColor(240, 240, 240)
         else:
@@ -245,7 +246,14 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
                 self.MainTable.item(row, i).setForeground(text_color)
         self.MainTable.itemChanged.connect(self.send_changed)
 
-
+    def change_settings(self, font, dark):
+        self.dark = dark
+        if self.MainTable.rowCount() != 0:
+            self.grayout(self.last_index, self.dark)
+        self.MainTable.setFont(font)
+        self.MainTable.resizeColumnToContents(0)
+        self.MainTable.resizeColumnToContents(3)
+        self.MainTable.resizeRowsToContents()
 
     def retranslateUi(self):
         self.setWindowTitle("Auto Neutron")
@@ -262,47 +270,9 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         item.setText("Jumps")
         item.setTextAlignment(QtCore.Qt.AlignCenter)
 
-    def change_editable_settings(self, values):
-        self.script_mode_signal.emit(values[7])
-        self.script_settings.emit((values[0], values[1], values[2]))
-
-        self.dark = values[2]
-        self.set_theme()
-        if self.MainTable.rowCount() != 0:
-            self.grayout(self.last_index, self.dark)
-
-        if (values[8] or values[9]
-                and not any((self.sound_alert, self.visual_alert))):
-            self.start_sound_worker()
-        elif not values[8] and not values[9]:
-            self.stop_sound_worker()
-        self.sound_alert = values[8]
-        self.visual_alert = values[9]
-
-        self.save_on_quit = values[6]
-        if self.modifier != values[10] and any((self.sound_alert, self.visual_alert)):
-            self.stop_sound_worker()
-            self.modifier = values[10]
-            self.start_sound_worker()
-        else:
-            self.modifier = values[10]
-
-        self.sound_path = values[11]
-        self.player = workers.SoundPlayer(values[11])
-        font = values[3]
-        font.setPointSize(values[4])
-        font.setBold(values[5])
-        self.MainTable.setFont(font)
-        self.MainTable.resizeColumnToContents(0)
-        self.MainTable.resizeColumnToContents(3)
-        self.MainTable.resizeRowsToContents()
-
     def closeEvent(self, *args, **kwargs):
         super(QtWidgets.QMainWindow, self).closeEvent(*args, **kwargs)
-        self.settings.setValue("window/size", self.size())
-        self.settings.setValue("window/pos", self.pos())
-        self.settings.sync()
-        self.window_quit_signal.emit(self.save_on_quit)
+        self.parent_class.quit(self.size(), self.pos())
 
 
 class Nexus(QtCore.QObject):
@@ -313,11 +283,10 @@ class Nexus(QtCore.QObject):
     save_route_signal = QtCore.pyqtSignal()  # signal to save current route
     quit_worker_signal = QtCore.pyqtSignal()
 
-    stop_sound_worker_signal = QtCore.pyqtSignal()
+    stop_alert_worker_signal = QtCore.pyqtSignal()
 
     def __init__(self, settings, application):
         super().__init__()
-        self.main_window = Ui_MainWindow(self)
         self.settings = settings
         self.application = application
         self.jpath = self.settings.value("paths/journal")
@@ -334,6 +303,8 @@ class Nexus(QtCore.QObject):
         self.max_fuel = 9999999999
         self.workers_started = False
 
+        self.main_window = Ui_MainWindow(self, self.dark)
+
     def startup(self):
         self.set_theme()
         self.write_default_settings()
@@ -343,15 +314,13 @@ class Nexus(QtCore.QObject):
         self.show_window()
         self.show_w()
 
-    def save_route(self):
-        pass
-
     def new_route(self):
         if self.workers_started:
             self.quit_worker_signal.emit()
             self.worker.quit()
             if any((self.visual_alert, self.sound_alert)):
-                self.stop_sound_worker()
+                self.stop_alert_worker()
+        self.main_window.reset_table()
         self.show_w()
 
     def show_window(self):
@@ -363,19 +332,19 @@ class Nexus(QtCore.QObject):
         self.main_window.MainTable.setFont(font)
         self.main_window.show()
 
-    def start_sound_worker(self):
+    def start_alert_worker(self):
         self.player = workers.SoundPlayer(self.sound_path)
         status_file = (f"{os.environ['userprofile']}/Saved Games/"
                        f"Frontier Developments/Elite Dangerous/Status.json")
         self.sound_worker = workers.FuelAlert(self.max_fuel, status_file, self, self.modifier)
-        self.sound_worker.flash_signal.connect(self.fuel_alert)
+        self.sound_worker.alert_signal.connect(self.fuel_alert)
         self.sound_worker.start()
 
-    def stop_sound_worker(self):
-        self.stop_sound_worker_signal.emit()
+    def stop_alert_worker(self):
+        self.stop_alert_worker_signal.emit()
         self.sound_worker.quit()
         try:
-            self.sound_worker.flash_signal.disconnect()
+            self.sound_worker.alert_signal.disconnect()
         except TypeError:
             pass
 
@@ -405,13 +374,13 @@ class Nexus(QtCore.QObject):
         self.worker.start()
 
         if self.visual_alert or self.sound_alert:
-            self.start_sound_worker()
+            self.start_alert_worker()
         self.workers_started = True
 
     def restart_worker(self, route_data, route_index):
         self.worker.quit()
         if self.sound_alert or self.visual_alert:
-            self.stop_sound_worker()
+            self.stop_alert_worker()
         while not self.worker.isFinished():
             QtCore.QThread.sleep(1)
         w = popups.GameShutPop(self.main_window, self.settings, route_data, route_index)
@@ -443,6 +412,37 @@ class Nexus(QtCore.QObject):
         w = popups.SettingsPop(self.main_window, self.settings)
         w.setupUi()
         w.settings_signal.connect(self.change_editable_settings)
+
+    def change_editable_settings(self, values):
+        self.script_mode_signal.emit(values[7])
+        self.script_settings.emit((values[0], values[1], values[2]))
+
+        self.dark = values[2]
+        self.set_theme()
+
+        if (values[8] or values[9]
+                and not any((self.sound_alert, self.visual_alert))):
+            self.start_alert_worker()
+        elif not values[8] and not values[9]:
+            self.stop_alert_worker()
+        self.sound_alert = values[8]
+        self.visual_alert = values[9]
+
+        self.save_on_quit = values[6]
+        if self.modifier != values[10] and any((self.sound_alert, self.visual_alert)):
+            self.stop_alert_worker()
+            self.modifier = values[10]
+            self.start_alert_worker()
+        else:
+            self.modifier = values[10]
+
+        self.sound_path = values[11]
+        self.player = workers.SoundPlayer(values[11])
+
+        font = values[3]
+        font.setPointSize(values[4])
+        font.setBold(values[5])
+        self.main_window.change_settings(font, self.dark)
 
     def write_default_settings(self):
         if not self.settings.value("paths/journal"):
@@ -490,6 +490,12 @@ class Nexus(QtCore.QObject):
             self.settings.setValue("last_route", ())
             self.settings.sync()
             self.write_ahk_path()
+
+    def quit(self, size, pos):
+        self.settings.setValue("window/size", size)
+        self.settings.setValue("window/pos", pos)
+        self.settings.sync()
+        self.window_quit_signal.emit(self.save_on_quit)
 
     def write_ahk_path(self):
         if not os.path.exists((self.settings.value("paths/ahk"))):
