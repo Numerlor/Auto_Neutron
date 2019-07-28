@@ -160,7 +160,7 @@ class AhkWorker(QtCore.QThread):
 
 
 class FuelAlert(QtCore.QThread):
-    flash_signal = QtCore.pyqtSignal()
+    alert_signal = QtCore.pyqtSignal()
 
     def __init__(self, max_fuel, file, parent, modifier):
         super(FuelAlert, self).__init__(parent)
@@ -169,8 +169,8 @@ class FuelAlert(QtCore.QThread):
         self.loop = True
         self.alert = False
         self.modifier = modifier
-
-        parent.stop_sound_worker_signal.connect(self.stop_loop)
+        print(parent)
+        parent.stop_alert_worker_signal.connect(self.stop_loop)
         parent.next_jump_signal.connect(self.change_alert)
 
     def run(self):
@@ -190,7 +190,7 @@ class FuelAlert(QtCore.QThread):
                             and f"{loaded['Flags']:b}"[-5] == "1"
                             and self.alert):
                         hold = True
-                        self.flash_signal.emit()
+                        self.alert_signal.emit()
                     elif loaded['Fuel']['FuelMain'] > jump_fuel:
                         hold = False
                 except KeyError:
