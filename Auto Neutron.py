@@ -5,9 +5,9 @@ import traceback
 
 from PyQt5 import QtWidgets, QtCore, QtGui
 
-import MainWindows
+import hub
 import popups
-from appinfo import *
+from appinfo import APP, ORG, APPID
 
 
 # https://stackoverflow.com/a/44352931
@@ -35,7 +35,7 @@ class ExceptionHandler:
         except AttributeError:
             pass
         self.w = popups.CrashPop(exc)
-        self.w.setup()
+        self.w.setup_ui()
 
 
 if __name__ == "__main__":
@@ -54,6 +54,6 @@ if __name__ == "__main__":
             os.mkdir(path[:path.rfind("/")])
         os.mkdir(path)
     settings = QtCore.QSettings(path + "/config.ini", QtCore.QSettings.IniFormat)
-    ui = MainWindows.Ui_MainWindow(settings, app)
-    ui.setupUi()
+    ui = hub.Hub(settings)
+    ui.startup()
     sys.exit(app.exec_())

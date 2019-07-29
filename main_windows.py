@@ -4,10 +4,275 @@ import os
 import sys
 
 from PyQt5 import QtWidgets, QtCore, QtGui
+from pyperclip import copy as set_clip
 
 import popups
 import workers
 from appinfo import SHIP_STATS
+
+
+class SpinBoxDelegate(QtWidgets.QStyledItemDelegate):
+    def createEditor(self, parent, QStyleOptionViewItem, QModelIndex):
+        editor = QtWidgets.QSpinBox(parent)
+        editor.setFrame(False)
+        editor.setMinimum(0)
+        editor.setMaximum(10_000)
+        editor.setButtonSymbols(QtWidgets.QAbstractSpinBox.NoButtons)
+        return editor
+
+    def setEditorData(self, QWidget, QModelIndex):
+        value = int(QModelIndex.model().data(QModelIndex, QtCore.Qt.EditRole))
+
+        QWidget.setValue(value)
+
+    def setModelData(self, QWidget, QAbstractItemModel, QModelIndex):
+        QWidget.interpretText()
+        value = QWidget.value()
+        QAbstractItemModel.setData(QModelIndex, value, QtCore.Qt.EditRole)
+
+    def updateEditorGeometry(self, QWidget, QStyleOptionViewItem, QModelIndex):
+        QWidget.setGeometry(QStyleOptionViewItem.rect)
+
+
+class DoubleSpinBoxDelegate(QtWidgets.QStyledItemDelegate):
+    def createEditor(self, parent, QStyleOptionViewItem, QModelIndex):
+        editor = QtWidgets.QDoubleSpinBox(parent)
+        editor.setFrame(False)
+        editor.setMinimum(0)
+        editor.setMaximum(1_000_000)
+        editor.setDecimals(2)
+        editor.setButtonSymbols(QtWidgets.QAbstractSpinBox.NoButtons)
+        return editor
+
+    def setEditorData(self, QWidget, QModelIndex):
+        value = float(QModelIndex.model().data(QModelIndex, QtCore.Qt.EditRole))
+        QWidget.setValue(value)
+
+    def setModelData(self, QWidget, QAbstractItemModel, QModelIndex):
+        value = QWidget.text()
+        QAbstractItemModel.setData(QModelIndex, value, QtCore.Qt.EditRole)
+
+    def updateEditorGeometry(self, QWidget, QStyleOptionViewItem, QModelIndex):
+        QWidget.setGeometry(QStyleOptionViewItem.rect)
+
+
+class MainWindow(QtWidgets.QMainWindow):
+    double_signal = QtCore.pyqtSignal(int)  # double click signal to set worker to new clicked row
+    edit_signal = QtCore.pyqtSignal(int, str)  # send edited system to worker if changed
+    next_jump_signal = QtCore.pyqtSignal(bool)
+
+    def __init__(self, hub, dark):
+        super(MainWindow, self).__init__()
+        self.hub = hub
+        self.dark = dark
+        self.centralwidget = QtWidgets.QWidget(self)
+        self.gridLayout = QtWidgets.QGridLayout(self.centralwidget)
+        self.MainTable = QtWidgets.QTableWidget(self.centralwidget)
+        self.spin_delegate = SpinBoxDelegate()
+        self.double_spin_delegate = DoubleSpinBoxDelegate()
+
+        self.change_action = QtWidgets.QAction("Edit", self)
+        self.save_action = QtWidgets.QAction("Save route", self)
+        self.copy_action = QtWidgets.QAction("Copy", self)
+        self.new_route_action = QtWidgets.QAction("Start a new route", self)
+        self.settings_action = QtWidgets.QAction("Settings", self)
+        self.about_action = QtWidgets.QAction("About", self)
+
+        self.setup_ui()
+
+    def setup_ui(self):
+        # connect and add actions
+        self.connect_signals()
+        # set context menus to custom
+        self.MainTable.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+
+        self.gridLayout.setContentsMargins(0, 0, 0, 0)
+        self.gridLayout.setSpacing(0)
+        # build table
+        self.MainTable.setGridStyle(QtCore.Qt.NoPen)
+        self.MainTable.setColumnCount(4)
+
+        for i in range(4):
+            item = QtWidgets.QTableWidgetItem()
+            self.MainTable.setHorizontalHeaderItem(i, item)
+
+        self.MainTable.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+        self.MainTable.setAlternatingRowColors(True)
+        self.MainTable.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+        self.MainTable.verticalHeader().setVisible(False)
+
+        header = self.MainTable.horizontalHeader()
+        header.setSectionResizeMode(0, QtWidgets.QHeaderView.Fixed)
+        header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
+        header.setSectionResizeMode(2, QtWidgets.QHeaderView.Stretch)
+        header.setSectionResizeMode(3, QtWidgets.QHeaderView.Fixed)
+        header.setHighlightSections(False)
+        header.disconnect()
+
+        self.MainTable.setItemDelegateForColumn(1, self.double_spin_delegate)
+        self.MainTable.setItemDelegateForColumn(2, self.double_spin_delegate)
+        self.MainTable.setItemDelegateForColumn(3, self.spin_delegate)
+
+        self.gridLayout.addWidget(self.MainTable, 0, 0, 1, 1)
+        self.setCentralWidget(self.centralwidget)
+
+        p = self.MainTable.palette()
+        p.setColor(QtGui.QPalette.Highlight, QtGui.QColor(255, 255, 255, 0))
+        p.setColor(QtGui.QPalette.HighlightedText, QtGui.QColor(0, 123, 255))
+        self.MainTable.setPalette(p)
+        self.retranslateUi()
+
+    def connect_signals(self):
+        self.MainTable.customContextMenuRequested.connect(self.table_context)
+        self.customContextMenuRequested.connect(self.main_context)
+        self.MainTable.doubleClicked.connect(self.table_click)
+        # actions
+        self.copy_action.triggered.connect(self.copy)
+        self.change_action.triggered.connect(self.change_item_text)
+
+        self.save_action.triggered.connect(self.hub.save_route_signal.emit)
+        self.settings_action.triggered.connect(self.hub.sett_pop)
+        self.about_action.triggered.connect(self.hub.licenses_pop)
+        self.new_route_action.triggered.connect(self.hub.new_route)
+
+    def main_context(self, location):
+        menu = QtWidgets.QMenu()
+        menu.addAction(self.new_route_action)
+        menu.addSeparator()
+        menu.addAction(self.save_action)
+        menu.addAction(self.settings_action)
+        menu.addAction(self.about_action)
+        menu.exec_(self.mapToGlobal(location))
+
+    def table_context(self, location):
+        menu = QtWidgets.QMenu()
+        menu.addAction(self.copy_action)
+        menu.addAction(self.change_action)
+        menu.addAction(self.save_action)
+        menu.addSeparator()
+        menu.addAction(self.new_route_action)
+        menu.addAction(self.settings_action)
+        menu.addAction(self.about_action)
+        menu.exec_(self.MainTable.viewport().mapToGlobal(location))
+
+    def copy(self):
+        if self.MainTable.currentItem() is not None:
+            set_clip(self.MainTable.currentItem().text())
+
+    def change_item_text(self):
+        item = self.MainTable.currentItem()
+        self.MainTable.editItem(item)
+
+    def table_click(self, c):
+        self.double_signal.emit(c.row())
+
+    def insert_row(self, data):
+        col_count = self.MainTable.columnCount()
+        row_pos = self.MainTable.rowCount()
+        self.MainTable.setRowCount(row_pos + 1)
+        for i in range(0, col_count):
+            item = QtWidgets.QTableWidgetItem(str(data[i]))
+            item.setTextAlignment(QtCore.Qt.AlignCenter)
+            self.MainTable.setItem(row_pos, i, item)
+
+    def update_jumps(self, index):
+        total_jumps = sum(
+            int(self.MainTable.item(i, 3).text()) for i in
+            range(self.MainTable.rowCount()))
+
+        if total_jumps != 0:
+            remaining_jumps = sum(
+                int(self.MainTable.item(i, 3).text()) for i in
+                range(index, self.MainTable.rowCount()))
+
+            self.MainTable.horizontalHeaderItem(3).setText(
+                f"Jumps {remaining_jumps}/{total_jumps}")
+            self.MainTable.resizeColumnToContents(3)
+        else:
+            self.MainTable.horizontalHeaderItem(3).setText("Jumps")
+
+    def reset_table(self):
+        self.MainTable.horizontalHeaderItem(3).setText("Jumps")
+        self.MainTable.clearContents()
+        self.MainTable.setRowCount(0)
+
+    def pop_table(self, journal, table_data, index):
+        try:
+            self.MainTable.itemChanged.disconnect()
+        except TypeError:
+            pass
+        self.hub.start_worker(journal, table_data, index)
+        self.update_jumps(0)
+        for row in table_data:
+            self.insert_row(row)
+
+        self.MainTable.resizeColumnToContents(0)
+        self.MainTable.resizeRowsToContents()
+        self.MainTable.itemChanged.connect(self.send_changed)
+
+    def send_changed(self, item):
+        if item.column() == 0:
+            self.MainTable.resizeColumnToContents(0)
+            self.edit_signal.emit(item.row(), item.text())
+        elif item.column() == 3:
+            self.update_jumps(self.last_index)
+
+    def disconnect_signals(self):
+        try:
+            self.disconnect()
+            self.MainTable.disconnect()
+            self.change_action.disconnect()
+        except TypeError:
+            pass
+
+    def grayout(self, index, dark):
+        self.update_jumps(index)
+        self.next_jump_signal.emit(
+            self.MainTable.item(index, 3).text() == "1")
+        self.last_index = index
+        try:
+            self.MainTable.itemChanged.disconnect()
+        except TypeError:
+            pass
+
+        text_color = "f0f0ff" if dark else "000000"
+
+        for row in range(0, index):
+            for i in range(0, 4):
+                self.MainTable.item(row, i).setForeground(QtGui.QColor(150, 150, 150))
+        for row in range(index, self.MainTable.rowCount()):
+            for i in range(0, 4):
+                self.MainTable.item(row, i).setForeground(QtGui.QColor(text_color))
+        self.MainTable.itemChanged.connect(self.send_changed)
+
+    def change_settings(self, font, dark):
+        self.dark = dark
+        if self.MainTable.rowCount() != 0:
+            self.grayout(self.last_index, self.dark)
+        self.MainTable.setFont(font)
+        self.MainTable.resizeColumnToContents(0)
+        self.MainTable.resizeColumnToContents(3)
+        self.MainTable.resizeRowsToContents()
+
+    def retranslateUi(self):
+        self.setWindowTitle("Auto Neutron")
+        item = self.MainTable.horizontalHeaderItem(0)
+        item.setText("System Name")
+        item.setTextAlignment(QtCore.Qt.AlignCenter)
+        item = self.MainTable.horizontalHeaderItem(1)
+        item.setText("Distance")
+        item.setTextAlignment(QtCore.Qt.AlignCenter)
+        item = self.MainTable.horizontalHeaderItem(2)
+        item.setText("Remaining")
+        item.setTextAlignment(QtCore.Qt.AlignCenter)
+        item = self.MainTable.horizontalHeaderItem(3)
+        item.setText("Jumps")
+        item.setTextAlignment(QtCore.Qt.AlignCenter)
+
+    def closeEvent(self, *args, **kwargs):
+        super(QtWidgets.QMainWindow, self).closeEvent(*args, **kwargs)
+        self.hub.quit(self.size(), self.pos())
 
 
 class PlotStartDialog(QtWidgets.QDialog):
@@ -51,7 +316,7 @@ class PlotStartDialog(QtWidgets.QDialog):
         self.status_layout = QtWidgets.QVBoxLayout(self)
         self.status = QtWidgets.QStatusBar()
 
-    def setupUi(self):
+    def setup_ui(self):
         self.setMinimumSize(233, 241)
         self.resize(233, 241)
         self.tabWidget.addTab(self.tab, "")
@@ -79,6 +344,7 @@ class PlotStartDialog(QtWidgets.QDialog):
 
         self.cs_submit.pressed.connect(lambda: self.cs_submit_act(self.cpath))
         self.path_button.pressed.connect(self.change_path)
+        self.cs_comb.currentIndexChanged.connect(self.set_max_fuel)
 
         self.horizontalLayout.addWidget(self.path_button, alignment=QtCore.Qt.AlignLeft)
         spacerItem = QtWidgets.QSpacerItem(30, 20, QtWidgets.QSizePolicy.Fixed,
@@ -143,12 +409,12 @@ class PlotStartDialog(QtWidgets.QDialog):
         self.last_main_layout.addLayout(self.last_comsub_layout)
         self.last_comsub_layout.addWidget(self.last_comb, alignment=QtCore.Qt.AlignLeft)
         self.last_comsub_layout.addWidget(self.last_submit, alignment=QtCore.Qt.AlignRight)
+        self.last_comb.currentIndexChanged.connect(self.set_max_fuel)
 
         self.setWindowFlag(QtCore.Qt.WindowContextHelpButtonHint, False)
         self.retranslateUi()
         self.get_journals()
         self.setModal(True)
-        self.show()
         self.check_dropped_files()
 
     def retranslateUi(self):
@@ -274,6 +540,24 @@ class PlotStartDialog(QtWidgets.QDialog):
             self.cargo_slider.setMaximum(cargo_cap)
             self.cargo_slider.setValue(ship_cargo)
 
+    def set_max_fuel(self, index):
+        print("DAS")
+        with open(self.journals[index], encoding='utf-8') as f:
+            lines = [json.loads(line) for line in f]
+        try:
+            # get last loadout event line
+            loadout = next(lines[i] for i in range(len(lines) - 1, -1, -1)
+                           if lines[i]['event'] == "Loadout"
+                           and lines[i]['MaxJumpRange'] != 0)
+        except StopIteration:
+            pass
+        else:
+            # get FSD
+            fsd = next((i for i in loadout['Modules']
+                        if i['Slot'] == "FrameShiftDrive"))
+            max_fuel = SHIP_STATS['FSD'][fsd['Item']][0]
+            self.fuel_signal.emit(max_fuel)
+
     def calculate_range(self, cargo):
         return (self.boost + self.optimal_mass *
                 (1000 * self.max_fuel / self.class_const)
@@ -367,7 +651,7 @@ class PlotStartDialog(QtWidgets.QDialog):
     def show_nearest(self):
         self.nearest.setEnabled(False)
         n_win = popups.Nearest(self)
-        n_win.setupUi()
+        n_win.setup_ui()
         n_win.closed_signal.connect(self.enable_button)
         n_win.destination_signal.connect(self.update_destination)
 

@@ -19,10 +19,8 @@ class AhkWorker(QtCore.QThread):
         self.data_values = data_values
         self.systems = [data[0].casefold() for data in data_values]
         self.settings = settings
-        self.script = self.settings.value("script")
-        self.bind = self.settings.value("bind")
-        self.dark = self.settings.value("window/dark", type=bool)
-        self.copy = self.settings.value("copy_mode", type=bool)
+        self.script, self.bind, self.dark, self.copy = settings
+
         if not self.copy:
             self.ahk = AHK(executable_path=self.settings.value("paths/AHK"))
         self.loop = True
@@ -79,6 +77,10 @@ class AhkWorker(QtCore.QThread):
                     else:
                         self.reset_ahk()
                     self.sys_signal.emit(self.list_index, self.dark)
+
+                elif loaded['event'] == "Loadout":
+                    pass
+
                 elif loaded['event'] == "Shutdown":
                     self.game_shut_signal.emit(self.data_values, self.list_index)
                     self.close_ahk()
@@ -160,23 +162,24 @@ class AhkWorker(QtCore.QThread):
 
 
 class FuelAlert(QtCore.QThread):
-    flash_signal = QtCore.pyqtSignal()
+    alert_signal = QtCore.pyqtSignal()
 
-    def __init__(self, max_fuel, file, parent, modifier):
+    def __init__(self, parent, max_fuel, file, modifier):
         super(FuelAlert, self).__init__(parent)
         self.file = file
         self.max_fuel = max_fuel
         self.loop = True
         self.alert = False
-        self.modifier = modifier
 
-        parent.stop_sound_worker_signal.connect(self.stop_loop)
+        self.set_jump_fuel(modifier)
+        parent.stop_alert_worker_signal.connect(self.stop_loop)
         parent.next_jump_signal.connect(self.change_alert)
+        parent.modifier_signal.connect(self.set_jump_fuel)
 
     def run(self):
-        self.main(self.file, self.max_fuel * (self.modifier / 100))
+        self.main(self.file)
 
-    def main(self, path, jump_fuel):
+    def main(self, path):
         hold = False
         for line in self.follow_file(open(path)):
             if len(line) > 0:
@@ -184,17 +187,20 @@ class FuelAlert(QtCore.QThread):
                 try:
                     # notify when fuel is low,
                     # fsd is in cooldown and ship in supercruise
-                    if (loaded['Fuel']['FuelMain'] < jump_fuel
+                    if (loaded['Fuel']['FuelMain'] < self.jump_fuel
                             and not hold
                             and f"{loaded['Flags']:b}"[-19] == "1"
                             and f"{loaded['Flags']:b}"[-5] == "1"
                             and self.alert):
                         hold = True
-                        self.flash_signal.emit()
-                    elif loaded['Fuel']['FuelMain'] > jump_fuel:
+                        self.alert_signal.emit()
+                    elif loaded['Fuel']['FuelMain'] > self.jump_fuel:
                         hold = False
                 except KeyError:
                     pass
+
+    def set_jump_fuel(self, modifier):
+        self.jump_fuel = self.max_fuel * modifier / 100
 
     def change_alert(self, status):
         self.alert = status
@@ -292,8 +298,7 @@ class NearestRequest(QtCore.QThread):
                     "An error has occured while communicating with Spansh's API")
 
 
-class SoundPlayer(QtCore.QObject):
-
+class SoundPlayer:
     def __init__(self, path):
         self.sound_file = QtMultimedia.QMediaPlayer()
         self.sound_file.setMedia(QtMultimedia.QMediaContent(

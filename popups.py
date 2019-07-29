@@ -1,7 +1,6 @@
+import os
 import sys
 from collections import namedtuple
-from os import listdir
-from os.path import getctime
 
 from PyQt5 import QtWidgets, QtCore, QtGui
 
@@ -44,8 +43,9 @@ class Nearest(QtWidgets.QDialog):
         self.status_vertical = QtWidgets.QVBoxLayout()
         self.get_button = QtWidgets.QPushButton(enabled=False)
         self.status = QtWidgets.QStatusBar()
+        self.setup_ui()
 
-    def setupUi(self):
+    def setup_ui(self):
         self.resize(207, 191)
         self.main_layout.setContentsMargins(2, 2, 20, 2)
         self.main_layout.setSpacing(2)
@@ -117,7 +117,6 @@ class Nearest(QtWidgets.QDialog):
         self.system_output.mouseDoubleClickEvent = self.set_destination
 
         self.setWindowFlag(QtCore.Qt.WindowContextHelpButtonHint, False)
-        self.show()
 
     def ena_button(self):
         if (len(self.x_edit.text()) != 0
@@ -186,8 +185,9 @@ class GameShutPop(QtWidgets.QDialog):
         self.index = index
         self.settings = settings
         self.jpath = self.settings.value("paths/journal")
+        self.setup_ui()
 
-    def setupUi(self):
+    def setup_ui(self):
         self.resize(375, 125)
 
         font = QtGui.QFont()
@@ -229,7 +229,6 @@ class GameShutPop(QtWidgets.QDialog):
         self.pushButton_2.setText("Quit")
         self.save_button.setText("Save current route")
         self.setModal(True)
-        self.show()
 
     def save_route(self):
         self.settings.setValue("last_route", [self.index, self.route])
@@ -238,14 +237,14 @@ class GameShutPop(QtWidgets.QDialog):
     def populate_combo(self):
         self.comboBox.addItems(["Last journal", "Second to last",
                                 "Third to last"][:len([file for file
-                                                       in listdir(self.jpath)
+                                                       in os.listdir(self.jpath)
                                                        if file.endswith(".log")])])
 
     def load_journal(self):
         journals = sorted([self.jpath + file for file
-                           in listdir(self.jpath)
+                           in os.listdir(self.jpath)
                            if file.endswith(".log")],
-                          key=getctime, reverse=True)
+                          key=os.path.getctime, reverse=True)
         self.worker_signal.emit(journals[self.comboBox.currentIndex()], self.route, self.index)
         self.hide()
 
@@ -283,6 +282,7 @@ class SettingsPop(QtWidgets.QDialog):
         self.alert_path_layout = QtWidgets.QHBoxLayout()
         self.alert_path = QtWidgets.QLineEdit()
         self.alert_dialog_button = QtWidgets.QToolButton()
+        self.alert_path_label = QtWidgets.QLabel()
 
         self.settings = settings
         self.status = QtWidgets.QStatusBar()
@@ -298,8 +298,9 @@ class SettingsPop(QtWidgets.QDialog):
         self.alerts = QtWidgets.QWidget()
         self.script_layout = QtWidgets.QVBoxLayout()
         self.script = QtWidgets.QWidget()
+        self.setup_ui()
 
-    def setupUi(self):
+    def setup_ui(self):
         self.resize(265, 371)
         self.main_bind_edit.setMaximumWidth(100)
         spacer = QtWidgets.QSpacerItem(1, 1, QtWidgets.QSizePolicy.Expanding,
@@ -360,6 +361,7 @@ class SettingsPop(QtWidgets.QDialog):
         self.alerts_layout.addLayout(self.alert_layout)
         self.threshold_layout.addWidget(self.alert_threshold_label)
         self.threshold_layout.addWidget(self.alert_threshold_spin)
+        self.alerts_layout.addWidget(self.alert_path_label)
         self.alerts_layout.addLayout(self.alert_path_layout)
         self.alerts_layout.addLayout(self.threshold_layout)
         self.alerts_layout.addSpacerItem(spacer)
@@ -385,7 +387,6 @@ class SettingsPop(QtWidgets.QDialog):
         self.ahk_button.pressed.connect(self.ahk_dialog)
         self.setWindowFlag(QtCore.Qt.WindowContextHelpButtonHint, False)
         self.resize(self.width(), self.script_edit.height() / 2)
-        self.show()
 
     def ahk_dialog(self):
         ahk_path = QtWidgets.QFileDialog.getOpenFileName(
@@ -453,34 +454,7 @@ class SettingsPop(QtWidgets.QDialog):
         self.alert_sound_check.setText("Sound fuel alert")
         self.alert_threshold_label.setText("Threshold for warning in % of max fuel usage per jump")
         self.alert_dialog_button.setText("...")
-
-class QuitDialog(QtWidgets.QDialog):
-    def __init__(self, parent, prompt, modal):
-        super(QuitDialog, self).__init__(parent)
-        self.gridLayout = QtWidgets.QVBoxLayout(self)
-        self.label = QtWidgets.QLabel(self)
-        self.pushButton = QtWidgets.QPushButton(self)
-        self.prompt = prompt
-        self.modal = modal
-
-    def setupUi(self):
-        self.setFixedSize(300, 100)
-        self.setWindowTitle(" ")
-        self.gridLayout.addWidget(self.label, alignment=QtCore.Qt.AlignCenter)
-        self.gridLayout.addWidget(self.pushButton, alignment=QtCore.Qt.AlignCenter)
-        self.pushButton.setText("Quit")
-        self.label.setText(self.prompt)
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        self.label.setFont(font)
-        self.pushButton.setMaximumWidth(95)
-        self.pushButton.pressed.connect(sys.exit)
-
-        self.setModal(self.modal)
-
-        self.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, False)
-        self.setWindowFlag(QtCore.Qt.WindowContextHelpButtonHint, False)
-        self.show()
+        self.alert_path_label.setText("Custom sound alert file")
 
 
 class RouteFinishedPop(QtWidgets.QDialog):
@@ -494,8 +468,9 @@ class RouteFinishedPop(QtWidgets.QDialog):
         self.quit_button = QtWidgets.QPushButton()
         self.new_route_button = QtWidgets.QPushButton()
         self.button_layout = QtWidgets.QHBoxLayout()
+        self.setup_ui()
 
-    def setup(self):
+    def setup_ui(self):
         self.setLayout(self.main_layout)
         self.main_layout.setContentsMargins(7, 20, 7, 10)
         self.main_layout.addWidget(self.label, alignment=QtCore.Qt.AlignCenter)
@@ -517,7 +492,6 @@ class RouteFinishedPop(QtWidgets.QDialog):
         self.new_route_button.pressed.connect(self.new_route_signal.emit)
         self.new_route_button.pressed.connect(self.hide)
         self.retranslateUi()
-        self.show()
 
     def retranslateUi(self):
         self.label.setText("Route finished")
@@ -537,8 +511,9 @@ class LicensePop(QtWidgets.QDialog):
         super(LicensePop, self).__init__(parent)
         self.text = QtWidgets.QTextBrowser()
         self.main_layout = QtWidgets.QVBoxLayout()
+        self.setup_ui()
 
-    def setup(self):
+    def setup_ui(self):
         self.setFixedSize(297, 62)
         self.text.setText("Auto Neutron Copyright (C) 2019 Numerlor\n"
                           "This program comes with ABSOLUTELY NO WARRANTY.\n"
@@ -550,7 +525,6 @@ class LicensePop(QtWidgets.QDialog):
         self.setLayout(self.main_layout)
         self.setWindowFlag(QtCore.Qt.WindowContextHelpButtonHint, False)
         self.main_layout.setContentsMargins(0, 0, 0, 0)
-        self.show()
 
 
 class CrashPop(QtWidgets.QDialog):
@@ -561,8 +535,9 @@ class CrashPop(QtWidgets.QDialog):
         self.quit_button = QtWidgets.QPushButton()
         self.main_layout = QtWidgets.QVBoxLayout(self)
         self.traceback = traceback
+        self.setup_ui()
 
-    def setup(self):
+    def setup_ui(self):
         self.setFixedSize(400, 250)
         self.label.setText("An unexpected error has occured")
         self.quit_button.setText("Quit")
@@ -582,5 +557,3 @@ class CrashPop(QtWidgets.QDialog):
         self.setWindowFlag(QtCore.Qt.WindowContextHelpButtonHint, False)
         self.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, False)
         self.setModal(True)
-
-        self.show()
