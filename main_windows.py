@@ -541,7 +541,6 @@ class PlotStartDialog(QtWidgets.QDialog):
             self.cargo_slider.setValue(ship_cargo)
 
     def set_max_fuel(self, index):
-        print("DAS")
         with open(self.journals[index], encoding='utf-8') as f:
             lines = [json.loads(line) for line in f]
         try:
@@ -556,6 +555,10 @@ class PlotStartDialog(QtWidgets.QDialog):
             fsd = next((i for i in loadout['Modules']
                         if i['Slot'] == "FrameShiftDrive"))
             max_fuel = SHIP_STATS['FSD'][fsd['Item']][0]
+            if 'Engineering' in fsd:
+                for blueprint in fsd['Engineering']['Modifiers']:
+                    if blueprint['Label'] == 'MaxFeulPerJump':
+                        max_fuel = blueprint['Value']
             self.fuel_signal.emit(max_fuel)
 
     def calculate_range(self, cargo):

@@ -5,6 +5,7 @@ from PyQt5 import QtCore, QtWidgets, QtGui
 import main_windows
 import popups
 import workers
+from appinfo import SHIP_STATS
 
 
 class Hub(QtCore.QObject):
@@ -16,7 +17,7 @@ class Hub(QtCore.QObject):
     quit_worker_signal = QtCore.pyqtSignal()
 
     stop_alert_worker_signal = QtCore.pyqtSignal()
-    modifier_signal = QtCore.pyqtSignal(int)
+    alert_fuel_signal = QtCore.pyqtSignal(int, int)
 
     def __init__(self, settings):
         super().__init__()
@@ -100,6 +101,7 @@ class Hub(QtCore.QObject):
         self.worker.sys_signal.connect(self.main_window.grayout)
         self.worker.route_finished_signal.connect(self.end_route_pop)
         self.worker.game_shut_signal.connect(self.restart_worker)
+        self.worker.fuel_signal.connect(self.get_max_fuel)
         self.worker.start()
 
         if self.visual_alert or self.sound_alert:
@@ -116,6 +118,16 @@ class Hub(QtCore.QObject):
         w.show()
         w.worker_signal.connect(self.start_worker)
         w.close_signal.connect(self.main_window.disconnect_signals)
+
+    def get_max_fuel(self, json):
+        fsd = next(item for item in json['Modules'] if item['Slot'] == "FrameShiftDrive")
+        self.max_fuel = SHIP_STATS['FSD'][fsd['Item']][0]
+        if 'Engineering' in fsd:
+            for blueprint in fsd['Engineering']['Modifiers']:
+                if blueprint['Label'] == 'MaxFeulPerJump':
+                    self.max_fuel = blueprint['Value']
+
+        self.alert_fuel_signal.emit(self.max_fuel, self.modifier)
 
     def set_theme(self):
         """ Set dark/default theme depending on user setting"""
@@ -167,7 +179,7 @@ class Hub(QtCore.QObject):
             self.start_alert_worker()
 
         self.modifier = values[10]
-        self.modifier_signal.emit(values[10])
+        self.alert_fuel_signal.emit(self.max_fuel, self.modifier)
 
         self.sound_path = values[11]
         self.player = workers.SoundPlayer(values[11])
