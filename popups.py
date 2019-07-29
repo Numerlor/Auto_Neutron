@@ -1,7 +1,6 @@
+import os
 import sys
 from collections import namedtuple
-from os import listdir
-from os.path import getctime
 
 from PyQt5 import QtWidgets, QtCore, QtGui
 
@@ -238,14 +237,14 @@ class GameShutPop(QtWidgets.QDialog):
     def populate_combo(self):
         self.comboBox.addItems(["Last journal", "Second to last",
                                 "Third to last"][:len([file for file
-                                                       in listdir(self.jpath)
+                                                       in os.listdir(self.jpath)
                                                        if file.endswith(".log")])])
 
     def load_journal(self):
         journals = sorted([self.jpath + file for file
-                           in listdir(self.jpath)
+                           in os.listdir(self.jpath)
                            if file.endswith(".log")],
-                          key=getctime, reverse=True)
+                          key=os.path.getctime, reverse=True)
         self.worker_signal.emit(journals[self.comboBox.currentIndex()], self.route, self.index)
         self.hide()
 
@@ -456,35 +455,6 @@ class SettingsPop(QtWidgets.QDialog):
         self.alert_threshold_label.setText("Threshold for warning in % of max fuel usage per jump")
         self.alert_dialog_button.setText("...")
         self.alert_path_label.setText("Custom sound alert file")
-
-
-class QuitDialog(QtWidgets.QDialog):
-    def __init__(self, parent, prompt, modal):
-        super(QuitDialog, self).__init__(parent)
-        self.gridLayout = QtWidgets.QVBoxLayout(self)
-        self.label = QtWidgets.QLabel(self)
-        self.pushButton = QtWidgets.QPushButton(self)
-        self.prompt = prompt
-        self.modal = modal
-        self.setup_ui()
-
-    def setup_ui(self):
-        self.setFixedSize(300, 100)
-        self.setWindowTitle(" ")
-        self.gridLayout.addWidget(self.label, alignment=QtCore.Qt.AlignCenter)
-        self.gridLayout.addWidget(self.pushButton, alignment=QtCore.Qt.AlignCenter)
-        self.pushButton.setText("Quit")
-        self.label.setText(self.prompt)
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        self.label.setFont(font)
-        self.pushButton.setMaximumWidth(95)
-        self.pushButton.pressed.connect(sys.exit)
-
-        self.setModal(self.modal)
-
-        self.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, False)
-        self.setWindowFlag(QtCore.Qt.WindowContextHelpButtonHint, False)
 
 
 class RouteFinishedPop(QtWidgets.QDialog):
