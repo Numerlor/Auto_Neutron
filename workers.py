@@ -12,7 +12,7 @@ class AhkWorker(QtCore.QThread):
     sys_signal = QtCore.pyqtSignal(int, bool)  # signal to move grayout to index
     route_finished_signal = QtCore.pyqtSignal()  # route end reached signal
     game_shut_signal = QtCore.pyqtSignal(list, int)  # signal for game shutdown
-
+    fuel_signal = QtCore.pyqtSignal(dict)
     def __init__(self, parent, journal, data_values, settings, start_index):
         super(AhkWorker, self).__init__(parent)
         self.journal = journal
@@ -64,6 +64,7 @@ class AhkWorker(QtCore.QThread):
             self.sys_signal.emit(self.list_index, self.dark)
             for line in self.follow_file(open(self.journal, encoding='utf-8')):
                 loaded = json.loads(line)
+
                 if (loaded['event'] == "FSDJump" and
                         loaded['StarSystem'].casefold() in self.systems[self.list_index:]):
                     self.list_index = self.systems.index(loaded['StarSystem'].casefold()) + 1
@@ -79,7 +80,8 @@ class AhkWorker(QtCore.QThread):
                     self.sys_signal.emit(self.list_index, self.dark)
 
                 elif loaded['event'] == "Loadout":
-                    pass
+                    # update max fuel for alerts
+                    self.fuel_signal.emit(loaded)
 
                 elif loaded['event'] == "Shutdown":
                     self.game_shut_signal.emit(self.data_values, self.list_index)
@@ -167,14 +169,13 @@ class FuelAlert(QtCore.QThread):
     def __init__(self, parent, max_fuel, file, modifier):
         super(FuelAlert, self).__init__(parent)
         self.file = file
-        self.max_fuel = max_fuel
         self.loop = True
         self.alert = False
 
-        self.set_jump_fuel(modifier)
+        self.set_jump_fuel(max_fuel, modifier)
         parent.stop_alert_worker_signal.connect(self.stop_loop)
         parent.next_jump_signal.connect(self.change_alert)
-        parent.modifier_signal.connect(self.set_jump_fuel)
+        parent.alert_fuel_signal.connect(self.set_jump_fuel)
 
     def run(self):
         self.main(self.file)
@@ -199,8 +200,8 @@ class FuelAlert(QtCore.QThread):
                 except KeyError:
                     pass
 
-    def set_jump_fuel(self, modifier):
-        self.jump_fuel = self.max_fuel * modifier / 100
+    def set_jump_fuel(self, max_fuel, modifier):
+        self.jump_fuel = max_fuel * modifier / 100
 
     def change_alert(self, status):
         self.alert = status
