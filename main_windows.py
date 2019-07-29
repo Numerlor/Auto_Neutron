@@ -316,8 +316,6 @@ class PlotStartDialog(QtWidgets.QDialog):
         self.status_layout = QtWidgets.QVBoxLayout(self)
         self.status = QtWidgets.QStatusBar()
 
-        self.setup_ui()
-
     def setup_ui(self):
         self.setMinimumSize(233, 241)
         self.resize(233, 241)
@@ -346,6 +344,7 @@ class PlotStartDialog(QtWidgets.QDialog):
 
         self.cs_submit.pressed.connect(lambda: self.cs_submit_act(self.cpath))
         self.path_button.pressed.connect(self.change_path)
+        self.cs_comb.currentIndexChanged.connect(self.set_max_fuel)
 
         self.horizontalLayout.addWidget(self.path_button, alignment=QtCore.Qt.AlignLeft)
         spacerItem = QtWidgets.QSpacerItem(30, 20, QtWidgets.QSizePolicy.Fixed,
@@ -410,6 +409,7 @@ class PlotStartDialog(QtWidgets.QDialog):
         self.last_main_layout.addLayout(self.last_comsub_layout)
         self.last_comsub_layout.addWidget(self.last_comb, alignment=QtCore.Qt.AlignLeft)
         self.last_comsub_layout.addWidget(self.last_submit, alignment=QtCore.Qt.AlignRight)
+        self.last_comb.currentIndexChanged.connect(self.set_max_fuel)
 
         self.setWindowFlag(QtCore.Qt.WindowContextHelpButtonHint, False)
         self.retranslateUi()
@@ -540,6 +540,24 @@ class PlotStartDialog(QtWidgets.QDialog):
             self.cargo_slider.setMaximum(cargo_cap)
             self.cargo_slider.setValue(ship_cargo)
 
+    def set_max_fuel(self, index):
+        print("DAS")
+        with open(self.journals[index], encoding='utf-8') as f:
+            lines = [json.loads(line) for line in f]
+        try:
+            # get last loadout event line
+            loadout = next(lines[i] for i in range(len(lines) - 1, -1, -1)
+                           if lines[i]['event'] == "Loadout"
+                           and lines[i]['MaxJumpRange'] != 0)
+        except StopIteration:
+            pass
+        else:
+            # get FSD
+            fsd = next((i for i in loadout['Modules']
+                        if i['Slot'] == "FrameShiftDrive"))
+            max_fuel = SHIP_STATS['FSD'][fsd['Item']][0]
+            self.fuel_signal.emit(max_fuel)
+
     def calculate_range(self, cargo):
         return (self.boost + self.optimal_mass *
                 (1000 * self.max_fuel / self.class_const)
@@ -633,7 +651,7 @@ class PlotStartDialog(QtWidgets.QDialog):
     def show_nearest(self):
         self.nearest.setEnabled(False)
         n_win = popups.Nearest(self)
-        n_win.setupUi()
+        n_win.setup_ui()
         n_win.closed_signal.connect(self.enable_button)
         n_win.destination_signal.connect(self.update_destination)
 

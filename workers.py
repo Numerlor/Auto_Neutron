@@ -77,6 +77,10 @@ class AhkWorker(QtCore.QThread):
                     else:
                         self.reset_ahk()
                     self.sys_signal.emit(self.list_index, self.dark)
+
+                elif loaded['event'] == "Loadout":
+                    pass
+
                 elif loaded['event'] == "Shutdown":
                     self.game_shut_signal.emit(self.data_values, self.list_index)
                     self.close_ahk()

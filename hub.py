@@ -126,8 +126,9 @@ class Hub(QtCore.QObject):
 
     def initial_pop(self):
         w = main_windows.PlotStartDialog(self.main_window, self.settings)
-        w.data_signal.connect(self.main_window.pop_table)
         w.fuel_signal.connect(self.set_max_fuel)
+        w.data_signal.connect(self.main_window.pop_table)
+        w.setup_ui()
         w.show()
 
     def end_route_pop(self):
