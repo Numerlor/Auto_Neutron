@@ -397,6 +397,7 @@ class SettingsPop(QtWidgets.QDialog):
         self.alerts.setLayout(self.alerts_layout)
         self.retranslate_ui()
 
+        # grab all settings and set the widget values to them
         self.main_bind_edit.setText(self.settings.value("bind"))
         self.script_edit.setText(self.settings.value("script"))
         self.alert_path.setText(self.settings.value("paths/alert"))
@@ -410,7 +411,7 @@ class SettingsPop(QtWidgets.QDialog):
         self.alert_sound_check.setChecked(self.settings.value("alerts/audio", type=bool))
         self.alert_visual_check.setChecked(self.settings.value("alerts/visual", type=bool))
 
-        if self.settings.value("paths/AHK") == "":
+        if not self.settings.value("paths/AHK"):
             self.copy_check.setDisabled(True)
 
         self.ahk_button.pressed.connect(self.ahk_dialog)

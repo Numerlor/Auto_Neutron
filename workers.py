@@ -13,6 +13,7 @@ class AhkWorker(QtCore.QThread):
     route_finished_signal = QtCore.pyqtSignal()  # route end reached signal
     game_shut_signal = QtCore.pyqtSignal(list, int)  # signal for game shutdown
     fuel_signal = QtCore.pyqtSignal(dict)
+
     def __init__(self, parent, journal, data_values, settings, start_index):
         super(AhkWorker, self).__init__(parent)
         self.journal = journal
@@ -68,7 +69,7 @@ class AhkWorker(QtCore.QThread):
                 if (loaded['event'] == "FSDJump" and
                         loaded['StarSystem'].casefold() in self.systems[self.list_index:]):
                     self.list_index = self.systems.index(loaded['StarSystem'].casefold()) + 1
-
+                    # if index is last, stop
                     if self.list_index == len(self.data_values):
                         self.close_ahk()
                         self.route_finished_signal.emit()
@@ -93,11 +94,8 @@ class AhkWorker(QtCore.QThread):
         if self.copy:
             set_clip(self.systems[self.list_index])
         else:
-            self.close_ahk()
-            hotkey = Hotkey(self.ahk, self.bind,
-                            self.script.replace("|SYSTEMDATA|",
-                                                self.systems[self.list_index]))
-            hotkey.start()
+            self.reset_ahk()
+
         self.sys_signal.emit(self.list_index, self.dark)
 
     def update_sys(self, index, new_sys):

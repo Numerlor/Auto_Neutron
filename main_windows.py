@@ -61,10 +61,9 @@ class MainWindow(QtWidgets.QMainWindow):
     edit_signal = QtCore.pyqtSignal(int, str)  # send edited system to worker if changed
     next_jump_signal = QtCore.pyqtSignal(bool)
 
-    def __init__(self, hub, dark):
+    def __init__(self, hub):
         super(MainWindow, self).__init__()
         self.hub = hub
-        self.dark = dark
         self.centralwidget = QtWidgets.QWidget(self)
         self.gridLayout = QtWidgets.QGridLayout(self.centralwidget)
         self.MainTable = QtWidgets.QTableWidget(self.centralwidget)
@@ -177,6 +176,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.MainTable.setItem(row_pos, i, item)
 
     def update_jumps(self, index):
+        # sum all values in 3rd column
         total_jumps = sum(
             int(self.MainTable.item(i, 3).text()) for i in
             range(self.MainTable.rowCount()))
@@ -188,9 +188,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
             self.MainTable.horizontalHeaderItem(3).setText(
                 f"Jumps {remaining_jumps}/{total_jumps}")
-            self.MainTable.resizeColumnToContents(3)
         else:
             self.MainTable.horizontalHeaderItem(3).setText("Jumps")
+        self.MainTable.resizeColumnToContents(3)
 
     def reset_table(self):
         self.MainTable.horizontalHeaderItem(3).setText("Jumps")
@@ -199,19 +199,25 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def pop_table(self, journal, table_data, index):
         try:
+            # disconnect signal to not update things needlessly
             self.MainTable.itemChanged.disconnect()
         except TypeError:
             pass
+        # start worker
         self.hub.start_worker(journal, table_data, index)
+        # update jump display with index 0
         self.update_jumps(0)
+
         for row in table_data:
             self.insert_row(row)
 
         self.MainTable.resizeColumnToContents(0)
         self.MainTable.resizeRowsToContents()
+        # reconnect signal
         self.MainTable.itemChanged.connect(self.send_changed)
 
     def send_changed(self, item):
+        # if edited item was in first column, send it to worker and update column size
         if item.column() == 0:
             self.MainTable.resizeColumnToContents(0)
             self.edit_signal.emit(item.row(), item.text())
@@ -219,6 +225,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.update_jumps(self.last_index)
 
     def disconnect_signals(self):
+        # disconnect all signals that interact
         try:
             self.disconnect()
             self.MainTable.disconnect()
@@ -227,6 +234,8 @@ class MainWindow(QtWidgets.QMainWindow):
             pass
 
     def grayout(self, index, dark):
+        """Handle GUI changes when index of table is changed
+           set all rows before index to grey, all rows after to black/white"""
         self.update_jumps(index)
         self.next_jump_signal.emit(
             self.MainTable.item(index, 3).text() == "1")
@@ -236,8 +245,7 @@ class MainWindow(QtWidgets.QMainWindow):
         except TypeError:
             pass
 
-        text_color = "f0f0ff" if dark else "000000"
-
+        text_color = "#f0f0f0" if dark else "#000000"
         for row in range(0, index):
             for i in range(0, 4):
                 self.MainTable.item(row, i).setForeground(QtGui.QColor(150, 150, 150))
@@ -344,7 +352,6 @@ class PlotStartDialog(QtWidgets.QDialog):
 
         self.cs_submit.pressed.connect(lambda: self.cs_submit_act(self.cpath))
         self.path_button.pressed.connect(self.change_path)
-        self.cs_comb.currentIndexChanged.connect(self.set_max_fuel)
 
         self.horizontalLayout.addWidget(self.path_button, alignment=QtCore.Qt.AlignLeft)
         spacerItem = QtWidgets.QSpacerItem(30, 20, QtWidgets.QSizePolicy.Fixed,
@@ -375,7 +382,6 @@ class PlotStartDialog(QtWidgets.QDialog):
         self.destination.textChanged.connect(self.button_on_filled_fields)
         self.nearest.pressed.connect(self.show_nearest)
         self.sp_submit.pressed.connect(self.sp_submit_act)
-        self.sp_comb.currentIndexChanged.connect(self.update_source)
         self.sp_comb.currentIndexChanged.connect(self.current_range)
         self.cargo_slider.valueChanged.connect(self.update_range)
 
@@ -409,13 +415,17 @@ class PlotStartDialog(QtWidgets.QDialog):
         self.last_main_layout.addLayout(self.last_comsub_layout)
         self.last_comsub_layout.addWidget(self.last_comb, alignment=QtCore.Qt.AlignLeft)
         self.last_comsub_layout.addWidget(self.last_submit, alignment=QtCore.Qt.AlignRight)
-        self.last_comb.currentIndexChanged.connect(self.set_max_fuel)
 
         self.setWindowFlag(QtCore.Qt.WindowContextHelpButtonHint, False)
         self.retranslateUi()
         self.get_journals()
         self.setModal(True)
         self.check_dropped_files()
+
+    def after_show(self):
+        # delay connecting of singals to only open file once
+        self.last_comb.currentIndexChanged.connect(self.set_max_fuel)
+        self.cs_comb.currentIndexChanged.connect(self.set_max_fuel)
 
     def retranslateUi(self):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), "CSV")
@@ -462,13 +472,13 @@ class PlotStartDialog(QtWidgets.QDialog):
                  if file.endswith(".log")],
                 key=os.path.getctime, reverse=True)
         except FileNotFoundError:
-            d = popups.QuitDialog(self, "Journal folder not detected")
-            d.setupUi()
+            w = popups.QuitDialog(self, "Journal folder not detected")
+            w.setupUi()
         else:
             options = ["Last journal", "Second to last", "Third to last"][:len(self.journals)]
             if len(options) == 0:
-                d = popups.QuitDialog(self, "No journals detected", False)
-                d.setupUi()
+                w = popups.QuitDialog(self, "No journals detected", False)
+                w.setupUi()
                 self.sp_submit.setEnabled(False)
                 self.cs_submit.setEnabled(False)
                 self.last_submit.setEnabled(False)
@@ -479,8 +489,7 @@ class PlotStartDialog(QtWidgets.QDialog):
                 self.sp_comb.addItems(options)
                 self.last_comb.addItems(options)
 
-    def update_source(self, index):
-        # set source system to last visited in currently selected journal
+    def current_range(self, index):
         with open(self.journals[index], encoding='utf-8') as f:
             lines = [json.loads(line) for line in f]
         try:
@@ -491,9 +500,6 @@ class PlotStartDialog(QtWidgets.QDialog):
         except StopIteration:
             self.source.clear()
 
-    def current_range(self, index):
-        with open(self.journals[index], encoding='utf-8') as f:
-            lines = [json.loads(line) for line in f]
         try:
             # get last loadout event line
             loadout = next(lines[i] for i in range(len(lines) - 1, -1, -1)
@@ -507,6 +513,7 @@ class PlotStartDialog(QtWidgets.QDialog):
         except StopIteration:
             self.ran_spinbox.setValue(50)
             self.cargo_slider.setDisabled(True)
+        # set text of source input widget to last visited sys
 
         else:
             # both loadout and cargo found, enable cargo_slider slider
