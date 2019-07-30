@@ -1,6 +1,6 @@
 from collections import namedtuple
 
-VERSION = "1.42"
+VERSION = "1.43"
 APP = "Auto Neutron"
 ORG = "Numerlor"
 APPID = f"{ORG}|{APP}|{VERSION}"
