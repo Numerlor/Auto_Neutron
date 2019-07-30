@@ -253,6 +253,35 @@ class GameShutPop(QtWidgets.QDialog):
         self.close_signal.emit()
 
 
+class QuitDialog(QtWidgets.QDialog):
+    def __init__(self, parent, prompt, modal):
+        super(QuitDialog, self).__init__(parent)
+        self.gridLayout = QtWidgets.QVBoxLayout(self)
+        self.label = QtWidgets.QLabel(self)
+        self.pushButton = QtWidgets.QPushButton(self)
+        self.prompt = prompt
+        self.modal = modal
+        self.setup_ui()
+
+    def setup_ui(self):
+        self.setFixedSize(300, 100)
+        self.setWindowTitle(" ")
+        self.gridLayout.addWidget(self.label, alignment=QtCore.Qt.AlignCenter)
+        self.gridLayout.addWidget(self.pushButton, alignment=QtCore.Qt.AlignCenter)
+        self.pushButton.setText("Quit")
+        self.label.setText(self.prompt)
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.label.setFont(font)
+        self.pushButton.setMaximumWidth(95)
+        self.pushButton.pressed.connect(sys.exit)
+
+        self.setModal(self.modal)
+
+        self.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, False)
+        self.setWindowFlag(QtCore.Qt.WindowContextHelpButtonHint, False)
+
+
 class SettingsPop(QtWidgets.QDialog):
     settings_signal = QtCore.pyqtSignal(tuple)  # signal containing new settings
 
