@@ -34,10 +34,10 @@ class Hub(QtCore.QObject):
 
         self.last_index = 0
         self.total_jumps = 0
-        self.max_fuel = 999
+        self.max_fuel = 0
         self.workers_started = False
 
-        self.main_window = main_windows.MainWindow(self, self.dark)
+        self.main_window = main_windows.MainWindow(self)
 
     def startup(self):
         self.set_theme()
@@ -63,7 +63,7 @@ class Hub(QtCore.QObject):
         font = self.settings.value("font/font", type=QtGui.QFont)
         font.setPointSize(self.settings.value("font/size", type=int))
         font.setBold(self.settings.value("font/bold", type=bool))
-        self.main_window.MainTable.setFont(font)
+        self.main_window.change_settings(font, self.dark)
         self.main_window.show()
 
     def start_alert_worker(self):
@@ -113,7 +113,7 @@ class Hub(QtCore.QObject):
         if self.sound_alert or self.visual_alert:
             self.stop_alert_worker()
         while not self.worker.isFinished():
-            QtCore.QThread.sleep(1)
+            self.thread().sleep(1)
         w = popups.GameShutPop(self.main_window, self.settings, route_data, route_index)
         w.show()
         w.worker_signal.connect(self.start_worker)
@@ -124,7 +124,7 @@ class Hub(QtCore.QObject):
         self.max_fuel = SHIP_STATS['FSD'][fsd['Item']][0]
         if 'Engineering' in fsd:
             for blueprint in fsd['Engineering']['Modifiers']:
-                if blueprint['Label'] == 'MaxFeulPerJump':
+                if blueprint['Label'] == 'MaxFuelPerJump':
                     self.max_fuel = blueprint['Value']
 
         self.alert_fuel_signal.emit(self.max_fuel, self.modifier)
@@ -142,6 +142,7 @@ class Hub(QtCore.QObject):
         w.data_signal.connect(self.main_window.pop_table)
         w.setup_ui()
         w.show()
+        w.after_show()
 
     def end_route_pop(self):
         w = popups.RouteFinishedPop(self.main_window)

@@ -22,12 +22,11 @@ class ExceptionHandler:
         self.path = output_file
 
     def handler(self, exctype, value, tb, exc=[]):
-        f = open(self.path, 'w')
         exc.extend(traceback.format_exception(exctype, value, tb))
-        for line in exc:
-            f.write(line)
-        f.flush()
-        f.close()
+        with open(self.path, 'w') as f:
+            for line in exc:
+                f.write(line)
+
         sys.__excepthook__(exctype, value, tb)
 
         try:
