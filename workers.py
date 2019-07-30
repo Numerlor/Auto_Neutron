@@ -16,14 +16,15 @@ class AhkWorker(QtCore.QThread):
 
     def __init__(self, parent, journal, data_values, settings, start_index):
         super(AhkWorker, self).__init__(parent)
+        self.hub = parent
         self.journal = journal
         self.data_values = data_values
         self.systems = [data[0].casefold() for data in data_values]
         self.settings = settings
-        self.script, self.bind, self.dark, self.copy = settings
+        self.script, self.bind, self.dark, self.copy, ahk_path = settings
 
         if not self.copy:
-            self.ahk = AHK(executable_path=self.settings.value("paths/AHK"))
+            self.ahk = AHK(executable_path=ahk_path)
         self.loop = True
         # set index according to last saved route or new plot, default index 1
         if start_index > 0:
@@ -122,7 +123,7 @@ class AhkWorker(QtCore.QThread):
                 self.close_ahk()
                 set_clip(self.systems[self.list_index])
             else:
-                self.ahk = AHK(executable_path=self.settings.value("paths/AHK"))
+                self.ahk = AHK(executable_path=self.hub.get_ahk_path())
                 self.reset_ahk()
 
     def reset_ahk(self):

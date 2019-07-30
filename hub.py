@@ -96,7 +96,8 @@ class Hub(QtCore.QObject):
 
     def start_worker(self, journal, data_values, index):
         settings = (self.settings.value("script"), self.settings.value("bind"),
-                    self.dark, self.settings.value("copy_mode", type=bool))
+                    self.dark, self.settings.value("copy_mode", type=bool),
+                    self.settings.value("paths/AHK"))
         self.worker = workers.AhkWorker(self, journal, data_values, settings, index)
         self.worker.sys_signal.connect(self.main_window.grayout)
         self.worker.route_finished_signal.connect(self.end_route_pop)
@@ -147,7 +148,7 @@ class Hub(QtCore.QObject):
     def end_route_pop(self):
         w = popups.RouteFinishedPop(self.main_window)
         w.show()
-        w.close_signal.connect(self.disconnect_signals)
+        w.close_signal.connect(self.main_window.disconnect_signals)
         w.new_route_signal.connect(self.new_route)
 
     def licenses_pop(self):
@@ -237,12 +238,6 @@ class Hub(QtCore.QObject):
             self.settings.sync()
             self.write_ahk_path()
 
-    def quit(self, size, pos):
-        self.settings.setValue("window/size", size)
-        self.settings.setValue("window/pos", pos)
-        self.settings.sync()
-        self.window_quit_signal.emit(self.save_on_quit)
-
     def write_ahk_path(self):
         if not os.path.exists((self.settings.value("paths/ahk"))):
             ahk_path = QtWidgets.QFileDialog.getOpenFileName(
@@ -258,6 +253,16 @@ class Hub(QtCore.QObject):
                 self.settings.setValue("paths/AHK", ahk_path[0])
                 self.settings.setValue("copy_mode", False)
             self.settings.sync()
+
+    def get_ahk_path(self):
+        return self.settings.value("paths/ahk")
+
+    def quit(self, size, pos):
+        self.settings.setValue("window/size", size)
+        self.settings.setValue("window/pos", pos)
+        self.settings.sync()
+        self.window_quit_signal.emit(self.save_on_quit)
+
 
 
 def change_to_dark():

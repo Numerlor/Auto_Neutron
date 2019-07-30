@@ -11,6 +11,8 @@ import workers
 from appinfo import SHIP_STATS
 
 
+# TODO clean up th mess of PlotStartDialog
+
 class SpinBoxDelegate(QtWidgets.QStyledItemDelegate):
     def createEditor(self, parent, QStyleOptionViewItem, QModelIndex):
         editor = QtWidgets.QSpinBox(parent)
