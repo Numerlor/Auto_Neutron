@@ -32,7 +32,6 @@ class Hub(QtCore.QObject):
         self.sound_path = self.settings.value("paths/alert")
         self.modifier = self.settings.value("alerts/threshold", type=int)
 
-        self.last_index = 0
         self.total_jumps = 0
         self.max_fuel = 0
         self.workers_started = False

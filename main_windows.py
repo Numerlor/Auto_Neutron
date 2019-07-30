@@ -79,6 +79,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.settings_action = QtWidgets.QAction("Settings", self)
         self.about_action = QtWidgets.QAction("About", self)
 
+        self.last_index = 0
+
         self.setup_ui()
 
     def setup_ui(self):
