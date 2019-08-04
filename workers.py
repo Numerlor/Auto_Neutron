@@ -13,6 +13,7 @@ class AhkWorker(QtCore.QThread):
     route_finished_signal = QtCore.pyqtSignal()  # route end reached signal
     game_shut_signal = QtCore.pyqtSignal(list, int)  # signal for game shutdown
     fuel_signal = QtCore.pyqtSignal(dict)
+    save_signal = QtCore.pyqtSignal(int, list)
 
     def __init__(self, parent, journal, data_values, settings, start_index):
         super(AhkWorker, self).__init__(parent)
@@ -146,7 +147,7 @@ class AhkWorker(QtCore.QThread):
         self.close_ahk()
 
     def save_route(self):
-        self.settings.setValue("last_route", (self.list_index, self.data_values))
+        self.save_signal.emit(self.list_index, self.data_values)
 
     def quit_loop(self):
         self.loop = False
