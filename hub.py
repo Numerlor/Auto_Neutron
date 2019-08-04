@@ -102,6 +102,7 @@ class Hub(QtCore.QObject):
         self.worker.route_finished_signal.connect(self.end_route_pop)
         self.worker.game_shut_signal.connect(self.restart_worker)
         self.worker.fuel_signal.connect(self.get_max_fuel)
+        self.worker.save_signal.connect(self.save_route)
         self.worker.start()
 
         if self.visual_alert or self.sound_alert:
@@ -255,6 +256,9 @@ class Hub(QtCore.QObject):
 
     def get_ahk_path(self):
         return self.settings.value("paths/ahk")
+
+    def save_route(self, index, data):
+        self.settings.setValue("last_route", (index, data))
 
     def quit(self, size, pos):
         self.settings.setValue("window/size", size)
