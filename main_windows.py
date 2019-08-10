@@ -653,13 +653,15 @@ class PlotStartDialog(QtWidgets.QDialog):
             self.status.showMessage("No last route found")
             self.last_submit.setEnabled(True)
         else:
-            if last_route[0] == len(last_route[1]):
+            index = int(last_route[0])
+            route = last_route[1]
+            if index == route:
                 self.data_signal.emit(self.journals[self.last_comb.currentIndex()],
-                                      last_route[1], 1)
+                                      route, 1)
                 self.close()
             else:
                 self.data_signal.emit(self.journals[self.last_comb.currentIndex()],
-                                      last_route[1], last_route[0])
+                                      route, index)
                 self.close()
 
     def show_nearest(self):
