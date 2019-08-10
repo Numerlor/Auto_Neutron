@@ -86,7 +86,7 @@ class Hub(QtCore.QObject):
 
     def fuel_alert(self):
         if self.visual_alert:
-            self.application.alert(self.centralwidget, 5000)
+            self.application.alert(self.main_window.centralwidget, 5000)
         if self.sound_alert:
             if self.sound_path:
                 self.player.play()
