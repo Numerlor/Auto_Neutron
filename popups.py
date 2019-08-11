@@ -5,6 +5,7 @@ from collections import namedtuple
 from PyQt5 import QtWidgets, QtCore, QtGui
 
 import workers
+from appinfo import VERSION
 
 
 class Nearest(QtWidgets.QDialog):
@@ -344,7 +345,7 @@ class SettingsPop(QtWidgets.QDialog):
         self.horizontalLayout.addWidget(self.selector)
         self.selector.addItems(("Appearance", "Behaviour", "Alerts", "AHK script"))
         self.selector.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
-        self.selector.setMinimumWidth(self.selector.sizeHintForColumn(0) + 5)
+        self.selector.setFixedWidth(self.selector.sizeHintForColumn(0) + 5)
 
         self.selector.currentRowChanged.connect(self.widget_selector.setCurrentIndex)
         self.widget_selector.addWidget(self.appearance)
@@ -545,6 +546,7 @@ class LicensePop(QtWidgets.QDialog):
 
     def setup_ui(self):
         self.setFixedSize(297, 62)
+        self.setWindowTitle("Auto Neutron " + VERSION)
         self.text.setText("Auto Neutron Copyright (C) 2019 Numerlor\n"
                           "This program comes with ABSOLUTELY NO WARRANTY.\n"
                           "This is free software, and you are welcome to redistribute it")
