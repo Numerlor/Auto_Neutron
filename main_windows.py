@@ -407,6 +407,7 @@ class PlotStartDialog(QtWidgets.QDialog):
             QtWidgets.QSizePolicy.Expanding)
 
         self.gridLayout_4.addItem(spacerItem2, 6, 0, 1, 1)
+        self.set_order()
 
         # Last
         font = QtGui.QFont()
@@ -454,6 +455,16 @@ class PlotStartDialog(QtWidgets.QDialog):
             self.sp_submit.setEnabled(True)
         else:
             self.sp_submit.setEnabled(False)
+
+    def set_order(self):
+        self.tab_2.setTabOrder(self, self.source)
+        self.tab_2.setTabOrder(self.source, self.destination)
+        self.tab_2.setTabOrder(self.destination, self.cargo_slider)
+        self.tab_2.setTabOrder(self.cargo_slider, self.ran_spinbox)
+        self.tab_2.setTabOrder(self.ran_spinbox, self.eff_spinbox)
+        self.tab_2.setTabOrder(self.eff_spinbox, self.nearest)
+        self.tab_2.setTabOrder(self.nearest, self.sp_comb)
+        self.tab_2.setTabOrder(self.sp_comb, self.sp_submit)
 
     def change_path(self):
         file_dialog = QtWidgets.QFileDialog()
