@@ -450,7 +450,7 @@ class PlotStartDialog(QtWidgets.QDialog):
         self.cargo_label.setText("Cargo")
 
     def button_on_filled_fields(self):
-        if len(self.destination.text()) > 0 and len(self.source.text()) > 0:
+        if self.destination.text() and self.source.text():
             self.sp_submit.setEnabled(True)
         else:
             self.sp_submit.setEnabled(False)
@@ -459,7 +459,7 @@ class PlotStartDialog(QtWidgets.QDialog):
         file_dialog = QtWidgets.QFileDialog()
         fpath = file_dialog.getOpenFileName(filter="csv (*.csv)",
                                             directory=self.cpath[:self.cpath.rfind("/")])
-        if len(fpath[0]) > 0:
+        if fpath[0]:
             self.cpath = fpath[0]
             self.path_label.setText("Current path: " + fpath[0])
             self.settings.setValue("paths/csv", fpath[0])
@@ -476,11 +476,11 @@ class PlotStartDialog(QtWidgets.QDialog):
                  if file.endswith(".log")],
                 key=os.path.getctime, reverse=True)
         except FileNotFoundError:
-            w = popups.QuitDialog(self, "Journal folder not detected")
+            w = popups.QuitDialog(self, "Journal folder not detected", True)
             w.setupUi()
         else:
             options = ["Last journal", "Second to last", "Third to last"][:len(self.journals)]
-            if len(options) == 0:
+            if not options:
                 w = popups.QuitDialog(self, "No journals detected", False)
                 w.setupUi()
                 self.sp_submit.setEnabled(False)
@@ -649,7 +649,7 @@ class PlotStartDialog(QtWidgets.QDialog):
     def last_submit_act(self):
         self.last_submit.setEnabled(False)
         last_route = self.settings.value("last_route")
-        if last_route is None or len(last_route) == 0:
+        if last_route is None or not last_route:
             self.status.showMessage("No last route found")
             self.last_submit.setEnabled(True)
         else:

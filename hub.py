@@ -246,7 +246,7 @@ class Hub(QtCore.QObject):
                         "if you wish to use it, cancel for copy mode",
                 directory="C:/")
 
-            if len(ahk_path[0]) == 0:
+            if not ahk_path[0]:
                 self.settings.setValue("copy_mode", True)
                 self.settings.setValue("paths/AHK", "")
             else:
