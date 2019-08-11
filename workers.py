@@ -183,7 +183,7 @@ class FuelAlert(QtCore.QThread):
     def main(self, path):
         hold = False
         for line in self.follow_file(open(path)):
-            if len(line) > 0:
+            if line:
                 loaded = json.loads(line)
                 try:
                     # notify when fuel is low,
