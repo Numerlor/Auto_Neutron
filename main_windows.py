@@ -237,13 +237,22 @@ class MainWindow(QtWidgets.QMainWindow):
         except TypeError:
             pass
 
+    def index_change(self, index):
+        self.update_jumps(index)
+
+        self.next_jump_signal.emit(
+            self.MainTable.item(index, 3).text() == "1")
+        if (self.MainTable.itemAt(QtCore.QPoint(1, 1)).row() == self.last_index
+                or self.last_index == 0):
+            self.MainTable.scrollToItem(self.MainTable.item(index, 0)
+                                        , QtWidgets.QAbstractItemView.PositionAtTop)
+        self.grayout(index, self.dark)
+        self.last_index = index
+
     def grayout(self, index, dark):
         """Handle GUI changes when index of table is changed
            set all rows before index to grey, all rows after to black/white"""
-        self.update_jumps(index)
-        self.next_jump_signal.emit(
-            self.MainTable.item(index, 3).text() == "1")
-        self.last_index = index
+
         try:
             self.MainTable.itemChanged.disconnect()
         except TypeError:

@@ -98,7 +98,7 @@ class Hub(QtCore.QObject):
                     self.dark, self.settings.value("copy_mode", type=bool),
                     self.settings.value("paths/AHK"))
         self.worker = workers.AhkWorker(self, journal, data_values, settings, index)
-        self.worker.sys_signal.connect(self.main_window.grayout)
+        self.worker.sys_signal.connect(self.main_window.index_change)
         self.worker.route_finished_signal.connect(self.end_route_pop)
         self.worker.game_shut_signal.connect(self.restart_worker)
         self.worker.fuel_signal.connect(self.get_max_fuel)
