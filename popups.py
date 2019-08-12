@@ -224,7 +224,6 @@ class GameShutPop(QtWidgets.QDialog):
             self.save_button.setDisabled(True)
         self.populate_combo()
 
-        self.setWindowTitle("self")
         self.label.setText("Game shut down")
         self.pushButton.setText("Load journal")
         self.pushButton_2.setText("Quit")
