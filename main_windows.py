@@ -242,8 +242,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.next_jump_signal.emit(
             self.MainTable.item(index, 3).text() == "1")
-        if (self.MainTable.itemAt(QtCore.QPoint(1, 1)).row() == self.last_index
-                or self.last_index == 0):
+        if (self.autoscroll and
+                (self.MainTable.itemAt(QtCore.QPoint(1, 1)).row() == self.last_index
+                 or self.last_index == 0)):
             self.MainTable.scrollToItem(self.MainTable.item(index, 0)
                                         , QtWidgets.QAbstractItemView.PositionAtTop)
         self.grayout(index, self.dark)
@@ -267,8 +268,9 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.MainTable.item(row, i).setForeground(QtGui.QColor(text_color))
         self.MainTable.itemChanged.connect(self.send_changed)
 
-    def change_settings(self, font, dark):
+    def change_settings(self, font, dark, autoscroll):
         self.dark = dark
+        self.autoscroll = autoscroll
         if self.MainTable.rowCount() != 0:
             self.grayout(self.last_index, self.dark)
         self.MainTable.setFont(font)

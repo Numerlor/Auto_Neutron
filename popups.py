@@ -302,6 +302,7 @@ class SettingsPop(QtWidgets.QDialog):
         self.copy_layout = QtWidgets.QHBoxLayout()
         self.ahk_button = QtWidgets.QPushButton()
         self.copy_check = QtWidgets.QCheckBox()
+        self.autoscroll_check = QtWidgets.QCheckBox()
 
         self.alert_layout = QtWidgets.QHBoxLayout()
         self.threshold_layout = QtWidgets.QHBoxLayout()
@@ -376,6 +377,7 @@ class SettingsPop(QtWidgets.QDialog):
         self.behaviour_layout.addWidget(self.save_on_quit)
 
         self.behaviour_layout.addLayout(self.copy_layout)
+        self.behaviour_layout.addWidget(self.autoscroll_check)
         self.behaviour_layout.addSpacerItem(spacer)
         self.behaviour.setLayout(self.behaviour_layout)
 
@@ -411,6 +413,7 @@ class SettingsPop(QtWidgets.QDialog):
         self.copy_check.setChecked(self.settings.value("copy_mode", type=bool))
         self.alert_sound_check.setChecked(self.settings.value("alerts/audio", type=bool))
         self.alert_visual_check.setChecked(self.settings.value("alerts/visual", type=bool))
+        self.autoscroll_check.setChecked(self.settings.value("window/autoscroll", type=bool))
 
         if not self.settings.value("paths/AHK"):
             self.copy_check.setDisabled(True)
@@ -442,7 +445,7 @@ class SettingsPop(QtWidgets.QDialog):
             "bind", "script", "dark_mode",
             "font", "font_size", "font_bold",
             "save_route", "copy_mode", "alert_audio",
-            "alert_visual", "alert_threshold", "alert_path"))
+            "alert_visual", "alert_threshold", "alert_path", "autoscroll"))
         values = settings(self.main_bind_edit.text(), self.script_edit.toPlainText(),
                           self.dark_check.isChecked(), self.font_combo.currentFont(),
                           self.font_size_combo.value(), self.bold_check.isChecked(),
@@ -450,7 +453,7 @@ class SettingsPop(QtWidgets.QDialog):
                           self.alert_sound_check.isChecked(),
                           self.alert_visual_check.isChecked(),
                           self.alert_threshold_spin.value(),
-                          self.alert_path.text())
+                          self.alert_path.text(), self.autoscroll_check.isChecked())
 
         if "|SYSTEMDATA|" not in values[1]:
             self.status.showMessage('Script must include "|SYSTEMDATA|"')
@@ -467,6 +470,7 @@ class SettingsPop(QtWidgets.QDialog):
             self.settings.setValue("alerts/visual", values[9])
             self.settings.setValue("alerts/threshold", values[10])
             self.settings.setValue("paths/alert", values[11])
+            self.settings.setValue("window/autoscroll", values[12])
             self.settings.sync()
             self.settings_signal.emit(values)
 
@@ -486,6 +490,7 @@ class SettingsPop(QtWidgets.QDialog):
         self.alert_threshold_label.setText("Threshold for warning in % of max fuel usage per jump")
         self.alert_dialog_button.setText("...")
         self.alert_path_label.setText("Custom sound alert file")
+        self.autoscroll_check.setText("Auto scroll")
 
 
 class RouteFinishedPop(QtWidgets.QDialog):

@@ -62,7 +62,8 @@ class Hub(QtCore.QObject):
         font = self.settings.value("font/font", type=QtGui.QFont)
         font.setPointSize(self.settings.value("font/size", type=int))
         font.setBold(self.settings.value("font/bold", type=bool))
-        self.main_window.change_settings(font, self.dark)
+        autoscroll = self.settings.value("window/autoscroll", type=bool)
+        self.main_window.change_settings(font, self.dark, autoscroll)
         self.main_window.show()
 
     def start_alert_worker(self):
@@ -189,7 +190,7 @@ class Hub(QtCore.QObject):
         font = values[3]
         font.setPointSize(values[4])
         font.setBold(values[5])
-        self.main_window.change_settings(font, self.dark)
+        self.main_window.change_settings(font, self.dark, values[12])
 
     def write_default_settings(self):
         if not self.settings.value("paths/journal"):
@@ -209,6 +210,7 @@ class Hub(QtCore.QObject):
             self.settings.setValue("window/pos", QtCore.QPoint(100, 100))
             self.settings.setValue("window/dark", False)
             self.settings.setValue("window/font_size", 11)
+            self.settings.setValue("window/autoscroll", True)
             self.settings.setValue("font/font", QtGui.QFont())
             self.settings.setValue("font/size", 11)
             self.settings.setValue("font/bold", False)
@@ -265,7 +267,6 @@ class Hub(QtCore.QObject):
         self.settings.setValue("window/pos", pos)
         self.settings.sync()
         self.window_quit_signal.emit(self.save_on_quit)
-
 
 
 def change_to_dark():
