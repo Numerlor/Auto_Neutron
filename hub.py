@@ -35,6 +35,7 @@ class Hub(QtCore.QObject):
         self.total_jumps = 0
         self.max_fuel = 0
         self.workers_started = False
+        self.alert_worker_started = False
 
         self.main_window = main_windows.MainWindow(self)
 
@@ -73,14 +74,16 @@ class Hub(QtCore.QObject):
         self.sound_worker = workers.FuelAlert(self, self.max_fuel, status_file, self.modifier)
         self.sound_worker.alert_signal.connect(self.fuel_alert)
         self.sound_worker.start()
+        self.alert_worker_started = True
 
     def stop_alert_worker(self):
-        self.stop_alert_worker_signal.emit()
-        self.sound_worker.quit()
-        try:
-            self.sound_worker.alert_signal.disconnect()
-        except TypeError:
-            pass
+        if self.alert_worker_started:
+            self.stop_alert_worker_signal.emit()
+            self.sound_worker.quit()
+            try:
+                self.sound_worker.alert_signal.disconnect()
+            except TypeError:
+                pass
 
     def set_max_fuel(self, value):
         self.max_fuel = value
