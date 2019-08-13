@@ -200,6 +200,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.MainTable.horizontalHeaderItem(3).setText("Jumps")
         self.MainTable.clearContents()
         self.MainTable.setRowCount(0)
+        self.last_index = 0
 
     def pop_table(self, journal, table_data, index):
         try:
