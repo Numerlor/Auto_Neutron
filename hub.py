@@ -197,8 +197,8 @@ class Hub(QtCore.QObject):
 
     def write_default_settings(self):
         if not self.settings.value("paths/journal"):
-            self.resize(800, 600)
-            self.move(300, 300)
+            self.main_window.resize(800, 600)
+            self.main_window.move(300, 300)
             self.settings.setValue("paths/journal",
                                    (f"{os.environ['userprofile']}/Saved Games/"
                                     f"Frontier Developments/Elite Dangerous/"))
