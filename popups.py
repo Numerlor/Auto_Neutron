@@ -219,6 +219,7 @@ class GameShutPop(QtWidgets.QDialog):
         self.pushButton_2.pressed.connect(sys.exit)
         self.save_button.pressed.connect(self.save_route)
         self.pushButton.pressed.connect(self.load_journal)
+        self.pushButton.pressed.connect(lambda: self.pushButton.setDisabled(True))
 
         if self.index == 0 or self.index == 1:
             self.save_button.setDisabled(True)
@@ -229,6 +230,7 @@ class GameShutPop(QtWidgets.QDialog):
         self.pushButton_2.setText("Quit")
         self.save_button.setText("Save current route")
         self.setModal(True)
+        self.setWindowFlag(QtCore.Qt.WindowContextHelpButtonHint, False)
 
     def save_route(self):
         self.settings.setValue("last_route", [self.index, self.route])
