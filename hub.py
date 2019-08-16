@@ -289,6 +289,8 @@ def change_to_dark():
     p.setColor(QtGui.QPalette.AlternateBase, QtGui.QColor(45, 45, 45))
     p.setColor(QtGui.QPalette.ToolTipText, QtCore.Qt.white)
     p.setColor(QtGui.QPalette.ButtonText, QtCore.Qt.white)
+    p.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.Light, QtGui.QColor(0, 0, 0))
+    p.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.Text, QtGui.QColor(110, 110, 100))
     app = QtWidgets.QApplication.instance()
     app.setStyle("Fusion")
     app.setPalette(p)
