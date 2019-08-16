@@ -158,11 +158,17 @@ class Hub(QtCore.QObject):
     def licenses_pop(self):
         w = popups.LicensePop(self.main_window)
         w.show()
+        w.close_signal.connect(lambda:
+                               self.main_window.about_action.setEnabled(True))
+        self.main_window.about_action.setDisabled(True)
 
     def sett_pop(self):
         w = popups.SettingsPop(self.main_window, self.settings)
         w.show()
         w.settings_signal.connect(self.change_editable_settings)
+        w.close_signal.connect(lambda:
+                               self.main_window.settings_action.setEnabled(True))
+        self.main_window.settings_action.setDisabled(True)
 
     def change_editable_settings(self, values):
         self.script_mode_signal.emit(values[7])
