@@ -286,6 +286,7 @@ class QuitDialog(QtWidgets.QDialog):
 
 class SettingsPop(QtWidgets.QDialog):
     settings_signal = QtCore.pyqtSignal(tuple)  # signal containing new settings
+    close_signal = QtCore.pyqtSignal()
 
     def __init__(self, parent, settings: QtCore.QSettings):
         super(SettingsPop, self).__init__(parent)
@@ -493,6 +494,9 @@ class SettingsPop(QtWidgets.QDialog):
         self.alert_path_label.setText("Custom sound alert file")
         self.autoscroll_check.setText("Auto scroll")
 
+    def closeEvent(self, *args, **kwargs):
+        super(QtWidgets.QDialog, self).closeEvent(*args, **kwargs)
+        self.close_signal.emit()
 
 class RouteFinishedPop(QtWidgets.QDialog):
     close_signal = QtCore.pyqtSignal()
@@ -544,6 +548,8 @@ class RouteFinishedPop(QtWidgets.QDialog):
 
 
 class LicensePop(QtWidgets.QDialog):
+    close_signal = QtCore.pyqtSignal()
+
     def __init__(self, parent):
         super(LicensePop, self).__init__(parent)
         self.text = QtWidgets.QTextBrowser()
@@ -564,6 +570,9 @@ class LicensePop(QtWidgets.QDialog):
         self.setWindowFlag(QtCore.Qt.WindowContextHelpButtonHint, False)
         self.main_layout.setContentsMargins(0, 0, 0, 0)
 
+    def closeEvent(self, *args, **kwargs):
+        super(QtWidgets.QDialog, self).closeEvent(*args, **kwargs)
+        self.close_signal.emit()
 
 class CrashPop(QtWidgets.QDialog):
     def __init__(self, traceback):
