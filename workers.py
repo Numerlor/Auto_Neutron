@@ -47,9 +47,9 @@ class AhkWorker(QtCore.QThread):
         self.main()
 
     def main(self):
-
         if self.check_shutdown():
             self.game_shut_signal.emit(self.data_values, self.list_index)
+
         else:
             if self.copy:
                 set_clip(self.systems[self.list_index])
