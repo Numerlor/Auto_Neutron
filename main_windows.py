@@ -185,7 +185,7 @@ class MainWindow(QtWidgets.QMainWindow):
             int(self.MainTable.item(i, 3).text()) for i in
             range(self.MainTable.rowCount()))
 
-        if total_jumps != 0:
+        if total_jumps:
             remaining_jumps = sum(
                 int(self.MainTable.item(i, 3).text()) for i in
                 range(index, self.MainTable.rowCount()))
