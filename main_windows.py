@@ -110,7 +110,6 @@ class MainWindow(QtWidgets.QMainWindow):
         header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
         header.setSectionResizeMode(2, QtWidgets.QHeaderView.Stretch)
         header.setSectionResizeMode(3, QtWidgets.QHeaderView.Fixed)
-        header.setHighlightSections(False)
         header.disconnect()
 
         self.MainTable.setItemDelegateForColumn(1, self.double_spin_delegate)
