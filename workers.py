@@ -47,16 +47,10 @@ class AhkWorker(QtCore.QThread):
         self.main()
 
     def main(self):
-        shutdown = False
-        # search file for shutdown event, do not continue and send signal if it's found
-        with open(self.journal, encoding='utf-8') as f:
-            for l in f:
-                j = json.loads(l)
-                if j['event'] == "Shutdown":
-                    shutdown = True
-                    self.game_shut_signal.emit(self.data_values, self.list_index)
 
-        if not shutdown:
+        if self.check_shutdown():
+            self.game_shut_signal.emit(self.data_values, self.list_index)
+        else:
             if self.copy:
                 set_clip(self.systems[self.list_index])
             else:
@@ -90,6 +84,21 @@ class AhkWorker(QtCore.QThread):
                     self.game_shut_signal.emit(self.data_values, self.list_index)
                     self.close_ahk()
                     break
+
+    def check_shutdown(self):
+        buffer = []
+        with open(self.journal, 'rb') as f:
+            # skip first newline and position before last character
+            f.seek(-2, 2)
+            # read 1 character
+            char = f.read(1)
+            while char != b"\n":
+                buffer.append(char)
+                # move back 2, read 1
+                f.seek(-2, 1)
+                char = f.read(1)
+            # check if shutdown in last journal entry
+            return buffer[4:12] == [b'n', b'w', b'o', b'd', b't', b'u', b'h', b'S']
 
     def set_index(self, index):
         self.list_index = index
