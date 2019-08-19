@@ -197,10 +197,11 @@ class FuelAlert(QtCore.QThread):
                 try:
                     # notify when fuel is low,
                     # fsd is in cooldown and ship in supercruise
+                    binflag = f"{loaded['Flags']:b}"
                     if (loaded['Fuel']['FuelMain'] < self.jump_fuel
                             and not hold
-                            and f"{loaded['Flags']:b}"[-19] == "1"
-                            and f"{loaded['Flags']:b}"[-5] == "1"
+                            and binflag[-19] == "1"
+                            and binflag[-5] == "1"
                             and self.alert):
                         hold = True
                         self.alert_signal.emit()
