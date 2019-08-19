@@ -86,19 +86,9 @@ class AhkWorker(QtCore.QThread):
                     break
 
     def check_shutdown(self):
-        buffer = []
         with open(self.journal, 'rb') as f:
-            # skip first newline and position before last character
-            f.seek(-2, 2)
-            # read 1 character
-            char = f.read(1)
-            while char != b"\n":
-                buffer.append(char)
-                # move back 2, read 1
-                f.seek(-2, 1)
-                char = f.read(1)
-            # check if shutdown in last journal entry
-            return buffer[4:12] == [b'n', b'w', b'o', b'd', b't', b'u', b'h', b'S']
+            f.seek(-60, 2)
+            return b"Shutdown" in f.readline()
 
     def set_index(self, index):
         self.list_index = index
