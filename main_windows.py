@@ -324,11 +324,13 @@ class PlotStartDialog(QtWidgets.QDialog):
         self.cs_comb = QtWidgets.QComboBox(self.tab)
         self.cs_submit = QtWidgets.QPushButton(self.tab, enabled=False)
         self.path_label = QtWidgets.QLabel(self.tab)
-        self.gridLayout_4 = QtWidgets.QGridLayout(self.tab_2)
+        self.spansh_layout = QtWidgets.QVBoxLayout(self.tab_2)
+        self.nearest_layout = QtWidgets.QHBoxLayout(self.tab_2)
+        self.sp_submit_layout = QtWidgets.QHBoxLayout(self.tab_2)
         self.source = QtWidgets.QLineEdit(self.tab_2)
         self.nearest = QtWidgets.QPushButton(self.tab_2)
-        self.cargo_slider = QtWidgets.QSlider(orientation=QtCore.Qt.Horizontal)
-        self.cargo_label = QtWidgets.QLabel()
+        self.cargo_slider = QtWidgets.QSlider(self.tab_2, orientation=QtCore.Qt.Horizontal)
+        self.cargo_label = QtWidgets.QLabel(self.tab_2)
         self.sp_comb = QtWidgets.QComboBox(self.tab_2)
         self.sp_submit = QtWidgets.QPushButton(self.tab_2, enabled=False)
         self.eff_spinbox = QtWidgets.QSpinBox(self.tab_2)
@@ -340,8 +342,7 @@ class PlotStartDialog(QtWidgets.QDialog):
         self.status = QtWidgets.QStatusBar()
 
     def setup_ui(self):
-        self.setMinimumSize(233, 241)
-        self.resize(233, 241)
+
         self.tabWidget.addTab(self.tab, "")
         self.tabWidget.addTab(self.tab_2, "")
         self.tabWidget.addTab(self.tab_3, "")
@@ -384,6 +385,7 @@ class PlotStartDialog(QtWidgets.QDialog):
         # Spansh
         self.sp_comb.setMaximumWidth(95)
         self.sp_submit.setMaximumWidth(65)
+        self.nearest.setMaximumWidth(65)
         self.eff_spinbox.setMaximumWidth(50)
         self.eff_spinbox.setRange(1, 100)
         self.eff_spinbox.setValue(60)
@@ -400,24 +402,22 @@ class PlotStartDialog(QtWidgets.QDialog):
         self.sp_comb.currentIndexChanged.connect(self.current_range)
         self.cargo_slider.valueChanged.connect(self.update_range)
 
-        self.gridLayout_4.addWidget(self.source, 0, 0, 1, 1)
-        self.gridLayout_4.addWidget(self.destination, 1, 0, 1, 1)
-        self.gridLayout_4.addWidget(self.cargo_label, 2, 0, 1, 1)
-        self.gridLayout_4.addWidget(self.cargo_slider, 3, 0, 1, 1)
-        self.gridLayout_4.addWidget(self.range, 4, 0, 1, 1)
-        self.gridLayout_4.addWidget(self.ran_spinbox, 5, 0, 1, 1)
-        self.gridLayout_4.addWidget(self.efficiency, 6, 0, 1, 1)
-        self.gridLayout_4.addWidget(self.nearest, 7, 1, 1, 1)
-        self.gridLayout_4.addWidget(self.eff_spinbox, 7, 0, 1, 1)
-        self.gridLayout_4.addWidget(self.sp_comb, 9, 0, 1, 1)
-        self.gridLayout_4.addWidget(self.sp_submit, 9, 1, 1, 1)
+        self.nearest_layout.addWidget(self.eff_spinbox, alignment=QtCore.Qt.AlignLeft)
+        self.nearest_layout.addWidget(self.nearest, alignment=QtCore.Qt.AlignRight)
 
-        spacerItem2 = QtWidgets.QSpacerItem(
-            20, 40,
-            QtWidgets.QSizePolicy.Minimum,
-            QtWidgets.QSizePolicy.Expanding)
+        self.sp_submit_layout.addWidget(self.sp_comb, alignment=QtCore.Qt.AlignLeft)
+        self.sp_submit_layout.addWidget(self.sp_submit, alignment=QtCore.Qt.AlignRight)
 
-        self.gridLayout_4.addItem(spacerItem2, 6, 0, 1, 1)
+        self.spansh_layout.addWidget(self.source)
+        self.spansh_layout.addWidget(self.destination)
+        self.spansh_layout.addWidget(self.cargo_label)
+        self.spansh_layout.addWidget(self.cargo_slider)
+        self.spansh_layout.addWidget(self.range)
+        self.spansh_layout.addWidget(self.ran_spinbox)
+        self.spansh_layout.addWidget(self.efficiency)
+        self.spansh_layout.addLayout(self.nearest_layout)
+        self.spansh_layout.addSpacerItem(spacerItem1)
+        self.spansh_layout.addLayout(self.sp_submit_layout)
         self.set_order()
 
         # Last
