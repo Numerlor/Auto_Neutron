@@ -291,6 +291,8 @@ class SettingsPop(QtWidgets.QDialog):
     def __init__(self, parent, settings: QtCore.QSettings):
         super(SettingsPop, self).__init__(parent)
         self.widget_save_layout = QtWidgets.QVBoxLayout()
+        self.bottom_layout = QtWidgets.QHBoxLayout()
+
         self.main_bind_edit = QtWidgets.QLineEdit()
         self.script_edit = QtWidgets.QTextEdit()
         self.dark_check = QtWidgets.QCheckBox()
@@ -299,7 +301,8 @@ class SettingsPop(QtWidgets.QDialog):
         self.font_combo = QtWidgets.QFontComboBox()
         self.font_size_combo = QtWidgets.QSpinBox()
         self.bold_check = QtWidgets.QCheckBox()
-        self.pushButton = QtWidgets.QPushButton()
+        self.save = QtWidgets.QPushButton()
+        self.apply = QtWidgets.QPushButton()
         self.save_on_quit = QtWidgets.QCheckBox()
         self.copy_layout = QtWidgets.QHBoxLayout()
         self.ahk_button = QtWidgets.QPushButton()
@@ -318,7 +321,7 @@ class SettingsPop(QtWidgets.QDialog):
         self.alert_path_label = QtWidgets.QLabel()
 
         self.settings = settings
-        self.status = QtWidgets.QStatusBar()
+        self.error_label = QtWidgets.QLabel()
 
         self.selector = QtWidgets.QListWidget(self)
 
@@ -339,11 +342,18 @@ class SettingsPop(QtWidgets.QDialog):
         spacer = QtWidgets.QSpacerItem(1, 1, QtWidgets.QSizePolicy.Expanding,
                                        QtWidgets.QSizePolicy.Expanding)
 
+        self.bottom_layout.addWidget(self.error_label)
+        self.bottom_layout.addWidget(self.save)
+        self.bottom_layout.addWidget(self.apply)
+        self.bottom_layout.setSpacing(5)
+
         self.horizontalLayout.setSpacing(0)
         self.horizontalLayout.setContentsMargins(4, 4, 4, 4)
         self.font_size_combo.setMaximumWidth(50)
-        self.pushButton.setMaximumWidth(95)
-        self.pushButton.pressed.connect(self.save_settings)
+        self.save.setMaximumWidth(75)
+        self.apply.setMaximumWidth(75)
+        self.save.pressed.connect(lambda: self.save_settings(close=True))
+        self.apply.pressed.connect(self.save_settings)
 
         self.horizontalLayout.addWidget(self.selector)
         self.selector.addItems(("Appearance", "Behaviour", "Alerts", "AHK script"))
@@ -358,7 +368,7 @@ class SettingsPop(QtWidgets.QDialog):
 
         self.widget_save_layout.setContentsMargins(0, 0, 0, 0)
         self.widget_save_layout.addWidget(self.widget_selector)
-        self.widget_save_layout.addWidget(self.pushButton, alignment=QtCore.Qt.AlignRight)
+        self.widget_save_layout.addLayout(self.bottom_layout)
         self.horizontalLayout.addLayout(self.widget_save_layout)
 
         self.font_layout.addWidget(self.font_combo)
@@ -442,7 +452,7 @@ class SettingsPop(QtWidgets.QDialog):
             self.alert_path.setText(sound_path[0])
         self.settings.sync()
 
-    def save_settings(self):
+    def save_settings(self, close=False):
         settings = namedtuple("settings_values", (
             "bind", "script", "dark_mode",
             "font", "font_size", "font_bold",
@@ -458,8 +468,9 @@ class SettingsPop(QtWidgets.QDialog):
                           self.alert_path.text(), self.autoscroll_check.isChecked())
 
         if "|SYSTEMDATA|" not in values[1]:
-            self.status.showMessage('Script must include "|SYSTEMDATA|"')
+            self.error_label.setText('Script must include "|SYSTEMDATA|"')
         else:
+            self.error_label.clear()
             self.settings.setValue("bind", values[0])
             self.settings.setValue("script", values[1])
             self.settings.setValue("window/dark", values[2])
@@ -475,12 +486,14 @@ class SettingsPop(QtWidgets.QDialog):
             self.settings.setValue("window/autoscroll", values[12])
             self.settings.sync()
             self.settings_signal.emit(values)
+            if close:
+                self.close()
 
     def retranslate_ui(self):
         self.setWindowTitle("Settings")
         self.dark_check.setText("Dark theme")
         self.bold_check.setText("Bold")
-        self.pushButton.setText("Save settings")
+        self.save.setText("Ok")
         self.main_bind_edit.setToolTip(
             "Bind to trigger the script, # for win key, "
             "! for alt, ^ for control, + for shift")
@@ -493,6 +506,7 @@ class SettingsPop(QtWidgets.QDialog):
         self.alert_dialog_button.setText("...")
         self.alert_path_label.setText("Custom sound alert file")
         self.autoscroll_check.setText("Auto scroll")
+        self.apply.setText("Apply")
 
     def closeEvent(self, *args, **kwargs):
         super(QtWidgets.QDialog, self).closeEvent(*args, **kwargs)
