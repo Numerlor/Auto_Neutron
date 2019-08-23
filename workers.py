@@ -88,7 +88,7 @@ class AhkWorker(QtCore.QThread):
     def check_shutdown(self):
         with open(self.journal, 'rb') as f:
             f.seek(-60, 2)
-            return b"Shutdown" in f.readline()[47:55]
+            return b"Shutdown" == f.readline()[47:55]
 
     def set_index(self, index):
         self.list_index = index
