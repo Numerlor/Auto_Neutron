@@ -10,8 +10,7 @@ $ cd Auto-Neutron
 $ pip intall -r requirements.txt
 $ python "Auto Neutron.py"
 ```
-*or*
-download latest release
+or download latest release
 
 # Usage
 After initial launch a popup window will show up if Auto Hot Key is not detected in ints default directory, if you wish to use it (install it) and select its executable.
