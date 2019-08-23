@@ -356,7 +356,7 @@ class PlotStartDialog(QtWidgets.QDialog):
 
         # CSV
         self.path_button.setMaximumWidth(95)
-        if len(self.cpath) > 0:
+        if self.cpath:
             self.cs_submit.setEnabled(True)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred,
                                            QtWidgets.QSizePolicy.Preferred)
