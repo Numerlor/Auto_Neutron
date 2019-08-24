@@ -59,7 +59,7 @@ class Nearest(QtWidgets.QDialog):
         self.main_layout_frame.setFrameShape(QtWidgets.QFrame.NoFrame)
         self.main_layout_frame.setFrameShadow(QtWidgets.QFrame.Plain)
         self.main_layout_frame.setLineWidth(0)
-        self.frame_layout.setContentsMargins(0, 0, 0, 0)
+        self.frame_layout.setContentsMargins(2, 2, 2, 2)
         self.frame_layout.setSpacing(0)
         self.main_horizontal.setSpacing(0)
         self.coords_vertical.setSizeConstraint(QtWidgets.QLayout.SetMaximumSize)
@@ -118,11 +118,12 @@ class Nearest(QtWidgets.QDialog):
         self.system_output.mouseDoubleClickEvent = self.set_destination
 
         self.setWindowFlag(QtCore.Qt.WindowContextHelpButtonHint, False)
+        self.status.setSizeGripEnabled(False)
 
     def ena_button(self):
-        if (len(self.x_edit.text()) != 0
-                and len(self.y_edit.text()) != 0
-                and len(self.z_edit.text()) != 0):
+        if (self.x_edit.text()
+                and self.y_edit.text()
+                and self.z_edit.text()):
             self.get_button.setEnabled(True)
         else:
             self.get_button.setEnabled(False)
