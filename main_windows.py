@@ -436,12 +436,12 @@ class PlotStartDialog(QtWidgets.QDialog):
         self.retranslateUi()
         self.get_journals()
         self.setModal(True)
-        self.check_dropped_files()
 
     def after_show(self):
         # delay connecting of singals to only open file once
         self.last_comb.currentIndexChanged.connect(self.set_max_fuel)
         self.cs_comb.currentIndexChanged.connect(self.set_max_fuel)
+        self.check_dropped_files()
 
     def retranslateUi(self):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), "CSV")
@@ -607,7 +607,7 @@ class PlotStartDialog(QtWidgets.QDialog):
 
     def check_dropped_files(self):
         files = [file for file in sys.argv if file.endswith("csv")]
-        if len(files) > 0:
+        if files:
             self.cs_submit_act(files[0])
 
     def sp_submit_act(self):
