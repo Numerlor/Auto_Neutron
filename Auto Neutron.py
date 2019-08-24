@@ -9,6 +9,7 @@ import hub
 import popups
 from appinfo import APP, ORG, APPID
 
+app = QtWidgets.QApplication(sys.argv)
 
 # https://stackoverflow.com/a/44352931
 def resource_path(relative_path):
@@ -17,6 +18,8 @@ def resource_path(relative_path):
     return os.path.join(base_path, relative_path)
 
 class ExceptionHandler:
+    w = popups.CrashPop()
+
     def __init__(self, output_file):
         self.path = output_file
 
@@ -28,17 +31,12 @@ class ExceptionHandler:
 
         sys.__excepthook__(exctype, value, tb)
 
-        try:
-            self.w.close()
-        except AttributeError:
-            pass
-        self.w = popups.CrashPop(exc)
+        self.w.add_traceback(exc)
         self.w.show()
 
 
 if __name__ == "__main__":
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(APPID)
-    app = QtWidgets.QApplication(sys.argv)
     app.setWindowIcon(QtGui.QIcon(resource_path("icons/icons_library.ico")))
     app.setApplicationName(APP)
     app.setOrganizationName(ORG)

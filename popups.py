@@ -590,13 +590,12 @@ class LicensePop(QtWidgets.QDialog):
         self.close_signal.emit()
 
 class CrashPop(QtWidgets.QDialog):
-    def __init__(self, traceback):
-        super(CrashPop, self).__init__()
+    def __init__(self):
+        super().__init__()
         self.label = QtWidgets.QLabel()
         self.text_browser = QtWidgets.QTextBrowser()
         self.quit_button = QtWidgets.QPushButton()
         self.main_layout = QtWidgets.QVBoxLayout(self)
-        self.traceback = traceback
         self.setup_ui()
 
     def setup_ui(self):
@@ -607,9 +606,6 @@ class CrashPop(QtWidgets.QDialog):
         font.setPointSize(12)
         self.label.setFont(font)
 
-        for line in self.traceback:
-            self.text_browser.append(line)
-
         self.quit_button.pressed.connect(sys.exit)
         self.quit_button.setMaximumWidth(125)
         self.main_layout.addWidget(self.label)
@@ -619,3 +615,7 @@ class CrashPop(QtWidgets.QDialog):
         self.setWindowFlag(QtCore.Qt.WindowContextHelpButtonHint, False)
         self.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, False)
         self.setModal(True)
+
+    def add_traceback(self, traceback):
+        for line in traceback:
+            self.text_browser.append(line)
