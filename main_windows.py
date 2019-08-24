@@ -689,7 +689,7 @@ class PlotStartDialog(QtWidgets.QDialog):
     def show_nearest(self):
         self.nearest.setEnabled(False)
         n_win = popups.Nearest(self)
-        n_win.setup_ui()
+        n_win.show()
         n_win.closed_signal.connect(self.enable_button)
         n_win.destination_signal.connect(self.update_destination)
 
