@@ -242,7 +242,7 @@ class SpanshPlot(QtCore.QThread):
         except requests.exceptions.ConnectionError:
             self.status_signal.emit("Cannot establish a connection to Spansh")
         else:
-            job_json = json.loads(job_request.content.decode())
+            job_json = job_request.json()
             try:
                 if job_json['error'] == "Could not find starting system":
                     self.status_signal.emit("Source system invalid")
@@ -256,9 +256,8 @@ class SpanshPlot(QtCore.QThread):
                 self.status_signal.emit("Plotting")
 
                 for sleep_base in itertools.count(1, 5):
-                    encodedjob = requests.get("https://spansh.co.uk/api/results/" + job_id)
-                    decodedjob = encodedjob.content.decode()
-                    job_json = json.loads(decodedjob)
+                    job_json = requests.get("https://spansh.co.uk/api/results/" + job_id).json()
+
                     if job_json['status'] == "queued":
                         # 1, 1, 2, 2, 3, 4, 6, 7, 9, 12, 15, 17, 20, 24, 27, 30, 30, 30, …
                         self.sleep(min(ceil(ceil((sleep_base / 10) ** 2) / 1.9), 30))
@@ -292,7 +291,7 @@ class NearestRequest(QtCore.QThread):
             self.status_signal.emit("Unable to establish a connection to Spansh")
         else:
             if job_request.ok:
-                response = json.loads(job_request.content.decode())
+                response = job_request.json()
                 self.finished_signal.emit(response['system'])
             else:
                 self.status_signal.emit(
