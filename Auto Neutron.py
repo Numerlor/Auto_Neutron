@@ -22,12 +22,19 @@ class ExceptionHandler:
 
     def __init__(self, output_file):
         self.path = output_file
+        self.cleared = False
 
-    def handler(self, exctype, value, tb, exc=[]):
-        exc.extend(traceback.format_exception(exctype, value, tb))
-        with open(self.path, 'w') as f:
+    def handler(self, exctype, value, tb):
+        exc = traceback.format_exception(exctype, value, tb)
+        with open(self.path, 'a') as f:
+            if not self.cleared:
+                f.seek(0)
+                f.truncate()
+                self.cleared = True
+
             for line in exc:
                 f.write(line)
+            f.write("\n")
 
         sys.__excepthook__(exctype, value, tb)
 
