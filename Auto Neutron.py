@@ -28,10 +28,12 @@ class ExceptionHandler:
         exc = traceback.format_exception(exctype, value, tb)
         with open(self.path, 'a') as f:
             if not self.cleared:
+                # clear file on first traceback
                 f.seek(0)
                 f.truncate()
                 self.cleared = True
             else:
+                # insert spacing newline
                 exc.insert(0, "\n")
             f.write("".join(exc))
 
