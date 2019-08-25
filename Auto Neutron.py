@@ -31,10 +31,9 @@ class ExceptionHandler:
                 f.seek(0)
                 f.truncate()
                 self.cleared = True
-
-            for line in exc:
-                f.write(line)
-            f.write("\n")
+            else:
+                exc.insert(0, "\n")
+            f.write("".join(exc))
 
         sys.__excepthook__(exctype, value, tb)
 
