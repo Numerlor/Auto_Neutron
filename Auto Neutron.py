@@ -1,15 +1,14 @@
-import ctypes
 import os
 import sys
-import traceback
 
+import ctypes
+import traceback
 from PyQt5 import QtWidgets, QtCore, QtGui
 
 import hub
 import popups
 from appinfo import APP, ORG, APPID
 
-app = QtWidgets.QApplication(sys.argv)
 
 # https://stackoverflow.com/a/44352931
 def resource_path(relative_path):
@@ -18,11 +17,11 @@ def resource_path(relative_path):
     return os.path.join(base_path, relative_path)
 
 class ExceptionHandler:
-    w = popups.CrashPop()
 
     def __init__(self, output_file):
         self.path = output_file
         self.cleared = False
+        self.w = popups.CrashPop()
 
     def handler(self, exctype, value, tb):
         exc = traceback.format_exception(exctype, value, tb)
@@ -45,6 +44,7 @@ class ExceptionHandler:
 
 if __name__ == "__main__":
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(APPID)
+    app = QtWidgets.QApplication(sys.argv)
     app.setWindowIcon(QtGui.QIcon(resource_path("icons/icons_library.ico")))
     app.setApplicationName(APP)
     app.setOrganizationName(ORG)
