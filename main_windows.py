@@ -502,7 +502,7 @@ class PlotStartDialog(QtWidgets.QDialog):
                 key=os.path.getctime, reverse=True)
         except FileNotFoundError:
             w = popups.QuitDialog(self, "Journal folder not detected", True)
-            w.setupUi()
+            w.show()
         else:
             options = ["Last journal", "Second to last", "Third to last"][:len(self.journals)]
             if not options:
