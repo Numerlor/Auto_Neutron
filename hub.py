@@ -50,8 +50,14 @@ class Hub(QtCore.QObject):
         self.initial_pop()
 
     def show_window(self):
-        self.main_window.resize(self.settings.value("window/size", type=QtCore.QSize))
-        self.main_window.move(self.settings.value("window/pos", type=QtCore.QPoint))
+        # check for old settings
+        if (self.settings.value("window/geometry") is None
+                and self.settings.value("window/pos", type=QtCore.QPoint)
+                and self.settings.value("window/size", type=QtCore.QSize)):
+            self.main_window.resize(self.settings.value("window/size", type=QtCore.QSize))
+            self.main_window.move(self.settings.value("window/pos", type=QtCore.QPoint))
+        else:
+            self.main_window.restoreGeometry(self.settings.value("window/geometry"))
         font = self.settings.value("font/font", type=QtGui.QFont)
         font.setPointSize(self.settings.value("font/size", type=int))
         font.setBold(self.settings.value("font/bold", type=bool))
@@ -206,8 +212,13 @@ class Hub(QtCore.QObject):
                                        os.environ['PROGRAMW6432']) / "AutoHotkey/AutoHotkey.exe"))
             self.settings.setValue("save_on_quit", True)
             self.settings.setValue("paths/csv", "")
-            self.settings.setValue("window/size", QtCore.QSize(800, 600))
-            self.settings.setValue("window/pos", QtCore.QPoint(100, 100))
+            self.settings.setValue("window/geometry",
+                                   b'\x01\xd9\xd0\xcb\x00\x03\x00\x00\x00\x00'
+                                   b'\x00d\x00\x00\x00d\x00\x00\x02c\x00\x00'
+                                   b'\x01{\x00\x00\x00l\x00\x00\x00\x82\x00'
+                                   b'\x00\x02[\x00\x00\x01s\x00\x00\x00\x00'
+                                   b'\x00\x00\x00\x00\x07\x80\x00\x00\x00l\x00'
+                                   b'\x00\x00\x82\x00\x00\x02[\x00\x00\x01s')
             self.settings.setValue("window/dark", False)
             self.settings.setValue("window/font_size", 11)
             self.settings.setValue("window/autoscroll", True)
@@ -278,9 +289,8 @@ class Hub(QtCore.QObject):
     def save_route(self, index, data):
         self.settings.setValue("last_route", (index, data))
 
-    def quit(self, size, pos):
-        self.settings.setValue("window/size", size)
-        self.settings.setValue("window/pos", pos)
+    def quit(self, geometry):
+        self.settings.setValue("window/geometry", geometry)
         self.settings.sync()
         self.window_quit_signal.emit(self.save_on_quit)
 

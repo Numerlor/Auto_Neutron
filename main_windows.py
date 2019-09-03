@@ -296,7 +296,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def closeEvent(self, *args, **kwargs):
         super(QtWidgets.QMainWindow, self).closeEvent(*args, **kwargs)
-        self.hub.quit(self.size(), self.pos())
+        self.hub.quit(self.saveGeometry())
 
 
 class PlotStartDialog(QtWidgets.QDialog):
