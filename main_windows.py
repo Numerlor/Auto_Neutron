@@ -306,8 +306,9 @@ class PlotStartDialog(QtWidgets.QDialog):
     def __init__(self, parent, settings):
         super(PlotStartDialog, self).__init__(parent)
         self.settings = settings
-        self.jpath = self.settings.value("paths/journal")
-        self.cpath = self.settings.value("paths/CSV")
+        self.jpath = Path(self.settings.value("paths/journal"))
+        cpath = self.settings.value("paths/CSV")
+        self.cpath = Path(cpath) if cpath else cpath
         self.gridLayout = QtWidgets.QGridLayout(self)
         self.tabWidget = QtWidgets.QTabWidget(self)
         self.tab = QtWidgets.QWidget()
@@ -481,11 +482,11 @@ class PlotStartDialog(QtWidgets.QDialog):
     def change_path(self):
         file_dialog = QtWidgets.QFileDialog()
         fpath, _ = file_dialog.getOpenFileName(filter="csv (*.csv)",
-                                               directory=str(self.cpath.parent))
+                                               directory=str(self.cpath.parent)
+                                               if self.cpath else "")
         if fpath:
-            fpath = Path(fpath)
-            self.cpath = fpath
-            self.path_label.setText("Current path: " + str(fpath))
+            self.cpath = Path(fpath)
+            self.path_label.setText("Current path: " + fpath)
             self.settings.setValue("paths/csv", fpath)
             self.settings.sync()
             self.cs_submit.setEnabled(True)
