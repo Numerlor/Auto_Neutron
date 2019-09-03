@@ -486,8 +486,8 @@ class PlotStartDialog(QtWidgets.QDialog):
                                                if self.cpath else "")
         if fpath:
             self.cpath = Path(fpath)
-            self.path_label.setText("Current path: " + fpath)
-            self.settings.setValue("paths/csv", fpath)
+            self.path_label.setText("Current path: " + str(self.cpath))
+            self.settings.setValue("paths/csv", str(self.cpath))
             self.settings.sync()
             self.cs_submit.setEnabled(True)
         else:
