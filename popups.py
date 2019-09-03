@@ -599,7 +599,7 @@ class CrashPop(QtWidgets.QDialog):
 
     def setup_ui(self):
         self.setFixedSize(400, 250)
-        self.label.setText("An unexpected error has occured")
+        self.label.setText("An unexpected error has occurred")
         self.quit_button.setText("Quit")
         font = QtGui.QFont()
         font.setPointSize(12)
