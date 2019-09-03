@@ -261,7 +261,7 @@ class Hub(QtCore.QObject):
             ahk_path, _ = QtWidgets.QFileDialog.getOpenFileName(
                 filter="AutoHotKey (AutoHotKey*.exe)",
                 caption="Select AutoHotkey's executable "
-                        "if you wish to use it, cancel for copy mode",
+                        "if you wish to use it; cancel for copy mode",
                 directory="C:/")
 
             if not ahk_path:
