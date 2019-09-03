@@ -24,15 +24,6 @@ class Hub(QtCore.QObject):
         super().__init__()
         self.settings = settings
         self.application = QtWidgets.QApplication.instance()
-        self.jpath = self.settings.value("paths/journal")
-        self.dark = self.settings.value("window/dark", type=bool)
-
-        self.save_on_quit = self.settings.value("save_on_quit", type=bool)
-        self.sound_alert = self.settings.value("alerts/audio", type=bool)
-        self.visual_alert = self.settings.value("alerts/visual", type=bool)
-        self.sound_path = self.settings.value("paths/alert")
-        self.modifier = self.settings.value("alerts/threshold", type=int)
-
         self.total_jumps = 0
         self.max_fuel = 0
         self.workers_started = False
@@ -41,8 +32,8 @@ class Hub(QtCore.QObject):
         self.main_window = main_windows.MainWindow(self)
 
     def startup(self):
-        self.set_theme()
         self.write_default_settings()
+        self.set_theme()
         self.double_signal = self.main_window.double_signal
         self.edit_signal = self.main_window.edit_signal
         self.next_jump_signal = self.main_window.next_jump_signal
@@ -208,10 +199,11 @@ class Hub(QtCore.QObject):
             self.main_window.move(300, 300)
             jpath = Path(
                 os.environ['userprofile']) / "Saved Games/Frontier Developments/Elite Dangerous"
-            self.settings.setValue("paths/journal", jpath)
+            self.settings.setValue("paths/journal", str(jpath))
             self.jpath = jpath
             self.settings.setValue("paths/ahk",
-                                   Path(os.environ['PROGRAMW6432']) / "AutoHotkey/AutoHotkey.exe")
+                                   str(Path(
+                                       os.environ['PROGRAMW6432']) / "AutoHotkey/AutoHotkey.exe"))
             self.settings.setValue("save_on_quit", True)
             self.settings.setValue("paths/csv", "")
             self.settings.setValue("window/size", QtCore.QSize(800, 600))
@@ -246,10 +238,26 @@ class Hub(QtCore.QObject):
                                               "send, {enter}\n"))
             self.settings.setValue("last_route", ())
             self.settings.sync()
+
+            self.dark = False
+            self.save_on_quit = False
+            self.sound_alert = False
+            self.visual_alert = False
+            self.sound_path = None
+            self.modifier = 150
             self.write_ahk_path()
+        else:
+            self.dark = self.settings.value("window/dark", type=bool)
+            self.jpath = Path(self.settings.value("paths/journal"))
+            self.save_on_quit = self.settings.value("save_on_quit", type=bool)
+            self.sound_alert = self.settings.value("alerts/audio", type=bool)
+            self.visual_alert = self.settings.value("alerts/visual", type=bool)
+            sound_path = self.settings.value("paths/alert")
+            self.sound_path = Path(sound_path) if sound_path else ""
+            self.modifier = self.settings.value("alerts/threshold", type=int)
 
     def write_ahk_path(self):
-        if not os.path.exists((self.settings.value("paths/ahk"))):
+        if not Path(self.settings.value("paths/ahk")).exists():
             ahk_path, _ = QtWidgets.QFileDialog.getOpenFileName(
                 filter="AutoHotKey (AutoHotKey*.exe)",
                 caption="Select AutoHotkey's executable "
@@ -260,7 +268,7 @@ class Hub(QtCore.QObject):
                 self.settings.setValue("copy_mode", True)
                 self.settings.setValue("paths/AHK", "")
             else:
-                self.settings.setValue("paths/AHK", Path(ahk_path))
+                self.settings.setValue("paths/AHK", ahk_path)
                 self.settings.setValue("copy_mode", False)
             self.settings.sync()
 
