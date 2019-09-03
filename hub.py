@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 from PyQt5 import QtCore, QtWidgets, QtGui
 
@@ -69,8 +70,8 @@ class Hub(QtCore.QObject):
 
     def start_alert_worker(self):
         self.player = workers.SoundPlayer(self.sound_path)
-        status_file = (f"{os.environ['userprofile']}/Saved Games/"
-                       f"Frontier Developments/Elite Dangerous/Status.json")
+        status_file = (Path(os.environ['userprofile'])
+                       / "Saved Games/Frontier Developments/Elite Dangerous/Status.json")
         self.sound_worker = workers.FuelAlert(self, self.max_fuel, status_file, self.modifier)
         self.sound_worker.alert_signal.connect(self.fuel_alert)
         self.sound_worker.start()
@@ -205,14 +206,12 @@ class Hub(QtCore.QObject):
         if not self.settings.value("paths/journal"):
             self.main_window.resize(800, 600)
             self.main_window.move(300, 300)
-            self.settings.setValue("paths/journal",
-                                   (f"{os.environ['userprofile']}/Saved Games/"
-                                    f"Frontier Developments/Elite Dangerous/"))
-            self.jpath = (f"{os.environ['userprofile']}/Saved Games/"
-                          f"Frontier Developments/Elite Dangerous/")
+            jpath = Path(
+                os.environ['userprofile']) / "Saved Games/Frontier Developments/Elite Dangerous"
+            self.settings.setValue("paths/journal", jpath)
+            self.jpath = jpath
             self.settings.setValue("paths/ahk",
-                                   (f"{os.environ['PROGRAMW6432']}/"
-                                    f"AutoHotkey/AutoHotkey.exe"))
+                                   Path(os.environ['PROGRAMW6432']) / "AutoHotkey/AutoHotkey.exe")
             self.settings.setValue("save_on_quit", True)
             self.settings.setValue("paths/csv", "")
             self.settings.setValue("window/size", QtCore.QSize(800, 600))
@@ -251,17 +250,17 @@ class Hub(QtCore.QObject):
 
     def write_ahk_path(self):
         if not os.path.exists((self.settings.value("paths/ahk"))):
-            ahk_path = QtWidgets.QFileDialog.getOpenFileName(
+            ahk_path, _ = QtWidgets.QFileDialog.getOpenFileName(
                 filter="AutoHotKey (AutoHotKey*.exe)",
                 caption="Select AutoHotkey's executable "
                         "if you wish to use it, cancel for copy mode",
                 directory="C:/")
 
-            if not ahk_path[0]:
+            if not ahk_path:
                 self.settings.setValue("copy_mode", True)
                 self.settings.setValue("paths/AHK", "")
             else:
-                self.settings.setValue("paths/AHK", ahk_path[0])
+                self.settings.setValue("paths/AHK", Path(ahk_path))
                 self.settings.setValue("copy_mode", False)
             self.settings.sync()
 

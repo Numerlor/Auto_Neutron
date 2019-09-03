@@ -59,7 +59,7 @@ class AhkWorker(QtCore.QThread):
                                                          self.systems[self.list_index]))
                 self.hotkey.start()
             self.sys_signal.emit(self.list_index, self.dark)
-            for line in self.follow_file(open(self.journal, encoding='utf-8')):
+            for line in self.follow_file(self.journal):
                 loaded = json.loads(line)
 
                 if (loaded['event'] == "FSDJump" and
@@ -86,7 +86,7 @@ class AhkWorker(QtCore.QThread):
                     break
 
     def check_shutdown(self):
-        with open(self.journal, 'rb') as f:
+        with self.journal.open('rb') as f:
             f.seek(-60, 2)
             return b"Shutdown" == f.readline()[47:55]
 
@@ -152,14 +152,15 @@ class AhkWorker(QtCore.QThread):
         self.loop = False
         self.close_ahk()
 
-    def follow_file(self, file):
-        file.seek(0, 2)
-        while self.loop:
-            loopline = file.readline()
-            if not loopline:
-                self.sleep(1)
-                continue
-            yield loopline
+    def follow_file(self, filepath):
+        with filepath.open(encoding="utf-8") as file:
+            file.seek(0, 2)
+            while self.loop:
+                loopline = file.readline()
+                if not loopline:
+                    self.sleep(1)
+                    continue
+                yield loopline
 
 
 class FuelAlert(QtCore.QThread):
@@ -181,7 +182,7 @@ class FuelAlert(QtCore.QThread):
 
     def main(self, path):
         hold = False
-        for line in self.follow_file(open(path)):
+        for line in self.follow_file(path):
             if line:
                 loaded = json.loads(line)
                 try:
@@ -209,12 +210,13 @@ class FuelAlert(QtCore.QThread):
     def stop_loop(self):
         self.loop = False
 
-    def follow_file(self, file):
-        while self.loop:
-            file.seek(0, 0)
-            loopline = file.readline()
-            self.sleep(2)
-            yield loopline
+    def follow_file(self, filepath):
+        with filepath.open(encoding="utf-8") as file:
+            while self.loop:
+                file.seek(0, 0)
+                loopline = file.readline()
+                self.sleep(2)
+                yield loopline
 
 
 class SpanshPlot(QtCore.QThread):
@@ -302,7 +304,7 @@ class SoundPlayer:
     def __init__(self, path):
         self.sound_file = QtMultimedia.QMediaPlayer()
         self.sound_file.setMedia(QtMultimedia.QMediaContent(
-            QtCore.QUrl.fromLocalFile(path)))
+            QtCore.QUrl.fromLocalFile(str(path))))
         self.sound_file.setVolume(100)
 
     def play(self):

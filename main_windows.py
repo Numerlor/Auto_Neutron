@@ -2,6 +2,7 @@ import csv
 import json
 import os
 import sys
+from pathlib import Path
 
 from PyQt5 import QtWidgets, QtCore, QtGui
 from pyperclip import copy as set_clip
@@ -95,7 +96,6 @@ class MainWindow(QtWidgets.QMainWindow):
         # build table
         self.MainTable.setGridStyle(QtCore.Qt.NoPen)
         self.MainTable.setColumnCount(4)
-
         for i in range(4):
             item = QtWidgets.QTableWidgetItem()
             self.MainTable.setHorizontalHeaderItem(i, item)
@@ -179,6 +179,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.MainTable.setItem(row_pos, i, item)
 
     def update_jumps(self, index):
+
         # sum all values in 3rd column
         total_jumps = sum(
             int(self.MainTable.item(i, 3).text()) for i in
@@ -299,7 +300,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
 
 class PlotStartDialog(QtWidgets.QDialog):
-    data_signal = QtCore.pyqtSignal(str, list, int)
+    data_signal = QtCore.pyqtSignal(Path, list, int)
     fuel_signal = QtCore.pyqtSignal(int)
 
     def __init__(self, parent, settings):
@@ -452,7 +453,7 @@ class PlotStartDialog(QtWidgets.QDialog):
         self.setWindowTitle("Select a route")
         self.path_button.setText("Change path")
         self.cs_submit.setText("Submit")
-        self.path_label.setText("Current path: " + self.cpath)
+        self.path_label.setText("Current path: " + str(self.cpath))
         self.source.setPlaceholderText("Source System")
         self.nearest.setText("Nearest")
         self.sp_submit.setText("Submit")
@@ -479,12 +480,13 @@ class PlotStartDialog(QtWidgets.QDialog):
 
     def change_path(self):
         file_dialog = QtWidgets.QFileDialog()
-        fpath = file_dialog.getOpenFileName(filter="csv (*.csv)",
-                                            directory=self.cpath[:self.cpath.rfind("/")])
-        if fpath[0]:
-            self.cpath = fpath[0]
-            self.path_label.setText("Current path: " + fpath[0])
-            self.settings.setValue("paths/csv", fpath[0])
+        fpath, _ = file_dialog.getOpenFileName(filter="csv (*.csv)",
+                                               directory=str(self.cpath.parent))
+        if fpath:
+            fpath = Path(fpath)
+            self.cpath = fpath
+            self.path_label.setText("Current path: " + str(fpath))
+            self.settings.setValue("paths/csv", fpath)
             self.settings.sync()
             self.cs_submit.setEnabled(True)
         else:
@@ -494,7 +496,7 @@ class PlotStartDialog(QtWidgets.QDialog):
     def get_journals(self):
         try:
             self.journals = sorted(
-                [self.jpath + file for file in os.listdir(self.jpath)
+                [self.jpath / file for file in os.listdir(self.jpath)
                  if file.endswith(".log")],
                 key=os.path.getctime, reverse=True)
         except FileNotFoundError:
@@ -516,7 +518,7 @@ class PlotStartDialog(QtWidgets.QDialog):
                 self.last_comb.addItems(options)
 
     def current_range(self, index):
-        with open(self.journals[index], encoding='utf-8') as f:
+        with self.journals[index].open(encoding='utf-8') as f:
             lines = [json.loads(line) for line in f]
         try:
             self.source.setText(next(lines[i]['StarSystem'] for i
@@ -574,7 +576,7 @@ class PlotStartDialog(QtWidgets.QDialog):
             self.cargo_slider.setValue(ship_cargo)
 
     def set_max_fuel(self, index):
-        with open(self.journals[index], encoding='utf-8') as f:
+        with self.journals[index].open(encoding='utf-8') as f:
             lines = [json.loads(line) for line in f]
         try:
             # get last loadout event line
@@ -635,7 +637,7 @@ class PlotStartDialog(QtWidgets.QDialog):
                 self.status.showMessage("File too large")
                 self.cs_submit.setEnabled(True)
             else:
-                with open(cpath, encoding='utf-8') as f:
+                with cpath.open(encoding='utf-8') as f:
                     data = []
                     valid = True
                     for stuff in csv.DictReader(f, delimiter=','):

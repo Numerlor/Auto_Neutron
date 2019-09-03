@@ -1,6 +1,7 @@
 import os
 import sys
 from collections import namedtuple
+from pathlib import Path
 
 from PyQt5 import QtWidgets, QtCore, QtGui
 
@@ -416,7 +417,7 @@ class SettingsPop(QtWidgets.QDialog):
         # grab all settings and set the widget values to them
         self.main_bind_edit.setText(self.settings.value("bind"))
         self.script_edit.setText(self.settings.value("script"))
-        self.alert_path.setText(self.settings.value("paths/alert"))
+        self.alert_path.setText(str(self.settings.value("paths/alert")))
         self.alert_threshold_spin.setValue(self.settings.value("alerts/threshold", type=int))
         self.dark_check.setChecked(self.settings.value("window/dark", type=bool))
         self.font_combo.setCurrentFont(self.settings.value("font/font", type=QtGui.QFont))
@@ -436,22 +437,21 @@ class SettingsPop(QtWidgets.QDialog):
         self.resize(self.width(), self.script_edit.height() / 2)
 
     def ahk_dialog(self):
-        ahk_path = QtWidgets.QFileDialog.getOpenFileName(
+        ahk_path, _ = QtWidgets.QFileDialog.getOpenFileName(
             filter="AutoHotKey (AutoHotKey*.exe)",
             caption="Select AutoHotkey's executable",
             directory="C:/")
 
-        if len(ahk_path[0]) != 0:
-            self.settings.setValue("paths/AHK", ahk_path[0])
+        if ahk_path:
+            self.settings.setValue("paths/AHK", Path(ahk_path))
             self.copy_check.setDisabled(False)
         self.settings.sync()
 
     def sound_path_dialog(self):
-        sound_path = QtWidgets.QFileDialog.getOpenFileName(
-            caption="Notification audio file", )
-        if len(sound_path[0]) != 0:
-            self.alert_path.setText(sound_path[0])
-        self.settings.sync()
+        sound_path, _ = QtWidgets.QFileDialog.getOpenFileName(
+            caption="Notification audio file")
+        if sound_path:
+            self.alert_path.setText(sound_path)
 
     def save_settings(self, close=False):
         settings = namedtuple("settings_values", (
@@ -483,7 +483,7 @@ class SettingsPop(QtWidgets.QDialog):
             self.settings.setValue("alerts/audio", values[8])
             self.settings.setValue("alerts/visual", values[9])
             self.settings.setValue("alerts/threshold", values[10])
-            self.settings.setValue("paths/alert", values[11])
+            self.settings.setValue("paths/alert", Path(values[11]))
             self.settings.setValue("window/autoscroll", values[12])
             self.settings.sync()
             self.settings_signal.emit(values)
