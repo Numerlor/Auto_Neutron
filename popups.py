@@ -1,6 +1,7 @@
 import os
 import sys
 from collections import namedtuple
+from pathlib import Path
 
 from PyQt5 import QtWidgets, QtCore, QtGui
 
@@ -168,7 +169,7 @@ class Nearest(QtWidgets.QDialog):
 
 
 class GameShutPop(QtWidgets.QDialog):
-    worker_signal = QtCore.pyqtSignal(str, list, int)  # signal to start new worker
+    worker_signal = QtCore.pyqtSignal(Path, list, int)  # signal to start new worker
     # signal to disconnect all main window signals if app is not quit or new worker is not started
     close_signal = QtCore.pyqtSignal()
 
@@ -186,7 +187,7 @@ class GameShutPop(QtWidgets.QDialog):
         self.route = route
         self.index = index
         self.settings = settings
-        self.jpath = self.settings.value("paths/journal")
+        self.jpath = Path(self.settings.value("paths/journal"))
         self.setup_ui()
 
     def setup_ui(self):
@@ -244,7 +245,7 @@ class GameShutPop(QtWidgets.QDialog):
                                                        if file.endswith(".log")])])
 
     def load_journal(self):
-        journals = sorted([self.jpath + file for file
+        journals = sorted([self.jpath / file for file
                            in os.listdir(self.jpath)
                            if file.endswith(".log")],
                           key=os.path.getctime, reverse=True)
