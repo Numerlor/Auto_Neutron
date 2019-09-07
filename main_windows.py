@@ -594,7 +594,7 @@ class PlotStartDialog(QtWidgets.QDialog):
             max_fuel = SHIP_STATS['FSD'][fsd['Item']][0]
             if 'Engineering' in fsd:
                 for blueprint in fsd['Engineering']['Modifiers']:
-                    if blueprint['Label'] == 'MaxFeulPerJump':
+                    if blueprint['Label'] == 'MaxFuelPerJump':
                         max_fuel = blueprint['Value']
             self.fuel_signal.emit(max_fuel)
 
