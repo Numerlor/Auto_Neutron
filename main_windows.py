@@ -612,7 +612,7 @@ class PlotStartDialog(QtWidgets.QDialog):
     def check_dropped_files(self):
         files = [file for file in sys.argv if file.endswith("csv")]
         if files:
-            self.cs_submit_act(files[0])
+            self.cs_submit_act(Path(files[0]))
 
     def sp_submit_act(self):
         self.plotter = workers.SpanshPlot(self.eff_spinbox.value(),
