@@ -5,6 +5,7 @@ Auto Neutron is an utility tool for neutron routes created using Spansh's route 
 
 
 # Installation
+Python 3.6 or later is needed to run directly
 ```
 $ cd Auto-Neutron
 $ pip intall -r requirements.txt
