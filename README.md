@@ -29,7 +29,8 @@ If the AHK script is not working, make sure all of the keybinds are correct or i
 * Skipping jumps using doubleclick
 * Low fuel alert when customisable threshold is reached
 
-
+Utility for creating custom CSV files usable by this app:
+https://github.com/Numerlor/Neutron-CSV-Builder
 
 
 ![](https://i.imgur.com/kTagchR.png)
