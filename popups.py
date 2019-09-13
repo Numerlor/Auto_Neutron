@@ -1,5 +1,4 @@
 import os
-import sys
 from collections import namedtuple
 from pathlib import Path
 
@@ -218,7 +217,7 @@ class GameShutPop(QtWidgets.QDialog):
         self.verticalLayout.setContentsMargins(6, 20, 6, 6)
         self.verticalLayout.addLayout(self.horizontalLayout)
 
-        self.pushButton_2.pressed.connect(sys.exit)
+        self.pushButton_2.pressed.connect(QtWidgets.QApplication.instance().quit)
         self.save_button.pressed.connect(self.save_route)
         self.pushButton.pressed.connect(self.load_journal)
         self.pushButton.pressed.connect(lambda: self.pushButton.setDisabled(True))
@@ -278,7 +277,7 @@ class QuitDialog(QtWidgets.QDialog):
         font.setPointSize(12)
         self.label.setFont(font)
         self.pushButton.setMaximumWidth(95)
-        self.pushButton.pressed.connect(sys.exit)
+        self.pushButton.pressed.connect(QtWidgets.QApplication.instance().quit)
 
         self.setModal(self.modal)
 
@@ -544,7 +543,7 @@ class RouteFinishedPop(QtWidgets.QDialog):
 
         self.button_layout.addWidget(self.quit_button)
 
-        self.quit_button.pressed.connect(sys.exit)
+        self.quit_button.pressed.connect(sQtWidgets.QApplication.instance().quit)
         self.new_route_button.pressed.connect(self.new_route_signal.emit)
         self.new_route_button.pressed.connect(self.hide)
         self.retranslateUi()
@@ -606,7 +605,7 @@ class CrashPop(QtWidgets.QDialog):
         font.setPointSize(12)
         self.label.setFont(font)
 
-        self.quit_button.pressed.connect(sys.exit)
+        self.quit_button.pressed.connect(QtWidgets.QApplication.instance().quit)
         self.quit_button.setMaximumWidth(125)
         self.main_layout.addWidget(self.label)
         self.main_layout.addWidget(self.text_browser)
