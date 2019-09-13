@@ -6,7 +6,6 @@ from pathlib import Path
 from PyQt5 import QtWidgets, QtCore, QtGui
 
 import hub
-import popups
 from appinfo import APP, ORG, APPID
 
 
@@ -16,12 +15,14 @@ def resource_path(relative_path):
     base_path = getattr(sys, '_MEIPASS', Path(__file__).absolute().parent)
     return str(base_path / relative_path)
 
-class ExceptionHandler:
+
+class ExceptionHandler(QtCore.QObject):
+    traceback_sig = QtCore.pyqtSignal(list)
 
     def __init__(self, output_file):
+        super().__init__()
         self.path = output_file
         self.cleared = False
-        self.w = popups.CrashPop()
 
     def handler(self, exctype, value, tb):
         exc = traceback.format_exception(exctype, value, tb)
@@ -38,8 +39,7 @@ class ExceptionHandler:
 
         sys.__excepthook__(exctype, value, tb)
 
-        self.w.add_traceback(exc)
-        self.w.show()
+        self.traceback_sig.emit(exc)
 
 
 if __name__ == "__main__":
@@ -51,11 +51,12 @@ if __name__ == "__main__":
 
     path = Path(QtCore.QStandardPaths.writableLocation(QtCore.QStandardPaths.AppConfigLocation))
     # save traceback to logfile if Exception is raised
-    sys.excepthook = ExceptionHandler(path / "traceback.log").handler
+    ex_handler = ExceptionHandler(path / "traceback.log")
+    sys.excepthook = ex_handler.handler
     # create org and app folders if not found
     if not path.exists():
         path.mkdir(parents=True)
     settings = QtCore.QSettings(str(path / "config.ini"), QtCore.QSettings.IniFormat)
-    ui = hub.Hub(settings)
+    ui = hub.Hub(settings, ex_handler)
     ui.startup()
     sys.exit(app.exec_())

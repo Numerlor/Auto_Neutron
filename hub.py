@@ -20,8 +20,10 @@ class Hub(QtCore.QObject):
     stop_alert_worker_signal = QtCore.pyqtSignal()
     alert_fuel_signal = QtCore.pyqtSignal(int, int)
 
-    def __init__(self, settings):
+    def __init__(self, settings, crash_handler):
         super().__init__()
+
+        crash_handler.traceback_sig.connect(self.show_exception)
         self.settings = settings
         self.application = QtWidgets.QApplication.instance()
         self.total_jumps = 0
@@ -30,6 +32,7 @@ class Hub(QtCore.QObject):
         self.alert_worker_started = False
 
         self.main_window = main_windows.MainWindow(self)
+        self.crash_window = popups.CrashPop()
 
     def startup(self):
         self.write_default_settings()
@@ -288,6 +291,10 @@ class Hub(QtCore.QObject):
 
     def save_route(self, index, data):
         self.settings.setValue("last_route", (index, data))
+
+    def show_exception(self, exc):
+        self.crash_window.add_traceback(exc)
+        self.crash_window.show()
 
     def quit(self, geometry):
         self.settings.setValue("window/geometry", geometry)
