@@ -98,7 +98,7 @@ class Hub(QtCore.QObject):
             else:
                 self.application.beep()
 
-    def start_worker(self, journal, data_values, index):
+    def start_worker(self, data_values, journal, index):
         settings = (self.settings.value("script"), self.settings.value("bind"),
                     self.dark, self.settings.value("copy_mode", type=bool),
                     self.settings.value("paths/AHK"))
@@ -146,6 +146,7 @@ class Hub(QtCore.QObject):
         w = main_windows.PlotStartDialog(self.main_window, self.settings)
         w.fuel_signal.connect(self.set_max_fuel)
         w.data_signal.connect(self.main_window.pop_table)
+        w.data_signal.connect(self.start_worker)
         w.setup_ui()
         w.show()
         w.after_show()

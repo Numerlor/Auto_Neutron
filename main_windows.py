@@ -171,6 +171,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.double_signal.emit(c.row())
 
     def insert_row(self, data):
+        """Creates a new row and inserts 4 items from data"""
         col_count = self.MainTable.columnCount()
         row_pos = self.MainTable.rowCount()
         self.MainTable.setRowCount(row_pos + 1)
@@ -180,8 +181,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.MainTable.setItem(row_pos, i, item)
 
     def update_jumps(self, index):
-
-        # sum all values in 3rd column
+        """Update remaining jump count"""
+        # sum all values in 4th column
         total_jumps = sum(
             int(self.MainTable.item(i, 3).text()) for i in
             range(self.MainTable.rowCount()))
@@ -203,15 +204,15 @@ class MainWindow(QtWidgets.QMainWindow):
         self.MainTable.setRowCount(0)
         self.last_index = 0
 
-    def pop_table(self, journal, table_data, index):
+    def pop_table(self, table_data, _, __):
+        """Populate table with table_data"""
+
+        # disconnect signal to not update things needlessly
         try:
-            # disconnect signal to not update things needlessly
             self.MainTable.itemChanged.disconnect()
         except TypeError:
             pass
-        # start worker
-        self.hub.start_worker(journal, table_data, index)
-        # update jump display with index 0
+
         self.update_jumps(0)
 
         for row in table_data:
@@ -220,9 +221,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.MainTable.resizeColumnToContents(0)
         self.MainTable.resizeRowsToContents()
         # reconnect signal
-        self.MainTable.itemChanged.connect(self.send_changed)
+        self.MainTable.itemChanged.connect(self.manage_changed)
 
-    def send_changed(self, item):
+    def manage_changed(self, item):
+        """Update relevant data in script if item was changed"""
         # if edited item was in first column, send it to worker and update column size
         if item.column() == 0:
             self.MainTable.resizeColumnToContents(0)
@@ -240,10 +242,12 @@ class MainWindow(QtWidgets.QMainWindow):
             pass
 
     def index_change(self, index):
-        self.update_jumps(index)
+        """Update table when index is changed"""
 
+        self.update_jumps(index)
         self.next_jump_signal.emit(
             self.MainTable.item(index, 3).text() == "1")
+
         if (self.autoscroll and
                 (self.MainTable.itemAt(QtCore.QPoint(1, 1)).row() == self.last_index
                  or self.last_index == 0)):
@@ -253,8 +257,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.last_index = index
 
     def grayout(self, index, dark):
-        """Handle GUI changes when index of table is changed
-           set all rows before index to grey, all rows after to black/white"""
+        """Set all rows before index to grey, all rows after to black/white"""
 
         try:
             self.MainTable.itemChanged.disconnect()
@@ -301,7 +304,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
 
 class PlotStartDialog(QtWidgets.QDialog):
-    data_signal = QtCore.pyqtSignal(Path, list, int)
+    data_signal = QtCore.pyqtSignal(list, Path, int)
     fuel_signal = QtCore.pyqtSignal(int)
 
     def __init__(self, parent, settings):
@@ -624,7 +627,7 @@ class PlotStartDialog(QtWidgets.QDialog):
         self.plotter.start()
 
     def sp_finish_act(self, data):
-        self.data_signal.emit(self.journals[self.sp_comb.currentIndex()], data, -1)
+        self.data_signal.emit(data, self.journals[self.cs_comb.currentIndex()], -1)
         self.plotter.quit()
         self.close()
 
@@ -661,8 +664,8 @@ class PlotStartDialog(QtWidgets.QDialog):
                             data.append(tlist)
                     if valid:
                         self.data_signal.emit(
-                            self.journals[self.cs_comb.currentIndex()],
                             data,
+                            self.journals[self.cs_comb.currentIndex()],
                             -1)
                         self.close()
                     else:
@@ -682,12 +685,10 @@ class PlotStartDialog(QtWidgets.QDialog):
             index = int(last_route[0])
             route = last_route[1]
             if index == route:
-                self.data_signal.emit(self.journals[self.last_comb.currentIndex()],
-                                      route, 1)
+                self.data_signal.emit(route, self.journals[self.last_comb.currentIndex()], 1)
                 self.close()
             else:
-                self.data_signal.emit(self.journals[self.last_comb.currentIndex()],
-                                      route, index)
+                self.data_signal.emit(route, self.journals[self.last_comb.currentIndex()], index)
                 self.close()
 
     def show_nearest(self):
