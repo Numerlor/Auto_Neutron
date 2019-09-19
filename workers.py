@@ -9,7 +9,7 @@ from pyperclip import copy as set_clip
 
 
 class AhkWorker(QtCore.QThread):
-    sys_signal = QtCore.pyqtSignal(int, bool)  # signal to move grayout to index
+    sys_signal = QtCore.pyqtSignal(int)  # signal to update gui to index
     route_finished_signal = QtCore.pyqtSignal()  # route end reached signal
     game_shut_signal = QtCore.pyqtSignal(list, int)  # signal for game shutdown
     fuel_signal = QtCore.pyqtSignal(dict)
@@ -22,7 +22,7 @@ class AhkWorker(QtCore.QThread):
         self.data_values = data_values
         self.systems = [data[0].casefold() for data in data_values]
         self.settings = settings
-        self.script, self.bind, self.dark, self.copy, ahk_path = settings
+        self.script, self.bind, self.copy, ahk_path = settings
 
         if not self.copy:
             self.ahk = AHK(executable_path=ahk_path)
@@ -58,7 +58,7 @@ class AhkWorker(QtCore.QThread):
                                      self.script.replace("|SYSTEMDATA|",
                                                          self.systems[self.list_index]))
                 self.hotkey.start()
-            self.sys_signal.emit(self.list_index, self.dark)
+            self.sys_signal.emit(self.list_index)
             for line in self.follow_file(self.journal):
                 loaded = json.loads(line)
 
@@ -74,7 +74,7 @@ class AhkWorker(QtCore.QThread):
                         set_clip(self.systems[self.list_index])
                     else:
                         self.reset_ahk()
-                    self.sys_signal.emit(self.list_index, self.dark)
+                    self.sys_signal.emit(self.list_index)
 
                 elif loaded['event'] == "Loadout":
                     # update max fuel for alerts
@@ -87,8 +87,8 @@ class AhkWorker(QtCore.QThread):
 
     def check_shutdown(self):
         with self.journal.open('rb') as f:
-            f.seek(-60, 2)
-            return b"Shutdown" == f.readline()[47:55]
+            f.seek(-13, 2)
+            return b"Shutdown" == f.read(8)
 
     def set_index(self, index):
         self.list_index = index
@@ -97,7 +97,7 @@ class AhkWorker(QtCore.QThread):
         else:
             self.reset_ahk()
 
-        self.sys_signal.emit(self.list_index, self.dark)
+        self.sys_signal.emit(self.list_index)
 
     def update_sys(self, index, new_sys):
         self.data_values[index][0] = new_sys
@@ -108,13 +108,12 @@ class AhkWorker(QtCore.QThread):
             else:
                 self.reset_ahk()
 
-    def update_script(self, tup):
-        if self.bind != tup[0] or self.script != tup[1]:
-            self.bind = tup[0]
-            self.script = tup[1]
+    def update_script(self, bind, script):
+        if self.bind != bind or self.script != script:
+            self.bind = bind
+            self.script = script
             if not self.copy:
                 self.reset_ahk()
-        self.dark = tup[2]
 
     def set_copy(self, setting):
         if setting is not self.copy:
