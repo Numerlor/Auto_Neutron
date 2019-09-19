@@ -8,6 +8,207 @@ import workers
 from appinfo import VERSION
 
 
+class BasePopUp(QtWidgets.QDialog):
+
+    def __init__(self, parent, prompt: str):
+        super().__init__(parent)
+        self.main_layout = QtWidgets.QVBoxLayout(self)
+        self.bottom_layout = QtWidgets.QHBoxLayout()
+        self.info_label = QtWidgets.QLabel(prompt)
+        self.x_spacer = QtWidgets.QSpacerItem(
+            1, 1,
+            QtWidgets.QSizePolicy.MinimumExpanding,
+            QtWidgets.QSizePolicy.Fixed)
+        self.y_spacer = QtWidgets.QSpacerItem(
+            1, 1,
+            QtWidgets.QSizePolicy.Fixed,
+            QtWidgets.QSizePolicy.MinimumExpanding)
+
+    def setup_ui(self):
+        self.main_layout.setContentsMargins(10, 20, 10, 10)
+        font = QtGui.QFont()
+        font.setPointSize(15)
+        self.info_label.setFont(font)
+        self.main_layout.addWidget(self.info_label, alignment=QtCore.Qt.AlignCenter)
+        self.main_layout.addSpacerItem(self.y_spacer)
+        self.main_layout.addLayout(self.bottom_layout)
+        self.setWindowFlag(QtCore.Qt.WindowContextHelpButtonHint, False)
+
+    def add_widget(self, widget, alignment=QtCore.Qt.AlignCenter):
+        self.bottom_layout.addWidget(widget, alignment)
+
+    def add_layout(self, layout):
+        self.bottom_layout.addLayout(layout)
+
+
+class RouteFinishedPop(BasePopUp):
+    close_signal = QtCore.pyqtSignal()
+    new_route_signal = QtCore.pyqtSignal()
+
+    def __init__(self, parent):
+        super().__init__(parent, "Route finished")
+        self.quit_button = QtWidgets.QPushButton("Quit")
+        self.new_route_button = QtWidgets.QPushButton("New route")
+        self.button_layout = QtWidgets.QHBoxLayout()
+        self.setup_ui()
+
+    def setup_ui(self):
+        super().setup_ui()
+        self.button_layout.addWidget(self.new_route_button)
+        self.button_layout.addSpacerItem(self.x_spacer)
+        self.button_layout.addWidget(self.quit_button)
+
+        self.add_layout(self.button_layout)
+
+        self.quit_button.pressed.connect(QtWidgets.QApplication.instance().quit)
+        self.new_route_button.pressed.connect(self.new_route_signal.emit)
+        self.new_route_button.pressed.connect(self.close)
+
+    def closeEvent(self, *args, **kwargs):
+        super(QtWidgets.QDialog, self).closeEvent(*args, **kwargs)
+        self.close_signal.emit()
+
+
+class QuitDialog(BasePopUp):
+    def __init__(self, parent, prompt, modal):
+        super().__init__(parent, prompt)
+
+        self.pushButton = QtWidgets.QPushButton(text="Quit", parent=parent)
+        self.modal = modal
+        self.setup_ui()
+
+    def setup_ui(self):
+        super().setup_ui()
+        self.pushButton.setMaximumWidth(95)
+        self.pushButton.pressed.connect(QtWidgets.QApplication.instance().quit)
+        self.add_widget(self.pushButton)
+
+        self.setModal(self.modal)
+        self.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, False)
+        self.setWindowFlag(QtCore.Qt.WindowContextHelpButtonHint, False)
+
+
+class GameShutPop(BasePopUp):
+    worker_signal = QtCore.pyqtSignal(list, Path, int)  # signal to start new worker
+    # signal to disconnect all main window signals if app is not quit or new worker is not started
+    close_signal = QtCore.pyqtSignal()
+
+    def __init__(self, parent, settings, route, index):
+        super().__init__(parent, "Game shut down")
+        self.horizontalLayout = QtWidgets.QHBoxLayout()
+        self.journal_combo = QtWidgets.QComboBox()
+        self.journal_button = QtWidgets.QPushButton("Load journal")
+        self.quit_button = QtWidgets.QPushButton("Quit")
+        self.jour_ver = QtWidgets.QHBoxLayout()
+        self.save_quit_lay = QtWidgets.QHBoxLayout()
+        self.save_button = QtWidgets.QPushButton("Save current route")
+        self.route = route
+        self.index = index
+        self.settings = settings
+        self.jpath = Path(self.settings.value("paths/journal"))
+        self.setup_ui()
+
+    def setup_ui(self):
+        super().setup_ui()
+        self.jour_ver.addWidget(self.journal_button, alignment=QtCore.Qt.AlignLeft)
+        self.jour_ver.addWidget(self.journal_combo, alignment=QtCore.Qt.AlignCenter)
+        self.jour_ver.addSpacerItem(self.x_spacer)
+
+        self.save_quit_lay.addWidget(self.save_button, alignment=QtCore.Qt.AlignRight)
+        self.save_quit_lay.addWidget(self.quit_button, alignment=QtCore.Qt.AlignRight)
+
+        self.horizontalLayout.addLayout(self.jour_ver)
+        self.horizontalLayout.addLayout(self.save_quit_lay)
+        self.add_layout(self.horizontalLayout)
+
+        self.quit_button.pressed.connect(QtWidgets.QApplication.instance().quit)
+        self.save_button.pressed.connect(self.save_route)
+        self.journal_button.pressed.connect(self.load_journal)
+        self.journal_button.pressed.connect(lambda: self.journal_button.setDisabled(True))
+
+        if self.index == 0 or self.index == 1:
+            self.save_button.setDisabled(True)
+        self.populate_combo()
+
+        self.setModal(True)
+        self.setWindowFlag(QtCore.Qt.WindowContextHelpButtonHint, False)
+
+    def save_route(self):
+        self.settings.setValue("last_route", [self.index, self.route])
+        self.save_button.setDisabled(True)
+
+    def populate_combo(self):
+        self.journal_combo.addItems(["Last journal", "Second to last",
+                                     "Third to last"][:len([file for file
+                                                            in os.listdir(self.jpath)
+                                                            if file.endswith(".log")])])
+
+    def load_journal(self):
+        journals = sorted([self.jpath / file for file
+                           in os.listdir(self.jpath)
+                           if file.endswith(".log")],
+                          key=os.path.getctime, reverse=True)
+        self.worker_signal.emit(self.route, journals[self.journal_combo.currentIndex()],
+                                self.index)
+        self.hide()
+
+    def closeEvent(self, *args, **kwargs):
+        super(QtWidgets.QDialog, self).closeEvent(*args, **kwargs)
+        self.close_signal.emit()
+
+
+class CrashPop(BasePopUp):
+    def __init__(self):
+        super().__init__(None, "An unexpected error has occurred")
+        self.text_browser = QtWidgets.QTextBrowser()
+        self.quit_button = QtWidgets.QPushButton("Quit")
+        self.layout = QtWidgets.QVBoxLayout()
+        self.setup_ui()
+
+    def setup_ui(self):
+        super().setup_ui()
+        self.quit_button.pressed.connect(QtWidgets.QApplication.instance().quit)
+        self.quit_button.setMaximumWidth(125)
+        self.layout.addWidget(self.text_browser)
+        self.layout.addWidget(self.quit_button, alignment=QtCore.Qt.AlignCenter)
+        self.add_layout(self.layout)
+        self.setWindowFlag(QtCore.Qt.WindowContextHelpButtonHint, False)
+        self.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, False)
+        self.setModal(True)
+
+    def add_traceback(self, traceback):
+        for line in traceback:
+            self.text_browser.append(line)
+
+
+class LicensePop(QtWidgets.QDialog):
+    close_signal = QtCore.pyqtSignal()
+
+    def __init__(self, parent):
+        super(LicensePop, self).__init__(parent)
+        self.text = QtWidgets.QTextBrowser()
+        self.main_layout = QtWidgets.QVBoxLayout()
+        self.setup_ui()
+
+    def setup_ui(self):
+        self.setFixedSize(300, 125)
+        self.setWindowTitle("Auto Neutron " + VERSION)
+        self.text.setText("Auto Neutron Copyright (C) 2019 Numerlor\n"
+                          "This program comes with ABSOLUTELY NO WARRANTY.\n"
+                          "This is free software, and you are welcome to redistribute it")
+        self.text.append('under certain conditions; <a href="https://www'
+                         '.gnu.org/licenses/">click here</a> for details')
+        self.main_layout.addWidget(self.text)
+        self.text.setOpenExternalLinks(True)
+        self.setLayout(self.main_layout)
+        self.setWindowFlag(QtCore.Qt.WindowContextHelpButtonHint, False)
+        self.main_layout.setContentsMargins(0, 0, 0, 0)
+
+    def closeEvent(self, *args, **kwargs):
+        super(QtWidgets.QDialog, self).closeEvent(*args, **kwargs)
+        self.close_signal.emit()
+
+
 class Nearest(QtWidgets.QDialog):
     # signal sent when window is closed
     closed_signal = QtCore.pyqtSignal()
@@ -165,124 +366,6 @@ class Nearest(QtWidgets.QDialog):
     def closeEvent(self, *args, **kwargs):
         super(QtWidgets.QDialog, self).closeEvent(*args, **kwargs)
         self.closed_signal.emit()
-
-
-class GameShutPop(QtWidgets.QDialog):
-    worker_signal = QtCore.pyqtSignal(Path, list, int)  # signal to start new worker
-    # signal to disconnect all main window signals if app is not quit or new worker is not started
-    close_signal = QtCore.pyqtSignal()
-
-    def __init__(self, parent, settings, route, index):
-        super(GameShutPop, self).__init__(parent)
-        self.verticalLayout = QtWidgets.QVBoxLayout(self)
-        self.label = QtWidgets.QLabel(self)
-        self.horizontalLayout = QtWidgets.QHBoxLayout()
-        self.comboBox = QtWidgets.QComboBox(self)
-        self.pushButton = QtWidgets.QPushButton(self)
-        self.pushButton_2 = QtWidgets.QPushButton(self)
-        self.jour_ver = QtWidgets.QHBoxLayout(self)
-        self.save_quit_lay = QtWidgets.QHBoxLayout(self)
-        self.save_button = QtWidgets.QPushButton(self)
-        self.route = route
-        self.index = index
-        self.settings = settings
-        self.jpath = Path(self.settings.value("paths/journal"))
-        self.setup_ui()
-
-    def setup_ui(self):
-        self.resize(375, 125)
-
-        font = QtGui.QFont()
-        font.setPointSize(14)
-        self.label.setFont(font)
-
-        self.jour_ver.addWidget(self.pushButton, alignment=QtCore.Qt.AlignLeft)
-        self.jour_ver.addWidget(self.comboBox, alignment=QtCore.Qt.AlignCenter)
-        self.jour_ver.addSpacerItem(QtWidgets.QSpacerItem(
-            1, 1,
-            QtWidgets.QSizePolicy.MinimumExpanding))
-
-        self.save_quit_lay.addWidget(self.save_button, alignment=QtCore.Qt.AlignRight)
-        self.save_quit_lay.addWidget(self.pushButton_2, alignment=QtCore.Qt.AlignRight)
-
-        self.horizontalLayout.addLayout(self.jour_ver)
-        self.horizontalLayout.addLayout(self.save_quit_lay)
-
-        self.verticalLayout.addWidget(self.label, alignment=QtCore.Qt.AlignCenter)
-        self.verticalLayout.addSpacerItem(QtWidgets.QSpacerItem(
-            1, 1,
-            QtWidgets.QSizePolicy.Fixed,
-            QtWidgets.QSizePolicy.MinimumExpanding))
-
-        self.verticalLayout.setContentsMargins(6, 20, 6, 6)
-        self.verticalLayout.addLayout(self.horizontalLayout)
-
-        self.pushButton_2.pressed.connect(QtWidgets.QApplication.instance().quit)
-        self.save_button.pressed.connect(self.save_route)
-        self.pushButton.pressed.connect(self.load_journal)
-        self.pushButton.pressed.connect(lambda: self.pushButton.setDisabled(True))
-
-        if self.index == 0 or self.index == 1:
-            self.save_button.setDisabled(True)
-        self.populate_combo()
-
-        self.label.setText("Game shut down")
-        self.pushButton.setText("Load journal")
-        self.pushButton_2.setText("Quit")
-        self.save_button.setText("Save current route")
-        self.setModal(True)
-        self.setWindowFlag(QtCore.Qt.WindowContextHelpButtonHint, False)
-
-    def save_route(self):
-        self.settings.setValue("last_route", [self.index, self.route])
-        self.save_button.setDisabled(True)
-
-    def populate_combo(self):
-        self.comboBox.addItems(["Last journal", "Second to last",
-                                "Third to last"][:len([file for file
-                                                       in os.listdir(self.jpath)
-                                                       if file.endswith(".log")])])
-
-    def load_journal(self):
-        journals = sorted([self.jpath / file for file
-                           in os.listdir(self.jpath)
-                           if file.endswith(".log")],
-                          key=os.path.getctime, reverse=True)
-        self.worker_signal.emit(journals[self.comboBox.currentIndex()], self.route, self.index)
-        self.hide()
-
-    def closeEvent(self, *args, **kwargs):
-        super(QtWidgets.QDialog, self).closeEvent(*args, **kwargs)
-        self.close_signal.emit()
-
-
-class QuitDialog(QtWidgets.QDialog):
-    def __init__(self, parent, prompt, modal):
-        super(QuitDialog, self).__init__(parent)
-        self.gridLayout = QtWidgets.QVBoxLayout(self)
-        self.label = QtWidgets.QLabel(self)
-        self.pushButton = QtWidgets.QPushButton(self)
-        self.prompt = prompt
-        self.modal = modal
-        self.setup_ui()
-
-    def setup_ui(self):
-        self.setFixedSize(300, 100)
-        self.setWindowTitle(" ")
-        self.gridLayout.addWidget(self.label, alignment=QtCore.Qt.AlignCenter)
-        self.gridLayout.addWidget(self.pushButton, alignment=QtCore.Qt.AlignCenter)
-        self.pushButton.setText("Quit")
-        self.label.setText(self.prompt)
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        self.label.setFont(font)
-        self.pushButton.setMaximumWidth(95)
-        self.pushButton.pressed.connect(QtWidgets.QApplication.instance().quit)
-
-        self.setModal(self.modal)
-
-        self.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, False)
-        self.setWindowFlag(QtCore.Qt.WindowContextHelpButtonHint, False)
 
 
 class SettingsPop(QtWidgets.QDialog):
@@ -511,110 +594,3 @@ class SettingsPop(QtWidgets.QDialog):
     def closeEvent(self, *args, **kwargs):
         super(QtWidgets.QDialog, self).closeEvent(*args, **kwargs)
         self.close_signal.emit()
-
-class RouteFinishedPop(QtWidgets.QDialog):
-    close_signal = QtCore.pyqtSignal()
-    new_route_signal = QtCore.pyqtSignal()
-
-    def __init__(self, parent):
-        super(RouteFinishedPop, self).__init__(parent)
-        self.main_layout = QtWidgets.QVBoxLayout()
-        self.label = QtWidgets.QLabel()
-        self.quit_button = QtWidgets.QPushButton()
-        self.new_route_button = QtWidgets.QPushButton()
-        self.button_layout = QtWidgets.QHBoxLayout()
-        self.setup_ui()
-
-    def setup_ui(self):
-        self.setLayout(self.main_layout)
-        self.main_layout.setContentsMargins(7, 20, 7, 10)
-        self.main_layout.addWidget(self.label, alignment=QtCore.Qt.AlignCenter)
-        self.main_layout.addSpacerItem(QtWidgets.QSpacerItem(
-            1, 1,
-            QtWidgets.QSizePolicy.Fixed,
-            QtWidgets.QSizePolicy.MinimumExpanding))
-
-        self.main_layout.addLayout(self.button_layout)
-        self.button_layout.addWidget(self.new_route_button)
-        self.button_layout.addSpacerItem(QtWidgets.QSpacerItem(
-            1, 1,
-            QtWidgets.QSizePolicy.MinimumExpanding,
-            QtWidgets.QSizePolicy.Fixed))
-
-        self.button_layout.addWidget(self.quit_button)
-
-        self.quit_button.pressed.connect(sQtWidgets.QApplication.instance().quit)
-        self.new_route_button.pressed.connect(self.new_route_signal.emit)
-        self.new_route_button.pressed.connect(self.hide)
-        self.retranslateUi()
-
-    def retranslateUi(self):
-        self.label.setText("Route finished")
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        self.label.setFont(font)
-        self.quit_button.setText("Quit")
-        self.new_route_button.setText("New route")
-
-    def closeEvent(self, *args, **kwargs):
-        super(QtWidgets.QDialog, self).closeEvent(*args, **kwargs)
-        self.close_signal.emit()
-
-
-class LicensePop(QtWidgets.QDialog):
-    close_signal = QtCore.pyqtSignal()
-
-    def __init__(self, parent):
-        super(LicensePop, self).__init__(parent)
-        self.text = QtWidgets.QTextBrowser()
-        self.main_layout = QtWidgets.QVBoxLayout()
-        self.setup_ui()
-
-    def setup_ui(self):
-        self.setFixedSize(297, 62)
-        self.setWindowTitle("Auto Neutron " + VERSION)
-        self.text.setText("Auto Neutron Copyright (C) 2019 Numerlor\n"
-                          "This program comes with ABSOLUTELY NO WARRANTY.\n"
-                          "This is free software, and you are welcome to redistribute it")
-        self.text.append('under certain conditions; <a href="https://www'
-                         '.gnu.org/licenses/">click here</a> for details')
-        self.main_layout.addWidget(self.text)
-        self.text.setOpenExternalLinks(True)
-        self.setLayout(self.main_layout)
-        self.setWindowFlag(QtCore.Qt.WindowContextHelpButtonHint, False)
-        self.main_layout.setContentsMargins(0, 0, 0, 0)
-
-    def closeEvent(self, *args, **kwargs):
-        super(QtWidgets.QDialog, self).closeEvent(*args, **kwargs)
-        self.close_signal.emit()
-
-class CrashPop(QtWidgets.QDialog):
-    def __init__(self):
-        super().__init__()
-        self.label = QtWidgets.QLabel()
-        self.text_browser = QtWidgets.QTextBrowser()
-        self.quit_button = QtWidgets.QPushButton()
-        self.main_layout = QtWidgets.QVBoxLayout(self)
-        self.setup_ui()
-
-    def setup_ui(self):
-        self.setFixedSize(400, 250)
-        self.label.setText("An unexpected error has occurred")
-        self.quit_button.setText("Quit")
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        self.label.setFont(font)
-
-        self.quit_button.pressed.connect(QtWidgets.QApplication.instance().quit)
-        self.quit_button.setMaximumWidth(125)
-        self.main_layout.addWidget(self.label)
-        self.main_layout.addWidget(self.text_browser)
-        self.main_layout.addWidget(self.quit_button, alignment=QtCore.Qt.AlignCenter)
-        self.setLayout(self.main_layout)
-        self.setWindowFlag(QtCore.Qt.WindowContextHelpButtonHint, False)
-        self.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, False)
-        self.setModal(True)
-
-    def add_traceback(self, traceback):
-        for line in traceback:
-            self.text_browser.append(line)
