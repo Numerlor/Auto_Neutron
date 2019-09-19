@@ -170,16 +170,6 @@ class MainWindow(QtWidgets.QMainWindow):
     def table_click(self, c):
         self.double_signal.emit(c.row())
 
-    def insert_row(self, data):
-        """Creates a new row and inserts 4 items from data"""
-        col_count = self.MainTable.columnCount()
-        row_pos = self.MainTable.rowCount()
-        self.MainTable.setRowCount(row_pos + 1)
-        for i in range(0, col_count):
-            item = QtWidgets.QTableWidgetItem(str(data[i]))
-            item.setTextAlignment(QtCore.Qt.AlignCenter)
-            self.MainTable.setItem(row_pos, i, item)
-
     def update_jumps(self, index):
         """Update remaining jump count"""
         # sum all values in 4th column
@@ -222,6 +212,16 @@ class MainWindow(QtWidgets.QMainWindow):
         self.MainTable.resizeRowsToContents()
         # reconnect signal
         self.MainTable.itemChanged.connect(self.manage_changed)
+
+    def insert_row(self, data):
+        """Creates a new row and inserts 4 items from data"""
+        col_count = self.MainTable.columnCount()
+        row_pos = self.MainTable.rowCount()
+        self.MainTable.setRowCount(row_pos + 1)
+        for i in range(0, col_count):
+            item = QtWidgets.QTableWidgetItem(str(data[i]))
+            item.setTextAlignment(QtCore.Qt.AlignCenter)
+            self.MainTable.setItem(row_pos, i, item)
 
     def manage_changed(self, item):
         """Update relevant data in script if item was changed"""
@@ -271,7 +271,7 @@ class MainWindow(QtWidgets.QMainWindow):
         for row in range(index, self.MainTable.rowCount()):
             for i in range(0, 4):
                 self.MainTable.item(row, i).setForeground(QtGui.QColor(text_color))
-        self.MainTable.itemChanged.connect(self.send_changed)
+        self.MainTable.itemChanged.connect(self.manage_changed)
 
     def change_settings(self, font, dark, autoscroll):
         self.dark = dark
