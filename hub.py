@@ -100,7 +100,7 @@ class Hub(QtCore.QObject):
 
     def start_worker(self, data_values, journal, index):
         settings = (self.settings.value("script"), self.settings.value("bind"),
-                    self.dark, self.settings.value("copy_mode", type=bool),
+                    self.settings.value("copy_mode", type=bool),
                     self.settings.value("paths/AHK"))
         self.worker = workers.AhkWorker(self, journal, data_values, settings, index)
         self.worker.sys_signal.connect(self.main_window.index_change)
@@ -174,7 +174,7 @@ class Hub(QtCore.QObject):
 
     def change_editable_settings(self, values):
         self.script_mode_signal.emit(values[7])
-        self.script_settings.emit((values[0], values[1], values[2]))
+        self.script_settings.emit(*values[:2])
 
         self.dark = values[2]
         self.set_theme()
