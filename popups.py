@@ -126,8 +126,6 @@ class GameShutPop(BasePopUp):
         self.journal_button.pressed.connect(self.load_journal)
         self.journal_button.pressed.connect(lambda: self.journal_button.setDisabled(True))
 
-        if self.index == 0 or self.index == 1:
-            self.save_button.setDisabled(True)
         self.populate_combo()
 
         self.setModal(True)
