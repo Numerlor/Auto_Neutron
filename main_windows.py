@@ -620,8 +620,8 @@ class PlotStartDialog(QtWidgets.QDialog):
     def sp_submit_act(self):
         self.plotter = workers.SpanshPlot(self.eff_spinbox.value(),
                                           self.ran_spinbox.value(),
-                                          self.source.text(),
-                                          self.destination.text(), self)
+                                          self.source.text().strip(),
+                                          self.destination.text().strip(), self)
         self.plotter.status_signal.connect(self.change_status)
         self.plotter.finished_signal.connect(self.sp_finish_act)
         self.plotter.start()
