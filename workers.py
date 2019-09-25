@@ -44,9 +44,6 @@ class AhkWorker(QtCore.QThread):
         parent.script_mode_signal.connect(self.set_copy)
 
     def run(self):
-        self.main()
-
-    def main(self):
         if self.check_shutdown():
             self.game_shut_signal.emit(self.data_values, self.list_index)
 
@@ -296,7 +293,7 @@ class NearestRequest(QtCore.QThread):
                 self.finished_signal.emit(response['system'])
             else:
                 self.status_signal.emit(
-                    "An error has occured while communicating with Spansh's API")
+                    "An error has occurred while communicating with Spansh's API")
 
 
 class SoundPlayer:
