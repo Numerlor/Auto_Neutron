@@ -1,5 +1,8 @@
 from collections import namedtuple
 
+from PyQt5.QtCore import QByteArray
+from PyQt5.QtGui import QFont
+
 VERSION = "1.456"
 APP = "Auto Neutron"
 ORG = "Numerlor"
@@ -49,4 +52,31 @@ SHIP_STATS = {
             'int_guardianfsdbooster_size4': 9.25,
             'int_guardianfsdbooster_size5': 10.5,
         }
+}
+
+setting_params = namedtuple("SettingParams", ("type", "category"))
+settings = {
+    "save_on_quit": setting_params(bool, ""),
+    "bind": setting_params(str, ""),
+    "script": setting_params(str, ""),
+    "last_route": setting_params(tuple, ""),
+    "copy_mode": setting_params(bool, ""),
+
+    "journal": setting_params(str, "paths"),
+    "ahk": setting_params(str, "paths"),
+    "csv": setting_params(str, "paths"),
+    "alert": setting_params(str, "paths"),
+
+    "geometry": setting_params(QByteArray, "window"),
+    "dark": setting_params(bool, "window"),
+    "font_size": setting_params(int, "window"),
+    "autoscroll": setting_params(bool, "window"),
+
+    "font": setting_params(QFont, "font"),
+    "size": setting_params(int, "font"),
+    "bold": setting_params(bool, "font"),
+
+    "audio": setting_params(bool, "alerts"),
+    "visual": setting_params(bool, "alerts"),
+    "threshold": setting_params(int, "alerts"),
 }
