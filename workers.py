@@ -247,7 +247,7 @@ class SpanshPlot(QtCore.QThread):
                 elif job_json['error'] == "Could not find finishing system":
                     self.status_signal.emit("Destination system invalid")
                 else:
-                    self.status_signal.emit("An error has occured when contacting Spansh's API")
+                    self.status_signal.emit("An error has occurred when contacting Spansh's API")
 
             except KeyError:
                 job_id = job_json['job']

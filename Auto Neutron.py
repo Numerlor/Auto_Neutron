@@ -11,7 +11,7 @@ from appinfo import APP, ORG, APPID
 
 # https://stackoverflow.com/a/44352931
 def resource_path(relative_path):
-    """ Get absolute path to resource, works for dev and for PyInstaller """
+    """Get absolute path to resource, works for dev and for PyInstaller """
     base_path = getattr(sys, '_MEIPASS', Path(__file__).absolute().parent)
     return str(base_path / relative_path)
 
