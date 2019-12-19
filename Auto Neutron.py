@@ -53,9 +53,8 @@ if __name__ == "__main__":
     # save traceback to logfile if Exception is raised
     ex_handler = ExceptionHandler(path / "traceback.log")
     sys.excepthook = ex_handler.handler
-    # create org and app folders if not found
-    if not path.exists():
-        path.mkdir(parents=True)
+    # create org and app folders
+    path.mkdir(parents=True, exist_ok=True)
     settings = QtCore.QSettings(str(path / "config.ini"), QtCore.QSettings.IniFormat)
     ui = hub.Hub(settings, ex_handler)
     ui.startup()
