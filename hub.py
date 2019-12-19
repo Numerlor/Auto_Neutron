@@ -136,7 +136,7 @@ class Hub(QtCore.QObject):
         self.alert_fuel_signal.emit(self.max_fuel, self.modifier)
 
     def set_theme(self):
-        """ Set dark/default theme depending on user setting"""
+        """Set dark/default theme depending on user setting"""
         if self.dark:
             change_to_dark()
         else:
