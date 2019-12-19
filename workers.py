@@ -28,12 +28,8 @@ class AhkWorker(QtCore.QThread):
             self.ahk = AHK(executable_path=ahk_path)
         self.loop = True
         # set index according to last saved route or new plot, default index 1
-        if start_index > 0:
-            self.list_index = start_index
-        elif len(self.data_values) != 1:
-            self.list_index = 1
-        else:
-            self.list_index = 0
+        self.route_index = start_index if start_index != -1 else 1
+
         # connect parent signals
         parent.double_signal.connect(self.set_index)
         parent.edit_signal.connect(self.update_sys)
@@ -45,40 +41,40 @@ class AhkWorker(QtCore.QThread):
 
     def run(self):
         if self.check_shutdown():
-            self.game_shut_signal.emit(self.data_values, self.list_index)
+            self.game_shut_signal.emit(self.data_values, self.route_index)
 
         else:
             if self.copy:
-                set_clip(self.systems[self.list_index])
+                set_clip(self.systems[self.route_index])
             else:
                 self.hotkey = Hotkey(self.ahk, self.bind,
                                      self.script.replace("|SYSTEMDATA|",
-                                                         self.systems[self.list_index]))
+                                                         self.systems[self.route_index]))
                 self.hotkey.start()
-            self.sys_signal.emit(self.list_index)
+            self.sys_signal.emit(self.route_index)
             for line in self.follow_file(self.journal):
                 loaded = json.loads(line)
 
                 if (loaded['event'] == "FSDJump" and
-                        loaded['StarSystem'].casefold() in self.systems[self.list_index:]):
-                    self.list_index = self.systems.index(loaded['StarSystem'].casefold()) + 1
+                        loaded['StarSystem'].casefold() in self.systems[self.route_index:]):
+                    self.route_index = self.systems.index(loaded['StarSystem'].casefold()) + 1
                     # if index is last, stop
-                    if self.list_index == len(self.data_values):
+                    if self.route_index == len(self.data_values):
                         self.close_ahk()
                         self.route_finished_signal.emit()
                         break
                     if self.copy:
-                        set_clip(self.systems[self.list_index])
+                        set_clip(self.systems[self.route_index])
                     else:
                         self.reset_ahk()
-                    self.sys_signal.emit(self.list_index)
+                    self.sys_signal.emit(self.route_index)
 
                 elif loaded['event'] == "Loadout":
                     # update max fuel for alerts
                     self.fuel_signal.emit(loaded)
 
                 elif loaded['event'] == "Shutdown":
-                    self.game_shut_signal.emit(self.data_values, self.list_index)
+                    self.game_shut_signal.emit(self.data_values, self.route_index)
                     self.close_ahk()
                     break
 
@@ -88,20 +84,20 @@ class AhkWorker(QtCore.QThread):
             return b"Shutdown" == f.read(8)
 
     def set_index(self, index):
-        self.list_index = index
+        self.route_index = index
         if self.copy:
-            set_clip(self.systems[self.list_index])
+            set_clip(self.systems[self.route_index])
         else:
             self.reset_ahk()
 
-        self.sys_signal.emit(self.list_index)
+        self.sys_signal.emit(self.route_index)
 
     def update_sys(self, index, new_sys):
         self.data_values[index][0] = new_sys
         self.systems[index] = new_sys.casefold()
-        if self.list_index == index:
+        if self.route_index == index:
             if self.copy:
-                set_clip(self.systems[self.list_index])
+                set_clip(self.systems[self.route_index])
             else:
                 self.reset_ahk()
 
@@ -117,7 +113,7 @@ class AhkWorker(QtCore.QThread):
             self.copy = setting
             if self.copy:
                 self.close_ahk()
-                set_clip(self.systems[self.list_index])
+                set_clip(self.systems[self.route_index])
             else:
                 self.ahk = AHK(executable_path=self.hub.get_ahk_path())
                 self.reset_ahk()
@@ -127,7 +123,7 @@ class AhkWorker(QtCore.QThread):
         self.hotkey = Hotkey(self.ahk,
                              self.bind,
                              self.script.replace("|SYSTEMDATA|",
-                                                 self.systems[self.list_index]))
+                                                 self.systems[self.route_index]))
         self.hotkey.start()
 
     def close_ahk(self):
@@ -142,7 +138,7 @@ class AhkWorker(QtCore.QThread):
         self.close_ahk()
 
     def save_route(self):
-        self.save_signal.emit(self.list_index, self.data_values)
+        self.save_signal.emit(self.route_index, self.data_values)
 
     def quit_loop(self):
         self.loop = False
