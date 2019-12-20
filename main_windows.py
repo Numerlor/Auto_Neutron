@@ -310,8 +310,8 @@ class PlotStartDialog(QtWidgets.QDialog):
     def __init__(self, parent, settings):
         super(PlotStartDialog, self).__init__(parent)
         self.settings = settings
-        self.jpath = Path(self.settings.value("paths/journal"))
-        cpath = self.settings.value("paths/CSV")
+        self.jpath = Path(self.settings.paths.journal)
+        cpath = self.settings.paths.csv
         self.cpath = Path(cpath) if cpath else cpath
         self.gridLayout = QtWidgets.QGridLayout(self)
         self.tabWidget = QtWidgets.QTabWidget(self)
@@ -491,8 +491,7 @@ class PlotStartDialog(QtWidgets.QDialog):
         if fpath:
             self.cpath = Path(fpath)
             self.path_label.setText("Current path: " + str(self.cpath))
-            self.settings.setValue("paths/csv", str(self.cpath))
-            self.settings.sync()
+            self.settings.paths.csv = str(self.cpath)
             self.cs_submit.setEnabled(True)
         else:
             if not self.cpath:
@@ -677,7 +676,7 @@ class PlotStartDialog(QtWidgets.QDialog):
 
     def last_submit_act(self):
         self.last_submit.setEnabled(False)
-        last_route = self.settings.value("last_route")
+        last_route = self.settings.last_route
         if last_route is None or not last_route:
             self.status.showMessage("No last route found")
             self.last_submit.setEnabled(True)

@@ -7,6 +7,7 @@ import main_windows
 import popups
 import workers
 from appinfo import SHIP_STATS
+from settings import Settings
 
 
 class Hub(QtCore.QObject):
@@ -20,7 +21,7 @@ class Hub(QtCore.QObject):
     stop_alert_worker_signal = QtCore.pyqtSignal()
     alert_fuel_signal = QtCore.pyqtSignal(int, int)
 
-    def __init__(self, settings, crash_handler):
+    def __init__(self, settings: Settings, crash_handler):
         super().__init__()
 
         crash_handler.traceback_sig.connect(self.show_exception)
@@ -35,7 +36,6 @@ class Hub(QtCore.QObject):
         self.crash_window = popups.CrashPop()
 
     def startup(self):
-        self.write_default_settings()
         self.set_theme()
         self.double_signal = self.main_window.double_signal
         self.edit_signal = self.main_window.edit_signal
@@ -53,26 +53,19 @@ class Hub(QtCore.QObject):
         self.initial_pop()
 
     def show_window(self):
-        # check for old settings
-        if (self.settings.value("window/geometry") is None
-                and self.settings.value("window/pos", type=QtCore.QPoint)
-                and self.settings.value("window/size", type=QtCore.QSize)):
-            self.main_window.resize(self.settings.value("window/size", type=QtCore.QSize))
-            self.main_window.move(self.settings.value("window/pos", type=QtCore.QPoint))
-        else:
-            self.main_window.restoreGeometry(self.settings.value("window/geometry"))
-        font = self.settings.value("font/font", type=QtGui.QFont)
-        font.setPointSize(self.settings.value("font/size", type=int))
-        font.setBold(self.settings.value("font/bold", type=bool))
-        autoscroll = self.settings.value("window/autoscroll", type=bool)
-        self.main_window.change_settings(font, self.dark, autoscroll)
+        self.main_window.restoreGeometry(self.settings.window.geometry)
+        font = self.settings.font.font
+        font.setPointSize(self.settings.font.size)
+        font.setBold(self.settings.font.bold)
+        autoscroll = self.settings.window.autoscroll
+        self.main_window.change_settings(font, self.settings.window.dark, autoscroll)
         self.main_window.show()
 
     def start_alert_worker(self):
-        self.player = workers.SoundPlayer(self.sound_path)
+        self.player = workers.SoundPlayer(self.settings.paths.alert)
         status_file = (Path(os.environ['userprofile'])
                        / "Saved Games/Frontier Developments/Elite Dangerous/Status.json")
-        self.sound_worker = workers.FuelAlert(self, self.max_fuel, status_file, self.modifier)
+        self.sound_worker = workers.FuelAlert(self, self.max_fuel, status_file, self.settings.alerts.threshold)
         self.sound_worker.alert_signal.connect(self.fuel_alert)
         self.sound_worker.start()
         self.alert_worker_started = True
@@ -99,9 +92,9 @@ class Hub(QtCore.QObject):
                 self.application.beep()
 
     def start_worker(self, data_values, journal, index):
-        settings = (self.settings.value("script"), self.settings.value("bind"),
-                    self.settings.value("copy_mode", type=bool),
-                    self.settings.value("paths/AHK"))
+        settings = (self.settings.script, self.settings.bind,
+                    self.settings.copy_mode,
+                    self.settings.paths.ahk)
         self.worker = workers.AhkWorker(self, journal, data_values, settings, index)
         self.worker.sys_signal.connect(self.main_window.index_change)
         self.worker.route_finished_signal.connect(self.end_route_pop)
@@ -110,13 +103,13 @@ class Hub(QtCore.QObject):
         self.worker.save_signal.connect(self.save_route)
         self.worker.start()
 
-        if self.visual_alert or self.sound_alert:
+        if self.settings.alerts.audio or self.settings.alerts.visual:
             self.start_alert_worker()
         self.workers_started = True
 
     def restart_worker(self, route_data, route_index):
         self.worker.quit()
-        if self.sound_alert or self.visual_alert:
+        if self.settings.alerts.audio or self.settings.alerts.visual:
             self.stop_alert_worker()
         while not self.worker.isFinished():
             self.thread().sleep(1)
@@ -133,11 +126,11 @@ class Hub(QtCore.QObject):
                 if blueprint['Label'] == 'MaxFuelPerJump':
                     self.max_fuel = blueprint['Value']
 
-        self.alert_fuel_signal.emit(self.max_fuel, self.modifier)
+        self.alert_fuel_signal.emit(self.max_fuel, self.settings.alerts.threshold)
 
     def set_theme(self):
         """Set dark/default theme depending on user setting"""
-        if self.dark:
+        if self.settings.window.dark:
             change_to_dark()
         else:
             change_to_default()
@@ -172,48 +165,39 @@ class Hub(QtCore.QObject):
                                self.main_window.settings_action.setEnabled(True))
         self.main_window.settings_action.setDisabled(True)
 
-    def change_editable_settings(self, values):
-        self.script_mode_signal.emit(values[7])
-        self.script_settings.emit(*values[:2])
+    def change_editable_settings(self):
+        self.script_mode_signal.emit(self.settings.copy_mode)
+        self.script_settings.emit(self.settings.bind, self.settings.script)
 
-        self.dark = values[2]
         self.set_theme()
 
-        if (values[8] or values[9]
-                and not any((self.sound_alert, self.visual_alert))):
+        if self.settings.alerts.audio or self.settings.alerts.visual:
             self.start_alert_worker()
-        elif not values[8] and not values[9]:
+        else:
             self.stop_alert_worker()
-        self.sound_alert = values[8]
-        self.visual_alert = values[9]
-
-        self.save_on_quit = values[6]
         if any((self.sound_alert, self.visual_alert)):
             self.stop_alert_worker()
             self.start_alert_worker()
 
-        self.modifier = values[10]
-        self.alert_fuel_signal.emit(self.max_fuel, self.modifier)
+        self.alert_fuel_signal.emit(self.max_fuel, self.settings.alerts.threshold)
 
-        self.sound_path = values[11]
-        self.player = workers.SoundPlayer(values[11])
+        self.player = workers.SoundPlayer(self.paths.alert)
 
-        font = values[3]
-        font.setPointSize(values[4])
-        font.setBold(values[5])
-        self.main_window.change_settings(font, self.dark, values[12])
+        font = self.settings.font.font
+        font.setPointSize(self.settings.font.size)
+        font.setBold(self.settings.font.bold)
+        self.main_window.change_settings(font, self.settings.window.dark, self.window.auto_scroll)
 
     def save_route(self, index, data):
-        self.settings.setValue("last_route", (index, data))
+        self.settings.last_route = (index, data)
 
     def show_exception(self, exc):
         self.crash_window.add_traceback(exc)
         self.crash_window.show()
 
     def quit(self, geometry):
-        self.settings.setValue("window/geometry", geometry)
-        self.settings.sync()
-        self.window_quit_signal.emit(self.save_on_quit)
+        self.settings.window.geometry = geometry
+        self.window_quit_signal.emit(self.settings.save_on_quit)
 
 
 def change_to_dark():

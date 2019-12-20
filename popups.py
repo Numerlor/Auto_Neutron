@@ -6,6 +6,7 @@ from PyQt5 import QtWidgets, QtCore, QtGui
 
 import workers
 from appinfo import VERSION
+from settings import Settings
 
 
 class BasePopUp(QtWidgets.QDialog):
@@ -105,7 +106,7 @@ class GameShutPop(BasePopUp):
         self.route = route
         self.index = index
         self.settings = settings
-        self.jpath = Path(self.settings.value("paths/journal"))
+        self.jpath = Path(self.settings.paths.journal)
         self.setup_ui()
 
     def setup_ui(self):
@@ -132,7 +133,7 @@ class GameShutPop(BasePopUp):
         self.setWindowFlag(QtCore.Qt.WindowContextHelpButtonHint, False)
 
     def save_route(self):
-        self.settings.setValue("last_route", [self.index, self.route])
+        self.settings.last_route = (self.index, self.route)
         self.save_button.setDisabled(True)
 
     def populate_combo(self):
@@ -367,10 +368,10 @@ class Nearest(QtWidgets.QDialog):
 
 
 class SettingsPop(QtWidgets.QDialog):
-    settings_signal = QtCore.pyqtSignal(tuple)  # signal containing new settings
+    settings_signal = QtCore.pyqtSignal()
     close_signal = QtCore.pyqtSignal()
 
-    def __init__(self, parent, settings: QtCore.QSettings):
+    def __init__(self, parent, settings: Settings):
         super(SettingsPop, self).__init__(parent)
         self.widget_save_layout = QtWidgets.QVBoxLayout()
         self.bottom_layout = QtWidgets.QHBoxLayout()
@@ -495,21 +496,21 @@ class SettingsPop(QtWidgets.QDialog):
         self.retranslate_ui()
 
         # grab all settings and set the widget values to them
-        self.main_bind_edit.setText(self.settings.value("bind"))
-        self.script_edit.setText(self.settings.value("script"))
-        self.alert_path.setText(self.settings.value("paths/alert"))
-        self.alert_threshold_spin.setValue(self.settings.value("alerts/threshold", type=int))
-        self.dark_check.setChecked(self.settings.value("window/dark", type=bool))
-        self.font_combo.setCurrentFont(self.settings.value("font/font", type=QtGui.QFont))
-        self.font_size_combo.setValue(self.settings.value("font/size", type=int))
-        self.bold_check.setChecked(self.settings.value("font/bold", type=bool))
-        self.save_on_quit.setChecked(self.settings.value("save_on_quit", type=bool))
-        self.copy_check.setChecked(self.settings.value("copy_mode", type=bool))
-        self.alert_sound_check.setChecked(self.settings.value("alerts/audio", type=bool))
-        self.alert_visual_check.setChecked(self.settings.value("alerts/visual", type=bool))
-        self.autoscroll_check.setChecked(self.settings.value("window/autoscroll", type=bool))
+        self.main_bind_edit.setText(self.settings.bind)
+        self.script_edit.setText(self.settings.script)
+        self.alert_path.setText(self.settings.paths.alert)
+        self.alert_threshold_spin.setValue(self.settings.alerts.threshold)
+        self.dark_check.setChecked(self.settings.window.dark)
+        self.font_combo.setCurrentFont(self.settings.font.font)
+        self.font_size_combo.setValue(self.settings.font.size)
+        self.bold_check.setChecked(self.settings.font.bold)
+        self.save_on_quit.setChecked(self.settings.save_on_quit)
+        self.copy_check.setChecked(self.settings.copy_mode)
+        self.alert_sound_check.setChecked(self.settings.alerts.audio)
+        self.alert_visual_check.setChecked(self.settings.alerts.visual)
+        self.autoscroll_check.setChecked(self.settings.window.autoscroll)
 
-        if not self.settings.value("paths/AHK"):
+        if not self.settings.paths.ahk:
             self.copy_check.setDisabled(True)
 
         self.ahk_button.pressed.connect(self.ahk_dialog)
@@ -523,7 +524,7 @@ class SettingsPop(QtWidgets.QDialog):
             directory="C:/")
 
         if ahk_path:
-            self.settings.setValue("paths/AHK", ahk_path)
+            self.settings.paths.ahk = ahk_path
             self.copy_check.setDisabled(False)
         self.settings.sync()
 
@@ -534,39 +535,26 @@ class SettingsPop(QtWidgets.QDialog):
             self.alert_path.setText(sound_path)
 
     def save_settings(self, close=False):
-        settings = namedtuple("settings_values", (
-            "bind", "script", "dark_mode",
-            "font", "font_size", "font_bold",
-            "save_route", "copy_mode", "alert_audio",
-            "alert_visual", "alert_threshold", "alert_path", "autoscroll"))
-        values = settings(self.main_bind_edit.text(), self.script_edit.toPlainText(),
-                          self.dark_check.isChecked(), self.font_combo.currentFont(),
-                          self.font_size_combo.value(), self.bold_check.isChecked(),
-                          self.save_on_quit.isChecked(), self.copy_check.isChecked(),
-                          self.alert_sound_check.isChecked(),
-                          self.alert_visual_check.isChecked(),
-                          self.alert_threshold_spin.value(),
-                          self.alert_path.text(), self.autoscroll_check.isChecked())
-
-        if "|SYSTEMDATA|" not in values[1]:
+        if "|SYSTEMDATA|" not in self.settings.script:
             self.error_label.setText('Script must include "|SYSTEMDATA|"')
         else:
             self.error_label.clear()
-            self.settings.setValue("bind", values[0])
-            self.settings.setValue("script", values[1])
-            self.settings.setValue("window/dark", values[2])
-            self.settings.setValue("font/font", values[3])
-            self.settings.setValue("font/size", values[4])
-            self.settings.setValue("font/bold", values[5])
-            self.settings.setValue("save_on_quit", values[6])
-            self.settings.setValue("copy_mode", values[7])
-            self.settings.setValue("alerts/audio", values[8])
-            self.settings.setValue("alerts/visual", values[9])
-            self.settings.setValue("alerts/threshold", values[10])
-            self.settings.setValue("paths/alert", values[11])
-            self.settings.setValue("window/autoscroll", values[12])
-            self.settings.sync()
-            self.settings_signal.emit(values)
+            self.settings.switch_auto_sync()
+            self.settings.bind = self.main_bind_edit.text()
+            self.settings.script = self.script_edit.toPlainText()
+            self.settings.window.dark = self.dark_check.isChecked()
+            self.settings.font.font = self.font_combo.currentFont()
+            self.settings.font.size = self.font_size_combo.value()
+            self.settings.font.bold = self.bold_check.isChecked()
+            self.settings.save_on_quit = self.save_on_quit.isChecked()
+            self.settings.copy_mode = self.copy_check.isChecked()
+            self.settings.alerts.audio = self.alert_sound_check.isChecked()
+            self.settings.alerts.visual = self.alert_visual_check.isChecked()
+            self.settings.alerts.threshold = self.alert_threshold_spin.value()
+            self.settings.paths.alert = self.alert_path.text()
+            self.settings.switch_auto_sync()
+            self.settings.window.autoscroll = self.autoscroll_check.isChecked()
+            self.settings_signal.emit()
             if close:
                 self.close()
 

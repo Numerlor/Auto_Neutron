@@ -7,7 +7,7 @@ from PyQt5 import QtWidgets, QtCore, QtGui
 
 import hub
 from appinfo import APP, ORG, APPID
-
+from settings import Settings
 
 # https://stackoverflow.com/a/44352931
 def resource_path(relative_path):
@@ -55,7 +55,7 @@ if __name__ == "__main__":
     sys.excepthook = ex_handler.handler
     # create org and app folders
     path.mkdir(parents=True, exist_ok=True)
-    settings = QtCore.QSettings(str(path / "config.ini"), QtCore.QSettings.IniFormat)
+    settings = Settings(path)
     ui = hub.Hub(settings, ex_handler)
     ui.startup()
     sys.exit(app.exec_())
