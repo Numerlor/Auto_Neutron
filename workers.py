@@ -21,7 +21,6 @@ class AhkWorker(QtCore.QThread):
         self.journal = journal
         self.data_values = data_values
         self.systems = [data[0].casefold() for data in data_values]
-        self.settings = settings
         self.script, self.bind, self.copy, ahk_path = settings
 
         if not self.copy:
