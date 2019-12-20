@@ -2,6 +2,7 @@ from contextlib import suppress
 from pathlib import Path
 
 from PyQt5.QtCore import QSettings
+from PyQt5.QtWidgets import QFileDialog
 
 from appinfo import settings
 
@@ -38,7 +39,7 @@ class Settings(Category):
         self.subcategories = []
         super().__init__(QSettings(str(settings_folder / "config.ini"), QSettings.IniFormat), "")
 
-        for setting, (sett_type, category) in settings.items():
+        for setting, (sett_type, category, _) in settings.items():
             if not category:
                 # Add setting to self when there's no category
                 setattr(self, setting, self.settings.value(setting, type=sett_type))
@@ -50,6 +51,9 @@ class Settings(Category):
                     self.subcategories.append(cat)
                 setattr(getattr(self, category), setting, self.settings.value(f"{category}/{setting}", type=sett_type))
 
+        if not len(self.settings.allKeys()):
+            self.write_default_settings()
+
     def switch_auto_sync(self):
         """Flip auto_sync for self and all subcategories."""
         self.auto_sync = not self.auto_sync
@@ -58,3 +62,29 @@ class Settings(Category):
 
     def __repr__(self):
         return '\n'.join([repr(cat) for cat in self.subcategories] + [super().__repr__()])
+
+    def write_default_settings(self):
+        self.switch_auto_sync()
+        for setting, (_, category, value) in settings.items():
+            if not category:
+                setattr(self, setting, value)
+            else:
+                setattr(getattr(self, category), setting, value)
+        self.write_ahk_path()
+        self.settings.sync()
+        self.switch_auto_sync()
+
+    def write_ahk_path(self):
+        if not Path(self.paths.ahk).exists():
+            ahk_path, _ = QFileDialog.getOpenFileName(
+                filter="AutoHotKey (AutoHotKey*.exe)",
+                caption="Select AutoHotkey's executable "
+                        "if you wish to use it; cancel for copy mode",
+                directory="C:/")
+
+            if not ahk_path:
+                self.copy_mode = True
+                self.paths.ahk = " "
+            else:
+                self.copy_mode = False
+                self.paths.ahk = ahk_path

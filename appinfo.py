@@ -1,4 +1,6 @@
+import os
 from collections import namedtuple
+from pathlib import Path
 
 from PyQt5.QtCore import QByteArray
 from PyQt5.QtGui import QFont
@@ -54,29 +56,54 @@ SHIP_STATS = {
         }
 }
 
-setting_params = namedtuple("SettingParams", ("type", "category"))
+jpath = Path(
+    os.environ['userprofile']) / "Saved Games/Frontier Developments/Elite Dangerous"
+setting_params = namedtuple("SettingParams", ("type", "category", "default"))
+
 settings = {
-    "save_on_quit": setting_params(bool, ""),
-    "bind": setting_params(str, ""),
-    "script": setting_params(str, ""),
-    "last_route": setting_params(tuple, ""),
-    "copy_mode": setting_params(bool, ""),
+    "save_on_quit": setting_params(bool, "", True),
+    "bind": setting_params(str, "", "F5"),
+    "script": setting_params(str, "", ("SetKeyDelay, 50, 50\n"
+                                       ";bind to open map\n"
+                                       "send, {Numpad7}\n"
+                                       "; wait for map to open\n"
+                                       "sleep, 850\n"
+                                       ";navigate to second map tab "
+                                       "and focus on search field\n"
+                                       "send, e\n"
+                                       "send, {Space}\n"
+                                       "ClipOld := ClipboardAll\n"
+                                       'Clipboard := "|SYSTEMDATA|"\n'
+                                       "sleep, 100\n"
+                                       "Send, ^v\n"
+                                       "Clipboard := ClipOld\n"
+                                       "ClipOld ="
+                                       "SetKeyDelay, 1, 2\n"
+                                       "send, {enter}\n")),
+    "last_route": setting_params(tuple, "", ([[]],)),
+    "copy_mode": setting_params(bool, "", True),
 
-    "journal": setting_params(str, "paths"),
-    "ahk": setting_params(str, "paths"),
-    "csv": setting_params(str, "paths"),
-    "alert": setting_params(str, "paths"),
+    "journal": setting_params(str, "paths", str(jpath)),
+    "ahk": setting_params(str, "paths", str(Path(os.environ['PROGRAMW6432']) / "AutoHotkey/AutoHotkey.exe")),
+    "csv": setting_params(str, "paths", ""),
+    "alert": setting_params(str, "paths", ""),
 
-    "geometry": setting_params(QByteArray, "window"),
-    "dark": setting_params(bool, "window"),
-    "font_size": setting_params(int, "window"),
-    "autoscroll": setting_params(bool, "window"),
+    "geometry": setting_params(QByteArray, "window",
+                               QByteArray(b'\x01\xd9\xd0\xcb\x00\x03\x00\x00\x00\x00'
+                                          b'\x00d\x00\x00\x00d\x00\x00\x02c\x00\x00'
+                                          b'\x01{\x00\x00\x00l\x00\x00\x00\x82\x00'
+                                          b'\x00\x02[\x00\x00\x01s\x00\x00\x00\x00'
+                                          b'\x00\x00\x00\x00\x07\x80\x00\x00\x00l\x00'
+                                          b'\x00\x00\x82\x00\x00\x02[\x00\x00\x01s')),
+    "dark": setting_params(bool, "window", False),
+    "font_size": setting_params(int, "window", 11),
+    "autoscroll": setting_params(bool, "window", True),
 
-    "font": setting_params(QFont, "font"),
-    "size": setting_params(int, "font"),
-    "bold": setting_params(bool, "font"),
+    "font": setting_params(QFont, "font", QFont()),
+    "size": setting_params(int, "font", 11),
+    "bold": setting_params(bool, "font", False),
 
-    "audio": setting_params(bool, "alerts"),
-    "visual": setting_params(bool, "alerts"),
-    "threshold": setting_params(int, "alerts"),
+    "audio": setting_params(bool, "alerts", False),
+    "visual": setting_params(bool, "alerts", False),
+    "threshold": setting_params(int, "alerts", 150),
 }
