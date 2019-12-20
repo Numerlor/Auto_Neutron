@@ -84,7 +84,7 @@ class Settings(Category):
 
             if not ahk_path:
                 self.copy_mode = True
-                self.paths.ahk = " "
+                self.paths.ahk = ""
             else:
                 self.copy_mode = False
                 self.paths.ahk = ahk_path
