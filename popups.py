@@ -1,5 +1,4 @@
 import os
-from collections import namedtuple
 from pathlib import Path
 
 from PyQt5 import QtWidgets, QtCore, QtGui
@@ -209,158 +208,89 @@ class LicensePop(QtWidgets.QDialog):
 
 
 class Nearest(QtWidgets.QDialog):
-    # signal sent when window is closed
+    """GUI window for sending and displaying requests for nearest system."""
+    RIGHT_ALIGN = QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter
     closed_signal = QtCore.pyqtSignal()
-    # signal containing destination to input into destination line edit
     destination_signal = QtCore.pyqtSignal(str)
 
-    # lightly modified auto generated
-    def __init__(self, parent):
-        super(Nearest, self).__init__(parent=parent)
-        self.main_layout = QtWidgets.QVBoxLayout(self)
-        self.main_layout_frame = QtWidgets.QFrame(self)
-        self.frame_layout = QtWidgets.QGridLayout(self.main_layout_frame)
-        self.main_horizontal = QtWidgets.QHBoxLayout()
-        self.coords_vertical = QtWidgets.QVBoxLayout()
-        self.x_edit = QtWidgets.QLineEdit(self.main_layout_frame)
-        self.y_edit = QtWidgets.QLineEdit(self.main_layout_frame)
-        self.z_edit = QtWidgets.QLineEdit(self.main_layout_frame)
-        self.output_vertical = QtWidgets.QVBoxLayout()
-        self.system_horizontal = QtWidgets.QHBoxLayout()
-        self.system_main = QtWidgets.QLabel(self.main_layout_frame)
-        self.system_output = QtWidgets.QLabel(self.main_layout_frame)
-        self.distance_horizontal = QtWidgets.QHBoxLayout()
-        self.distance_main = QtWidgets.QLabel(self.main_layout_frame)
-        self.distance_output = QtWidgets.QLabel(self.main_layout_frame)
-        self.x_horizontal = QtWidgets.QHBoxLayout()
-        self.x_main = QtWidgets.QLabel(self.main_layout_frame)
-        self.x_output = QtWidgets.QLabel(self.main_layout_frame)
-        self.y_horizontal = QtWidgets.QHBoxLayout()
-        self.y_main = QtWidgets.QLabel(self.main_layout_frame)
-        self.y_output = QtWidgets.QLabel(self.main_layout_frame)
-        self.z_horizontal = QtWidgets.QHBoxLayout()
-        self.z_main = QtWidgets.QLabel(self.main_layout_frame)
-        self.z_output = QtWidgets.QLabel(self.main_layout_frame)
-        self.status_vertical = QtWidgets.QVBoxLayout()
-        self.get_button = QtWidgets.QPushButton(enabled=False)
+    def __init__(self, parent=None):
+        super().__init__(parent=parent)
+        self.parameters = dict.fromkeys("xyz", 0)
+        self.main_layout = QtWidgets.QGridLayout(self)
         self.status = QtWidgets.QStatusBar()
+
+        self.system_label = QtWidgets.QLabel("System name", alignment=self.RIGHT_ALIGN)
+        self.distance_label = QtWidgets.QLabel("Distance", alignment=self.RIGHT_ALIGN)
+
+        self.distance_result = QtWidgets.QLabel()
+        self.system_result = QtWidgets.QLabel()
+        self.x_result = QtWidgets.QLabel()
+        self.y_result = QtWidgets.QLabel()
+        self.z_result = QtWidgets.QLabel()
+
+        self.submit_button = QtWidgets.QPushButton("Send")
         self.setup_ui()
 
     def setup_ui(self):
-        self.resize(207, 191)
-        self.main_layout.setContentsMargins(2, 2, 20, 2)
-        self.main_layout.setSpacing(2)
-        sizePolicy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.main_layout_frame.sizePolicy().hasHeightForWidth())
-        self.main_layout_frame.setSizePolicy(sizePolicy)
-        self.main_layout_frame.setFrameShape(QtWidgets.QFrame.NoFrame)
-        self.main_layout_frame.setFrameShadow(QtWidgets.QFrame.Plain)
-        self.main_layout_frame.setLineWidth(0)
-        self.frame_layout.setContentsMargins(2, 2, 2, 2)
-        self.frame_layout.setSpacing(0)
-        self.main_horizontal.setSpacing(0)
-        self.coords_vertical.setSizeConstraint(QtWidgets.QLayout.SetMaximumSize)
-        self.coords_vertical.setSpacing(0)
-        self.x_edit.setMaximumWidth(60)
-        self.coords_vertical.addWidget(self.x_edit)
-        self.y_edit.setMaximumWidth(60)
-        self.coords_vertical.addWidget(self.y_edit)
-        self.z_edit.setMaximumWidth(60)
-        self.coords_vertical.addWidget(self.z_edit)
-        self.main_horizontal.addLayout(self.coords_vertical)
-        self.system_main.setMaximumWidth(68)
-        self.system_horizontal.addWidget(self.system_main)
-        self.system_horizontal.addWidget(self.system_output, alignment=QtCore.Qt.AlignRight)
-        self.output_vertical.addLayout(self.system_horizontal)
-        self.distance_main.setMaximumWidth(45)
-        self.distance_horizontal.addWidget(self.distance_main)
-        self.distance_horizontal.addWidget(self.distance_output, alignment=QtCore.Qt.AlignRight)
-        self.output_vertical.addLayout(self.distance_horizontal)
-        self.x_main.setMaximumWidth(15)
-        self.x_horizontal.addWidget(self.x_main)
-        self.x_horizontal.addWidget(self.x_output, alignment=QtCore.Qt.AlignRight)
-        self.output_vertical.addLayout(self.x_horizontal)
-        self.y_main.setMaximumWidth(15)
-        self.y_horizontal.addWidget(self.y_main)
-        self.y_horizontal.addWidget(self.y_output, alignment=QtCore.Qt.AlignRight)
-        self.output_vertical.addLayout(self.y_horizontal)
-        self.z_main.setMaximumWidth(15)
-        self.z_horizontal.addWidget(self.z_main)
-        self.z_horizontal.addWidget(self.z_output, alignment=QtCore.Qt.AlignRight)
-        self.output_vertical.addLayout(self.z_horizontal)
-        self.main_horizontal.addLayout(self.output_vertical)
-        self.frame_layout.addLayout(self.main_horizontal, 0, 0, 1, 1)
-        self.main_layout.addWidget(self.main_layout_frame)
-        self.status_vertical.setSizeConstraint(QtWidgets.QLayout.SetNoConstraint)
-        self.status_vertical.setSpacing(0)
-        self.main_layout.addLayout(self.status_vertical)
-        self.coords_vertical.addWidget(self.get_button)
-        self.main_horizontal.setSpacing(10)
-        self.get_button.pressed.connect(self.get_nearest)
-        self.status_vertical.addWidget(self.status)
+        spacer = QtWidgets.QSpacerItem(0, 0, QtWidgets.QSizePolicy.MinimumExpanding)
+        right_align = QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter
 
-        self.retranslateUi()
-        regex = QtCore.QRegExp("\-?\d+\.\d+")
-        valida = QtGui.QRegExpValidator(regex)
-        self.x_edit.setValidator(valida)
-        self.y_edit.setValidator(valida)
-        self.z_edit.setValidator(valida)
-
-        self.x_edit.textChanged.connect(self.ena_button)
-        self.y_edit.textChanged.connect(self.ena_button)
-        self.z_edit.textChanged.connect(self.ena_button)
-
-        self.system_output.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
-        self.system_output.setCursor(QtCore.Qt.IBeamCursor)
-        self.system_output.mouseDoubleClickEvent = self.set_destination
-
+        self.setFixedSize(250, 188)
         self.setWindowFlag(QtCore.Qt.WindowContextHelpButtonHint, False)
+        self.main_layout.setSpacing(10)
+        self.submit_button.setFixedWidth(65)
         self.status.setSizeGripEnabled(False)
 
-    def ena_button(self):
-        if (self.x_edit.text()
-                and self.y_edit.text()
-                and self.z_edit.text()):
-            self.get_button.setEnabled(True)
-        else:
-            self.get_button.setEnabled(False)
+        self.system_result.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
+        self.system_result.setCursor(QtCore.Qt.IBeamCursor)
+        self.system_result.mouseDoubleClickEvent = lambda _: self.destination_signal.emit(self.system_result.text())
+        # Add spinbox/ label pairs for each coord to grid.
+        for i, coord_name in zip(range(2, 5), "xyz"):
+            layout = QtWidgets.QHBoxLayout()
+            spinbox = QtWidgets.QDoubleSpinBox(alignment=self.RIGHT_ALIGN, minimum=-100000, maximum=100000)
+            label = QtWidgets.QLabel(coord_name.upper(), alignment=self.RIGHT_ALIGN)
 
-    def get_nearest(self):
-        self.nearest_worker = workers.NearestRequest("https://spansh.co.uk/api/nearest",
-                                                     f"x={self.x_edit.text()}"
-                                                     f"&y={self.y_edit.text()}"
-                                                     f"&z={self.z_edit.text()}"
-                                                     , self)
-        self.nearest_worker.finished_signal.connect(self.nearest_finished)
-        self.nearest_worker.status_signal.connect(self.change_status)
-        self.nearest_worker.start()
+            spinbox.setButtonSymbols(QtWidgets.QAbstractSpinBox.NoButtons)
+            spinbox.valueChanged.connect(self.update_parameters)
+            spinbox.setObjectName(coord_name)  # Set object name for identification when updating request params
 
-    def nearest_finished(self, system):
-        self.nearest_worker.quit()
+            layout.addSpacerItem(spacer)
+            layout.addWidget(spinbox)
+            layout.addWidget(label)
+            self.main_layout.addLayout(layout, i, 0)
+
+        self.main_layout.addWidget(self.system_label, 0, 0)
+        self.main_layout.addWidget(self.distance_label, 1, 0)
+
+        self.main_layout.addWidget(self.system_result, 0, 1)
+        self.main_layout.addWidget(self.distance_result, 1, 1)
+        self.main_layout.addWidget(self.x_result, 2, 1)
+        self.main_layout.addWidget(self.y_result, 3, 1)
+        self.main_layout.addWidget(self.z_result, 4, 1)
+        self.main_layout.setColumnStretch(1, 1)
+        self.submit_button.pressed.connect(self.send_request)
+        self.main_layout.addWidget(self.status, 5, 0, 1, 2)
+
+        self.main_layout.addWidget(self.submit_button, 5, 1, alignment=QtCore.Qt.AlignRight)
+
+    def update_parameters(self, value):
+        """Update parameters to reflect changed value."""
+        self.parameters[self.sender().objectName()] = value
+
+    def send_request(self):
+        self.request_worker = workers.NearestRequest(self.parameters)
+        self.request_worker.finished_signal.connect(self.process_response)
+        self.request_worker.status_signal.connect(self.status.showMessage)
+        self.request_worker.start()
+
+    def process_response(self, system):
+        self.request_worker.quit()
         self.status.clearMessage()
-        self.system_output.setText(str(system['name']))
-        self.distance_output.setText(str(round(system['distance'], 2)) + " Ly")
-        self.x_output.setText(str(round(system['x'], 2)))
-        self.y_output.setText(str(round(system['y'], 2)))
-        self.z_output.setText(str(round(system['z'], 2)))
-
-    def change_status(self, message):
-        self.status.showMessage(message)
-
-    def set_destination(self, event):
-        self.destination_signal.emit(self.system_output.text())
-
-    def retranslateUi(self):
-        self.setWindowTitle("Nearest")
-        self.system_main.setText("System Name")
-        self.distance_main.setText("Distance")
-        self.x_main.setText("X")
-        self.y_main.setText("Y")
-        self.z_main.setText("Z")
-        self.get_button.setText("Get sys")
+        self.system_result.setText(str(system['name']))
+        self.distance_result.setText(f"{round(system['distance'], 2)} Ly")
+        self.x_result.setText(str(round(system['x'], 2)))
+        self.y_result.setText(str(round(system['y'], 2)))
+        self.z_result.setText(str(round(system['z'], 2)))
 
     def closeEvent(self, *args, **kwargs):
         super(QtWidgets.QDialog, self).closeEvent(*args, **kwargs)
