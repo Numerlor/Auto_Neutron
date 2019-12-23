@@ -205,8 +205,8 @@ class FuelAlert(QtCore.QThread):
             while self.loop:
                 file.seek(0, 0)
                 loopline = file.readline()
-                self.sleep(2)
                 yield loopline
+                self.sleep(2)
 
 
 class SpanshPlot(QtCore.QThread):
