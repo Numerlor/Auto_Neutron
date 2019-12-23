@@ -56,7 +56,7 @@ class AhkWorker(QtCore.QThread):
                 if index == len(self.data_values):
                     self.close_ahk()
                     self.route_finished_signal.emit()
-                    break
+                    return
                 self.set_index(index)
 
             elif loaded['event'] == "Loadout":
@@ -66,7 +66,7 @@ class AhkWorker(QtCore.QThread):
             elif loaded['event'] == "Shutdown":
                 self.game_shut_signal.emit(self.data_values, self.route_index)
                 self.close_ahk()
-                break
+                return
 
     def check_shutdown(self):
         with self.journal.open('rb') as f:
