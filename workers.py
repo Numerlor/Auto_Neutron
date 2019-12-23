@@ -54,8 +54,7 @@ class AhkWorker(QtCore.QThread):
         super(AhkWorker, self).__init__(parent)
         self.hub = parent
         self.journal = journal
-        self.data_values = data_values
-        self.systems = [data[0].casefold() for data in data_values]
+        self.route = RouteHolder(data_values)
         self.script, self.bind, self.copy, ahk_path = settings
 
         if not self.copy:
@@ -75,7 +74,7 @@ class AhkWorker(QtCore.QThread):
 
     def run(self):
         if self.check_shutdown():
-            self.game_shut_signal.emit(self.data_values, self.route_index)
+            self.game_shut_signal.emit(self.route.data, self.route_index)
             return
 
         self.set_output_system()
@@ -85,11 +84,11 @@ class AhkWorker(QtCore.QThread):
 
             if (
                     loaded['event'] == "FSDJump"
-                    and loaded['StarSystem'].casefold() in self.systems[self.route_index:]
+                    and loaded['StarSystem'] in self.route[self.route_index:]
             ):
-                index = self.systems.index(loaded['StarSystem'].casefold()) + 1
+                index = self.route.index(loaded['StarSystem'].casefold()) + 1
                 # if index is last, stop
-                if index == len(self.data_values):
+                if index == len(self.route):
                     self.close_ahk()
                     self.route_finished_signal.emit()
                     return
@@ -100,7 +99,7 @@ class AhkWorker(QtCore.QThread):
                 self.fuel_signal.emit(loaded)
 
             elif loaded['event'] == "Shutdown":
-                self.game_shut_signal.emit(self.data_values, self.route_index)
+                self.game_shut_signal.emit(self.route.data, self.route_index)
                 self.close_ahk()
                 return
 
@@ -116,13 +115,12 @@ class AhkWorker(QtCore.QThread):
 
     def set_output_system(self):
         if self.copy:
-            set_clip(self.systems[self.route_index])
+            set_clip(self.route[self.route_index])
         else:
             self.reset_ahk()
 
     def update_sys(self, index, new_sys):
-        self.data_values[index][0] = new_sys
-        self.systems[index] = new_sys.casefold()
+        self.route[index] = new_sys
         if self.route_index == index:
             self.set_output_system()
 
@@ -138,7 +136,7 @@ class AhkWorker(QtCore.QThread):
             self.copy = setting
             if self.copy:
                 self.close_ahk()
-                set_clip(self.systems[self.route_index])
+                set_clip(self.route[self.route_index])
             else:
                 self.ahk = AHK(executable_path=self.hub.get_ahk_path())
                 self.reset_ahk()
@@ -148,7 +146,7 @@ class AhkWorker(QtCore.QThread):
         self.hotkey = Hotkey(
             self.ahk,
             self.bind,
-            self.script.replace("|SYSTEMDATA|", self.systems[self.route_index])
+            self.script.replace("|SYSTEMDATA|", self.route[self.route_index])
         )
         self.hotkey.start()
 
@@ -162,7 +160,7 @@ class AhkWorker(QtCore.QThread):
         self.close_ahk()
 
     def save_route(self):
-        self.save_signal.emit(self.route_index, self.data_values)
+        self.save_signal.emit(self.route_index, self.route.data)
 
     def quit_loop(self):
         self.loop = False
