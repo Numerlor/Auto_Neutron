@@ -1,12 +1,46 @@
 import itertools
 import json
+from collections import UserList
 from contextlib import suppress
 from math import ceil
+from typing import List, Sequence, Union
 
 import requests
 from PyQt5 import QtCore, QtMultimedia
 from ahk import Hotkey, AHK
 from pyperclip import copy as set_clip
+
+
+class RouteHolder(UserList):
+    """
+    Holds a route in the form of a list of lists.
+
+    Index, contains and getitem work with the first elements of the route sublists.
+    """
+
+    def __init__(self, route: Sequence[List[Union[str, float, float, int]]]):
+        super().__init__(route)
+        self.systems = [data[0].casefold() for data in self.data]
+        self.length = len(self.data)
+
+    def index(self, item, *args) -> int:
+        return self.systems.index(item.casefold(), *args)
+
+    def __iter__(self):
+        return iter(self.data)
+
+    def __len__(self):
+        return self.length
+
+    def __contains__(self, item):
+        return item in self.systems
+
+    def __setitem__(self, key, value):
+        self.systems[key] = value.casefold()
+        self.data[key][0] = value
+
+    def __getitem__(self, item):
+        return self.systems[item]
 
 
 class AhkWorker(QtCore.QThread):
