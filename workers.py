@@ -44,13 +44,7 @@ class AhkWorker(QtCore.QThread):
             self.game_shut_signal.emit(self.data_values, self.route_index)
             return
 
-        if self.copy:
-            set_clip(self.systems[self.route_index])
-        else:
-            self.hotkey = Hotkey(self.ahk, self.bind,
-                                 self.script.replace("|SYSTEMDATA|",
-                                                     self.systems[self.route_index]))
-            self.hotkey.start()
+        self.set_output_system()
         self.sys_signal.emit(self.route_index)
         for line in self.follow_file(self.journal):
             loaded = json.loads(line)
@@ -63,10 +57,7 @@ class AhkWorker(QtCore.QThread):
                     self.close_ahk()
                     self.route_finished_signal.emit()
                     break
-                if self.copy:
-                    set_clip(self.systems[self.route_index])
-                else:
-                    self.reset_ahk()
+                self.set_output_system()
                 self.sys_signal.emit(self.route_index)
 
             elif loaded['event'] == "Loadout":
@@ -85,21 +76,20 @@ class AhkWorker(QtCore.QThread):
 
     def set_index(self, index):
         self.route_index = index
+        self.set_output_system()
+        self.sys_signal.emit(self.route_index)
+
+    def set_output_system(self):
         if self.copy:
             set_clip(self.systems[self.route_index])
         else:
             self.reset_ahk()
 
-        self.sys_signal.emit(self.route_index)
-
     def update_sys(self, index, new_sys):
         self.data_values[index][0] = new_sys
         self.systems[index] = new_sys.casefold()
         if self.route_index == index:
-            if self.copy:
-                set_clip(self.systems[self.route_index])
-            else:
-                self.reset_ahk()
+            self.set_output_system()
 
     def update_script(self, bind, script):
         if self.bind != bind or self.script != script:
