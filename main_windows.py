@@ -510,7 +510,7 @@ class PlotStartDialog(QtWidgets.QDialog):
             options = ["Last journal", "Second to last", "Third to last"][:len(self.journals)]
             if not options:
                 w = popups.QuitDialog(self, "No journals detected", False)
-                w.setupUi()
+                w.show()
                 self.sp_submit.setEnabled(False)
                 self.cs_submit.setEnabled(False)
                 self.last_submit.setEnabled(False)
