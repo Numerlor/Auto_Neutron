@@ -226,11 +226,12 @@ class SpanshPlot(QtCore.QThread):
     def plot(self, efficiency, jrange, source, to):
         try:
             job_request = requests.get("https://spansh.co.uk/api/route",
-                                       params=
-                                       f"efficiency={efficiency}"
-                                       f"&range={jrange}"
-                                       f"&from={source}"
-                                       f"&to={to}")
+                                       params={
+                                           "efficiency": efficiency,
+                                           "range": jrange,
+                                           "from": source,
+                                           "to": to
+                                       })
         except requests.exceptions.ConnectionError:
             self.status_signal.emit("Cannot establish a connection to Spansh")
         else:
