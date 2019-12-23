@@ -264,21 +264,21 @@ class SpanshPlot(QtCore.QThread):
 
 
 class NearestRequest(QtCore.QThread):
+    REQUEST_URL = "https://spansh.co.uk/api/nearest"
     finished_signal = QtCore.pyqtSignal(dict)  # output signal
     status_signal = QtCore.pyqtSignal(str)  # statusbar change signal
 
-    def __init__(self, link, params, parent=None):
+    def __init__(self, params, parent=None):
         super(NearestRequest, self).__init__(parent)
-        self.link = link
         self.params = params
 
     def run(self):
-        self.request(self.link, self.params)
+        self.request(self.params)
 
-    def request(self, request_link, parameters):
+    def request(self, parameters):
         try:
             self.status_signal.emit("Waiting for spansh")
-            job_request = requests.get(request_link, params=parameters)
+            job_request = requests.get(self.REQUEST_URL, params=parameters)
         except requests.exceptions.ConnectionError:
             self.status_signal.emit("Unable to establish a connection to Spansh")
         else:
