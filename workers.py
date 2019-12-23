@@ -258,34 +258,35 @@ class SpanshPlot(QtCore.QThread):
                                        })
         except requests.exceptions.ConnectionError:
             self.status_signal.emit("Cannot establish a connection to Spansh")
-        else:
-            job_json = job_request.json()
-            try:
-                if job_json['error'] == "Could not find starting system":
-                    self.status_signal.emit("Source system invalid")
-                elif job_json['error'] == "Could not find finishing system":
-                    self.status_signal.emit("Destination system invalid")
-                else:
-                    self.status_signal.emit("An error has occurred when contacting Spansh's API")
+            return
 
-            except KeyError:
-                job_id = job_json['job']
-                self.status_signal.emit("Plotting")
+        job_json = job_request.json()
+        if 'error' in job_json:
+            if job_json['error'] == "Could not find starting system":
+                self.status_signal.emit("Source system invalid")
+            elif job_json['error'] == "Could not find finishing system":
+                self.status_signal.emit("Destination system invalid")
+            else:
+                self.status_signal.emit("An error has occurred when contacting Spansh's API")
 
-                for sleep_base in itertools.count(1, 5):
-                    job_json = requests.get("https://spansh.co.uk/api/results/" + job_id).json()
+            return
+        job_id = job_json['job']
+        self.status_signal.emit("Plotting")
+        for sleep_base in itertools.count(1, 5):
+            job_json = requests.get("https://spansh.co.uk/api/results/" + job_id).json()
 
-                    if job_json['status'] == "queued":
-                        # 1, 1, 2, 2, 3, 4, 6, 7, 9, 12, 15, 17, 20, 24, 27, 30, 30, 30, …
-                        self.sleep(min(ceil(ceil((sleep_base / 10) ** 2) / 1.9), 30))
-                    else:
-                        self.finished_signal.emit(
-                            [[data['system'],
-                              round(float(data['distance_jumped']), 2),
-                              round(float(data['distance_left']), 2),
-                              int(data['jumps'])]
-                             for data in job_json['result']['system_jumps']])
-                        break
+            if job_json['status'] == "queued":
+                # 1, 1, 2, 2, 3, 4, 6, 7, 9, 12, 15, 17, 20, 24, 27, 30, 30, 30, …
+                self.sleep(min(ceil(ceil((sleep_base / 10) ** 2) / 1.9), 30))
+            else:
+                self.finished_signal.emit([
+                    [data['system'],
+                     round(float(data['distance_jumped']), 2),
+                     round(float(data['distance_left']), 2),
+                     int(data['jumps'])]
+                    for data in job_json['result']['system_jumps']
+                ])
+                break
 
 
 class NearestRequest(QtCore.QThread):
@@ -318,8 +319,7 @@ class NearestRequest(QtCore.QThread):
 class SoundPlayer:
     def __init__(self, path):
         self.sound_file = QtMultimedia.QMediaPlayer()
-        self.sound_file.setMedia(QtMultimedia.QMediaContent(
-            QtCore.QUrl.fromLocalFile(str(path))))
+        self.sound_file.setMedia(QtMultimedia.QMediaContent(QtCore.QUrl.fromLocalFile(str(path))))
         self.sound_file.setVolume(100)
 
     def play(self):
