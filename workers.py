@@ -110,10 +110,11 @@ class AhkWorker(QtCore.QThread):
 
     def reset_ahk(self):
         self.close_ahk()
-        self.hotkey = Hotkey(self.ahk,
-                             self.bind,
-                             self.script.replace("|SYSTEMDATA|",
-                                                 self.systems[self.route_index]))
+        self.hotkey = Hotkey(
+            self.ahk,
+            self.bind,
+            self.script.replace("|SYSTEMDATA|", self.systems[self.route_index])
+        )
         self.hotkey.start()
 
     def close_ahk(self):
