@@ -257,7 +257,7 @@ class SpanshPlot(QtCore.QThread):
                                            "to": to
                                        })
         except requests.exceptions.ConnectionError:
-            self.status_signal.emit("Cannot establish a connection to Spansh")
+            self.status_signal.emit("Couldn't establish a connection to Spansh")
             return
 
         job_json = job_request.json()
