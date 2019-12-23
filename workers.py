@@ -42,41 +42,41 @@ class AhkWorker(QtCore.QThread):
     def run(self):
         if self.check_shutdown():
             self.game_shut_signal.emit(self.data_values, self.route_index)
+            return
 
+        if self.copy:
+            set_clip(self.systems[self.route_index])
         else:
-            if self.copy:
-                set_clip(self.systems[self.route_index])
-            else:
-                self.hotkey = Hotkey(self.ahk, self.bind,
-                                     self.script.replace("|SYSTEMDATA|",
-                                                         self.systems[self.route_index]))
-                self.hotkey.start()
-            self.sys_signal.emit(self.route_index)
-            for line in self.follow_file(self.journal):
-                loaded = json.loads(line)
+            self.hotkey = Hotkey(self.ahk, self.bind,
+                                 self.script.replace("|SYSTEMDATA|",
+                                                     self.systems[self.route_index]))
+            self.hotkey.start()
+        self.sys_signal.emit(self.route_index)
+        for line in self.follow_file(self.journal):
+            loaded = json.loads(line)
 
-                if (loaded['event'] == "FSDJump" and
-                        loaded['StarSystem'].casefold() in self.systems[self.route_index:]):
-                    self.route_index = self.systems.index(loaded['StarSystem'].casefold()) + 1
-                    # if index is last, stop
-                    if self.route_index == len(self.data_values):
-                        self.close_ahk()
-                        self.route_finished_signal.emit()
-                        break
-                    if self.copy:
-                        set_clip(self.systems[self.route_index])
-                    else:
-                        self.reset_ahk()
-                    self.sys_signal.emit(self.route_index)
-
-                elif loaded['event'] == "Loadout":
-                    # update max fuel for alerts
-                    self.fuel_signal.emit(loaded)
-
-                elif loaded['event'] == "Shutdown":
-                    self.game_shut_signal.emit(self.data_values, self.route_index)
+            if (loaded['event'] == "FSDJump" and
+                    loaded['StarSystem'].casefold() in self.systems[self.route_index:]):
+                self.route_index = self.systems.index(loaded['StarSystem'].casefold()) + 1
+                # if index is last, stop
+                if self.route_index == len(self.data_values):
                     self.close_ahk()
+                    self.route_finished_signal.emit()
                     break
+                if self.copy:
+                    set_clip(self.systems[self.route_index])
+                else:
+                    self.reset_ahk()
+                self.sys_signal.emit(self.route_index)
+
+            elif loaded['event'] == "Loadout":
+                # update max fuel for alerts
+                self.fuel_signal.emit(loaded)
+
+            elif loaded['event'] == "Shutdown":
+                self.game_shut_signal.emit(self.data_values, self.route_index)
+                self.close_ahk()
+                break
 
     def check_shutdown(self):
         with self.journal.open('rb') as f:
