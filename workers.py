@@ -51,14 +51,13 @@ class AhkWorker(QtCore.QThread):
 
             if (loaded['event'] == "FSDJump" and
                     loaded['StarSystem'].casefold() in self.systems[self.route_index:]):
-                self.route_index = self.systems.index(loaded['StarSystem'].casefold()) + 1
+                index = self.systems.index(loaded['StarSystem'].casefold()) + 1
                 # if index is last, stop
-                if self.route_index == len(self.data_values):
+                if index == len(self.data_values):
                     self.close_ahk()
                     self.route_finished_signal.emit()
                     break
-                self.set_output_system()
-                self.sys_signal.emit(self.route_index)
+                self.set_index(index)
 
             elif loaded['event'] == "Loadout":
                 # update max fuel for alerts
