@@ -49,8 +49,10 @@ class AhkWorker(QtCore.QThread):
         for line in self.follow_file(self.journal):
             loaded = json.loads(line)
 
-            if (loaded['event'] == "FSDJump" and
-                    loaded['StarSystem'].casefold() in self.systems[self.route_index:]):
+            if (
+                    loaded['event'] == "FSDJump"
+                    and loaded['StarSystem'].casefold() in self.systems[self.route_index:]
+            ):
                 index = self.systems.index(loaded['StarSystem'].casefold()) + 1
                 # if index is last, stop
                 if index == len(self.data_values):
