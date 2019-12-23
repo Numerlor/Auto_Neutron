@@ -1,5 +1,6 @@
 import itertools
 import json
+from contextlib import suppress
 from math import ceil
 
 import requests
@@ -126,10 +127,8 @@ class AhkWorker(QtCore.QThread):
         self.hotkey.start()
 
     def close_ahk(self):
-        try:
+        with suppress(RuntimeError, AttributeError):
             self.hotkey.stop()
-        except (RuntimeError, AttributeError):
-            pass
 
     def exit_and_save(self, save_route):
         if save_route:
@@ -176,7 +175,7 @@ class FuelAlert(QtCore.QThread):
         for line in self.follow_file(path):
             if line:
                 loaded = json.loads(line)
-                try:
+                with suppress(KeyError):
                     # notify when fuel is low,
                     # fsd is in cooldown and ship in supercruise
                     binflag = f"{loaded['Flags']:b}"
@@ -191,8 +190,6 @@ class FuelAlert(QtCore.QThread):
                         self.alert_signal.emit()
                     elif loaded['Fuel']['FuelMain'] > self.jump_fuel:
                         hold = False
-                except KeyError:
-                    pass
 
     def set_jump_fuel(self, max_fuel, modifier):
         self.jump_fuel = max_fuel * modifier / 100
