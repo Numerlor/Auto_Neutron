@@ -80,7 +80,7 @@ settings = {
                                        "ClipOld ="
                                        "SetKeyDelay, 1, 2\n"
                                        "send, {enter}\n")),
-    "last_route": setting_params(tuple, "", ([[]],)),
+    "last_route": setting_params(tuple, "", ()),
     "copy_mode": setting_params(bool, "", True),
 
     "journal": setting_params(str, "paths", str(jpath)),
