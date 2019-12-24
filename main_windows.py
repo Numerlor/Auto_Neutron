@@ -677,7 +677,7 @@ class PlotStartDialog(QtWidgets.QDialog):
     def last_submit_act(self):
         self.last_submit.setEnabled(False)
         last_route = self.settings.last_route
-        if last_route is None or not last_route:
+        if not last_route:
             self.status.showMessage("No last route found")
             self.last_submit.setEnabled(True)
         else:
