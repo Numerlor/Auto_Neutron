@@ -68,8 +68,7 @@ settings = {
                                        "send, {Numpad7}\n"
                                        "; wait for map to open\n"
                                        "sleep, 850\n"
-                                       ";navigate to second map tab "
-                                       "and focus on search field\n"
+                                       ";navigate to second map tab and focus on search field\n"
                                        "send, e\n"
                                        "send, {Space}\n"
                                        "ClipOld := ClipboardAll\n"
@@ -77,7 +76,7 @@ settings = {
                                        "sleep, 100\n"
                                        "Send, ^v\n"
                                        "Clipboard := ClipOld\n"
-                                       "ClipOld ="
+                                       "ClipOld =\n"
                                        "SetKeyDelay, 1, 2\n"
                                        "send, {enter}\n")),
     "last_route": setting_params(tuple, "", ()),
