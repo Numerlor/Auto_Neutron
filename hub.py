@@ -174,7 +174,7 @@ class Hub(QtCore.QObject):
 
     def change_editable_settings(self, values):
         self.script_mode_signal.emit(values[7])
-        self.script_settings.emit(*values[:2])
+        self.script_settings.emit((*values[:2],))
 
         self.dark = values[2]
         self.set_theme()
