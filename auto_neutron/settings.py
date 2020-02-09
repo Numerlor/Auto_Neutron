@@ -4,7 +4,7 @@ from pathlib import Path
 from PyQt5.QtCore import QSettings
 from PyQt5.QtWidgets import QFileDialog
 
-from appinfo import settings
+from auto_neutron.appinfo import settings
 
 
 class Category:

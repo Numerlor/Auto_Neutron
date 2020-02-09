@@ -7,9 +7,9 @@ from pathlib import Path
 from PyQt5 import QtWidgets, QtCore, QtGui
 from pyperclip import copy as set_clip
 
-import popups
-import workers
-from appinfo import SHIP_STATS
+from auto_neutron import popups
+from auto_neutron import workers
+from auto_neutron.appinfo import SHIP_STATS
 
 
 # TODO clean up th mess of PlotStartDialog

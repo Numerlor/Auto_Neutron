@@ -3,9 +3,9 @@ from pathlib import Path
 
 from PyQt5 import QtWidgets, QtCore, QtGui
 
-import workers
-from appinfo import VERSION
-from settings import Settings
+from auto_neutron import workers
+from auto_neutron.appinfo import VERSION
+from auto_neutron.settings import Settings
 
 
 class BasePopUp(QtWidgets.QDialog):

@@ -5,9 +5,10 @@ from pathlib import Path
 
 from PyQt5 import QtWidgets, QtCore, QtGui
 
-import hub
-from appinfo import APP, ORG, APPID
-from settings import Settings
+from auto_neutron import hub
+from auto_neutron.appinfo import APP, ORG, APPID
+from auto_neutron.settings import Settings
+
 
 # https://stackoverflow.com/a/44352931
 def resource_path(relative_path):

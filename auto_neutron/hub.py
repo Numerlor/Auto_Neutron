@@ -3,11 +3,11 @@ from pathlib import Path
 
 from PyQt5 import QtCore, QtWidgets, QtGui
 
-import main_windows
-import popups
-import workers
-from appinfo import SHIP_STATS
-from settings import Settings
+from auto_neutron import main_windows
+from auto_neutron import popups
+from auto_neutron import workers
+from auto_neutron.appinfo import SHIP_STATS
+from auto_neutron.settings import Settings
 
 
 class Hub(QtCore.QObject):
