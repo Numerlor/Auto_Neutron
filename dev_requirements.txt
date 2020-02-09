@@ -1,0 +1,4 @@
+flake8
+flake8-annotations
+flake8-docstrings
+pyinstaller == 3.6
