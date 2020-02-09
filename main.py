@@ -46,7 +46,7 @@ class ExceptionHandler(QtCore.QObject):
 if __name__ == "__main__":
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(APPID)
     app = QtWidgets.QApplication(sys.argv)
-    app.setWindowIcon(QtGui.QIcon(resource_path(Path("icons/icons_library.ico"))))
+    app.setWindowIcon(QtGui.QIcon(resource_path(Path("icons_library.ico"))))
     app.setApplicationName(APP)
     app.setOrganizationName(ORG)
 

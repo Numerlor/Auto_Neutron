@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+        xmlns:dc="http://purl.org/dc/elements/1.1/"
+        xmlns:cc="http://creativecommons.org/ns#"
+        xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+        xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+        xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+        xmlns="http://www.w3.org/2000/svg"
+        id="svg4078"
+        sodipodi:docname="icon.svg"
+        viewBox="0 0 489.47751 489.47751"
+        version="1.1"
+        inkscape:version="0.92.4 (5da689c313, 2019-01-14)"
+        width="489.47751"
+        height="489.47751"
+        inkscape:export-filename="D:\pycon\Auto Neutron\icons\icon16.png"
+        inkscape:export-xdpi="3.1380401"
+        inkscape:export-ydpi="3.1380401">
+    <defs
+            id="defs4536">
+        <inkscape:perspective
+                sodipodi:type="inkscape:persp3d"
+                inkscape:vp_x="-14 : 112.23875 : 1"
+                inkscape:vp_y="0 : 1000 : 0"
+                inkscape:vp_z="489.47751 : 244.73875 : 1"
+                inkscape:persp3d-origin="244.73875 : 163.15917 : 1"
+                id="perspective532"/>
+    </defs>
+    <sodipodi:namedview
+            id="base"
+            bordercolor="#666666"
+            inkscape:pageshadow="2"
+            inkscape:window-y="-8"
+            pagecolor="#ffffff"
+            inkscape:window-height="1018"
+            inkscape:window-maximized="1"
+            inkscape:zoom="1.4142136"
+            inkscape:window-x="-8"
+            showgrid="false"
+            borderopacity="1.0"
+            inkscape:current-layer="layer3"
+            inkscape:cx="382.80246"
+            inkscape:cy="280.88755"
+            inkscape:window-width="1920"
+            inkscape:pageopacity="0.0"
+            inkscape:document-units="px"
+            inkscape:snap-object-midpoints="true">
+        <inkscape:grid
+                type="xygrid"
+                id="grid555"/>
+    </sodipodi:namedview>
+    <g
+            id="layer1"
+            inkscape:label="Layer 1"
+            inkscape:groupmode="layer"
+            transform="translate(-259.37076,-404.16662)">
+        <path
+                id="path4050"
+                style="fill:#000100;fill-opacity:1"
+                d="m 488.19048,451.62 -8.125,46.281 0.0313,0.031 c -9.9316,1.6228 -19.54,4.2238 -28.719,7.6875 v -0.031 l -30.156,-36.031 -28.344,16.375 16.094,44.125 0.0624,0.031 c -7.6842,6.3076 -14.727,13.375 -21.031,21.063 l -0.0312,-0.094 -44.125,-16.094 -16.375,28.344 36.031,30.188 c -3.458,9.1707 -6.0358,18.765 -7.6562,28.688 l -0.0313,-0.031 -46.281,8.125 v 32.75 l 46.281,8.125 0.0313,-0.031 c 1.6203,9.9223 4.1982,19.517 7.6562,28.688 l -36.031,30.188 16.375,28.344 44.125,-16.094 0.0312,-0.094 c 6.3041,7.687 13.347,14.755 21.031,21.062 l -0.0624,0.031 -16.094,44.125 28.344,16.375 30.156,-36.031 v -0.0312 c 9.1783,3.4637 18.787,6.0647 28.719,7.6875 l -0.0313,0.031 8.125,46.281 h 32.719 l 8.125,-46.281 -0.0312,-0.031 c 9.9296,-1.6184 19.541,-4.1977 28.719,-7.6563 l 30.187,36.031 28.344,-16.375 -16.125,-44.125 c 7.6669,-6.2915 14.706,-13.335 21,-21 l 44.156,16.094 16.344,-28.344 -36,-30.188 c 3.4588,-9.1719 6.0668,-18.764 7.6875,-28.688 l 46.281,-8.0937 v -32.75 l -46.281,-8.125 c -1.621,-9.9131 -4.2322,-19.494 -7.6875,-28.656 l 36,-30.188 -16.344,-28.344 -44.156,16.094 c -6.2938,-7.6652 -13.333,-14.708 -21,-21 l 16.125,-44.125 -28.344,-16.375 -30.187,36.031 c -9.1775,-3.4583 -18.789,-6.0378 -28.719,-7.6562 l 0.0312,-0.031 -8.125,-46.281 h -32.719 z m 16.375,79.688 c 63.71,0 115.38,51.634 115.38,115.34 0,63.71 -51.665,115.34 -115.38,115.34 -63.71,0 -115.34,-51.634 -115.34,-115.34 0,-63.71 51.634,-115.34 115.34,-115.34 z"
+                inkscape:connector-curvature="0"
+                inkscape:export-filename="C:\Users\Numerlor\Desktop\path4050.png"
+                inkscape:export-xdpi="63.005077"
+                inkscape:export-ydpi="63.005077"/>
+    </g>
+    <metadata
+            id="metadata4533">
+        <rdf:RDF>
+            <cc:Work>
+                <dc:format>image/svg+xml</dc:format>
+                <dc:type
+                        rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+                <cc:license
+                        rdf:resource="http://creativecommons.org/publicdomain/zero/1.0/"/>
+                <dc:publisher>
+                    <cc:Agent
+                            rdf:about="http://openclipart.org/">
+                        <dc:title>Openclipart</dc:title>
+                    </cc:Agent>
+                </dc:publisher>
+                <dc:title></dc:title>
+                <dc:date>2011-02-08T14:40:25</dc:date>
+                <dc:description>a red cog</dc:description>
+                <dc:source>https://openclipart.org/detail/117439/mechanics-by-rones</dc:source>
+                <dc:creator>
+                    <cc:Agent>
+                        <dc:title>rones</dc:title>
+                    </cc:Agent>
+                </dc:creator>
+                <dc:subject>
+                    <rdf:Bag>
+                        <rdf:li>cog</rdf:li>
+                        <rdf:li>cogwheel</rdf:li>
+                        <rdf:li>iron</rdf:li>
+                        <rdf:li>machinery</rdf:li>
+                        <rdf:li>mechanics</rdf:li>
+                        <rdf:li>red</rdf:li>
+                        <rdf:li>spokes</rdf:li>
+                        <rdf:li>symbol</rdf:li>
+                        <rdf:li>wheel</rdf:li>
+                        <rdf:li>????????</rdf:li>
+                        <rdf:li>??????</rdf:li>
+                        <rdf:li>??????????</rdf:li>
+                        <rdf:li>??????????</rdf:li>
+                    </rdf:Bag>
+                </dc:subject>
+            </cc:Work>
+            <cc:License
+                    rdf:about="http://creativecommons.org/publicdomain/zero/1.0/">
+                <cc:permits
+                        rdf:resource="http://creativecommons.org/ns#Reproduction"/>
+                <cc:permits
+                        rdf:resource="http://creativecommons.org/ns#Distribution"/>
+                <cc:permits
+                        rdf:resource="http://creativecommons.org/ns#DerivativeWorks"/>
+            </cc:License>
+        </rdf:RDF>
+    </metadata>
+    <g
+            inkscape:groupmode="layer"
+            id="layer3"
+            inkscape:label="Layer 2"
+            transform="translate(30.309244,46.45339)"
+            style="display:inline">
+        <path
+                id="path5234"
+                style="fill:#007bff;fill-opacity:1;stroke-width:0.68749994"
+                d="m 108.30213,438.76898 c 28.82192,-63.56992 57.12668,-127.37496 86.38863,-190.74486 -11.54832,-5.26653 -22.23752,-12.86427 -30,-23 -174.955632,115.92784 0,0 -68.821438,45.60176 -106.134194,70.32608 68.821438,-45.60176 -12.198627,8.07298 l -93.935567,62.2531 c 4.2162243,15.02012 9.75624306,29.79286 17.8852633,43.16332 18.7960807,33.14224 56.1965767,51.54686 93.1587487,55.03037 2.51254,0.12773 5.03289,-0.0361 7.52299,-0.37667 z"
+                inkscape:connector-curvature="0"
+                sodipodi:nodetypes="ccccccccc"/>
+        <circle
+                id="path30"
+                cx="214.655"
+                cy="196.36893"
+                style="fill:#000000;fill-opacity:1;stroke-width:1.1329546"
+                r="37.369499"/>
+        <path
+                id="path5234-8"
+                style="display:inline;fill:#007bff;fill-opacity:1;stroke-width:0.68749994"
+                d="M 321.20822,-45.747609 C 292.3863,17.822308 264.08154,81.627348 234.81959,144.99725 c 11.54832,5.26653 22.23752,12.86427 30,23 174.95563,-115.927842 0,0 68.82144,-45.60176 106.13419,-70.326082 -68.82144,45.60176 12.19862,-8.07298 L 439.77522,52.069408 C 435.559,37.049288 430.01898,22.276548 421.88996,8.9060877 403.09388,-24.236149 365.69338,-42.640769 328.73121,-46.124279 c -2.51254,-0.12773 -5.03289,0.0361 -7.52299,0.37667 z"
+                inkscape:connector-curvature="0"
+                sodipodi:nodetypes="ccccccccc"/>
+    </g>
+</svg>
