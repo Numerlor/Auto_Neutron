@@ -13,7 +13,7 @@ from auto_neutron.settings import Settings
 # https://stackoverflow.com/a/44352931
 def resource_path(relative_path):
     """Get absolute path to resource, works for dev and for PyInstaller """
-    base_path = getattr(sys, '_MEIPASS', Path(__file__).absolute().parent)
+    base_path = getattr(sys, '_MEIPASS', Path(__file__).absolute().parent / "resources")
     return str(base_path / relative_path)
 
 
