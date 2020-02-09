@@ -1,6 +1,7 @@
 import ctypes
 import sys
 import traceback
+from os import PathLike
 from pathlib import Path
 
 from PyQt5 import QtWidgets, QtCore, QtGui
@@ -11,21 +12,29 @@ from auto_neutron.settings import Settings
 
 
 # https://stackoverflow.com/a/44352931
-def resource_path(relative_path):
-    """Get absolute path to resource, works for dev and for PyInstaller """
+def resource_path(relative_path: Path) -> str:
+    """Get absolute path to resource, works for dev and for PyInstaller."""
     base_path = getattr(sys, '_MEIPASS', Path(__file__).absolute().parent / "resources")
     return str(base_path / relative_path)
 
 
 class ExceptionHandler(QtCore.QObject):
+    """Handles exceptions when linked to sys.excepthook."""
+
     traceback_sig = QtCore.pyqtSignal(list)
 
-    def __init__(self, output_file):
+    def __init__(self, output_file: PathLike):
         super().__init__()
         self.path = output_file
         self.cleared = False
 
-    def handler(self, exctype, value, tb):
+    def handler(self, exctype, value, tb) -> None:  # noqa TYP001
+        """
+        Logs exceptions to `self.path` and sends a signal to open error window.
+
+        `self.path` is truncated on the first exception,
+        newlines are added if multiple exceptions occur.
+        """
         exc = traceback.format_exception(exctype, value, tb)
         with open(self.path, 'a') as f:
             if not self.cleared:
