@@ -9,3 +9,5 @@ The `build.bat` file launches PyInstaller with `PYTHONOPTIMIZE=2` under the venv
 with UPX dir set to `UPX_DIR`, if not specified UPX will not be used.
 
 `delete_dlls.py` deletes unused dlls which PyInstaller packs from the PyQt5 install to reduce the size
+
+Specified files in this directory use the MIT license included in LICENSE.md

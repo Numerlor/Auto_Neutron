@@ -1,3 +1,6 @@
+# This file uses the MIT license.
+# Copyright (C) 2020  Numerlor
+
 """
 Deletes dlls from PyQt5 install that aren't needed for this app.
 

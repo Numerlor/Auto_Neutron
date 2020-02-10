@@ -1,3 +1,6 @@
+rem This file uses the MIT license.
+rem Copyright (C) 2020  Numerlor
+
 setlocal
 FOR /F "tokens=*" %%i in ('type .env') do SET %%i
 IF NOT DEFINED VENV_DIR SET VENV_DIR=.venv

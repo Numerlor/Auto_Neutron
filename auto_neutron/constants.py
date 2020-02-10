@@ -1,3 +1,6 @@
+# Auto_Neutron
+# Copyright (C) 2019-2020  Numerlor
+
 import os
 from collections import namedtuple
 from pathlib import Path
