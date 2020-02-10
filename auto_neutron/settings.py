@@ -1,5 +1,6 @@
 from contextlib import suppress
 from pathlib import Path
+from typing import Any
 
 from PyQt5.QtCore import QSettings
 from PyQt5.QtWidgets import QFileDialog
@@ -8,12 +9,20 @@ from auto_neutron.appinfo import settings
 
 
 class Category:
+    """
+    Contains one ini QSettings category.
+
+    If `auto_sync` is `True` settings will be written on every set setting.
+    Types are checked against settings in `appinfo`, TypeError is raised on a mismatch.
+    """
+
     def __init__(self, settings_obj: QSettings, name: str):
         self.settings = settings_obj
         self.name = name
         self._auto_sync = True
 
-    def __setattr__(self, key, value):
+    def __setattr__(self, key: str, value: Any) -> None:
+        print(type(key))
         if not hasattr(self, key):
             self.__dict__[key] = value
             return
@@ -26,7 +35,7 @@ class Category:
 
         self.__dict__[key] = value
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         base_str = f"<Category {repr(self.name)}; "
         for setting in settings:
             with suppress(AttributeError):
@@ -35,6 +44,12 @@ class Category:
 
 
 class Settings(Category):
+    """
+    Holds top level settings and categories of QSettings ini file.
+
+    config.ini file in `settings_folder` is read and attributes are created from its contents.
+    """
+
     def __init__(self, settings_folder: Path):
         self.subcategories = []
         super().__init__(QSettings(str(settings_folder / "config.ini"), QSettings.IniFormat), "")
@@ -49,7 +64,12 @@ class Settings(Category):
                     cat = Category(self.settings, category)
                     setattr(self, category, cat)
                     self.subcategories.append(cat)
-                setattr(getattr(self, category), setting, self.settings.value(f"{category}/{setting}", type=sett_type))
+                # Set new setting on `category`
+                setattr(
+                    getattr(self, category),
+                    setting,
+                    self.settings.value(f"{category}/{setting}", type=sett_type)
+                )
 
         if not len(self.settings.allKeys()):
             self.write_default_settings()
@@ -59,20 +79,21 @@ class Settings(Category):
         """
         Get or set `self._auto_sync`.
 
-        Setting will switch all subcategories to new value.
+        Setting switches all subcategories' `_auto_sync` to `value`.
         """
         return self._auto_sync
 
     @auto_sync.setter
-    def auto_sync(self, value: bool) -> None:
+    def auto_sync(self, value: Any) -> None:
         self._auto_sync = value
-        for cat in self.subcategories:
-            cat.auto_sync = value
+        for category in self.subcategories:
+            category.auto_sync = value
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return '\n'.join([repr(cat) for cat in self.subcategories] + [super().__repr__()])
 
-    def write_default_settings(self):
+    def write_default_settings(self) -> None:
+        """Write default settings from `app_info` to config.ini and prompt for `ahk_path`."""
         self.auto_sync = False
         for setting, (_, category, value) in settings.items():
             if not category:
@@ -83,7 +104,8 @@ class Settings(Category):
         self.settings.sync()
         self.auto_sync = True
 
-    def write_ahk_path(self):
+    def write_ahk_path(self) -> None:
+        """Check if ahk path exists, prompt for if not."""
         if not Path(self.paths.ahk).exists():
             ahk_path, _ = QFileDialog.getOpenFileName(
                 filter="AutoHotKey (AutoHotKey*.exe)",
