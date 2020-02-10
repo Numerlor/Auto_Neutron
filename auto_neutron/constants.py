@@ -58,8 +58,8 @@ SHIP_STATS = {
 
 jpath = Path(
     os.environ['userprofile']) / "Saved Games/Frontier Developments/Elite Dangerous"
-setting_params = namedtuple("SettingParams", ("type", "category", "default"))
 
+setting_params = namedtuple("SettingParams", ("type", "category", "default"))
 settings = {
     "save_on_quit": setting_params(bool, "", True),
     "bind": setting_params(str, "", "F5"),
