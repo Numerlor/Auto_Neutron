@@ -469,7 +469,7 @@ class SettingsPop(QtWidgets.QDialog):
             self.error_label.setText('Script must include "|SYSTEMDATA|"')
         else:
             self.error_label.clear()
-            self.settings.switch_auto_sync()
+            self.settings.auto_sync = False
             self.settings.bind = self.main_bind_edit.text()
             self.settings.script = self.script_edit.toPlainText()
             self.settings.window.dark = self.dark_check.isChecked()
@@ -482,7 +482,7 @@ class SettingsPop(QtWidgets.QDialog):
             self.settings.alerts.visual = self.alert_visual_check.isChecked()
             self.settings.alerts.threshold = self.alert_threshold_spin.value()
             self.settings.paths.alert = self.alert_path.text()
-            self.settings.switch_auto_sync()
+            self.settings.auto_sync = True
             self.settings.window.autoscroll = self.autoscroll_check.isChecked()
             self.settings_signal.emit()
             if close:

@@ -11,7 +11,7 @@ class Category:
     def __init__(self, settings_obj: QSettings, name: str):
         self.settings = settings_obj
         self.name = name
-        self.auto_sync = True
+        self._auto_sync = True
 
     def __setattr__(self, key, value):
         if not hasattr(self, key):
@@ -21,7 +21,7 @@ class Category:
             if not isinstance(value, settings[key].type):
                 raise TypeError(f"Invalid type '{type(value)}' for setting {key}.")
             self.settings.setValue(f"{self.name}/{key}", value)
-            if self.auto_sync:
+            if self._auto_sync:
                 self.settings.sync()
 
         self.__dict__[key] = value
@@ -54,17 +54,26 @@ class Settings(Category):
         if not len(self.settings.allKeys()):
             self.write_default_settings()
 
-    def switch_auto_sync(self):
-        """Flip auto_sync for self and all subcategories."""
-        self.auto_sync = not self.auto_sync
+    @property
+    def auto_sync(self) -> bool:
+        """
+        Get or set `self._auto_sync`.
+
+        Setting will switch all subcategories to new value.
+        """
+        return self._auto_sync
+
+    @auto_sync.setter
+    def auto_sync(self, value: bool) -> None:
+        self._auto_sync = value
         for cat in self.subcategories:
-            cat.auto_sync = self.auto_sync
+            cat.auto_sync = value
 
     def __repr__(self):
         return '\n'.join([repr(cat) for cat in self.subcategories] + [super().__repr__()])
 
     def write_default_settings(self):
-        self.switch_auto_sync()
+        self.auto_sync = False
         for setting, (_, category, value) in settings.items():
             if not category:
                 setattr(self, setting, value)
@@ -72,7 +81,7 @@ class Settings(Category):
                 setattr(getattr(self, category), setting, value)
         self.write_ahk_path()
         self.settings.sync()
-        self.switch_auto_sync()
+        self.auto_sync = True
 
     def write_ahk_path(self):
         if not Path(self.paths.ahk).exists():
