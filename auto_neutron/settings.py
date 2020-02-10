@@ -22,7 +22,6 @@ class Category:
         self._auto_sync = True
 
     def __setattr__(self, key: str, value: Any) -> None:
-        print(type(key))
         if not hasattr(self, key):
             self.__dict__[key] = value
             return
