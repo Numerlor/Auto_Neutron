@@ -5,7 +5,7 @@ from typing import Any
 from PyQt5.QtCore import QSettings
 from PyQt5.QtWidgets import QFileDialog
 
-from auto_neutron.constants import settings
+from auto_neutron.constants import SETTINGS
 
 
 class Category:
@@ -26,8 +26,8 @@ class Category:
         if not hasattr(self, key):
             self.__dict__[key] = value
             return
-        if key in settings:
-            if not isinstance(value, settings[key].type):
+        if key in SETTINGS:
+            if not isinstance(value, SETTINGS[key].type):
                 raise TypeError(f"Invalid type '{type(value)}' for setting {key}.")
             self.settings.setValue(f"{self.name}/{key}", value)
             if self._auto_sync:
@@ -37,7 +37,7 @@ class Category:
 
     def __repr__(self) -> str:
         base_str = f"<Category {repr(self.name)}; "
-        for setting in settings:
+        for setting in SETTINGS:
             with suppress(AttributeError):
                 base_str += f"{setting}: {repr(getattr(self, setting))}, "
         return f"{base_str[:-2]}>"
@@ -54,7 +54,7 @@ class Settings(Category):
         self.subcategories = []
         super().__init__(QSettings(str(settings_folder / "config.ini"), QSettings.IniFormat), "")
 
-        for setting, (sett_type, category, _) in settings.items():
+        for setting, (sett_type, category, _) in SETTINGS.items():
             if not category:
                 # Add setting to self when there's no category
                 setattr(self, setting, self.settings.value(setting, type=sett_type))
@@ -95,7 +95,7 @@ class Settings(Category):
     def write_default_settings(self) -> None:
         """Write default settings from `app_info` to config.ini and prompt for `ahk_path`."""
         self.auto_sync = False
-        for setting, (_, category, value) in settings.items():
+        for setting, (_, category, value) in SETTINGS.items():
             if not category:
                 setattr(self, setting, value)
             else:

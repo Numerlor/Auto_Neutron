@@ -56,11 +56,11 @@ SHIP_STATS = {
         }
 }
 
-jpath = Path(
+JPATH = Path(
     os.environ['userprofile']) / "Saved Games/Frontier Developments/Elite Dangerous"
 
 setting_params = namedtuple("SettingParams", ("type", "category", "default"))
-settings = {
+SETTINGS = {
     "save_on_quit": setting_params(bool, "", True),
     "bind": setting_params(str, "", "F5"),
     "script": setting_params(str, "", ("SetKeyDelay, 50, 50\n"
@@ -82,7 +82,7 @@ settings = {
     "last_route": setting_params(tuple, "", ()),
     "copy_mode": setting_params(bool, "", True),
 
-    "journal": setting_params(str, "paths", str(jpath)),
+    "journal": setting_params(str, "paths", str(JPATH)),
     "ahk": setting_params(str, "paths", str(Path(os.environ['PROGRAMW6432']) / "AutoHotkey/AutoHotkey.exe")),
     "csv": setting_params(str, "paths", ""),
     "alert": setting_params(str, "paths", ""),
