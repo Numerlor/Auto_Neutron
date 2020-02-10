@@ -4,7 +4,7 @@ from pathlib import Path
 from PyQt5 import QtWidgets, QtCore, QtGui
 
 from auto_neutron import workers
-from auto_neutron.appinfo import VERSION
+from auto_neutron.constants import VERSION
 from auto_neutron.settings import Settings
 
 

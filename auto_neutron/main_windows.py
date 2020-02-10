@@ -9,7 +9,7 @@ from pyperclip import copy as set_clip
 
 from auto_neutron import popups
 from auto_neutron import workers
-from auto_neutron.appinfo import SHIP_STATS
+from auto_neutron.constants import SHIP_STATS
 
 
 # TODO clean up th mess of PlotStartDialog

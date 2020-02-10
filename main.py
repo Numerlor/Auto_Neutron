@@ -7,7 +7,7 @@ from pathlib import Path
 from PyQt5 import QtWidgets, QtCore, QtGui
 
 from auto_neutron import hub
-from auto_neutron.appinfo import APP, ORG, APPID
+from auto_neutron.constants import APP, ORG, APPID
 from auto_neutron.settings import Settings
 
 

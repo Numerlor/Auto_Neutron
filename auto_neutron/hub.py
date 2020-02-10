@@ -6,7 +6,7 @@ from PyQt5 import QtCore, QtWidgets, QtGui
 from auto_neutron import main_windows
 from auto_neutron import popups
 from auto_neutron import workers
-from auto_neutron.appinfo import SHIP_STATS
+from auto_neutron.constants import SHIP_STATS
 from auto_neutron.settings import Settings
 
 

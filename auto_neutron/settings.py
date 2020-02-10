@@ -5,7 +5,7 @@ from typing import Any
 from PyQt5.QtCore import QSettings
 from PyQt5.QtWidgets import QFileDialog
 
-from auto_neutron.appinfo import settings
+from auto_neutron.constants import settings
 
 
 class Category:
