@@ -57,7 +57,7 @@ class Settings(Category):
         super().__init__(QSettings(str(settings_folder / "config.ini"), QSettings.IniFormat), "")
 
         for setting, (sett_type, category, _) in SETTINGS.items():
-            if not category:
+            if category is None:
                 # Add setting to self when there's no category
                 setattr(self, setting, self.settings.value(setting, type=sett_type))
             else:

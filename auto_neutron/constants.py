@@ -64,26 +64,26 @@ AHK_PATH = Path(os.environ['PROGRAMW6432']) / "AutoHotkey/AutoHotkey.exe"
 
 setting_params = namedtuple("SettingParams", ("type", "category", "default"))
 SETTINGS = {
-    "save_on_quit": setting_params(bool, "", True),
-    "bind": setting_params(str, "", "F5"),
-    "script": setting_params(str, "", ("SetKeyDelay, 50, 50\n"
-                                       ";bind to open map\n"
-                                       "send, {Numpad7}\n"
-                                       "; wait for map to open\n"
-                                       "sleep, 850\n"
-                                       ";navigate to second map tab and focus on search field\n"
-                                       "send, e\n"
-                                       "send, {Space}\n"
-                                       "ClipOld := ClipboardAll\n"
-                                       'Clipboard := "|SYSTEMDATA|"\n'
-                                       "sleep, 100\n"
-                                       "Send, ^v\n"
-                                       "Clipboard := ClipOld\n"
-                                       "ClipOld =\n"
-                                       "SetKeyDelay, 1, 2\n"
-                                       "send, {enter}\n")),
-    "last_route": setting_params(tuple, "", ()),
-    "copy_mode": setting_params(bool, "", True),
+    "save_on_quit": setting_params(bool, None, True),
+    "bind": setting_params(str, None, "F5"),
+    "script": setting_params(str, None, ("SetKeyDelay, 50, 50\n"
+                                         ";bind to open map\n"
+                                         "send, {Numpad7}\n"
+                                         "; wait for map to open\n"
+                                         "sleep, 850\n"
+                                         ";navigate to second map tab and focus on search field\n"
+                                         "send, e\n"
+                                         "send, {Space}\n"
+                                         "ClipOld := ClipboardAll\n"
+                                         'Clipboard := "|SYSTEMDATA|"\n'
+                                         "sleep, 100\n"
+                                         "Send, ^v\n"
+                                         "Clipboard := ClipOld\n"
+                                         "ClipOld =\n"
+                                         "SetKeyDelay, 1, 2\n"
+                                         "send, {enter}\n")),
+    "last_route": setting_params(tuple, None, ()),
+    "copy_mode": setting_params(bool, None, True),
 
     "ahk": setting_params(str, "paths", str(AHK_PATH)),
     "csv": setting_params(str, "paths", ""),
