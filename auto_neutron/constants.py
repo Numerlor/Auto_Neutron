@@ -85,7 +85,6 @@ SETTINGS = {
     "last_route": setting_params(tuple, "", ()),
     "copy_mode": setting_params(bool, "", True),
 
-    "journal": setting_params(str, "paths", str(JPATH)),
     "ahk": setting_params(str, "paths", str(AHK_PATH)),
     "csv": setting_params(str, "paths", ""),
     "alert": setting_params(str, "paths", ""),
