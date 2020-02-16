@@ -209,8 +209,8 @@ class LicensePop(QtWidgets.QDialog):
     def setup_ui(self):
         self.setFixedSize(300, 125)
         self.setWindowTitle("Auto Neutron " + VERSION)
-        self.text.setText("Auto Neutron Copyright (C) 2019 Numerlor\n"
-                          "This program comes with ABSOLUTELY NO WARRANTY.\n"
+        self.text.setText("Auto_Neutron Copyright (C) 2019-2020 Numerlor\n"
+                          "Auto_Neutron comes with ABSOLUTELY NO WARRANTY.\n"
                           "This is free software, and you are welcome to redistribute it")
         self.text.append('under certain conditions; <a href="https://www'
                          '.gnu.org/licenses/">click here</a> for details')
