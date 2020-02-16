@@ -12,7 +12,7 @@ from pyperclip import copy as set_clip
 
 from auto_neutron import popups
 from auto_neutron import workers
-from auto_neutron.constants import SHIP_STATS
+from auto_neutron.constants import SHIP_STATS, LAST_JOURNALS_TEXT
 from auto_neutron.utils import get_journals
 
 
@@ -505,7 +505,7 @@ class PlotStartDialog(QtWidgets.QDialog):
             w = popups.QuitDialog(self, "Journal folder not detected", True)
             w.show()
         else:
-            options = ["Last journal", "Second to last", "Third to last"][:len(self.journals)]
+            options = LAST_JOURNALS_TEXT[:len(self.journals)]
             if not options:
                 w = popups.QuitDialog(self, "No journals detected", False)
                 w.show()
