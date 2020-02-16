@@ -13,9 +13,8 @@ from pyperclip import copy as set_clip
 from auto_neutron import popups
 from auto_neutron import workers
 from auto_neutron.constants import SHIP_STATS
+from auto_neutron.utils import get_journals
 
-
-# TODO clean up th mess of PlotStartDialog
 
 class SpinBoxDelegate(QtWidgets.QStyledItemDelegate):
     def createEditor(self, parent, QStyleOptionViewItem, QModelIndex):
@@ -313,7 +312,6 @@ class PlotStartDialog(QtWidgets.QDialog):
     def __init__(self, parent, settings):
         super(PlotStartDialog, self).__init__(parent)
         self.settings = settings
-        self.jpath = Path(self.settings.paths.journal)
         cpath = self.settings.paths.csv
         self.cpath = Path(cpath) if cpath else cpath
         self.gridLayout = QtWidgets.QGridLayout(self)
@@ -502,10 +500,7 @@ class PlotStartDialog(QtWidgets.QDialog):
 
     def get_journals(self):
         try:
-            self.journals = sorted(
-                [self.jpath / file for file in os.listdir(self.jpath)
-                 if file.endswith(".log")],
-                key=os.path.getctime, reverse=True)
+            self.journals = get_journals(3)
         except FileNotFoundError:
             w = popups.QuitDialog(self, "Journal folder not detected", True)
             w.show()
