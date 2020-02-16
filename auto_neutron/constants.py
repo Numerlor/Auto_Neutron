@@ -59,6 +59,9 @@ SHIP_STATS = {
     }
 }
 
+# Constant until localization is figured out.
+LAST_JOURNALS_TEXT = ("Last journal", "Second to last", "Third to last")
+
 JPATH = Path(os.environ['userprofile']) / "Saved Games/Frontier Developments/Elite Dangerous"
 AHK_PATH = Path(os.environ['PROGRAMW6432']) / "AutoHotkey/AutoHotkey.exe"
 
