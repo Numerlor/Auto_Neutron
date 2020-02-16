@@ -49,9 +49,8 @@ class RouteHolder(UserList):
 class AhkWorker(QtCore.QThread):
     sys_signal = QtCore.pyqtSignal(int)  # signal to update gui to index
     route_finished_signal = QtCore.pyqtSignal()  # route end reached signal
-    game_shut_signal = QtCore.pyqtSignal(list, int)  # signal for game shutdown
+    game_shut_signal = QtCore.pyqtSignal()  # signal for game shutdown
     fuel_signal = QtCore.pyqtSignal(dict)
-    save_signal = QtCore.pyqtSignal(int, list)
 
     def __init__(self, parent, journal, data_values, settings, start_index):
         super(AhkWorker, self).__init__(parent)
@@ -70,14 +69,12 @@ class AhkWorker(QtCore.QThread):
         parent.double_signal.connect(self.set_index)
         parent.edit_signal.connect(self.update_sys)
         parent.script_settings.connect(self.update_script)
-        parent.window_quit_signal.connect(self.exit_and_save)
-        parent.save_route_signal.connect(self.save_route)
         parent.quit_worker_signal.connect(self.quit_loop)
         parent.script_mode_signal.connect(self.set_copy)
 
     def run(self):
         if self.check_shutdown():
-            self.game_shut_signal.emit(self.route.data, self.route_index)
+            self.game_shut_signal.emit()
             return
 
         self.set_output_system()
@@ -157,14 +154,6 @@ class AhkWorker(QtCore.QThread):
         with suppress(RuntimeError, AttributeError):
             self.hotkey.stop()
 
-    def exit_and_save(self, save_route):
-        if save_route:
-            self.save_route()
-        self.close_ahk()
-
-    def save_route(self):
-        self.save_signal.emit(self.route_index, self.route.data)
-
     def quit_loop(self):
         self.loop = False
         self.close_ahk()
@@ -179,6 +168,9 @@ class AhkWorker(QtCore.QThread):
                     continue
                 yield loopline
 
+    def close(self):
+        self.close_ahk()
+        self.disconnect()
 
 class FuelAlert(QtCore.QThread):
     alert_signal = QtCore.pyqtSignal()

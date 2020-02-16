@@ -137,7 +137,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.copy_action.triggered.connect(self.copy)
         self.change_action.triggered.connect(self.change_item_text)
 
-        self.save_action.triggered.connect(self.hub.save_route_signal.emit)
+        self.save_action.triggered.connect(self.hub.save_route)
         self.settings_action.triggered.connect(self.hub.sett_pop)
         self.about_action.triggered.connect(self.hub.licenses_pop)
         self.new_route_action.triggered.connect(self.hub.new_route)

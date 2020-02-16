@@ -18,7 +18,6 @@ class Hub(QtCore.QObject):
     script_mode_signal = QtCore.pyqtSignal(bool)
     window_quit_signal = QtCore.pyqtSignal(bool)  # if window was closed, close ahk script
     worker_set_ahk_signal = QtCore.pyqtSignal()
-    save_route_signal = QtCore.pyqtSignal()  # signal to save current route
     quit_worker_signal = QtCore.pyqtSignal()
 
     stop_alert_worker_signal = QtCore.pyqtSignal()
@@ -103,7 +102,6 @@ class Hub(QtCore.QObject):
         self.worker.route_finished_signal.connect(self.end_route_pop)
         self.worker.game_shut_signal.connect(self.restart_worker)
         self.worker.fuel_signal.connect(self.get_max_fuel)
-        self.worker.save_signal.connect(self.save_route)
         self.worker.start()
 
         if self.settings.alerts.audio or self.settings.alerts.visual:
@@ -191,8 +189,8 @@ class Hub(QtCore.QObject):
         font.setBold(self.settings.font.bold)
         self.main_window.change_settings(font, self.settings.window.dark, self.window.auto_scroll)
 
-    def save_route(self, index, data):
-        self.settings.last_route = (index, data)
+    def save_route(self):
+        self.settings.last_route = (self.worker.route_index, self.worker.route.data)
 
     def show_exception(self, exc):
         self.crash_window.add_traceback(exc)
@@ -200,8 +198,8 @@ class Hub(QtCore.QObject):
 
     def quit(self, geometry):
         self.settings.window.geometry = geometry
-        self.window_quit_signal.emit(self.settings.save_on_quit)
-
+        if self.settings.save_on_quit:
+            self.save_route()
 
 def change_to_dark():
     p = QtGui.QPalette()
