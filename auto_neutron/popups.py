@@ -297,18 +297,18 @@ class Nearest(QtWidgets.QDialog):
 
     def send_request(self):
         self.request_worker = workers.NearestRequest(self.parameters)
-        self.request_worker.finished_signal.connect(self.process_response)
+        self.request_worker.finished_signal.connect(self.set_target_values)
         self.request_worker.status_signal.connect(self.status.showMessage)
         self.request_worker.start()
 
-    def process_response(self, system):
-        self.request_worker.quit()
+    def set_target_values(self, system: str, distance: str, x: str, y: str, z: str) -> None:
+        """Clear status bar and set target system values."""
         self.status.clearMessage()
-        self.system_result.setText(str(system['name']))
-        self.distance_result.setText(f"{round(system['distance'], 2)} Ly")
-        self.x_result.setText(str(round(system['x'], 2)))
-        self.y_result.setText(str(round(system['y'], 2)))
-        self.z_result.setText(str(round(system['z'], 2)))
+        self.system_result.setText(system)
+        self.distance_result.setText(f"{distance} Ly")
+        self.x_result.setText(x)
+        self.y_result.setText(y)
+        self.z_result.setText(z)
 
     def closeEvent(self, *args, **kwargs):
         super(QtWidgets.QDialog, self).closeEvent(*args, **kwargs)

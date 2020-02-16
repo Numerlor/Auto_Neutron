@@ -286,7 +286,7 @@ class SpanshPlot(QtCore.QThread):
 
 class NearestRequest(QtCore.QThread):
     REQUEST_URL = "https://spansh.co.uk/api/nearest"
-    finished_signal = QtCore.pyqtSignal(dict)  # output signal
+    finished_signal = QtCore.pyqtSignal(str, str, str, str, str)  # output signal
     status_signal = QtCore.pyqtSignal(str)  # statusbar change signal
 
     def __init__(self, params, parent=None):
@@ -304,8 +304,14 @@ class NearestRequest(QtCore.QThread):
             self.status_signal.emit("Unable to establish a connection to Spansh")
         else:
             if job_request.ok:
-                response = job_request.json()
-                self.finished_signal.emit(response['system'])
+                system_info = job_request.json()['system']
+                self.finished_signal.emit(
+                    system_info['name'],
+                    str(round(system_info['distance'], 2)),
+                    str(round(system_info['x'], 2)),
+                    str(round(system_info['y'], 2)),
+                    str(round(system_info['z'], 2))
+                )
             else:
                 self.status_signal.emit(
                     "An error has occurred while communicating with Spansh's API")
