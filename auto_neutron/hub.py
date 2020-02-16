@@ -9,8 +9,9 @@ from PyQt5 import QtCore, QtWidgets, QtGui
 from auto_neutron import main_windows
 from auto_neutron import popups
 from auto_neutron import workers
-from auto_neutron.constants import SHIP_STATS
+from auto_neutron.constants import LAST_JOURNALS_TEXT, SHIP_STATS
 from auto_neutron.settings import Settings
+from auto_neutron.utils import get_journals
 
 
 class Hub(QtCore.QObject):
@@ -100,7 +101,7 @@ class Hub(QtCore.QObject):
         self.worker = workers.AhkWorker(self, journal, data_values, settings, index)
         self.worker.sys_signal.connect(self.main_window.index_change)
         self.worker.route_finished_signal.connect(self.end_route_pop)
-        self.worker.game_shut_signal.connect(self.restart_worker)
+        self.worker.game_shut_signal.connect(self.on_game_shutdown)
         self.worker.fuel_signal.connect(self.get_max_fuel)
         self.worker.start()
 
@@ -108,16 +109,21 @@ class Hub(QtCore.QObject):
             self.start_alert_worker()
         self.workers_started = True
 
-    def restart_worker(self, route_data, route_index):
-        self.worker.quit()
+    def on_game_shutdown(self):
+        self.worker.close()
         if self.settings.alerts.audio or self.settings.alerts.visual:
             self.stop_alert_worker()
-        while not self.worker.isFinished():
-            self.thread().sleep(1)
-        w = popups.GameShutPop(self.main_window, self.settings, route_data, route_index)
+
+        journals = get_journals(3)
+        w = popups.GameShutPop(self.main_window, LAST_JOURNALS_TEXT[:len(journals)])
         w.show()
-        w.worker_signal.connect(self.start_worker)
-        w.close_signal.connect(self.main_window.disconnect_signals)
+        w.journal_button.pressed.connect(
+            lambda: self.start_worker(
+                self.worker.route,
+                journals[w.journal_combo.currentIndex()],
+                self.worker.route_index)
+        )
+        w.save_button.pressed.connect(self.save_route)
 
     def get_max_fuel(self, json):
         fsd = next(item for item in json['Modules'] if item['Slot'] == "FrameShiftDrive")

@@ -96,7 +96,7 @@ class GameShutPop(BasePopUp):
     # signal to disconnect all main window signals if app is not quit or new worker is not started
     close_signal = QtCore.pyqtSignal()
 
-    def __init__(self, parent, settings, route, index):
+    def __init__(self, parent: Optional[QtWidgets.QWidget], combo_items: List[str]):
         super().__init__(parent, "Game shut down")
         self.horizontalLayout = QtWidgets.QHBoxLayout()
         self.journal_combo = QtWidgets.QComboBox()
@@ -105,13 +105,12 @@ class GameShutPop(BasePopUp):
         self.jour_ver = QtWidgets.QHBoxLayout()
         self.save_quit_lay = QtWidgets.QHBoxLayout()
         self.save_button = QtWidgets.QPushButton("Save current route")
-        self.route = route
-        self.index = index
-        self.settings = settings
-        self.jpath = Path(self.settings.paths.journal)
-        self.setup_ui()
 
-    def setup_ui(self):
+        self.combo_items = combo_items
+        self.setup_ui()
+        self.connect_signals()
+
+    def setup_ui(self) -> None:  # noqa D102
         super().setup_ui()
         self.jour_ver.addWidget(self.journal_button, alignment=QtCore.Qt.AlignLeft)
         self.jour_ver.addWidget(self.journal_combo, alignment=QtCore.Qt.AlignCenter)
@@ -124,36 +123,17 @@ class GameShutPop(BasePopUp):
         self.horizontalLayout.addLayout(self.save_quit_lay)
         self.add_layout(self.horizontalLayout)
 
-        self.quit_button.pressed.connect(QtWidgets.QApplication.instance().quit)
-        self.save_button.pressed.connect(self.save_route)
-        self.journal_button.pressed.connect(self.load_journal)
-        self.journal_button.pressed.connect(lambda: self.journal_button.setDisabled(True))
-
-        self.populate_combo()
+        self.journal_combo.addItems(self.combo_items)
 
         self.setModal(True)
         self.setWindowFlag(QtCore.Qt.WindowContextHelpButtonHint, False)
 
-    def save_route(self):
-        self.settings.last_route = (self.index, self.route)
-        self.save_button.setDisabled(True)
+    def connect_signals(self) -> None:  # noqa D102
+        self.quit_button.pressed.connect(QtWidgets.QApplication.instance().quit)
+        self.journal_button.pressed.connect(self.close)
 
-    def populate_combo(self):
-        self.journal_combo.addItems(["Last journal", "Second to last",
-                                     "Third to last"][:len([file for file
-                                                            in os.listdir(self.jpath)
-                                                            if file.endswith(".log")])])
-
-    def load_journal(self):
-        journals = sorted([self.jpath / file for file
-                           in os.listdir(self.jpath)
-                           if file.endswith(".log")],
-                          key=os.path.getctime, reverse=True)
-        self.worker_signal.emit(self.route, journals[self.journal_combo.currentIndex()],
-                                self.index)
-        self.hide()
-
-    def closeEvent(self, *args, **kwargs):
+    def closeEvent(self, *args, **kwargs) -> None:
+        """Emit `close_signal` when window is closed."""
         super(QtWidgets.QDialog, self).closeEvent(*args, **kwargs)
         self.close_signal.emit()
 
