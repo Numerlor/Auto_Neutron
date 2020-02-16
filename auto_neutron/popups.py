@@ -85,7 +85,7 @@ class RouteFinishedPop(BasePopUp):
 
     def closeEvent(self, *args, **kwargs) -> None:
         """Emit `close_signal` when window is closed."""
-        super(QtWidgets.QDialog, self).closeEvent(*args, **kwargs)
+        super().closeEvent(*args, **kwargs)
         self.close_signal.emit()
 
 
@@ -169,11 +169,17 @@ class GameShutPop(BasePopUp):
 
     def closeEvent(self, *args, **kwargs) -> None:
         """Emit `close_signal` when window is closed."""
-        super(QtWidgets.QDialog, self).closeEvent(*args, **kwargs)
+        super().closeEvent(*args, **kwargs)
         self.close_signal.emit()
 
 
 class CrashPop(BasePopUp):
+    """
+    Popup for showing an exception.
+
+    Shows an exception text and forces user to quit through `quit_button`.
+    """
+
     def __init__(self):
         super().__init__(None, "An unexpected error has occurred")
         self.text_browser = QtWidgets.QTextBrowser()
@@ -181,7 +187,7 @@ class CrashPop(BasePopUp):
         self.layout = QtWidgets.QVBoxLayout()
         self.setup_ui()
 
-    def setup_ui(self):
+    def setup_ui(self):  # noqa D102
         super().setup_ui()
         self.quit_button.pressed.connect(QtWidgets.QApplication.instance().quit)
         self.quit_button.setMaximumWidth(125)
@@ -192,26 +198,30 @@ class CrashPop(BasePopUp):
         self.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, False)
         self.setModal(True)
 
-    def add_traceback(self, traceback):
+    def add_traceback(self, traceback: List[str]) -> None:
+        """Add items from traceback to `self.text_browser`."""
         for line in traceback:
             self.text_browser.append(line)
 
 
 class LicensePop(QtWidgets.QDialog):
+    """Window for license information."""
+
     close_signal = QtCore.pyqtSignal()
 
-    def __init__(self, parent):
+    def __init__(self, parent: Optional[QtWidgets.QWidget] = None):
         super(LicensePop, self).__init__(parent)
         self.text = QtWidgets.QTextBrowser()
         self.main_layout = QtWidgets.QVBoxLayout()
         self.setup_ui()
 
-    def setup_ui(self):
+    def setup_ui(self) -> None:  # noqa D102
         self.setFixedSize(300, 125)
         self.setWindowTitle("Auto Neutron " + VERSION)
         self.text.setText("Auto_Neutron Copyright (C) 2019-2020 Numerlor\n"
                           "Auto_Neutron comes with ABSOLUTELY NO WARRANTY.\n"
                           "This is free software, and you are welcome to redistribute it")
+        # Append because link didn't work with setText
         self.text.append('under certain conditions; <a href="https://www'
                          '.gnu.org/licenses/">click here</a> for details')
         self.main_layout.addWidget(self.text)
@@ -220,18 +230,20 @@ class LicensePop(QtWidgets.QDialog):
         self.setWindowFlag(QtCore.Qt.WindowContextHelpButtonHint, False)
         self.main_layout.setContentsMargins(0, 0, 0, 0)
 
-    def closeEvent(self, *args, **kwargs):
-        super(QtWidgets.QDialog, self).closeEvent(*args, **kwargs)
+    def closeEvent(self, *args, **kwargs) -> None:
+        """Emit `close_signal` when window is closed."""
+        super().closeEvent(*args, **kwargs)
         self.close_signal.emit()
 
 
 class Nearest(QtWidgets.QDialog):
     """GUI window for sending and displaying requests for nearest system."""
+
     RIGHT_ALIGN = QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter
     closed_signal = QtCore.pyqtSignal()
     destination_signal = QtCore.pyqtSignal(str)
 
-    def __init__(self, parent=None):
+    def __init__(self, parent: Optional[QtWidgets.QWidget] = None):
         super().__init__(parent=parent)
         self.parameters = dict.fromkeys("xyz", 0)
         self.main_layout = QtWidgets.QGridLayout(self)
@@ -249,10 +261,7 @@ class Nearest(QtWidgets.QDialog):
         self.submit_button = QtWidgets.QPushButton("Send")
         self.setup_ui()
 
-    def setup_ui(self):
-        spacer = QtWidgets.QSpacerItem(0, 0, QtWidgets.QSizePolicy.MinimumExpanding)
-        right_align = QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter
-
+    def setup_ui(self) -> None:  # noqa D102
         self.setFixedSize(250, 188)
         self.setWindowFlag(QtCore.Qt.WindowContextHelpButtonHint, False)
         self.main_layout.setSpacing(10)
@@ -261,18 +270,25 @@ class Nearest(QtWidgets.QDialog):
 
         self.system_result.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
         self.system_result.setCursor(QtCore.Qt.IBeamCursor)
-        self.system_result.mouseDoubleClickEvent = lambda _: self.destination_signal.emit(self.system_result.text())
+        self.system_result.mouseDoubleClickEvent = lambda _: (
+            self.destination_signal.emit(self.system_result.text())
+        )
         # Add spinbox/ label pairs for each coord to grid.
         for i, coord_name in zip(range(2, 5), "xyz"):
             layout = QtWidgets.QHBoxLayout()
-            spinbox = QtWidgets.QDoubleSpinBox(alignment=self.RIGHT_ALIGN, minimum=-100000, maximum=100000)
+            spinbox = QtWidgets.QDoubleSpinBox(
+                alignment=self.RIGHT_ALIGN,
+                minimum=-100000,
+                maximum=100000
+            )
             label = QtWidgets.QLabel(coord_name.upper(), alignment=self.RIGHT_ALIGN)
 
             spinbox.setButtonSymbols(QtWidgets.QAbstractSpinBox.NoButtons)
             spinbox.valueChanged.connect(self.update_parameters)
-            spinbox.setObjectName(coord_name)  # Set object name for identification when updating request params
+            # Set object name for identification when updating request params
+            spinbox.setObjectName(coord_name)
 
-            layout.addSpacerItem(spacer)
+            layout.addSpacerItem(QtWidgets.QSpacerItem(0, 0, QtWidgets.QSizePolicy.Expanding))
             layout.addWidget(spinbox)
             layout.addWidget(label)
             self.main_layout.addLayout(layout, i, 0)
@@ -291,11 +307,12 @@ class Nearest(QtWidgets.QDialog):
 
         self.main_layout.addWidget(self.submit_button, 5, 1, alignment=QtCore.Qt.AlignRight)
 
-    def update_parameters(self, value):
-        """Update parameters to reflect changed value."""
+    def update_parameters(self, value: int) -> None:
+        """Update coordinate parameters with new value from spinboxes."""
         self.parameters[self.sender().objectName()] = value
 
-    def send_request(self):
+    def send_request(self) -> None:
+        """Create and start NearestWorker for getting coordinates from spansh."""
         self.request_worker = workers.NearestRequest(self.parameters)
         self.request_worker.finished_signal.connect(self.set_target_values)
         self.request_worker.status_signal.connect(self.status.showMessage)
@@ -310,8 +327,9 @@ class Nearest(QtWidgets.QDialog):
         self.y_result.setText(y)
         self.z_result.setText(z)
 
-    def closeEvent(self, *args, **kwargs):
-        super(QtWidgets.QDialog, self).closeEvent(*args, **kwargs)
+    def closeEvent(self, *args, **kwargs) -> None:
+        """Emit `close_signal` when window is closed."""
+        super().closeEvent(*args, **kwargs)
         self.closed_signal.emit()
 
 
