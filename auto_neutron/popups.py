@@ -1,8 +1,7 @@
 # This file is part of Auto_Neutron.
 # Copyright (C) 2019-2020  Numerlor
 
-import os
-from pathlib import Path
+from typing import Optional, Union, List
 
 from PyQt5 import QtWidgets, QtCore, QtGui
 
@@ -12,8 +11,9 @@ from auto_neutron.settings import Settings
 
 
 class BasePopUp(QtWidgets.QDialog):
+    """Base window for simple dialog popups."""
 
-    def __init__(self, parent, prompt: str):
+    def __init__(self, parent: Optional[QtWidgets.QWidget], prompt: str):
         super().__init__(parent)
         self.main_layout = QtWidgets.QVBoxLayout(self)
         self.bottom_layout = QtWidgets.QHBoxLayout()
@@ -27,7 +27,7 @@ class BasePopUp(QtWidgets.QDialog):
             QtWidgets.QSizePolicy.Fixed,
             QtWidgets.QSizePolicy.MinimumExpanding)
 
-    def setup_ui(self):
+    def setup_ui(self) -> None:  # noqa D102
         self.main_layout.setContentsMargins(10, 20, 10, 10)
         font = QtGui.QFont()
         font.setPointSize(15)
@@ -37,25 +37,40 @@ class BasePopUp(QtWidgets.QDialog):
         self.main_layout.addLayout(self.bottom_layout)
         self.setWindowFlag(QtCore.Qt.WindowContextHelpButtonHint, False)
 
-    def add_widget(self, widget, alignment=QtCore.Qt.AlignCenter):
+    def add_widget(
+            self,
+            widget: QtWidgets.QWidget,
+            alignment: Union[QtCore.Qt.Alignment, QtCore.Qt.AlignmentFlag] = QtCore.Qt.AlignCenter
+    ) -> None:
+        """Add `widget` to bottom of window."""
         self.bottom_layout.addWidget(widget, alignment)
 
-    def add_layout(self, layout):
+    def add_layout(self, layout: QtWidgets.QLayout) -> None:
+        """Add `layout` to bottom of window."""
         self.bottom_layout.addLayout(layout)
 
 
 class RouteFinishedPop(BasePopUp):
+    """
+    Popup for finished route.
+
+    Contains two buttons:
+                          `quit_button` for exiting the app
+                          `new_route_button` for starting a new route
+    """
+
     close_signal = QtCore.pyqtSignal()
     new_route_signal = QtCore.pyqtSignal()
 
-    def __init__(self, parent):
+    def __init__(self, parent: Optional[QtWidgets.QWidget]):
         super().__init__(parent, "Route finished")
         self.quit_button = QtWidgets.QPushButton("Quit")
         self.new_route_button = QtWidgets.QPushButton("New route")
         self.button_layout = QtWidgets.QHBoxLayout()
         self.setup_ui()
+        self.connect_signals()
 
-    def setup_ui(self):
+    def setup_ui(self) -> None:  # noqa D102
         super().setup_ui()
         self.button_layout.addWidget(self.new_route_button)
         self.button_layout.addSpacerItem(self.x_spacer)
@@ -63,37 +78,57 @@ class RouteFinishedPop(BasePopUp):
 
         self.add_layout(self.button_layout)
 
+    def connect_signals(self) -> None:  # noqa D102
         self.quit_button.pressed.connect(QtWidgets.QApplication.instance().quit)
         self.new_route_button.pressed.connect(self.new_route_signal.emit)
         self.new_route_button.pressed.connect(self.close)
 
-    def closeEvent(self, *args, **kwargs):
+    def closeEvent(self, *args, **kwargs) -> None:
+        """Emit `close_signal` when window is closed."""
         super(QtWidgets.QDialog, self).closeEvent(*args, **kwargs)
         self.close_signal.emit()
 
 
 class QuitDialog(BasePopUp):
-    def __init__(self, parent, prompt, modal):
+    """
+    Popup wth the option to quit the app.
+
+    Contains one button:
+                          `quit_button` for exiting the app
+    If `modal` is True, the window is modal and user is forced to quit.
+    """
+
+    def __init__(self, parent: Optional[QtWidgets.QWidget], prompt: str, modal: bool):
         super().__init__(parent, prompt)
 
-        self.pushButton = QtWidgets.QPushButton(text="Quit", parent=parent)
+        self.quit_button = QtWidgets.QPushButton(text="Quit", parent=parent)
         self.modal = modal
         self.setup_ui()
+        self.connect_signals()
 
-    def setup_ui(self):
+    def setup_ui(self) -> None:  # noqa D102
         super().setup_ui()
-        self.pushButton.setMaximumWidth(95)
-        self.pushButton.pressed.connect(QtWidgets.QApplication.instance().quit)
-        self.add_widget(self.pushButton)
-
+        self.quit_button.setMaximumWidth(95)
+        self.add_widget(self.quit_button)
         self.setModal(self.modal)
         self.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, False)
         self.setWindowFlag(QtCore.Qt.WindowContextHelpButtonHint, False)
 
+    def connect_signals(self) -> None:  # noqa D102
+        self.quit_button.pressed.connect(QtWidgets.QApplication.instance().quit)
+
 
 class GameShutPop(BasePopUp):
-    worker_signal = QtCore.pyqtSignal(list, Path, int)  # signal to start new worker
-    # signal to disconnect all main window signals if app is not quit or new worker is not started
+    """
+    Popup for when the game is shut down.
+
+    Contains three buttons:
+                            `quit_button` for exiting the app
+                            `journal_button` for continuing the route with
+                                             a new journal file
+                            `save_button` for saving the route
+    """
+
     close_signal = QtCore.pyqtSignal()
 
     def __init__(self, parent: Optional[QtWidgets.QWidget], combo_items: List[str]):
