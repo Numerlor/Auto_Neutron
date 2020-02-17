@@ -445,6 +445,7 @@ class SettingsPop(QtWidgets.QDialog):
         self.alert_threshold_spin.setSuffix("%")
         self.alert_threshold_spin.setMaximum(300)
         self.alert_threshold_spin.setAccelerated(True)
+        self.alert_threshold_spin.setMaximumWidth(75)
         self.alert_threshold_label.setWordWrap(True)
         self.alert_dialog_button.pressed.connect(self.sound_path_dialog)
         self.alert_path_layout.addWidget(self.alert_path)
