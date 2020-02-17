@@ -366,7 +366,7 @@ class SettingsPop(QtWidgets.QDialog):
         self.alert_visual_check = QtWidgets.QCheckBox()
         self.alert_path_layout = QtWidgets.QHBoxLayout()
         self.alert_path = QtWidgets.QLineEdit()
-        self.alert_dialog_button = QtWidgets.QToolButton()
+        self.alert_dialog_button = QtWidgets.QPushButton()
         self.alert_path_label = QtWidgets.QLabel()
 
         self.settings = settings
@@ -447,7 +447,7 @@ class SettingsPop(QtWidgets.QDialog):
         self.alert_threshold_spin.setAccelerated(True)
         self.alert_threshold_spin.setMaximumWidth(75)
         self.alert_threshold_label.setWordWrap(True)
-        self.alert_dialog_button.pressed.connect(self.sound_path_dialog)
+        self.alert_dialog_button.setFixedSize(24, 23)
         self.alert_path_layout.addWidget(self.alert_path)
         self.alert_path_layout.addWidget(self.alert_dialog_button)
         self.alert_layout.addWidget(self.alert_visual_check)
