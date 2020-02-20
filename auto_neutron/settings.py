@@ -102,22 +102,25 @@ class Settings(Category):
                 setattr(self, setting, value)
             else:
                 setattr(getattr(self, category), setting, value)
-        self.write_ahk_path()
+        if not Path(self.paths.ahk).exists():
+            path = self.set_ahk_path()
+            if path:
+                self.copy_mode = True
+            else:
+                self.copy_mode = False
         self.settings.sync()
         self.auto_sync = True
 
-    def write_ahk_path(self) -> None:
-        """Check if ahk path exists, prompt for if not."""
-        if not Path(self.paths.ahk).exists():
-            ahk_path, _ = QFileDialog.getOpenFileName(
-                filter="AutoHotKey (AutoHotKey*.exe)",
-                caption="Select AutoHotkey's executable "
-                        "if you wish to use it; cancel for copy mode",
-                directory="C:/")
+    def set_ahk_path(self) -> bool:
+        """Prompt for ahk path and set it if valid. If dialog is closed, set to an empty string."""
+        ahk_path, _ = QFileDialog.getOpenFileName(
+            filter="AutoHotkey (AutoHotkey*.exe)",
+            caption="Select AutoHotkey's executable.",
+            directory="C:/")
 
-            if not ahk_path:
-                self.copy_mode = True
-                self.paths.ahk = ""
-            else:
-                self.copy_mode = False
-                self.paths.ahk = ahk_path
+        if ahk_path and Path(ahk_path).stem.lower().startswith("autohotkey"):
+            self.paths.ahk = ahk_path
+            return True
+        else:
+            self.paths.ahk = ""
+            return False
