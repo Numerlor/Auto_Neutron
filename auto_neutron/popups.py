@@ -305,7 +305,7 @@ class Nearest(QtWidgets.QDialog):
         self.submit_button.pressed.connect(self.send_request)
         self.main_layout.addWidget(self.status, 5, 0, 1, 2)
 
-        self.main_layout.addWidget(self.submit_button, 5, 1, alignment=QtCore.Qt.AlignRight)
+        self.main_layout.addWidget(self.submit_button, 5, 1, alignment=self.RIGHT_ALIGN)
 
     def update_parameters(self, value: int) -> None:
         """Update coordinate parameters with new value from spinboxes."""
