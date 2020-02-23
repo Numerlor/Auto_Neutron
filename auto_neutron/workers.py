@@ -13,6 +13,8 @@ from PyQt5 import QtCore, QtMultimedia
 from ahk import Hotkey, AHK
 from pyperclip import copy as set_clip
 
+from auto_neutron.constants import STATUS_PATH
+
 
 class RouteHolder(UserList):
     """
@@ -219,8 +221,8 @@ class FuelAlert(QtCore.QThread):
     def stop_loop(self):
         self.loop = False
 
-    def follow_file(self, filepath):
-        with filepath.open(encoding="utf-8") as file:
+    def follow_file(self):
+        with STATUS_PATH.open(encoding="utf-8") as file:
             while self.loop:
                 file.seek(0, 0)
                 loopline = file.readline()

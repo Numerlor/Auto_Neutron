@@ -63,6 +63,7 @@ SHIP_STATS = {
 LAST_JOURNALS_TEXT = ("Last journal", "Second to last", "Third to last")
 
 JPATH = Path(os.environ['userprofile']) / "Saved Games/Frontier Developments/Elite Dangerous"
+STATUS_PATH = Path(os.environ['userprofile']) / "Saved Games/Frontier Developments/Elite Dangerous/Status.json"
 AHK_PATH = Path(os.environ['PROGRAMW6432']) / "AutoHotkey/AutoHotkey.exe"
 
 setting_params = namedtuple("SettingParams", ("type", "category", "default"))

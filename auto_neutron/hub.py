@@ -66,9 +66,8 @@ class Hub(QtCore.QObject):
 
     def start_alert_worker(self):
         self.player = workers.SoundPlayer(self.settings.paths.alert)
-        status_file = (Path(os.environ['userprofile'])
-                       / "Saved Games/Frontier Developments/Elite Dangerous/Status.json")
-        self.sound_worker = workers.FuelAlert(self, self.max_fuel, status_file, self.settings.alerts.threshold)
+
+        self.sound_worker = workers.FuelAlert(self, self.max_fuel, self.settings.alerts.threshold)
         self.sound_worker.alert_signal.connect(self.fuel_alert)
         self.sound_worker.start()
         self.alert_worker_started = True
