@@ -313,7 +313,7 @@ class Nearest(QtWidgets.QDialog):
 
     def send_request(self) -> None:
         """Create and start NearestWorker for getting coordinates from spansh."""
-        self.request_worker = workers.NearestRequest(self.parameters)
+        self.request_worker = workers.NearestRequest(*self.parameters.values())
         self.request_worker.finished_signal.connect(self.set_target_values)
         self.request_worker.status_signal.connect(self.status.showMessage)
         self.request_worker.start()

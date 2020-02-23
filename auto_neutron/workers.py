@@ -348,9 +348,13 @@ class NearestRequest(QtCore.QThread):
     finished_signal = QtCore.pyqtSignal(str, str, str, str, str)  # output signal
     status_signal = QtCore.pyqtSignal(str)  # statusbar change signal
 
-    def __init__(self, params, parent=None):
-        super(NearestRequest, self).__init__(parent)
-        self.params = params
+    def __init__(self, x: float, y: float, z: float, parent=None):
+        super().__init__(parent)
+        self.request_params = {
+            "x": x,
+            "y": y,
+            "z": z,
+        }
 
     def run(self):
         self.request(self.params)
