@@ -6,7 +6,8 @@ import json
 from collections import UserList
 from contextlib import suppress
 from math import ceil
-from typing import List, Sequence, Union
+from pathlib import Path
+from typing import Generator, List, Sequence, Union, Optional
 
 import requests
 from PyQt5 import QtCore, QtMultimedia
@@ -28,7 +29,8 @@ class RouteHolder(UserList):
         self.systems = [data[0].casefold() for data in self.data]
         self.length = len(self.data)
 
-    def index(self, item, *args) -> int:
+    def index(self, item: str, *args) -> int:
+        """Get index of a system."""
         return self.systems.index(item.casefold(), *args)
 
     def __iter__(self):
@@ -37,25 +39,38 @@ class RouteHolder(UserList):
     def __len__(self):
         return self.length
 
-    def __contains__(self, item):
+    def __contains__(self, item: str):
         return item in self.systems
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key: int, value: str):
         self.systems[key] = value.casefold()
         self.data[key][0] = value
 
-    def __getitem__(self, item):
+    def __getitem__(self, item: int):
         return self.systems[item]
 
 
+# TODO Detach AHK to an another class.
 class AhkWorker(QtCore.QThread):
+    """
+    Worker for handling journal file events.
+
+    Create AHK instances or copy systems to clipboard depending on journal events.
+    """
+
     sys_signal = QtCore.pyqtSignal(int)  # signal to update gui to index
     route_finished_signal = QtCore.pyqtSignal()  # route end reached signal
     game_shut_signal = QtCore.pyqtSignal()  # signal for game shutdown
     fuel_signal = QtCore.pyqtSignal(dict)
 
-    def __init__(self, parent, journal, data_values, settings, start_index):
-        super(AhkWorker, self).__init__(parent)
+    def __init__(
+            self, parent: Optional[QtCore.QObject],
+            journal: Path,
+            data_values: Sequence[List[Union[str, float, float, int]]],
+            settings: tuple,
+            start_index: int
+    ):
+        super().__init__(parent)
         self.hub = parent
         self.journal = journal
         self.route = RouteHolder(data_values)
@@ -74,25 +89,31 @@ class AhkWorker(QtCore.QThread):
         parent.quit_worker_signal.connect(self.quit_loop)
         parent.script_mode_signal.connect(self.set_copy)
 
-    def run(self):
+    def run(self) -> None:
+        """
+        Run checks on every line of file in thread.
+
+        File is checked for FSDJump, Loadout and Shutdown events.
+        When end of route is reached or the Shutdown event is encountered, stop execution.
+        """
         if self.check_shutdown():
             self.game_shut_signal.emit()
             return
 
         self.set_output_system()
         self.sys_signal.emit(self.route_index)
-        for line in self.follow_file(self.journal):
+        for line in self.follow_file():
             loaded = json.loads(line)
 
             if (
-                    loaded['event'] == "FSDJump"
-                    and loaded['StarSystem'] in self.route[self.route_index:]
+                    loaded['event'] == "FSDJump" and
+                    loaded['StarSystem'] in self.route[self.route_index:]
             ):
                 index = self.route.index(loaded['StarSystem'].casefold()) + 1
                 # if index is last, stop
                 if index == len(self.route):
-                    self.close_ahk()
                     self.route_finished_signal.emit()
+                    self.close_ahk()
                     return
                 self.set_index(index)
 
@@ -105,35 +126,55 @@ class AhkWorker(QtCore.QThread):
                 self.close_ahk()
                 return
 
-    def check_shutdown(self):
+    def check_shutdown(self) -> bool:
+        """Check if journal ends with a Shutdown event."""
         with self.journal.open('rb') as f:
             f.seek(-13, 2)
             return b"Shutdown" == f.read(8)
 
-    def set_index(self, index):
+    def set_index(self, index: int) -> None:
+        """Set current route index, change output sys and send signal."""
         self.route_index = index
         self.set_output_system()
         self.sys_signal.emit(self.route_index)
 
-    def set_output_system(self):
+    def set_output_system(self) -> None:
+        """
+        Set output sys to current index.
+
+        If copy mode is active, set clipboard
+        otherwise reset AHK with new route index.
+        """
         if self.copy:
             set_clip(self.route[self.route_index])
         else:
             self.reset_ahk()
 
-    def update_sys(self, index, new_sys):
+    def update_sys(self, index: int, new_sys: str) -> None:
+        """Update system at `index` to `new_sys`."""
         self.route[index] = new_sys
         if self.route_index == index:
             self.set_output_system()
 
-    def update_script(self, bind, script):
+    def update_script(self, bind: str, script: str) -> None:
+        """
+        Update AHK script code or bind .
+
+        Triggered when any of them are updated with new settings.
+        """
         if self.bind != bind or self.script != script:
             self.bind = bind
             self.script = script
             if not self.copy:
                 self.reset_ahk()
 
-    def set_copy(self, setting):
+    def set_copy(self, setting: bool) -> None:
+        """
+        Set copy mode to `settings`.
+
+        When new and current settings mismatch, apply setting.
+        AHK is closed or launched depending on the setting.
+        """
         if setting is not self.copy:
             self.copy = setting
             if self.copy:
@@ -143,7 +184,8 @@ class AhkWorker(QtCore.QThread):
                 self.ahk = AHK(executable_path=self.hub.get_ahk_path())
                 self.reset_ahk()
 
-    def reset_ahk(self):
+    def reset_ahk(self) -> None:
+        """Reset AHK with system at `self.route_index` in place."""
         self.close_ahk()
         self.hotkey = Hotkey(
             self.ahk,
@@ -152,16 +194,19 @@ class AhkWorker(QtCore.QThread):
         )
         self.hotkey.start()
 
-    def close_ahk(self):
+    def close_ahk(self) -> None:
+        """Close AHK."""
         with suppress(RuntimeError, AttributeError):
             self.hotkey.stop()
 
-    def quit_loop(self):
+    def quit_loop(self) -> None:
+        """Quit main thread loop and close AHK."""
         self.loop = False
         self.close_ahk()
 
-    def follow_file(self, filepath):
-        with filepath.open(encoding="utf-8") as file:
+    def follow_file(self) -> Generator[str, None, None]:
+        """Tail journal file, yielding new lines every second."""
+        with self.journal.open(encoding="utf-8") as file:
             file.seek(0, 2)
             while self.loop:
                 loopline = file.readline()
@@ -170,16 +215,19 @@ class AhkWorker(QtCore.QThread):
                     continue
                 yield loopline
 
-    def close(self):
+    def close(self) -> None:
+        """Close AHK and disconnect signals."""
         self.close_ahk()
         self.disconnect()
 
+
 class FuelAlert(QtCore.QThread):
+    """Worker class for following the status file and sending an alert signal when fuel is low."""
+
     alert_signal = QtCore.pyqtSignal()
 
-    def __init__(self, parent, max_fuel, file, modifier):
-        super(FuelAlert, self).__init__(parent)
-        self.file = file
+    def __init__(self, parent: Optional[QtCore.QObject], max_fuel: float, modifier: float):
+        super().__init__(parent)
         self.loop = True
         self.alert = False
 
@@ -188,46 +236,53 @@ class FuelAlert(QtCore.QThread):
         parent.next_jump_signal.connect(self.change_alert)
         parent.alert_fuel_signal.connect(self.set_jump_fuel)
 
-    def run(self):
-        self.main(self.file)
+    def run(self) -> None:
+        """
+        Send signal event when fuel is low.
 
-    def main(self, path):
+        On every status file check, send `FuelAlert.alert_signal` if current fuel is below limit.
+        """
         hold = False
-        for line in self.follow_file(path):
-            if line:
-                loaded = json.loads(line)
-                with suppress(KeyError):
-                    # notify when fuel is low,
-                    # fsd is in cooldown and ship in supercruise
-                    binflag = f"{loaded['Flags']:b}"
-                    if (
-                            not hold
-                            and self.alert
-                            and loaded['Fuel']['FuelMain'] < self.jump_fuel
-                            and binflag[-19] == "1"
-                            and binflag[-5] == "1"
-                    ):
-                        hold = True
-                        self.alert_signal.emit()
-                    elif loaded['Fuel']['FuelMain'] > self.jump_fuel:
-                        hold = False
+        for line in self.follow_file():
+            loaded = json.loads(line)
+            with suppress(KeyError):
+                # notify when fuel is low,
+                # fsd is in cooldown and ship in supercruise
+                binflag = f"{loaded['Flags']:b}"
+                if (
+                        not hold
+                        and self.alert
+                        and loaded['Fuel']['FuelMain'] < self.jump_fuel
+                        and binflag[-19] == "1"
+                        and binflag[-5] == "1"
+                ):
+                    hold = True
+                    self.alert_signal.emit()
+                elif loaded['Fuel']['FuelMain'] > self.jump_fuel:
+                    hold = False
 
-    def set_jump_fuel(self, max_fuel, modifier):
+    def set_jump_fuel(self, max_fuel: float, modifier: float) -> None:
+        """Set `self.jump_fuel`."""
         self.jump_fuel = max_fuel * modifier / 100
 
-    def change_alert(self, status):
-        self.alert = status
+    def change_alert(self, value: bool) -> None:
+        """Set `self.alert` to new `value`."""
+        self.alert = value
 
-    def stop_loop(self):
+    def stop_loop(self) -> None:
+        """Set `self.loop` to False, stopping the `self.follow_file` loop."""
         self.loop = False
 
-    def follow_file(self):
+    def follow_file(self) -> Generator[str, None, None]:
+        """Follow status file, reading containing line every 2 seconds."""
         with STATUS_PATH.open(encoding="utf-8") as file:
             while self.loop:
                 file.seek(0, 0)
                 loopline = file.readline()
+                if not loopline:
+                    self.sleep(2)
+                    continue
                 yield loopline
-                self.sleep(2)
 
 
 class SpanshPlot(QtCore.QThread):
@@ -236,23 +291,19 @@ class SpanshPlot(QtCore.QThread):
 
     def __init__(self, efficiency, jrange, source, to, parent=None):
         super(SpanshPlot, self).__init__(parent)
-        self.efficiency = efficiency
-        self.jrange = jrange
-        self.source = source
-        self.to = to
+        self.request_params = {
+            "efficiency": efficiency,
+            "range": jrange,
+            "from": source,
+            "to": to
+        }
 
     def run(self):
-        self.plot(self.efficiency, self.jrange, self.source, self.to)
-
-    def plot(self, efficiency, jrange, source, to):
         try:
-            job_request = requests.get("https://spansh.co.uk/api/route",
-                                       params={
-                                           "efficiency": efficiency,
-                                           "range": jrange,
-                                           "from": source,
-                                           "to": to
-                                       })
+            job_request = requests.get(
+                "https://spansh.co.uk/api/route",
+                params=self.request_params
+            )
         except requests.exceptions.ConnectionError:
             self.status_signal.emit("Couldn't establish a connection to Spansh")
             return
@@ -265,8 +316,8 @@ class SpanshPlot(QtCore.QThread):
                 self.status_signal.emit("Destination system invalid")
             else:
                 self.status_signal.emit("An error has occurred when contacting Spansh's API")
-
             return
+
         job_id = job_json['job']
         self.status_signal.emit("Plotting")
         for sleep_base in itertools.count(1, 5):
@@ -276,13 +327,17 @@ class SpanshPlot(QtCore.QThread):
                 # 1, 1, 2, 2, 3, 4, 6, 7, 9, 12, 15, 17, 20, 24, 27, 30, 30, 30, …
                 self.sleep(min(ceil(ceil((sleep_base / 10) ** 2) / 1.9), 30))
             else:
-                self.finished_signal.emit([
-                    [data['system'],
-                     round(float(data['distance_jumped']), 2),
-                     round(float(data['distance_left']), 2),
-                     int(data['jumps'])]
-                    for data in job_json['result']['system_jumps']
-                ])
+                self.finished_signal.emit(
+                    [
+                        [
+                            data['system'],
+                            round(float(data['distance_jumped']), 2),
+                            round(float(data['distance_left']), 2),
+                            int(data['jumps'])
+                        ]
+                        for data in job_json['result']['system_jumps']
+                    ]
+                )
                 break
 
 
