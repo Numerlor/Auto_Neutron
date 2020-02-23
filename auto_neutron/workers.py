@@ -286,6 +286,7 @@ class FuelAlert(QtCore.QThread):
 
 
 class SpanshPlot(QtCore.QThread):
+    SPANSH_API_URL = "https://spansh.co.uk/api/"
     finished_signal = QtCore.pyqtSignal(list)  # signal containing output
     status_signal = QtCore.pyqtSignal(str)  # signal for updating statusbar
 
@@ -300,10 +301,7 @@ class SpanshPlot(QtCore.QThread):
 
     def run(self):
         try:
-            job_request = requests.get(
-                "https://spansh.co.uk/api/route",
-                params=self.request_params
-            )
+            job_request = requests.get(self.SPANSH_API_URL + "route", params=self.request_params)
         except requests.exceptions.ConnectionError:
             self.status_signal.emit("Couldn't establish a connection to Spansh")
             return
@@ -321,7 +319,11 @@ class SpanshPlot(QtCore.QThread):
         job_id = job_json['job']
         self.status_signal.emit("Plotting")
         for sleep_base in itertools.count(1, 5):
-            job_json = requests.get("https://spansh.co.uk/api/results/" + job_id).json()
+            try:
+                job_json = requests.get(self.SPANSH_API_URL + "results/" + job_id).json()
+            except requests.exceptions.ConnectionError:
+                self.status_signal.emit("Couldn't establish a connection to Spansh")
+                return
 
             if job_json['status'] == "queued":
                 # 1, 1, 2, 2, 3, 4, 6, 7, 9, 12, 15, 17, 20, 24, 27, 30, 30, 30, …
