@@ -16,6 +16,7 @@ from pyperclip import copy as set_clip
 
 from auto_neutron.constants import STATUS_PATH
 
+SPANSH_API_URL = "https://spansh.co.uk/api/"
 
 class RouteHolder(UserList):
     """
@@ -106,8 +107,8 @@ class AhkWorker(QtCore.QThread):
             loaded = json.loads(line)
 
             if (
-                    loaded['event'] == "FSDJump" and
-                    loaded['StarSystem'] in self.route[self.route_index:]
+                    loaded['event'] == "FSDJump"
+                    and loaded['StarSystem'] in self.route[self.route_index:]
             ):
                 index = self.route.index(loaded['StarSystem'].casefold()) + 1
                 # if index is last, stop
@@ -286,7 +287,6 @@ class FuelAlert(QtCore.QThread):
 
 
 class SpanshPlot(QtCore.QThread):
-    SPANSH_API_URL = "https://spansh.co.uk/api/"
     finished_signal = QtCore.pyqtSignal(list)  # signal containing output
     status_signal = QtCore.pyqtSignal(str)  # signal for updating statusbar
 
@@ -294,14 +294,14 @@ class SpanshPlot(QtCore.QThread):
         super(SpanshPlot, self).__init__(parent)
         self.request_params = {
             "efficiency": efficiency,
-            "range": jrange,
-            "from": source,
-            "to": to
+            "range": jump_range,
+            "from": source_system,
+            "to": destination_system
         }
 
     def run(self):
         try:
-            job_request = requests.get(self.SPANSH_API_URL + "route", params=self.request_params)
+            job_request = requests.get(SPANSH_API_URL + "route", params=self.request_params)
         except requests.exceptions.ConnectionError:
             self.status_signal.emit("Couldn't establish a connection to Spansh")
             return
@@ -320,7 +320,7 @@ class SpanshPlot(QtCore.QThread):
         self.status_signal.emit("Plotting")
         for sleep_base in itertools.count(1, 5):
             try:
-                job_json = requests.get(self.SPANSH_API_URL + "results/" + job_id).json()
+                job_json = requests.get(SPANSH_API_URL + "results/" + job_id).json()
             except requests.exceptions.ConnectionError:
                 self.status_signal.emit("Couldn't establish a connection to Spansh")
                 return
