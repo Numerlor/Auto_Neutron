@@ -3,11 +3,12 @@
 
 import itertools
 import json
+import os
 from collections import UserList
 from contextlib import suppress
 from math import ceil
 from pathlib import Path
-from typing import Generator, List, Sequence, Union, Optional
+from typing import Generator, List, Sequence, Union, Optional, Dict, Any
 
 import requests
 from PyQt5 import QtCore, QtMultimedia
@@ -17,6 +18,7 @@ from pyperclip import copy as set_clip
 from auto_neutron.constants import STATUS_PATH
 
 SPANSH_API_URL = "https://spansh.co.uk/api/"
+
 
 class RouteHolder(UserList):
     """
@@ -287,11 +289,20 @@ class FuelAlert(QtCore.QThread):
 
 
 class SpanshPlot(QtCore.QThread):
+    """Worker to handle plotting requests to Spansh."""
+
     finished_signal = QtCore.pyqtSignal(list)  # signal containing output
     status_signal = QtCore.pyqtSignal(str)  # signal for updating statusbar
 
-    def __init__(self, efficiency, jrange, source, to, parent=None):
-        super(SpanshPlot, self).__init__(parent)
+    def __init__(
+            self,
+            efficiency: float,
+            jump_range: float,
+            source_system: str,
+            destination_system: str,
+            parent: Optional[QtCore.QObject] = None
+    ):
+        super().__init__(parent)
         self.request_params = {
             "efficiency": efficiency,
             "range": jump_range,
@@ -299,15 +310,16 @@ class SpanshPlot(QtCore.QThread):
             "to": destination_system
         }
 
-    def run(self):
-        try:
-            job_request = requests.get(SPANSH_API_URL + "route", params=self.request_params)
-        except requests.exceptions.ConnectionError:
-            self.status_signal.emit("Couldn't establish a connection to Spansh")
-            return
+    def run(self) -> None:
+        """Send plot request to spansh and return result in a list of lists."""
+        job_json = get_request_json(
+            "Spansh",
+            self.status_signal,
+            SPANSH_API_URL + "route",
+            self.request_params,
+        )
 
-        job_json = job_request.json()
-        if 'error' in job_json:
+        with suppress(KeyError):
             if job_json['error'] == "Could not find starting system":
                 self.status_signal.emit("Source system invalid")
             elif job_json['error'] == "Could not find finishing system":
@@ -319,11 +331,11 @@ class SpanshPlot(QtCore.QThread):
         job_id = job_json['job']
         self.status_signal.emit("Plotting")
         for sleep_base in itertools.count(1, 5):
-            try:
-                job_json = requests.get(SPANSH_API_URL + "results/" + job_id).json()
-            except requests.exceptions.ConnectionError:
-                self.status_signal.emit("Couldn't establish a connection to Spansh")
-                return
+            job_json = get_request_json(
+                "Spansh",
+                self.status_signal,
+                SPANSH_API_URL + "results/" + job_id,
+            )
 
             if job_json['status'] == "queued":
                 # 1, 1, 2, 2, 3, 4, 6, 7, 9, 12, 15, 17, 20, 24, 27, 30, 30, 30, …
@@ -344,11 +356,12 @@ class SpanshPlot(QtCore.QThread):
 
 
 class NearestRequest(QtCore.QThread):
-    REQUEST_URL = "https://spansh.co.uk/api/nearest"
+    """Worker for handling nearest requests to Spansh."""
+
     finished_signal = QtCore.pyqtSignal(str, str, str, str, str)  # output signal
     status_signal = QtCore.pyqtSignal(str)  # statusbar change signal
 
-    def __init__(self, x: float, y: float, z: float, parent=None):
+    def __init__(self, x: float, y: float, z: float, parent: Optional[QtCore.QObject] = None):
         super().__init__(parent)
         self.request_params = {
             "x": x,
@@ -356,35 +369,62 @@ class NearestRequest(QtCore.QThread):
             "z": z,
         }
 
-    def run(self):
-        self.request(self.params)
+    def run(self) -> None:
+        """Send request to Spansh and emit resulting values if request was successful."""
+        request_json = get_request_json(
+            "Spansh",
+            self.status_signal,
+            SPANSH_API_URL + "nearest",
+            self.request_params,
+        )
 
-    def request(self, parameters):
-        try:
-            self.status_signal.emit("Waiting for spansh")
-            job_request = requests.get(self.REQUEST_URL, params=parameters)
-        except requests.exceptions.ConnectionError:
-            self.status_signal.emit("Unable to establish a connection to Spansh")
-        else:
-            if job_request.ok:
-                system_info = job_request.json()['system']
-                self.finished_signal.emit(
-                    system_info['name'],
-                    str(round(system_info['distance'], 2)),
-                    str(round(system_info['x'], 2)),
-                    str(round(system_info['y'], 2)),
-                    str(round(system_info['z'], 2))
-                )
-            else:
-                self.status_signal.emit(
-                    "An error has occurred while communicating with Spansh's API")
+        if request_json is not None:
+            system_info = request_json['system']
+            self.finished_signal.emit(
+                system_info['name'],
+                str(round(system_info['distance'], 2)),
+                str(round(system_info['x'], 2)),
+                str(round(system_info['y'], 2)),
+                str(round(system_info['z'], 2))
+            )
 
 
 class SoundPlayer:
-    def __init__(self, path):
+    """
+    Wrapper around `QtMultimedia.QMediaPlayer`.
+
+    Creates `QMediaPlayer` object, sets audio file to `path` and volume to full.
+    """
+
+    def __init__(self, path: os.PathLike):
         self.sound_file = QtMultimedia.QMediaPlayer()
         self.sound_file.setMedia(QtMultimedia.QMediaContent(QtCore.QUrl.fromLocalFile(str(path))))
         self.sound_file.setVolume(100)
 
-    def play(self):
+    def play(self) -> None:
+        """Play sound file."""
         self.sound_file.play()
+
+
+def get_request_json(
+        service_name: str,
+        logging_signal: QtCore.pyqtSignal,
+        url: str,
+        parameters: dict = {},
+) -> Optional[Dict[str, Any]]:
+    """
+    Get resulting json from a request to `url` with `parameters`.
+
+    Handles possible connections errors on the way, sending logging output to `logging_signal`.
+    """
+    try:
+        logging_signal.emit(f"Waiting for {service_name}")
+        request = requests.get(url, params=parameters)
+    except requests.exceptions.ConnectionError:
+        logging_signal.emit(f"Unable to establish a connection to {service_name}")
+        return
+    if not request.ok:
+        logging_signal.emit(f"An error has occurred while communicating with {service_name}")
+        return
+
+    return request.json()
