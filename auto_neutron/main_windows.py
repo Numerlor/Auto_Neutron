@@ -13,52 +13,8 @@ from pyperclip import copy as set_clip
 from auto_neutron import popups
 from auto_neutron import workers
 from auto_neutron.constants import SHIP_STATS, LAST_JOURNALS_TEXT
+from auto_neutron.delegates import SpinBoxDelegate, DoubleSpinBoxDelegate
 from auto_neutron.utils import get_journals
-
-
-class SpinBoxDelegate(QtWidgets.QStyledItemDelegate):
-    def createEditor(self, parent, QStyleOptionViewItem, QModelIndex):
-        editor = QtWidgets.QSpinBox(parent)
-        editor.setFrame(False)
-        editor.setMinimum(0)
-        editor.setMaximum(10_000)
-        editor.setButtonSymbols(QtWidgets.QAbstractSpinBox.NoButtons)
-        return editor
-
-    def setEditorData(self, QWidget, QModelIndex):
-        value = int(QModelIndex.model().data(QModelIndex, QtCore.Qt.EditRole))
-
-        QWidget.setValue(value)
-
-    def setModelData(self, QWidget, QAbstractItemModel, QModelIndex):
-        QWidget.interpretText()
-        value = QWidget.value()
-        QAbstractItemModel.setData(QModelIndex, value, QtCore.Qt.EditRole)
-
-    def updateEditorGeometry(self, QWidget, QStyleOptionViewItem, QModelIndex):
-        QWidget.setGeometry(QStyleOptionViewItem.rect)
-
-
-class DoubleSpinBoxDelegate(QtWidgets.QStyledItemDelegate):
-    def createEditor(self, parent, QStyleOptionViewItem, QModelIndex):
-        editor = QtWidgets.QDoubleSpinBox(parent)
-        editor.setFrame(False)
-        editor.setMinimum(0)
-        editor.setMaximum(1_000_000)
-        editor.setDecimals(2)
-        editor.setButtonSymbols(QtWidgets.QAbstractSpinBox.NoButtons)
-        return editor
-
-    def setEditorData(self, QWidget, QModelIndex):
-        value = float(QModelIndex.model().data(QModelIndex, QtCore.Qt.EditRole))
-        QWidget.setValue(value)
-
-    def setModelData(self, QWidget, QAbstractItemModel, QModelIndex):
-        value = QWidget.text()
-        QAbstractItemModel.setData(QModelIndex, value, QtCore.Qt.EditRole)
-
-    def updateEditorGeometry(self, QWidget, QStyleOptionViewItem, QModelIndex):
-        QWidget.setGeometry(QStyleOptionViewItem.rect)
 
 
 class MainWindow(QtWidgets.QMainWindow):
