@@ -55,8 +55,7 @@ class ExceptionHandler(QtCore.QObject):
         with open(self.path, 'a') as f:
             if not self.cleared:
                 # clear file on first traceback
-                f.seek(0)
-                f.truncate()
+                f.truncate(0)
                 self.cleared = True
             else:
                 # insert spacing newline
