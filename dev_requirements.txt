@@ -1,4 +1,6 @@
 flake8
 flake8-annotations >= 2.0
 flake8-docstrings
+flake8-import-order
+flake8-print
 pyinstaller == 3.6
