@@ -8,11 +8,11 @@ from collections import UserList
 from contextlib import suppress
 from math import ceil
 from pathlib import Path
-from typing import Generator, List, Sequence, Union, Optional, Dict, Any
+from typing import Any, Dict, Generator, List, Optional, Sequence, Union
 
 import requests
 from PyQt5 import QtCore, QtMultimedia
-from ahk import Hotkey, AHK
+from ahk import AHK, Hotkey
 from pyperclip import copy as set_clip
 
 from auto_neutron.constants import STATUS_PATH

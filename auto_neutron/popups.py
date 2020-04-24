@@ -1,9 +1,9 @@
 # This file is part of Auto_Neutron.
 # Copyright (C) 2019-2020  Numerlor
 
-from typing import Optional, Union, List
+from typing import List, Optional, Union
 
-from PyQt5 import QtWidgets, QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 from auto_neutron import workers
 from auto_neutron.constants import VERSION

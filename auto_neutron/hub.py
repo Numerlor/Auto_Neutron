@@ -4,7 +4,7 @@
 import os
 from pathlib import Path
 
-from PyQt5 import QtCore, QtWidgets, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 from auto_neutron import main_windows
 from auto_neutron import popups

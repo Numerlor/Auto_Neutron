@@ -7,13 +7,13 @@ import os
 import sys
 from pathlib import Path
 
-from PyQt5 import QtWidgets, QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 from pyperclip import copy as set_clip
 
 from auto_neutron import popups
 from auto_neutron import workers
-from auto_neutron.constants import SHIP_STATS, LAST_JOURNALS_TEXT
-from auto_neutron.delegates import SpinBoxDelegate, DoubleSpinBoxDelegate
+from auto_neutron.constants import LAST_JOURNALS_TEXT, SHIP_STATS
+from auto_neutron.delegates import DoubleSpinBoxDelegate, SpinBoxDelegate
 from auto_neutron.utils import get_journals
 
 

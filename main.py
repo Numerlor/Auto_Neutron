@@ -20,10 +20,10 @@ import traceback
 from os import PathLike
 from pathlib import Path
 
-from PyQt5 import QtWidgets, QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 from auto_neutron import hub
-from auto_neutron.constants import APP, ORG, APPID
+from auto_neutron.constants import APP, APPID, ORG
 from auto_neutron.settings import Settings
 
 
