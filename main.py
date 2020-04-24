@@ -59,7 +59,7 @@ class ExceptionHandler(QtCore.QObject):
                 self.cleared = True
             else:
                 # insert spacing newline
-                exc.insert(0, "\n")
+                f.write("\n")
             f.write("".join(exc))
 
         sys.__excepthook__(exctype, value, tb)
