@@ -16,8 +16,6 @@
 
 import ctypes
 import sys
-import traceback
-from os import PathLike
 from pathlib import Path
 
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -25,6 +23,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from auto_neutron import hub
 from auto_neutron.constants import APP, APPID, ORG
 from auto_neutron.settings import Settings
+from auto_neutron.utils import ExceptionHandler
 
 
 # https://stackoverflow.com/a/44352931
@@ -32,39 +31,6 @@ def resource_path(relative_path: Path) -> str:
     """Get absolute path to resource, works for dev and for PyInstaller."""
     base_path = getattr(sys, '_MEIPASS', Path(__file__).parent / "resources")
     return str(base_path / relative_path)
-
-
-class ExceptionHandler(QtCore.QObject):
-    """Handles exceptions when linked to sys.excepthook."""
-
-    traceback_sig = QtCore.pyqtSignal(list)
-
-    def __init__(self, output_file: PathLike):
-        super().__init__()
-        self.path = output_file
-        self.cleared = False
-
-    def handler(self, exctype, value, tb) -> None:  # noqa TYP001
-        """
-        Logs exceptions to `self.path` and sends a signal to open error window.
-
-        `self.path` is truncated on the first exception,
-        newlines are added if multiple exceptions occur.
-        """
-        exc = traceback.format_exception(exctype, value, tb)
-        with open(self.path, 'a') as f:
-            if not self.cleared:
-                # clear file on first traceback
-                f.truncate(0)
-                self.cleared = True
-            else:
-                # insert spacing newline
-                f.write("\n")
-            f.write("".join(exc))
-
-        sys.__excepthook__(exctype, value, tb)
-
-        self.traceback_sig.emit(exc)
 
 
 if __name__ == "__main__":
