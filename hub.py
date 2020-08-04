@@ -10,7 +10,7 @@ from appinfo import SHIP_STATS
 
 
 class Hub(QtCore.QObject):
-    script_settings = QtCore.pyqtSignal(tuple)  # worker settings from SettingsPop
+    script_settings = QtCore.pyqtSignal(str, str)  # worker settings from SettingsPop
     script_mode_signal = QtCore.pyqtSignal(bool)
     window_quit_signal = QtCore.pyqtSignal(bool)  # if window was closed, close ahk script
     worker_set_ahk_signal = QtCore.pyqtSignal()
@@ -174,7 +174,7 @@ class Hub(QtCore.QObject):
 
     def change_editable_settings(self, values):
         self.script_mode_signal.emit(values[7])
-        self.script_settings.emit((*values[:2],))
+        self.script_settings.emit(*values[:2])
 
         self.dark = values[2]
         self.set_theme()
