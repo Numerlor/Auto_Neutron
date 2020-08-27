@@ -1,0 +1,25 @@
+[[source]]
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[requires]
+python_version = "3.7"
+
+[packages]
+ahk = "~=0.9"
+pyperclip = "~=1.8"
+PyQt5 = "~=5.13.0"
+requests = "~=2.24"
+
+[dev-packages]
+flake8 = "~=3.8"
+flake8-annotations = "~=2.0"
+flake8-docstrings = "~=1.5"
+flake8-import-order = "~=0.18"
+flake8-print = "~=3.1"
+pyinstaller = "~=3.6, >=3.6"
+
+[scripts]
+start = "pipenv run python main.py"
+lint = "pipenv run flake8"
