@@ -11,6 +11,8 @@ from typing import Any, Callable, Dict, List, NamedTuple, Optional, Tuple, Union
 from PyQt5.QtCore import QByteArray, QSettings
 from PyQt5.QtGui import QFont
 
+__all__ = ["General", "Paths", "Window", "Alerts", "set_settings"]
+
 
 class SettingsParams(NamedTuple):
     """
