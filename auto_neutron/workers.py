@@ -110,7 +110,7 @@ class AhkWorker(QtCore.QThread):
 
             if (
                     loaded['event'] == "FSDJump"
-                    and loaded['StarSystem'] in self.route[self.route_index:]
+                    and loaded['StarSystem'].casefold() in self.route[self.route_index:]
             ):
                 index = self.route.index(loaded['StarSystem'].casefold()) + 1
                 # if index is last, stop
