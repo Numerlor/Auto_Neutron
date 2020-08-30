@@ -21,5 +21,5 @@ flake8-print = "~=3.1"
 pyinstaller = "~=3.6, >=3.6"
 
 [scripts]
-start = "pipenv run python main.py"
-lint = "pipenv run flake8"
+start = "python main.py"
+lint = "python -m flake8"
