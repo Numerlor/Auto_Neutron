@@ -158,7 +158,7 @@ class Paths(metaclass=SettingsCategory):  # noqa D101
 class Window(metaclass=SettingsCategory):  # noqa D101
     geometry: QByteArray = SettingsParams(
         str,
-        "AdnQywADAAAAAABkAAAAZAAAAmMAAAF7AAAAbAAAAIIAAAJbAAABcwAAAAAAAAAAB4AAAABsAAAAggAAAlsAAAFz",
+        "AdnQywADAAAAAAJ/AAAA+QAABDQAAAH9AAACgAAAARgAAAQzAAAB/AAAAAAAAAAAB4AAAAKAAAABGAAABDMAAAH8",
         lambda val: b64encode(val.data()).decode(),
         lambda val: QByteArray(b64decode(val.encode()))
     )
