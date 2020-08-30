@@ -157,8 +157,8 @@ class Window(metaclass=SettingsCategory):  # noqa D101
     geometry: QByteArray = SettingsParams(
         str,
         "AdnQywADAAAAAABkAAAAZAAAAmMAAAF7AAAAbAAAAIIAAAJbAAABcwAAAAAAAAAAB4AAAABsAAAAggAAAlsAAAFz",
-        lambda val: QByteArray(b64decode(val)),
-        lambda val: b64encode(val.data())
+        lambda val: b64encode(val.data()).decode(),
+        lambda val: QByteArray(b64decode(val.encode()))
     )
     dark_mode: bool = SettingsParams(bool, True)
     autoscroll: bool = SettingsParams(bool, True)
