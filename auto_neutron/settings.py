@@ -155,6 +155,12 @@ class Paths(metaclass=SettingsCategory):  # noqa D101
     alert_sound: Optional[Path] = SettingsParams(str, "", _path_serializer, _path_deserializer)
 
 
+def _font_deserializer(val: str) -> QFont:
+    font = QFont()
+    font.fromString(val)
+    return font
+
+
 class Window(metaclass=SettingsCategory):  # noqa D101
     geometry: QByteArray = SettingsParams(
         str,
@@ -164,19 +170,12 @@ class Window(metaclass=SettingsCategory):  # noqa D101
     )
     dark_mode: bool = SettingsParams(bool, True)
     autoscroll: bool = SettingsParams(bool, True)
-
-    def _font_deserializer(val: str) -> QFont:
-        font = QFont()
-        font.fromString(val)
-        return font
-
     font: QFont = SettingsParams(
         str,
         'Arial,-1,-1,5,50,0,0,0,0,0',
         lambda val: val.toString(),
         _font_deserializer
     )
-    del _font_deserializer
 
 
 class Alerts(metaclass=SettingsCategory):  # noqa D101
