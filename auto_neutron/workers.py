@@ -36,15 +36,6 @@ class RouteHolder(UserList):
         """Get index of a system."""
         return self.systems.index(item.casefold(), *args)
 
-    def __iter__(self):
-        return iter(self.data)
-
-    def __len__(self):
-        return self.length
-
-    def __contains__(self, item: str):
-        return item in self.systems
-
     def __setitem__(self, key: int, value: str):
         self.systems[key] = value.casefold()
         self.data[key][0] = value
