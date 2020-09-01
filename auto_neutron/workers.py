@@ -3,7 +3,6 @@
 
 import itertools
 import json
-import os
 from collections import UserList
 from contextlib import suppress
 from math import ceil
@@ -15,6 +14,7 @@ from PyQt5 import QtCore, QtMultimedia
 from ahk import AHK, Hotkey
 from pyperclip import copy as set_clip
 
+from auto_neutron import settings
 from auto_neutron.constants import STATUS_PATH
 
 SPANSH_API_URL = "https://spansh.co.uk/api/"
@@ -61,17 +61,13 @@ class AhkWorker(QtCore.QThread):
             self, parent: Optional[QtCore.QObject],
             journal: Path,
             data_values: Sequence[List[Union[str, float, float, int]]],
-            settings: tuple,
             start_index: int
     ):
         super().__init__(parent)
         self.hub = parent
         self.journal = journal
         self.route = RouteHolder(data_values)
-        self.script, self.bind, self.copy, ahk_path = settings
 
-        if not self.copy:
-            self.ahk = AHK(executable_path=ahk_path)
         self.loop = True
         # set index according to last saved route or new plot, default index 1
         self.route_index = start_index if start_index != -1 else 1
@@ -79,9 +75,8 @@ class AhkWorker(QtCore.QThread):
         # connect parent signals
         parent.double_signal.connect(self.set_index)
         parent.edit_signal.connect(self.update_sys)
-        parent.script_settings.connect(self.update_script)
+        parent.settings_changed.connect(self.update_settings)
         parent.quit_worker_signal.connect(self.quit_loop)
-        parent.script_mode_signal.connect(self.set_copy)
 
     def run(self) -> None:
         """
@@ -93,6 +88,9 @@ class AhkWorker(QtCore.QThread):
         if self.check_shutdown():
             self.game_shut_signal.emit()
             return
+
+        if not settings.General.copy_mode:
+            self.reset_ahk()
 
         self.set_output_system()
         self.sys_signal.emit(self.route_index)
@@ -139,7 +137,7 @@ class AhkWorker(QtCore.QThread):
         If copy mode is active, set clipboard
         otherwise reset AHK with new route index.
         """
-        if self.copy:
+        if settings.General.copy_mode:
             set_clip(self.route[self.route_index])
         else:
             self.reset_ahk()
@@ -150,41 +148,25 @@ class AhkWorker(QtCore.QThread):
         if self.route_index == index:
             self.set_output_system()
 
-    def update_script(self, bind: str, script: str) -> None:
+    def update_settings(self) -> None:
         """
         Update AHK script code or bind .
 
         Triggered when any of them are updated with new settings.
         """
-        if self.bind != bind or self.script != script:
-            self.bind = bind
-            self.script = script
-            if not self.copy:
-                self.reset_ahk()
-
-    def set_copy(self, setting: bool) -> None:
-        """
-        Set copy mode to `settings`.
-
-        When new and current settings mismatch, apply setting.
-        AHK is closed or launched depending on the setting.
-        """
-        if setting is not self.copy:
-            self.copy = setting
-            if self.copy:
-                self.close_ahk()
-                set_clip(self.route[self.route_index])
-            else:
-                self.ahk = AHK(executable_path=self.hub.get_ahk_path())
-                self.reset_ahk()
+        if settings.General.copy_mode:
+            self.close_ahk()
+            set_clip(self.route[self.route_index])
+        else:
+            self.reset_ahk()
 
     def reset_ahk(self) -> None:
         """Reset AHK with system at `self.route_index` in place."""
         self.close_ahk()
         self.hotkey = Hotkey(
-            self.ahk,
-            self.bind,
-            self.script.replace("|SYSTEMDATA|", self.route[self.route_index])
+            AHK(executable_path=str(settings.Paths.ahk)),
+            settings.General.bind,
+            settings.General.script.replace("|SYSTEMDATA|", self.route[self.route_index])
         )
         self.hotkey.start()
 
@@ -220,12 +202,12 @@ class FuelAlert(QtCore.QThread):
 
     alert_signal = QtCore.pyqtSignal()
 
-    def __init__(self, parent: Optional[QtCore.QObject], max_fuel: float, modifier: float):
+    def __init__(self, parent: Optional[QtCore.QObject], max_fuel: float):
         super().__init__(parent)
         self.loop = True
         self.alert = False
+        self.set_jump_fuel(max_fuel)
 
-        self.set_jump_fuel(max_fuel, modifier)
         parent.stop_alert_worker_signal.connect(self.stop_loop)
         parent.next_jump_signal.connect(self.change_alert)
         parent.alert_fuel_signal.connect(self.set_jump_fuel)
@@ -243,21 +225,22 @@ class FuelAlert(QtCore.QThread):
                 # notify when fuel is low,
                 # fsd is in cooldown and ship in supercruise
                 binflag = f"{loaded['Flags']:b}"
+                jump_fuel = self.max_fuel * settings.Alerts.threshold / 100
                 if (
                         not hold
                         and self.alert
-                        and loaded['Fuel']['FuelMain'] < self.jump_fuel
+                        and loaded['Fuel']['FuelMain'] < jump_fuel
                         and binflag[-19] == "1"
                         and binflag[-5] == "1"
                 ):
                     hold = True
                     self.alert_signal.emit()
-                elif loaded['Fuel']['FuelMain'] > self.jump_fuel:
+                elif loaded['Fuel']['FuelMain'] > jump_fuel:
                     hold = False
 
-    def set_jump_fuel(self, max_fuel: float, modifier: float) -> None:
+    def set_jump_fuel(self, max_fuel: float) -> None:
         """Set `self.jump_fuel`."""
-        self.jump_fuel = max_fuel * modifier / 100
+        self.max_fuel = max_fuel
 
     def change_alert(self, value: bool) -> None:
         """Set `self.alert` to new `value`."""
@@ -387,10 +370,23 @@ class SoundPlayer:
     Creates `QMediaPlayer` object, sets audio file to `path` and volume to full.
     """
 
-    def __init__(self, path: os.PathLike):
+    def __init__(self, settings_signal: QtCore.pyqtSignal):
         self.sound_file = QtMultimedia.QMediaPlayer()
-        self.sound_file.setMedia(QtMultimedia.QMediaContent(QtCore.QUrl.fromLocalFile(str(path))))
+        self.sound_file.setMedia(
+            QtMultimedia.QMediaContent(
+                QtCore.QUrl.fromLocalFile(str(settings.Paths.alert_sound))
+            )
+        )
         self.sound_file.setVolume(100)
+        settings_signal.connect(self.update_sound)
+
+    def update_sound(self) -> None:
+        """Update sound media to current setting."""
+        self.sound_file.setMedia(
+            QtMultimedia.QMediaContent(
+                QtCore.QUrl.fromLocalFile(str(settings.Paths.alert_sound))
+            )
+        )
 
     def play(self) -> None:
         """Play sound file."""

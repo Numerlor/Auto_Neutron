@@ -1,34 +1,29 @@
 # This file is part of Auto_Neutron.
 # Copyright (C) 2019-2020  Numerlor
 
-import os
-from pathlib import Path
-
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from auto_neutron import main_windows
 from auto_neutron import popups
+from auto_neutron import settings
 from auto_neutron import workers
 from auto_neutron.constants import LAST_JOURNALS_TEXT, SHIP_STATS
-from auto_neutron.settings import Settings
 from auto_neutron.utils import get_journals
 
 
 class Hub(QtCore.QObject):
-    script_settings = QtCore.pyqtSignal(tuple)  # worker settings from SettingsPop
-    script_mode_signal = QtCore.pyqtSignal(bool)
+    settings_changed = QtCore.pyqtSignal()  # worker settings from SettingsPop
     window_quit_signal = QtCore.pyqtSignal(bool)  # if window was closed, close ahk script
     worker_set_ahk_signal = QtCore.pyqtSignal()
     quit_worker_signal = QtCore.pyqtSignal()
 
     stop_alert_worker_signal = QtCore.pyqtSignal()
-    alert_fuel_signal = QtCore.pyqtSignal(int, int)
+    alert_fuel_signal = QtCore.pyqtSignal(int)
 
-    def __init__(self, settings: Settings, crash_handler):
+    def __init__(self, crash_handler):
         super().__init__()
 
         crash_handler.traceback_sig.connect(self.show_exception)
-        self.settings = settings
         self.application = QtWidgets.QApplication.instance()
         self.total_jumps = 0
         self.max_fuel = 0
@@ -37,40 +32,30 @@ class Hub(QtCore.QObject):
 
         self.main_window = main_windows.MainWindow(self)
         self.crash_window = popups.CrashPop()
+        self.player = workers.SoundPlayer(self.settings_changed)
 
     def startup(self):
         self.set_theme()
         self.double_signal = self.main_window.double_signal
         self.edit_signal = self.main_window.edit_signal
         self.next_jump_signal = self.main_window.next_jump_signal
-        self.show_window()
+        self.main_window.show()
+        self.start_alert_worker()
         self.initial_pop()
 
     def new_route(self):
         if self.workers_started:
             self.quit_worker_signal.emit()
             self.worker.quit()
-            if any((self.visual_alert, self.sound_alert)):
+            if settings.Alerts.visual or settings.Alerts.audio:
                 self.stop_alert_worker()
         self.main_window.reset_table()
         self.initial_pop()
 
-    def show_window(self):
-        self.main_window.restoreGeometry(self.settings.window.geometry)
-        font = self.settings.font.font
-        font.setPointSize(self.settings.font.size)
-        font.setBold(self.settings.font.bold)
-        autoscroll = self.settings.window.autoscroll
-        self.main_window.change_settings(font, self.settings.window.dark, autoscroll)
-        self.main_window.show()
-
     def start_alert_worker(self):
-        self.player = workers.SoundPlayer(self.settings.paths.alert)
-
-        self.sound_worker = workers.FuelAlert(self, self.max_fuel, self.settings.alerts.threshold)
+        self.sound_worker = workers.FuelAlert(self, self.max_fuel)
         self.sound_worker.alert_signal.connect(self.fuel_alert)
         self.sound_worker.start()
-        self.alert_worker_started = True
 
     def stop_alert_worker(self):
         if self.alert_worker_started:
@@ -85,32 +70,29 @@ class Hub(QtCore.QObject):
         self.max_fuel = value
 
     def fuel_alert(self):
-        if self.visual_alert:
+        if settings.Alerts.visual:
             self.application.alert(self.main_window.centralwidget, 5000)
-        if self.sound_alert:
-            if self.sound_path:
+        if settings.Alerts.audio:
+            if settings.Paths.alert_sound:
                 self.player.play()
             else:
                 self.application.beep()
 
     def start_worker(self, data_values, journal, index):
-        settings = (self.settings.script, self.settings.bind,
-                    self.settings.copy_mode,
-                    self.settings.paths.ahk)
-        self.worker = workers.AhkWorker(self, journal, data_values, settings, index)
+        self.worker = workers.AhkWorker(self, journal, data_values, index)
         self.worker.sys_signal.connect(self.main_window.index_change)
         self.worker.route_finished_signal.connect(self.end_route_pop)
         self.worker.game_shut_signal.connect(self.on_game_shutdown)
         self.worker.fuel_signal.connect(self.get_max_fuel)
         self.worker.start()
 
-        if self.settings.alerts.audio or self.settings.alerts.visual:
+        if settings.Alerts.audio or settings.Alerts.visual:
             self.start_alert_worker()
         self.workers_started = True
 
     def on_game_shutdown(self):
         self.worker.close()
-        if self.settings.alerts.audio or self.settings.alerts.visual:
+        if settings.Alerts.audio or settings.Alerts.visual:
             self.stop_alert_worker()
 
         journals = get_journals(3)
@@ -132,17 +114,17 @@ class Hub(QtCore.QObject):
                 if blueprint['Label'] == 'MaxFuelPerJump':
                     self.max_fuel = blueprint['Value']
 
-        self.alert_fuel_signal.emit(self.max_fuel, self.settings.alerts.threshold)
+        self.alert_fuel_signal.emit(self.max_fuel)
 
     def set_theme(self):
         """Set dark/default theme depending on user setting"""
-        if self.settings.window.dark:
+        if settings.Window.dark_mode:
             change_to_dark()
         else:
             change_to_default()
 
     def initial_pop(self):
-        w = main_windows.PlotStartDialog(self.main_window, self.settings)
+        w = main_windows.PlotStartDialog(self.main_window)
         w.fuel_signal.connect(self.set_max_fuel)
         w.data_signal.connect(self.main_window.pop_table)
         w.data_signal.connect(self.start_worker)
@@ -164,7 +146,7 @@ class Hub(QtCore.QObject):
         self.main_window.about_action.setDisabled(True)
 
     def sett_pop(self):
-        w = popups.SettingsPop(self.main_window, self.settings)
+        w = popups.SettingsPop(self.main_window)
         w.show()
         w.settings_signal.connect(self.change_editable_settings)
         w.close_signal.connect(lambda:
@@ -172,39 +154,26 @@ class Hub(QtCore.QObject):
         self.main_window.settings_action.setDisabled(True)
 
     def change_editable_settings(self):
-        self.script_mode_signal.emit(self.settings.copy_mode)
-        self.script_settings.emit(self.settings.bind, self.settings.script)
-
         self.set_theme()
-
-        if self.settings.alerts.audio or self.settings.alerts.visual:
-            self.start_alert_worker()
-        else:
-            self.stop_alert_worker()
-        if any((self.sound_alert, self.visual_alert)):
-            self.stop_alert_worker()
-            self.start_alert_worker()
-
-        self.alert_fuel_signal.emit(self.max_fuel, self.settings.alerts.threshold)
-
-        self.player = workers.SoundPlayer(self.paths.alert)
-
-        font = self.settings.font.font
-        font.setPointSize(self.settings.font.size)
-        font.setBold(self.settings.font.bold)
-        self.main_window.change_settings(font, self.settings.window.dark, self.window.auto_scroll)
-
-    def save_route(self):
-        self.settings.last_route = (self.worker.route_index, self.worker.route.data)
+        self.settings_changed.emit()
 
     def show_exception(self, exc):
         self.crash_window.add_traceback(exc)
         self.crash_window.show()
 
+    def save_route(self):
+        settings.General.last_route = (self.worker.route_index, self.worker.route.data)
+
     def quit(self, geometry):
-        self.settings.window.geometry = geometry
-        if self.settings.save_on_quit:
+        settings.Window.geometry = geometry
+        if settings.General.save_on_quit:
             self.save_route()
+
+
+def set_ahk_path() -> bool:
+    """Ask user for the path to AHK, a boolean is returned depending on success."""
+
+
 
 def change_to_dark():
     p = QtGui.QPalette()

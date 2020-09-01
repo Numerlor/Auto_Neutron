@@ -22,7 +22,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 from auto_neutron import hub
 from auto_neutron.constants import APP, APPID, ORG
-from auto_neutron.settings import Settings
+from auto_neutron.settings import set_settings
 from auto_neutron.utils import ExceptionHandler
 
 
@@ -46,7 +46,8 @@ if __name__ == "__main__":
     sys.excepthook = ex_handler.handler
     # create org and app folders
     path.mkdir(parents=True, exist_ok=True)
-    settings = Settings(path)
-    ui = hub.Hub(settings, ex_handler)
+
+    set_settings(QtCore.QSettings(str(path / "config.ini"), QtCore.QSettings.IniFormat))
+    ui = hub.Hub(ex_handler)
     ui.startup()
     sys.exit(app.exec_())

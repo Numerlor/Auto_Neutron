@@ -10,8 +10,7 @@ from pathlib import Path
 from PyQt5 import QtCore, QtGui, QtWidgets
 from pyperclip import copy as set_clip
 
-from auto_neutron import popups
-from auto_neutron import workers
+from auto_neutron import popups, settings, workers
 from auto_neutron.constants import LAST_JOURNALS_TEXT, SHIP_STATS
 from auto_neutron.delegates import DoubleSpinBoxDelegate, SpinBoxDelegate
 from auto_neutron.utils import get_journals
@@ -83,6 +82,7 @@ class MainWindow(QtWidgets.QMainWindow):
         p.setColor(QtGui.QPalette.HighlightedText, QtGui.QColor(0, 123, 255))
         self.MainTable.setPalette(p)
         self.retranslateUi()
+        self.restoreGeometry(settings.Window.geometry)
 
     def connect_signals(self):
         self.MainTable.customContextMenuRequested.connect(self.table_context)
@@ -96,6 +96,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.settings_action.triggered.connect(self.hub.sett_pop)
         self.about_action.triggered.connect(self.hub.licenses_pop)
         self.new_route_action.triggered.connect(self.hub.new_route)
+        self.hub.settings_changed.connect(self.update_settings)
 
     def main_context(self, location):
         menu = QtWidgets.QMenu()
@@ -206,23 +207,27 @@ class MainWindow(QtWidgets.QMainWindow):
         self.next_jump_signal.emit(
             self.MainTable.item(index, 3).text() == "1")
 
-        if (self.autoscroll and
-                (self.MainTable.itemAt(QtCore.QPoint(1, 1)).row() == self.last_index
-                 or self.last_index == 0)):
-            self.MainTable.scrollToItem(self.MainTable.item(index, 0)
-                                        , QtWidgets.QAbstractItemView.PositionAtTop)
-        self.grayout(index, self.dark)
+        if (
+                settings.Window.autoscroll and (
+                  self.last_index == 0 or
+                  self.MainTable.itemAt(QtCore.QPoint(1, 1)).row() == self.last_index
+                )
+        ):
+            self.MainTable.scrollToItem(
+                self.MainTable.item(index, 0),
+                QtWidgets.QAbstractItemView.PositionAtTop
+            )
+        self.grayout(index)
         self.last_index = index
 
-    def grayout(self, index, dark):
+    def grayout(self, index):
         """Set all rows before index to grey, all rows after to black/white"""
-
         try:
             self.MainTable.itemChanged.disconnect()
         except TypeError:
             pass
 
-        text_color = "#f0f0f0" if dark else "#000000"
+        text_color = "#f0f0f0" if settings.Window.dark_mode else "#000000"
         for row in range(0, index):
             for i in range(0, 4):
                 self.MainTable.item(row, i).setForeground(QtGui.QColor(150, 150, 150))
@@ -231,12 +236,10 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.MainTable.item(row, i).setForeground(QtGui.QColor(text_color))
         self.MainTable.itemChanged.connect(self.manage_changed)
 
-    def change_settings(self, font, dark, autoscroll):
-        self.dark = dark
-        self.autoscroll = autoscroll
+    def update_settings(self):
         if self.MainTable.rowCount() != 0:
-            self.grayout(self.last_index, self.dark)
-        self.MainTable.setFont(font)
+            self.grayout(self.last_index)
+        self.MainTable.setFont(settings.Window.font)
         self.MainTable.resizeColumnToContents(0)
         self.MainTable.resizeColumnToContents(3)
         self.MainTable.resizeRowsToContents()
@@ -265,11 +268,8 @@ class PlotStartDialog(QtWidgets.QDialog):
     data_signal = QtCore.pyqtSignal(list, Path, int)
     fuel_signal = QtCore.pyqtSignal(int)
 
-    def __init__(self, parent, settings):
+    def __init__(self, parent):
         super(PlotStartDialog, self).__init__(parent)
-        self.settings = settings
-        cpath = self.settings.paths.csv
-        self.cpath = Path(cpath) if cpath else cpath
         self.gridLayout = QtWidgets.QGridLayout(self)
         self.tabWidget = QtWidgets.QTabWidget(self)
         self.tab = QtWidgets.QWidget()
@@ -319,7 +319,7 @@ class PlotStartDialog(QtWidgets.QDialog):
 
         # CSV
         self.path_button.setMaximumWidth(95)
-        if self.cpath:
+        if settings.Paths.csv is not None:
             self.cs_submit.setEnabled(True)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred,
                                            QtWidgets.QSizePolicy.Preferred)
@@ -329,7 +329,7 @@ class PlotStartDialog(QtWidgets.QDialog):
         self.cs_submit.setMaximumWidth(65)
         self.path_label.setWordWrap(True)
 
-        self.cs_submit.pressed.connect(lambda: self.cs_submit_act(self.cpath))
+        self.cs_submit.pressed.connect(self.cs_submit_act)
         self.path_button.pressed.connect(self.change_path)
 
         self.horizontalLayout.addWidget(self.path_button, alignment=QtCore.Qt.AlignLeft)
@@ -415,7 +415,7 @@ class PlotStartDialog(QtWidgets.QDialog):
         self.setWindowTitle("Select a route")
         self.path_button.setText("Change path")
         self.cs_submit.setText("Submit")
-        self.path_label.setText("Current path: " + str(self.cpath))
+        self.path_label.setText("Current path: " + str(settings.Paths.csv))
         self.source.setPlaceholderText("Source System")
         self.nearest.setText("Nearest")
         self.sp_submit.setText("Submit")
@@ -442,16 +442,17 @@ class PlotStartDialog(QtWidgets.QDialog):
 
     def change_path(self):
         file_dialog = QtWidgets.QFileDialog()
-        fpath, _ = file_dialog.getOpenFileName(filter="csv (*.csv)",
-                                               directory=str(self.cpath.parent)
-                                               if self.cpath else "")
+        csv_path = settings.Paths.csv
+        fpath, _ = file_dialog.getOpenFileName(
+            filter="csv (*.csv)",
+            directory=str(csv_path.parent if csv_path else "")
+        )
         if fpath:
-            self.cpath = Path(fpath)
-            self.path_label.setText("Current path: " + str(self.cpath))
-            self.settings.paths.csv = str(self.cpath)
+            settings.Paths.csv = new_path = Path(fpath)
+            self.path_label.setText("Current path: " + str(new_path))
             self.cs_submit.setEnabled(True)
         else:
-            if not self.cpath:
+            if not settings.Paths.csv:
                 self.cs_submit.setEnabled(False)
 
     def get_journals(self):
@@ -568,7 +569,8 @@ class PlotStartDialog(QtWidgets.QDialog):
     def check_dropped_files(self):
         files = [file for file in sys.argv if file.endswith("csv")]
         if files:
-            self.cs_submit_act(Path(files[0]))
+            settings.Paths.csv = Path(files[0])
+            self.cs_submit_act()
 
     def sp_submit_act(self):
         self.plotter = workers.SpanshPlot(self.eff_spinbox.value(),
@@ -587,15 +589,15 @@ class PlotStartDialog(QtWidgets.QDialog):
     def change_status(self, message):
         self.status.showMessage(message)
 
-    def cs_submit_act(self, cpath):
+    def cs_submit_act(self):
         self.cs_submit.setEnabled(False)
-
+        csv_path = settings.Paths.csv
         try:
-            if os.stat(cpath).st_size > 2_097_152:
+            if os.stat(csv_path).st_size > 2_097_152:
                 self.status.showMessage("File too large")
                 self.cs_submit.setEnabled(True)
             else:
-                with cpath.open(encoding='utf-8') as f:
+                with csv_path.open(encoding='utf-8') as f:
                     data = []
                     valid = True
                     for stuff in csv.DictReader(f, delimiter=','):
@@ -630,7 +632,7 @@ class PlotStartDialog(QtWidgets.QDialog):
 
     def last_submit_act(self):
         self.last_submit.setEnabled(False)
-        last_route = self.settings.last_route
+        last_route = settings.General.last_route
         if not last_route:
             self.status.showMessage("No last route found")
             self.last_submit.setEnabled(True)

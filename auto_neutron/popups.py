@@ -1,13 +1,12 @@
 # This file is part of Auto_Neutron.
 # Copyright (C) 2019-2020  Numerlor
-
+from pathlib import Path
 from typing import List, Optional, Union
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-from auto_neutron import workers
+from auto_neutron import settings, workers
 from auto_neutron.constants import VERSION
-from auto_neutron.settings import Settings
 
 
 class BasePopUp(QtWidgets.QDialog):
@@ -343,9 +342,8 @@ class SettingsPop(QtWidgets.QDialog):
     settings_signal = QtCore.pyqtSignal()
     close_signal = QtCore.pyqtSignal()
 
-    def __init__(self, parent: Optional[QtWidgets.QWidget], settings: Settings):
-        super(SettingsPop, self).__init__(parent)
-        self.settings = settings
+    def __init__(self, parent: Optional[QtWidgets.QWidget]):
+        super().__init__(parent)
 
         self.selector = QtWidgets.QListWidget(self)
         self.widget_selector = QtWidgets.QStackedWidget(self)
@@ -385,13 +383,14 @@ class SettingsPop(QtWidgets.QDialog):
         self.alert_sound_check = QtWidgets.QCheckBox("Sound fuel alert")
         self.alert_visual_check = QtWidgets.QCheckBox("Taskbar fuel alert")
         self.alert_path_layout = QtWidgets.QHBoxLayout()
-        self.alert_path = QtWidgets.QLineEdit(self.settings.paths.alert)
+        self.alert_path = QtWidgets.QLineEdit(settings.Paths.alert_sound)
         self.alert_dialog_button = QtWidgets.QPushButton("...")
         self.alert_path_label = QtWidgets.QLabel("Custom sound alert file")
 
-        self.main_bind_edit = QtWidgets.QLineEdit(self.settings.bind)
+        self.main_bind_edit = QtWidgets.QLineEdit(settings.General.bind)
         self.script_edit = QtWidgets.QTextEdit()
 
+        self.ahk_path = settings.Paths.ahk
         self.setup_ui()
         self.connect_signals()
 
@@ -424,18 +423,20 @@ class SettingsPop(QtWidgets.QDialog):
         self.alert_threshold_label.setWordWrap(True)
 
         # Grab remaining settings and set the widget values to them
-        self.script_edit.setText(self.settings.script)
-        self.alert_threshold_spin.setValue(self.settings.alerts.threshold)
-        self.dark_check.setChecked(self.settings.window.dark)
-        self.font_combo.setCurrentFont(self.settings.font.font)
-        self.font_size_combo.setValue(self.settings.font.size)
-        self.bold_check.setChecked(self.settings.font.bold)
-        self.save_on_quit.setChecked(self.settings.save_on_quit)
-        self.copy_check.setChecked(self.settings.copy_mode)
-        self.alert_sound_check.setChecked(self.settings.alerts.audio)
-        self.alert_visual_check.setChecked(self.settings.alerts.visual)
-        self.autoscroll_check.setChecked(self.settings.window.autoscroll)
-        if not self.settings.paths.ahk:
+        self.script_edit.setText(settings.General.script)
+        self.save_on_quit.setChecked(settings.General.save_on_quit)
+        self.copy_check.setChecked(settings.General.copy_mode)
+
+        self.dark_check.setChecked(settings.Window.dark_mode)
+        self.autoscroll_check.setChecked(settings.Window.autoscroll)
+        self.font_combo.setCurrentFont(settings.Window.font)
+        self.font_size_combo.setValue(settings.Window.font.pointSize())
+        self.bold_check.setChecked(settings.Window.font.bold())
+
+        self.alert_threshold_spin.setValue(settings.Alerts.threshold)
+        self.alert_sound_check.setChecked(settings.Alerts.audio)
+        self.alert_visual_check.setChecked(settings.Alerts.visual)
+        if not settings.Paths.ahk:
             self.copy_check.setDisabled(True)
 
         self.setWindowFlag(QtCore.Qt.WindowContextHelpButtonHint, False)
@@ -505,8 +506,18 @@ class SettingsPop(QtWidgets.QDialog):
 
     def enable_copy_mode(self) -> None:
         """Allow use of ahk mode after a valid path was set."""
-        if self.settings.set_ahk_path():
+        ahk_path, _ = QtWidgets.QFileDialog.getOpenFileName(
+            filter="AutoHotkey (AutoHotkey*.exe)",
+            caption="Select AutoHotkey's executable.",
+            directory="C:/")
+
+        if ahk_path:
+            self.ahk_path = Path(ahk_path)
             self.copy_check.setEnabled(True)
+        else:
+            self.ahk_path = None
+            self.copy_check.setChecked(True)
+            self.copy_check.setEnabled(False)
 
     def sound_path_dialog(self) -> None:
         """Open a file dialog, set `self.alert_path`'s text to file if one was selected."""
@@ -522,25 +533,29 @@ class SettingsPop(QtWidgets.QDialog):
         Error is displayed if ahk script doesn't include |SYSTEMDATA|-
         If `close` is True the settings window is closed.
         """
-        if "|SYSTEMDATA|" not in self.settings.script:
+        if "|SYSTEMDATA|" not in self.script_edit.toPlainText():
             self.error_label.setText('Script must include "|SYSTEMDATA|"')
         else:
             self.error_label.clear()
-            self.settings.auto_sync = False
-            self.settings.bind = self.main_bind_edit.text()
-            self.settings.script = self.script_edit.toPlainText()
-            self.settings.window.dark = self.dark_check.isChecked()
-            self.settings.font.font = self.font_combo.currentFont()
-            self.settings.font.size = self.font_size_combo.value()
-            self.settings.font.bold = self.bold_check.isChecked()
-            self.settings.save_on_quit = self.save_on_quit.isChecked()
-            self.settings.copy_mode = self.copy_check.isChecked()
-            self.settings.alerts.audio = self.alert_sound_check.isChecked()
-            self.settings.alerts.visual = self.alert_visual_check.isChecked()
-            self.settings.alerts.threshold = self.alert_threshold_spin.value()
-            self.settings.paths.alert = self.alert_path.text()
-            self.settings.auto_sync = True
-            self.settings.window.autoscroll = self.autoscroll_check.isChecked()
+
+            settings.General.bind = self.main_bind_edit.text()
+            settings.General.script = self.script_edit.toPlainText()
+            settings.General.save_on_quit = self.save_on_quit.isChecked()
+            settings.General.copy_mode = self.copy_check.isChecked()
+
+            settings.Window.dark_mode = self.dark_check.isChecked()
+            font = self.font_combo.currentFont()
+            font.setBold(self.bold_check.isChecked())
+            font.setPointSize(self.font_size_combo.value())
+            settings.Window.font = font
+            settings.Window.autoscroll = self.autoscroll_check.isChecked()
+
+            settings.Alerts.audio = self.alert_sound_check.isChecked()
+            settings.Alerts.visual = self.alert_visual_check.isChecked()
+            settings.Alerts.threshold = self.alert_threshold_spin.value()
+
+            settings.Paths.alert = self.alert_path.text()
+            settings.Paths.ahk = self.ahk_path
             self.settings_signal.emit()
             if close:
                 self.close()
