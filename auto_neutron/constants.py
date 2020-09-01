@@ -9,7 +9,7 @@ from PyQt5.QtCore import QByteArray
 from PyQt5.QtGui import QFont
 
 VERSION = "1.456"
-APP = "Auto Neutron"
+APP = "Auto_Neutron"
 ORG = "Numerlor"
 APPID = f"{ORG}|{APP}|{VERSION}"
 
