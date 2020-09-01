@@ -274,8 +274,8 @@ class FuelAlert(QtCore.QThread):
                 file.seek(0, 0)
                 loopline = file.readline()
                 if not loopline:
-                    self.sleep(2)
                     continue
+                self.sleep(2)
                 yield loopline
 
 
