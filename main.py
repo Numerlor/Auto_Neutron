@@ -33,21 +33,20 @@ def resource_path(relative_path: Path) -> str:
     return str(base_path / relative_path)
 
 
-if __name__ == "__main__":
-    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(APPID)
-    app = QtWidgets.QApplication(sys.argv)
-    app.setWindowIcon(QtGui.QIcon(resource_path(Path("icons_library.ico"))))
-    app.setApplicationName(APP)
-    app.setOrganizationName(ORG)
+ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(APPID)
+app = QtWidgets.QApplication(sys.argv)
+app.setWindowIcon(QtGui.QIcon(resource_path(Path("icons_library.ico"))))
+app.setApplicationName(APP)
+app.setOrganizationName(ORG)
 
-    path = Path(QtCore.QStandardPaths.writableLocation(QtCore.QStandardPaths.AppConfigLocation))
-    # save traceback to logfile if Exception is raised
-    ex_handler = ExceptionHandler(path / "traceback.log")
-    sys.excepthook = ex_handler.handler
-    # create org and app folders
-    path.mkdir(parents=True, exist_ok=True)
+path = Path(QtCore.QStandardPaths.writableLocation(QtCore.QStandardPaths.AppConfigLocation))
+# save traceback to logfile if Exception is raised
+ex_handler = ExceptionHandler(path / "traceback.log")
+sys.excepthook = ex_handler.handler
+# create org and app folders
+path.mkdir(parents=True, exist_ok=True)
 
-    set_settings(QtCore.QSettings(str(path / "config.ini"), QtCore.QSettings.IniFormat))
-    ui = hub.Hub(ex_handler)
-    ui.startup()
-    sys.exit(app.exec_())
+set_settings(QtCore.QSettings(str(path / "config.ini"), QtCore.QSettings.IniFormat))
+ui = hub.Hub(ex_handler)
+ui.startup()
+sys.exit(app.exec_())
