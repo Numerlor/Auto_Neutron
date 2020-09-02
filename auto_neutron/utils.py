@@ -1,10 +1,10 @@
 import logging
 import os
-import sys
 import traceback
+from contextlib import contextmanager
 from pathlib import Path
 from types import MethodType
-from typing import List, Optional, Tuple
+from typing import Iterator, List, Optional, Tuple
 
 from PyQt5 import QtCore
 
@@ -23,6 +23,23 @@ QT_LOG_LEVELS = {
 def get_journals(n: int) -> List[Path]:
     """Get last n journals."""
     return sorted(JPATH.glob("*.log"), key=os.path.getctime, reverse=True)[:n]
+
+
+@contextmanager
+def patch_log_module(logger: logging.Logger, module_name: str) -> Iterator[None]:
+    """Patch logs using `logger` within this context manager to use `module_name` as the module name."""
+    original_find_caller = logger.findCaller
+
+    def patched_caller(self: logging.Logger, stack_info: bool) -> Tuple[str, int, str, Optional[str]]:
+        """Patch filename on logs after this was applied to be `module_name`."""
+        _, lno, func, sinfo = original_find_caller(stack_info)
+        return module_name, lno, func, sinfo
+
+    logger.findCaller = MethodType(patched_caller, logger)
+    try:
+        yield
+    finally:
+        logger.findCaller = original_find_caller
 
 
 class ExceptionHandler(QtCore.QObject):
@@ -61,14 +78,6 @@ class ExceptionHandler(QtCore.QObject):
 def init_qt_logging(logger: logging.Logger) -> None:
     """Redirect QDebug calls to `logger`."""
     def handler(level: int, _context: QtCore.QMessageLogContext, message: str) -> None:
-        original_find_caller = logger.findCaller
-
-        def patched_caller(self, stack_info: bool) -> Tuple[str, int, str, Optional[str]]:  # noqa ANN001
-            """Patch filename to be "Qt" for logs from this function."""
-            _, lno, func, sinfo = original_find_caller(stack_info)
-            return "<Qt>", lno, func, sinfo
-
-        logger.findCaller = MethodType(patched_caller, logger)
-        logger.log(QT_LOG_LEVELS[level], message)
-        logger.findCaller = original_find_caller
+        with patch_log_module(logger, "<Qt>"):
+            logger.log(QT_LOG_LEVELS[level], message)
     QtCore.qInstallMessageHandler(handler)
