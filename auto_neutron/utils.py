@@ -3,8 +3,8 @@ import os
 import traceback
 from contextlib import contextmanager
 from pathlib import Path
-from types import MethodType
-from typing import Iterator, List, Optional, Tuple
+from types import MethodType, TracebackType
+from typing import Iterator, List, Optional, Tuple, Type
 
 from PyQt5 import QtCore
 
@@ -47,32 +47,18 @@ class ExceptionHandler(QtCore.QObject):
 
     traceback_sig = QtCore.pyqtSignal(list)
 
-    def __init__(self, output_file: os.PathLike):
+    def __init__(self, logger: logging.Logger):
         super().__init__()
-        self.path = output_file
-        self.cleared = False
+        self.logger = logger
 
-    def handler(self, exctype, value, tb) -> None:  # noqa TYP001
-        """
-        Logs exceptions to `self.path` and sends a signal to open error window.
+    def handler(self, exctype: Type[BaseException], value: BaseException, tb: TracebackType) -> None:
+        """Log exception using `self.logger` and emit `traceback_sig`` with formatted exception."""
+        exception_file_path = Path(tb.tb_frame.f_code.co_filename)
+        with patch_log_module(self.logger, exception_file_path.stem):
+            self.logger.critical("Uncaught exception:", exc_info=(exctype, value, tb))
+            self.logger.critical("")  # log empty message to give a bit of space around traceback
 
-        `self.path` is truncated on the first exception,
-        newlines are added if multiple exceptions occur.
-        """
-        exc = traceback.format_exception(exctype, value, tb)
-        with open(self.path, 'a') as f:
-            if not self.cleared:
-                # clear file on first traceback
-                f.truncate(0)
-                self.cleared = True
-            else:
-                # insert spacing newline
-                f.write("\n")
-            f.write("".join(exc))
-
-        sys.__excepthook__(exctype, value, tb)
-
-        self.traceback_sig.emit(exc)
+        self.traceback_sig.emit(traceback.format_exception(exctype, value, tb))
 
 
 def init_qt_logging(logger: logging.Logger) -> None:

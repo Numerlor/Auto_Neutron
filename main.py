@@ -60,7 +60,7 @@ else:
 init_qt_logging(root_logger)
 
 # save traceback to logfile if Exception is raised
-ex_handler = ExceptionHandler(path / "traceback.log")
+ex_handler = ExceptionHandler(root_logger)
 sys.excepthook = ex_handler.handler
 
 set_settings(QtCore.QSettings(str(path / "config.ini"), QtCore.QSettings.IniFormat))
