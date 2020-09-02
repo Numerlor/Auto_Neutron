@@ -28,9 +28,8 @@ from auto_neutron.settings import set_settings
 from auto_neutron.utils import ExceptionHandler, init_qt_logging
 
 
-# https://stackoverflow.com/a/44352931
 def resource_path(relative_path: Path) -> str:
-    """Get absolute path to resource, works for dev and for PyInstaller."""
+    """Get absolute path to resource, using pyinstaller's temp directory when built."""
     base_path = getattr(sys, '_MEIPASS', Path(__file__).parent / "resources")
     return str(base_path / relative_path)
 
