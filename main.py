@@ -25,7 +25,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from auto_neutron import hub
 from auto_neutron.constants import APP, APPID, ORG
 from auto_neutron.settings import set_settings
-from auto_neutron.utils import ExceptionHandler, init_qt_logging
+from auto_neutron.utils import ExceptionHandler, UsernameFormatter, init_qt_logging
 
 
 def resource_path(relative_path: Path) -> str:
@@ -44,7 +44,7 @@ path = Path(QtCore.QStandardPaths.writableLocation(QtCore.QStandardPaths.AppConf
 # create org and app folders
 path.mkdir(parents=True, exist_ok=True)
 
-log_format = logging.Formatter("{asctime} | {module:>12} | {levelname:>7} | {message}", datefmt="%H:%M:%S", style="{")
+log_format = UsernameFormatter("{asctime} | {module:>12} | {levelname:>7} | {message}", datefmt="%H:%M:%S", style="{")
 file_handler = handlers.RotatingFileHandler(path / "log.log", maxBytes=2*1024*1024, backupCount=3, encoding="utf8")
 file_handler.setFormatter(log_format)
 

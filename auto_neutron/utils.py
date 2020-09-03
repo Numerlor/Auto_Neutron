@@ -61,6 +61,16 @@ class ExceptionHandler(QtCore.QObject):
         self.traceback_sig.emit(traceback.format_exception(exctype, value, tb))
 
 
+class UsernameFormatter(logging.Formatter):
+    """Redact Windows usernames from logs made using this formatter."""
+    os_username = os.environ["USERNAME"]
+
+    def format(self, record: logging.LogRecord) -> str:
+        """Redact Windows usernames from `record` message."""
+        message = super().format(record)
+        return message.replace(f"\\{self.os_username}", "\\USERNAME")
+
+
 def init_qt_logging(logger: logging.Logger) -> None:
     """Redirect QDebug calls to `logger`."""
     def handler(level: int, _context: QtCore.QMessageLogContext, message: str) -> None:
