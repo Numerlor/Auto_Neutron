@@ -166,7 +166,7 @@ class Hub(QtCore.QObject):
 
     def quit(self, geometry):
         settings.Window.geometry = geometry
-        if settings.General.save_on_quit:
+        if self.workers_started and settings.General.save_on_quit:
             self.save_route()
 
 
