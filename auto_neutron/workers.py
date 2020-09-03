@@ -3,6 +3,7 @@
 
 import itertools
 import json
+import logging
 from collections import UserList
 from contextlib import suppress
 from math import ceil
@@ -18,6 +19,7 @@ from auto_neutron import settings
 from auto_neutron.constants import STATUS_PATH
 
 SPANSH_API_URL = "https://spansh.co.uk/api/"
+log = logging.getLogger(__name__)
 
 
 class RouteHolder(UserList):
@@ -379,6 +381,7 @@ class SoundPlayer:
         )
         self.sound_file.setVolume(100)
         settings_signal.connect(self.update_sound)
+        log.info(f"Setup sound player with media {settings.Paths.alert_sound}")
 
     def update_sound(self) -> None:
         """Update sound media to current setting."""
@@ -387,6 +390,7 @@ class SoundPlayer:
                 QtCore.QUrl.fromLocalFile(str(settings.Paths.alert_sound))
             )
         )
+        log.info(f"Set media to {settings.Paths.alert_sound}")
 
     def play(self) -> None:
         """Play sound file."""
