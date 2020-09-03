@@ -235,7 +235,7 @@ class FuelAlert(QtCore.QThread):
                 ):
                     hold = True
                     self.alert_signal.emit()
-                elif loaded['Fuel']['FuelMain'] > jump_fuel:
+                elif hold and loaded['Fuel']['FuelMain'] > jump_fuel:
                     hold = False
 
     def set_jump_fuel(self, max_fuel: float) -> None:
