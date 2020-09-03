@@ -383,7 +383,7 @@ class SettingsPop(QtWidgets.QDialog):
         self.alert_sound_check = QtWidgets.QCheckBox("Sound fuel alert")
         self.alert_visual_check = QtWidgets.QCheckBox("Taskbar fuel alert")
         self.alert_path_layout = QtWidgets.QHBoxLayout()
-        self.alert_path = QtWidgets.QLineEdit(settings.Paths.alert_sound)
+        self.alert_path = QtWidgets.QLineEdit(str(settings.Paths.alert_sound))
         self.alert_dialog_button = QtWidgets.QPushButton("...")
         self.alert_path_label = QtWidgets.QLabel("Custom sound alert file")
 
@@ -554,7 +554,7 @@ class SettingsPop(QtWidgets.QDialog):
             settings.Alerts.visual = self.alert_visual_check.isChecked()
             settings.Alerts.threshold = self.alert_threshold_spin.value()
 
-            settings.Paths.alert = self.alert_path.text()
+            settings.Paths.alert_sound = self.alert_path.text()
             settings.Paths.ahk = self.ahk_path
             self.settings_signal.emit()
             if close:
