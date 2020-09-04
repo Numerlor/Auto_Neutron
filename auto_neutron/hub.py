@@ -51,9 +51,9 @@ class Hub(QtCore.QObject):
         self.initial_pop()
 
     def start_alert_worker(self):
-        self.sound_worker = workers.FuelAlert(self, self.max_fuel)
-        self.sound_worker.alert_signal.connect(self.fuel_alert)
-        self.sound_worker.start()
+        self.alert_worker = workers.FuelAlert(self, self.max_fuel)
+        self.alert_worker.alert_signal.connect(self.fuel_alert)
+        self.alert_worker.start()
 
     def set_max_fuel(self, value):
         self.max_fuel = value
