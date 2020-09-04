@@ -22,7 +22,6 @@ class Hub(QtCore.QObject):
 
     def __init__(self, crash_handler):
         super().__init__()
-
         crash_handler.traceback_sig.connect(self.show_exception)
         self.application = QtWidgets.QApplication.instance()
         self.total_jumps = 0
@@ -79,7 +78,6 @@ class Hub(QtCore.QObject):
 
     def on_game_shutdown(self):
         self.worker.close()
-
         journals = get_journals(3)
         w = popups.GameShutPop(self.main_window, LAST_JOURNALS_TEXT[:len(journals)])
         w.show()
@@ -126,16 +124,14 @@ class Hub(QtCore.QObject):
     def licenses_pop(self):
         w = popups.LicensePop(self.main_window)
         w.show()
-        w.close_signal.connect(lambda:
-                               self.main_window.about_action.setEnabled(True))
+        w.close_signal.connect(lambda: self.main_window.about_action.setEnabled(True))
         self.main_window.about_action.setDisabled(True)
 
     def sett_pop(self):
         w = popups.SettingsPop(self.main_window)
         w.show()
         w.settings_signal.connect(self.change_editable_settings)
-        w.close_signal.connect(lambda:
-                               self.main_window.settings_action.setEnabled(True))
+        w.close_signal.connect(lambda: self.main_window.settings_action.setEnabled(True))
         self.main_window.settings_action.setDisabled(True)
 
     def change_editable_settings(self):
@@ -153,11 +149,6 @@ class Hub(QtCore.QObject):
         settings.Window.geometry = geometry
         if self.workers_started and settings.General.save_on_quit:
             self.save_route()
-
-
-def set_ahk_path() -> bool:
-    """Ask user for the path to AHK, a boolean is returned depending on success."""
-
 
 
 def change_to_dark():
