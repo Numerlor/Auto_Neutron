@@ -47,8 +47,6 @@ class Hub(QtCore.QObject):
         if self.workers_started:
             self.quit_worker_signal.emit()
             self.worker.quit()
-            if settings.Alerts.visual or settings.Alerts.audio:
-                self.stop_alert_worker()
         self.main_window.reset_table()
         self.initial_pop()
 
@@ -56,15 +54,6 @@ class Hub(QtCore.QObject):
         self.sound_worker = workers.FuelAlert(self, self.max_fuel)
         self.sound_worker.alert_signal.connect(self.fuel_alert)
         self.sound_worker.start()
-
-    def stop_alert_worker(self):
-        if self.alert_worker_started:
-            self.stop_alert_worker_signal.emit()
-            self.sound_worker.quit()
-            try:
-                self.sound_worker.alert_signal.disconnect()
-            except TypeError:
-                pass
 
     def set_max_fuel(self, value):
         self.max_fuel = value
@@ -86,14 +75,10 @@ class Hub(QtCore.QObject):
         self.worker.fuel_signal.connect(self.get_max_fuel)
         self.worker.start()
 
-        if settings.Alerts.audio or settings.Alerts.visual:
-            self.start_alert_worker()
         self.workers_started = True
 
     def on_game_shutdown(self):
         self.worker.close()
-        if settings.Alerts.audio or settings.Alerts.visual:
-            self.stop_alert_worker()
 
         journals = get_journals(3)
         w = popups.GameShutPop(self.main_window, LAST_JOURNALS_TEXT[:len(journals)])
