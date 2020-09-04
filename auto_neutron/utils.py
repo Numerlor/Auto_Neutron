@@ -10,6 +10,7 @@ from PyQt5 import QtCore
 
 from auto_neutron.constants import JPATH
 
+log = logging.getLogger(__name__)
 
 QT_LOG_LEVELS = {
     0: logging.DEBUG,
@@ -47,16 +48,12 @@ class ExceptionHandler(QtCore.QObject):
 
     traceback_sig = QtCore.pyqtSignal(list)
 
-    def __init__(self, logger: logging.Logger):
-        super().__init__()
-        self.logger = logger
-
     def handler(self, exctype: Type[BaseException], value: BaseException, tb: TracebackType) -> None:
         """Log exception using `self.logger` and emit `traceback_sig`` with formatted exception."""
         exception_file_path = Path(tb.tb_frame.f_code.co_filename)
-        with patch_log_module(self.logger, exception_file_path.stem):
-            self.logger.critical("Uncaught exception:", exc_info=(exctype, value, tb))
-            self.logger.critical("")  # log empty message to give a bit of space around traceback
+        with patch_log_module(log, exception_file_path.stem):
+            log.critical("Uncaught exception:", exc_info=(exctype, value, tb))
+            log.critical("")  # log empty message to give a bit of space around traceback
 
         self.traceback_sig.emit(traceback.format_exception(exctype, value, tb))
 
@@ -71,9 +68,9 @@ class UsernameFormatter(logging.Formatter):
         return message.replace(f"\\{self.os_username}", "\\USERNAME")
 
 
-def init_qt_logging(logger: logging.Logger) -> None:
+def init_qt_logging() -> None:
     """Redirect QDebug calls to `logger`."""
     def handler(level: int, _context: QtCore.QMessageLogContext, message: str) -> None:
-        with patch_log_module(logger, "<Qt>"):
-            logger.log(QT_LOG_LEVELS[level], message)
+        with patch_log_module(log, "<Qt>"):
+            log.log(QT_LOG_LEVELS[level], message)
     QtCore.qInstallMessageHandler(handler)

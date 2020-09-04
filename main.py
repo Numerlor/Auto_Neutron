@@ -57,10 +57,10 @@ if __debug__:
     root_logger.setLevel(logging.DEBUG)
 else:
     root_logger.setLevel(logging.INFO)
-init_qt_logging(root_logger)
+init_qt_logging()
 
 # save traceback to logfile if Exception is raised
-ex_handler = ExceptionHandler(root_logger)
+ex_handler = ExceptionHandler()
 sys.excepthook = ex_handler.handler
 
 set_settings(QtCore.QSettings(str(path / "config.ini"), QtCore.QSettings.IniFormat))
