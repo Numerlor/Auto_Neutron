@@ -114,7 +114,7 @@ class AhkWorker(QtCore.QThread):
                 self.fuel_signal.emit(loaded)
 
             elif loaded['event'] == "Shutdown":
-                self.game_shut_signal.emit(self.route.data, self.route_index)
+                self.game_shut_signal.emit()
                 self.close_ahk()
                 return
 
