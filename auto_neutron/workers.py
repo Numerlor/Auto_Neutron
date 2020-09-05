@@ -96,6 +96,7 @@ class AhkWorker(QtCore.QThread):
         self.set_output_system()
         self.sys_signal.emit(self.route_index)
         for line in self.follow_file():
+            log.debug("Processing line from journal.")
             loaded = json.loads(line)
 
             if (
@@ -103,6 +104,7 @@ class AhkWorker(QtCore.QThread):
                     and loaded['StarSystem'].casefold() in self.route[self.route_index:]
             ):
                 index = self.route.index(loaded['StarSystem'].casefold()) + 1
+                log.info(f"Next system in route reached at index {index}")
                 # if index is last, stop
                 if index == len(self.route):
                     self.route_finished_signal.emit()
@@ -113,10 +115,12 @@ class AhkWorker(QtCore.QThread):
             elif loaded['event'] == "Loadout":
                 # update max fuel for alerts
                 self.fuel_signal.emit(loaded)
+                log.info("Dispatched loadout event.")
 
             elif loaded['event'] == "Shutdown":
                 self.game_shut_signal.emit()
                 self.stop()
+                log.info("Dispatched shutdown event.")
                 return
 
     def check_shutdown(self) -> bool:
@@ -130,6 +134,7 @@ class AhkWorker(QtCore.QThread):
         self.route_index = index
         self.set_output_system()
         self.sys_signal.emit(self.route_index)
+        log.info(f"Set route index to {index}.")
 
     def set_output_system(self) -> None:
         """
@@ -148,6 +153,7 @@ class AhkWorker(QtCore.QThread):
         self.route[index] = new_sys
         if self.route_index == index:
             self.set_output_system()
+        log.debug(f"Updated system at index {index} to `{new_sys}`")
 
     def update_settings(self) -> None:
         """
@@ -170,16 +176,13 @@ class AhkWorker(QtCore.QThread):
             settings.General.script.replace("|SYSTEMDATA|", self.route[self.route_index])
         )
         self.hotkey.start()
+        log.debug(f"Reset AHK with system {self.route[self.route_index]}")
 
     def close_ahk(self) -> None:
         """Close AHK."""
         with suppress(RuntimeError, AttributeError):
             self.hotkey.stop()
-
-    def quit_loop(self) -> None:
-        """Quit main thread loop and close AHK."""
-        self.loop = False
-        self.close_ahk()
+        log.debug("Stopped AHK.")
 
     def follow_file(self) -> Generator[str, None, None]:
         """Tail journal file, yielding new lines every second."""
@@ -191,6 +194,7 @@ class AhkWorker(QtCore.QThread):
                     self.sleep(1)
                     continue
                 yield loopline
+        log.debug("File follower exited.")
 
     def stop(self) -> None:
         """Close AHK and disconnect signals."""
