@@ -106,6 +106,7 @@ class AhkWorker(QtCore.QThread):
                 if index == len(self.route):
                     self.route_finished_signal.emit()
                     self.close_ahk()
+                    log.info("Reached end of route, event dispatched.")
                     return
                 self.set_index(index)
 
@@ -179,7 +180,6 @@ class AhkWorker(QtCore.QThread):
         """Close AHK."""
         with suppress(RuntimeError, AttributeError):
             self.hotkey.stop()
-        log.debug("Stopped AHK.")
 
     def follow_file(self) -> Generator[str, None, None]:
         """Tail journal file, yielding new lines every second."""
@@ -218,6 +218,7 @@ class FuelAlert(QtCore.QThread):
         parent.stop_alert_worker_signal.connect(self.stop_loop)
         parent.next_jump_signal.connect(self.change_alert)
         parent.alert_fuel_signal.connect(self.set_jump_fuel)
+        log.info("Started alert worker.")
 
     def run(self) -> None:
         """
@@ -242,8 +243,10 @@ class FuelAlert(QtCore.QThread):
                 ):
                     hold = True
                     self.alert_signal.emit()
+                    log.info("Dispatched alert signal.")
                 elif hold and loaded['Fuel']['FuelMain'] > jump_fuel:
                     hold = False
+                    log.info("Reset alert hold.")
 
     def set_jump_fuel(self, max_fuel: float) -> None:
         """Set `self.jump_fuel`."""
