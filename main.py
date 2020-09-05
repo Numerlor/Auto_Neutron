@@ -44,6 +44,7 @@ path = Path(QtCore.QStandardPaths.writableLocation(QtCore.QStandardPaths.AppConf
 # create org and app folders
 path.mkdir(parents=True, exist_ok=True)
 
+logging.getLogger("ahk").setLevel(logging.WARNING)
 log_format = UsernameFormatter("{asctime} | {module:>12} | {levelname:>7} | {message}", datefmt="%H:%M:%S", style="{")
 file_handler = handlers.RotatingFileHandler(path / "log.log", maxBytes=2*1024*1024, backupCount=3, encoding="utf8")
 file_handler.setFormatter(log_format)
