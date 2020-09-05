@@ -83,6 +83,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.MainTable.setPalette(p)
         self.retranslateUi()
         self.restoreGeometry(settings.Window.geometry)
+        self.update_settings()
 
     def connect_signals(self):
         self.MainTable.customContextMenuRequested.connect(self.table_context)
