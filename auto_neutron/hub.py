@@ -77,7 +77,6 @@ class Hub(QtCore.QObject):
         self.workers_started = True
 
     def on_game_shutdown(self):
-        self.worker.stop()
         journals = get_journals(3)
         w = popups.GameShutPop(self.main_window, LAST_JOURNALS_TEXT[:len(journals)])
         w.show()
@@ -118,7 +117,6 @@ class Hub(QtCore.QObject):
     def end_route_pop(self):
         w = popups.RouteFinishedPop(self.main_window)
         w.show()
-        w.close_signal.connect(self.main_window.disconnect_signals)
         w.new_route_signal.connect(self.new_route)
 
     def licenses_pop(self):

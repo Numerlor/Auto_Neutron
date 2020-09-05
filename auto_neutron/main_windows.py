@@ -192,15 +192,6 @@ class MainWindow(QtWidgets.QMainWindow):
         elif item.column() == 3:
             self.update_jumps(self.last_index)
 
-    def disconnect_signals(self):
-        # disconnect all signals that interact
-        try:
-            self.disconnect()
-            self.MainTable.disconnect()
-            self.change_action.disconnect()
-        except TypeError:
-            pass
-
     def index_change(self, index):
         """Update table when index is changed"""
 
