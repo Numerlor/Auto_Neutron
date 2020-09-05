@@ -87,6 +87,7 @@ class AhkWorker(QtCore.QThread):
         """
         if self.check_shutdown():
             self.game_shut_signal.emit()
+            self.stop()
             return
 
         if not settings.General.copy_mode:
@@ -115,7 +116,7 @@ class AhkWorker(QtCore.QThread):
 
             elif loaded['event'] == "Shutdown":
                 self.game_shut_signal.emit()
-                self.close_ahk()
+                self.stop()
                 return
 
     def check_shutdown(self) -> bool:
