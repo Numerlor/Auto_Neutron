@@ -90,9 +90,6 @@ class AhkWorker(QtCore.QThread):
             self.stop()
             return
 
-        if not settings.General.copy_mode:
-            self.reset_ahk()
-
         self.set_output_system()
         self.sys_signal.emit(self.route_index)
         for line in self.follow_file():
