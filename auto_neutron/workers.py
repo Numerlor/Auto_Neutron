@@ -69,16 +69,14 @@ class AhkWorker(QtCore.QThread):
         self.hub = parent
         self.journal = journal
         self.route = RouteHolder(data_values)
-
-        self.loop = True
         # set index according to last saved route or new plot, default index 1
         self.route_index = start_index if start_index != -1 else 1
 
         # connect parent signals
-        parent.double_signal.connect(self.set_index)
-        parent.edit_signal.connect(self.update_sys)
-        parent.settings_changed.connect(self.update_settings)
-        parent.quit_worker_signal.connect(self.quit_loop)
+        self.hub.double_signal.connect(self.set_index)
+        self.hub.edit_signal.connect(self.update_sys)
+        self.hub.settings_changed.connect(self.update_settings)
+        self.hub.quit_worker_signal.connect(self.stop)
 
     def run(self) -> None:
         """
@@ -186,17 +184,22 @@ class AhkWorker(QtCore.QThread):
         """Tail journal file, yielding new lines every second."""
         with self.journal.open(encoding="utf-8") as file:
             file.seek(0, 2)
-            while self.loop:
+            while not self.isInterruptionRequested():
                 loopline = file.readline()
                 if not loopline:
                     self.sleep(1)
                     continue
                 yield loopline
 
-    def close(self) -> None:
+    def stop(self) -> None:
         """Close AHK and disconnect signals."""
+        self.requestInterruption()
         self.close_ahk()
         self.disconnect()
+        self.hub.double_signal.disconnect()
+        self.hub.edit_signal.disconnect()
+        self.hub.settings_changed.disconnect()
+        self.hub.quit_worker_signal.disconnect()
 
 
 class FuelAlert(QtCore.QThread):

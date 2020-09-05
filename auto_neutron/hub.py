@@ -77,7 +77,7 @@ class Hub(QtCore.QObject):
         self.workers_started = True
 
     def on_game_shutdown(self):
-        self.worker.close()
+        self.worker.stop()
         journals = get_journals(3)
         w = popups.GameShutPop(self.main_window, LAST_JOURNALS_TEXT[:len(journals)])
         w.show()
