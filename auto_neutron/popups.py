@@ -194,9 +194,9 @@ class CrashPop(BasePopUp):
         log_path = QtCore.QStandardPaths.writableLocation(QtCore.QStandardPaths.AppConfigLocation)
         self.text_browser.insertHtml(
             f'Please make sure to report the bug at <br>'
-            f'<a href="{issues_html}">{issues_html}</a>,<br>'
+            f'<a href="{issues_html}" style="color: #007bff">{issues_html}</a>,<br>'
             f'including the latest log file from<br>'
-            f' <a href="{log_path}">{log_path}</a>'
+            f' <a href="{log_path}" style="color: #007bff">{log_path}</a>'
         )
         self.text_browser.setOpenExternalLinks(True)
 
@@ -222,12 +222,13 @@ class LicensePop(QtWidgets.QDialog):
     def setup_ui(self) -> None:  # noqa D102
         self.setFixedSize(300, 125)
         self.setWindowTitle("Auto Neutron " + VERSION)
-        self.text.setText("Auto_Neutron Copyright (C) 2019-2020 Numerlor\n"
-                          "Auto_Neutron comes with ABSOLUTELY NO WARRANTY.\n"
-                          "This is free software, and you are welcome to redistribute it")
-        # Append because link didn't work with setText
-        self.text.append('under certain conditions; <a href="https://www'
-                         '.gnu.org/licenses/">click here</a> for details')
+        self.text.insertHtml(
+            'Auto_Neutron Copyright (C) 2019-2020 Numerlor<br><br>'
+            'Auto_Neutron comes with ABSOLUTELY NO WARRANTY.<br>'
+            'This is free software, and you are welcome to redistribute it under certain conditions; '
+            '<a href="https://www.gnu.org/licenses/" style="color: #007bff">click here</a> '
+            'for details'
+        )
         self.main_layout.addWidget(self.text)
         self.text.setOpenExternalLinks(True)
         self.setLayout(self.main_layout)
