@@ -190,17 +190,22 @@ class CrashPop(BasePopUp):
         super().setup_ui()
         self.quit_button.pressed.connect(QtWidgets.QApplication.instance().quit)
         self.quit_button.setMaximumWidth(125)
+        issues_html = "https://github.com/Numerlor/Auto_Neutron/issues/new"
+        log_path = QtCore.QStandardPaths.writableLocation(QtCore.QStandardPaths.AppConfigLocation)
+        self.text_browser.insertHtml(
+            f'Please make sure to report the bug at <br>'
+            f'<a href="{issues_html}">{issues_html}</a>,<br>'
+            f'including the latest log file from<br>'
+            f' <a href="{log_path}">{log_path}</a>'
+        )
+        self.text_browser.setOpenExternalLinks(True)
+
         self.layout.addWidget(self.text_browser)
         self.layout.addWidget(self.quit_button, alignment=QtCore.Qt.AlignCenter)
         self.add_layout(self.layout)
         self.setWindowFlag(QtCore.Qt.WindowContextHelpButtonHint, False)
         self.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, False)
         self.setModal(True)
-
-    def add_traceback(self, traceback: List[str]) -> None:
-        """Add items from traceback to `self.text_browser`."""
-        for line in traceback:
-            self.text_browser.append(line)
 
 
 class LicensePop(QtWidgets.QDialog):

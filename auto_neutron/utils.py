@@ -46,7 +46,7 @@ def patch_log_module(logger: logging.Logger, module_name: str) -> Iterator[None]
 class ExceptionHandler(QtCore.QObject):
     """Handles exceptions when linked to sys.excepthook."""
 
-    traceback_sig = QtCore.pyqtSignal(list)
+    triggered = QtCore.pyqtSignal()
 
     def handler(self, exctype: Type[BaseException], value: BaseException, tb: TracebackType) -> None:
         """Log exception using `self.logger` and emit `traceback_sig`` with formatted exception."""
@@ -55,7 +55,7 @@ class ExceptionHandler(QtCore.QObject):
             log.critical("Uncaught exception:", exc_info=(exctype, value, tb))
             log.critical("")  # log empty message to give a bit of space around traceback
 
-        self.traceback_sig.emit(traceback.format_exception(exctype, value, tb))
+        self.triggered.emit()
 
 
 class UsernameFormatter(logging.Formatter):

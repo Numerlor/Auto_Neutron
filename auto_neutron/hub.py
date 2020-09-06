@@ -22,7 +22,6 @@ class Hub(QtCore.QObject):
 
     def __init__(self, crash_handler):
         super().__init__()
-        crash_handler.traceback_sig.connect(self.show_exception)
         self.application = QtWidgets.QApplication.instance()
         self.total_jumps = 0
         self.max_fuel = 0
@@ -31,6 +30,7 @@ class Hub(QtCore.QObject):
 
         self.main_window = main_windows.MainWindow(self)
         self.crash_window = popups.CrashPop()
+        crash_handler.triggered.connect(self.crash_window.show)
         self.player = workers.SoundPlayer(self.settings_changed)
 
     def startup(self):
@@ -135,10 +135,6 @@ class Hub(QtCore.QObject):
     def change_editable_settings(self):
         self.set_theme()
         self.settings_changed.emit()
-
-    def show_exception(self, exc):
-        self.crash_window.add_traceback(exc)
-        self.crash_window.show()
 
     def save_route(self):
         settings.General.last_route = (self.worker.route_index, self.worker.route.data)
