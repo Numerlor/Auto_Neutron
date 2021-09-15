@@ -20,7 +20,9 @@ import sys
 from logging import handlers
 from pathlib import Path
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PySide6 import QtCore, QtGui, QtWidgets
+# noinspection PyUnresolvedReferences
+from __feature__ import snake_case, true_property
 
 from auto_neutron import hub
 from auto_neutron.constants import APP, APPID, ORG
@@ -36,11 +38,11 @@ def resource_path(relative_path: Path) -> str:
 
 ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(APPID)
 app = QtWidgets.QApplication(sys.argv)
-app.setWindowIcon(QtGui.QIcon(resource_path(Path("icons_library.ico"))))
-app.setApplicationName(APP)
-app.setOrganizationName(ORG)
+app.window_icon = (QtGui.QIcon(resource_path(Path("icons_library.ico"))))
+app.application_name = APP
+app.organization_name = ORG
 
-path = Path(QtCore.QStandardPaths.writableLocation(QtCore.QStandardPaths.AppConfigLocation))
+path = Path(QtCore.QStandardPaths.writable_location(QtCore.QStandardPaths.AppConfigLocation))
 # create org and app folders
 path.mkdir(parents=True, exist_ok=True)
 
@@ -67,4 +69,4 @@ sys.excepthook = ex_handler.handler
 set_settings(QtCore.QSettings(str(path / "config.ini"), QtCore.QSettings.IniFormat))
 ui = hub.Hub(ex_handler)
 ui.startup()
-sys.exit(app.exec_())
+sys.exit(app.exec())
