@@ -8,8 +8,10 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Callable, Dict, List, NamedTuple, Optional, Tuple, Union
 
-from PyQt5.QtCore import QByteArray, QSettings
-from PyQt5.QtGui import QFont
+from PySide6.QtCore import QByteArray, QSettings
+from PySide6.QtGui import QFont
+# noinspection PyUnresolvedReferences
+from __feature__ import snake_case, true_property
 
 __all__ = ["General", "Paths", "Window", "Alerts", "set_settings"]
 
@@ -88,7 +90,7 @@ class SettingsCategory(type):
         if key in cls.__annotations__:
             if super().__getattribute__(key).on_save is not None:
                 value = super().__getattribute__(key).on_save(value)
-            cls._settings.setValue(f"{cls.__name__}/{key}", value)
+            cls._settings.set_value(f"{cls.__name__}/{key}", value)
             if cls._auto_sync:
                 cls._settings.sync()
         else:
@@ -157,7 +159,7 @@ class Paths(metaclass=SettingsCategory):  # noqa D101
 
 def _font_deserializer(val: str) -> QFont:
     font = QFont()
-    font.fromString(val)
+    font.from_string(val)
     return font
 
 
