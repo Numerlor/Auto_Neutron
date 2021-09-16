@@ -2,18 +2,18 @@
 # Copyright (C) 2019-2020  Numerlor
 from typing import Union
 
-from PySide6 import QtWidgets
-from PySide6 import QtCore
+from PySide6 import QtCore, QtWidgets
+
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property
 
 
 class SpinBoxDelegate(QtWidgets.QStyledItemDelegate):
     def create_editor(
-            self,
-            parent: QtWidgets.QWidget,
-            option: QtWidgets.QStyleOptionViewItem,
-            index: Union[QtCore.QModelIndex, QtCore.QPersistentModelIndex]
+        self,
+        parent: QtWidgets.QWidget,
+        option: QtWidgets.QStyleOptionViewItem,
+        index: Union[QtCore.QModelIndex, QtCore.QPersistentModelIndex],
     ) -> QtWidgets.QWidget:
         editor = QtWidgets.QSpinBox(parent)
         editor.frame = False
@@ -25,10 +25,10 @@ class SpinBoxDelegate(QtWidgets.QStyledItemDelegate):
 
 class DoubleSpinBoxDelegate(QtWidgets.QStyledItemDelegate):
     def create_editor(
-            self,
-            parent: QtWidgets.QWidget,
-            option: QtWidgets.QStyleOptionViewItem,
-            index: Union[QtCore.QModelIndex, QtCore.QPersistentModelIndex]
+        self,
+        parent: QtWidgets.QWidget,
+        option: QtWidgets.QStyleOptionViewItem,
+        index: Union[QtCore.QModelIndex, QtCore.QPersistentModelIndex],
     ) -> QtWidgets.QWidget:
         editor = QtWidgets.QDoubleSpinBox(parent)
         editor.frame = False

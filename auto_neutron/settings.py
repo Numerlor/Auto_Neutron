@@ -10,6 +10,7 @@ from typing import Any, Callable, Dict, List, NamedTuple, Optional, Tuple, Union
 
 from PySide6.QtCore import QByteArray, QSettings
 from PySide6.QtGui import QFont
+
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property
 
@@ -71,7 +72,9 @@ class SettingsCategory(type):
         getattr_ = super().__getattribute__
         value: SettingsParams = getattr_(key)
         if key in getattr_("__annotations__"):
-            settings_val = getattr_("_settings").value(f"{cls.__name__}/{key}", value.default, value.setting_type)
+            settings_val = getattr_("_settings").value(
+                f"{cls.__name__}/{key}", value.default, value.setting_type
+            )
             if value.on_load is not None:
                 return value.on_load(settings_val)
             return settings_val
@@ -127,14 +130,14 @@ class General(metaclass=SettingsCategory):  # noqa D101
             "ClipOld =\n"
             "SetKeyDelay, 1, 2\n"
             "send, {enter}\n"
-        )
+        ),
     )
 
     last_route: Tuple[int, List[Union[str, float, float, int]]] = SettingsParams(
         str,
         "gASVBwAAAAAAAABLAF2UhpQu",  # (0, [[]])
         lambda val: b64encode(pickle.dumps(val)).decode(),
-        lambda val: pickle.loads(b64decode(val.encode()))
+        lambda val: pickle.loads(b64decode(val.encode())),
     )
     copy_mode: bool = SettingsParams(bool, True)
 
@@ -154,7 +157,9 @@ def _path_deserializer(path_string: str) -> Optional[Path]:
 class Paths(metaclass=SettingsCategory):  # noqa D101
     ahk: Optional[Path] = SettingsParams(str, "", _path_serializer, _path_deserializer)
     csv: Optional[Path] = SettingsParams(str, "", _path_serializer, _path_deserializer)
-    alert_sound: Optional[Path] = SettingsParams(str, "", _path_serializer, _path_deserializer)
+    alert_sound: Optional[Path] = SettingsParams(
+        str, "", _path_serializer, _path_deserializer
+    )
 
 
 def _font_deserializer(val: str) -> QFont:
@@ -168,15 +173,15 @@ class Window(metaclass=SettingsCategory):  # noqa D101
         str,
         "AdnQywADAAAAAAJ/AAAA+QAABDQAAAH9AAACgAAAARgAAAQzAAAB/AAAAAAAAAAAB4AAAAKAAAABGAAABDMAAAH8",
         lambda val: b64encode(val.data()).decode(),
-        lambda val: QByteArray(b64decode(val.encode()))
+        lambda val: QByteArray(b64decode(val.encode())),
     )
     dark_mode: bool = SettingsParams(bool, True)
     autoscroll: bool = SettingsParams(bool, True)
     font: QFont = SettingsParams(
         str,
-        'Arial,-1,-1,5,50,0,0,0,0,0',
+        "Arial,-1,-1,5,50,0,0,0,0,0",
         lambda val: val.toString(),
-        _font_deserializer
+        _font_deserializer,
     )
 
 
