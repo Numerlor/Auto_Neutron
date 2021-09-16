@@ -1,5 +1,5 @@
 # This file is part of Auto_Neutron.
-# Copyright (C) 2019-2020  Numerlor
+# Copyright (C)2019  Numerlor
 
 
 import pickle  # noqa S403

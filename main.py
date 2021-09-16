@@ -1,5 +1,5 @@
 # Auto_Neutron
-# Copyright (C) 2019-2020 Numerlor
+# Copyright (C)2019 Numerlor
 #
 # Auto_Neutron is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,9 +21,9 @@ from logging import handlers
 from pathlib import Path
 
 from PySide6 import QtCore, QtGui, QtWidgets
-# noinspection PyUnresolvedReferences
-from __feature__ import snake_case, true_property
 
+# noinspection PyUnresolvedReferences
+from __feature__ import snake_case, true_property  # noqa F401
 from auto_neutron import hub
 from auto_neutron.constants import APP, APPID, ORG
 from auto_neutron.settings import set_settings
@@ -32,23 +32,31 @@ from auto_neutron.utils import ExceptionHandler, UsernameFormatter, init_qt_logg
 
 def resource_path(relative_path: Path) -> str:
     """Get absolute path to resource, using pyinstaller's temp directory when built."""
-    base_path = getattr(sys, '_MEIPASS', Path(__file__).parent / "resources")
+    base_path = getattr(sys, "_MEIPASS", Path(__file__).parent / "resources")
     return str(base_path / relative_path)
 
 
 ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(APPID)
 app = QtWidgets.QApplication(sys.argv)
-app.window_icon = (QtGui.QIcon(resource_path(Path("icons_library.ico"))))
+app.window_icon = QtGui.QIcon(resource_path(Path("icons_library.ico")))
 app.application_name = APP
 app.organization_name = ORG
 
-path = Path(QtCore.QStandardPaths.writable_location(QtCore.QStandardPaths.AppConfigLocation))
+path = Path(
+    QtCore.QStandardPaths.writable_location(QtCore.QStandardPaths.AppConfigLocation)
+)
 # create org and app folders
 path.mkdir(parents=True, exist_ok=True)
 
 logging.getLogger("ahk").setLevel(logging.WARNING)
-log_format = UsernameFormatter("{asctime} | {module:>12} | {levelname:>7} | {message}", datefmt="%H:%M:%S", style="{")
-file_handler = handlers.RotatingFileHandler(path / "log.log", maxBytes=2*1024*1024, backupCount=3, encoding="utf8")
+log_format = UsernameFormatter(
+    "{asctime} | {module:>12} | {levelname:>7} | {message}",
+    datefmt="%H:%M:%S",
+    style="{",
+)
+file_handler = handlers.RotatingFileHandler(
+    path / "log.log", maxBytes=2 * 1024 * 1024, backupCount=3, encoding="utf8"
+)
 file_handler.setFormatter(log_format)
 
 root_logger = logging.getLogger()
