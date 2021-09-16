@@ -148,6 +148,17 @@ optional = false
 python-versions = ">=3.5"
 
 [[package]]
+name = "playsound"
+version = "1.3.0"
+description = "Pure Python, cross platform, single function module with no dependencies for playing sounds."
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.source]
+type = "url"
+url = "https://github.com/TaylorSMarks/playsound/archive/9cf4af20caa5ae8586f88b65659681b24f0c4e69.zip"
+[[package]]
 name = "psutil"
 version = "5.8.0"
 description = "Cross-platform lib for process and system monitoring in Python."
@@ -298,7 +309,7 @@ socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 [metadata]
 lock-version = "1.1"
 python-versions = "3.9.*"
-content-hash = "35c55ee723543b1f92a12a5f46389d48fbd408d64a7d3c9f8c3a1321f0f48480"
+content-hash = "e47bb5b0be13e8b40585a4678a1767cf0947d4f574a51c162a578a93f9ca4fd0"
 
 [metadata.files]
 ahk = [
@@ -413,6 +424,7 @@ mslex = [
     {file = "mslex-0.3.0-py2.py3-none-any.whl", hash = "sha256:380cb14abf8fabf40e56df5c8b21a6d533dc5cbdcfe42406bbf08dda8f42e42a"},
     {file = "mslex-0.3.0.tar.gz", hash = "sha256:4a1ac3f25025cad78ad2fe499dd16d42759f7a3801645399cce5c404415daa97"},
 ]
+playsound = []
 psutil = [
     {file = "psutil-5.8.0-cp27-cp27m-macosx_10_9_x86_64.whl", hash = "sha256:0066a82f7b1b37d334e68697faba68e5ad5e858279fd6351c8ca6024e8d6ba64"},
     {file = "psutil-5.8.0-cp27-cp27m-manylinux2010_i686.whl", hash = "sha256:0ae6f386d8d297177fd288be6e8d1afc05966878704dad9847719650e44fc49c"},
