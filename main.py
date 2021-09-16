@@ -47,40 +47,46 @@ app.window_icon = QtGui.QIcon(resource_path(Path("icons_library.ico")))
 app.application_name = APP
 app.organization_name = ORG
 
-path = Path(
+config_path = Path(
     QtCore.QStandardPaths.writable_location(QtCore.QStandardPaths.AppConfigLocation)
 )
 # create org and app folders
-path.mkdir(parents=True, exist_ok=True)
+config_path.mkdir(parents=True, exist_ok=True)
 
+root_logger = logging.getLogger()
 logging.getLogger("ahk").setLevel(logging.WARNING)
 log_format = UsernameFormatter(
     "{asctime} | {module:>12} | {levelname:>7} | {message}",
     datefmt="%H:%M:%S",
     style="{",
 )
-file_handler = handlers.RotatingFileHandler(
-    path / "log.log", maxBytes=2 * 1024 * 1024, backupCount=3, encoding="utf8"
-)
-file_handler.setFormatter(log_format)
-
-root_logger = logging.getLogger()
-root_logger.addHandler(file_handler)
 if __debug__:
     stream_handler = logging.StreamHandler(stream=sys.stdout)
     stream_handler.setFormatter(log_format)
     root_logger.addHandler(stream_handler)
     root_logger.setLevel(logging.DEBUG)
     qt_interrupt_timer = create_interrupt_timer()
+
+    logger_path = Path("logs/log.log")
+    logger_path.parent.mkdir(exist_ok=True)
 else:
     root_logger.setLevel(logging.INFO)
+    logger_path = config_path / "log.log"
 init_qt_logging()
+
+file_handler = handlers.RotatingFileHandler(
+    logger_path, maxBytes=2 * 1024 * 1024, backupCount=3, encoding="utf8"
+)
+file_handler.setFormatter(log_format)
+root_logger.addHandler(file_handler)
 
 # save traceback to logfile if Exception is raised
 ex_handler = ExceptionHandler()
 sys.excepthook = ex_handler.handler
 
-set_settings(QtCore.QSettings(str(path / "config.ini"), QtCore.QSettings.IniFormat))
+set_settings(
+    QtCore.QSettings(str(config_path / "config.ini"), QtCore.QSettings.IniFormat)
+)
 ui = hub.Hub(ex_handler)
 ui.startup()
 sys.exit(app.exec())
