@@ -19,9 +19,11 @@ playsound = {url="https://github.com/TaylorSMarks/playsound/archive/9cf4af20caa5
 flake8 = "~3.9"
 
 flake8-annotations = "~2.6"
+flake8-bandit = "~2.1"
+flake8-bugbear = "21.9.1"
 flake8-docstrings = "~1.6"
+flake8-isort = "~4.0"
 flake8-print = "~=3.1"
-flake8-import-order = "~=0.18"
 isort = "~5.9"
 black = "21.9b0"
 pyinstaller = "~=3.6, >=3.6"
