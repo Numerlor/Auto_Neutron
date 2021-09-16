@@ -1,49 +1,39 @@
 # This file is part of Auto_Neutron.
 # Copyright (C) 2019-2020  Numerlor
+from typing import Union
 
-from PyQt5 import QtWidgets
-from PyQt5 import QtCore
+from PySide6 import QtWidgets
+from PySide6 import QtCore
+# noinspection PyUnresolvedReferences
+from __feature__ import snake_case, true_property
 
 
 class SpinBoxDelegate(QtWidgets.QStyledItemDelegate):
-    def createEditor(self, parent, QStyleOptionViewItem, QModelIndex):
+    def create_editor(
+            self,
+            parent: QtWidgets.QWidget,
+            option: QtWidgets.QStyleOptionViewItem,
+            index: Union[QtCore.QModelIndex, QtCore.QPersistentModelIndex]
+    ) -> QtWidgets.QWidget:
         editor = QtWidgets.QSpinBox(parent)
-        editor.setFrame(False)
-        editor.setMinimum(0)
-        editor.setMaximum(10_000)
-        editor.setButtonSymbols(QtWidgets.QAbstractSpinBox.NoButtons)
+        editor.frame = False
+        editor.minimum = 1
+        editor.maximum = 10_000
+        editor.button_symbols = QtWidgets.QAbstractSpinBox.NoButtons
         return editor
-
-    def setEditorData(self, QWidget, QModelIndex):
-        value = int(QModelIndex.model().data(QModelIndex, QtCore.Qt.EditRole))
-        QWidget.setValue(value)
-
-    def setModelData(self, QWidget, QAbstractItemModel, QModelIndex):
-        QWidget.interpretText()
-        value = QWidget.value()
-        QAbstractItemModel.setData(QModelIndex, value, QtCore.Qt.EditRole)
-
-    def updateEditorGeometry(self, QWidget, QStyleOptionViewItem, QModelIndex):
-        QWidget.setGeometry(QStyleOptionViewItem.rect)
 
 
 class DoubleSpinBoxDelegate(QtWidgets.QStyledItemDelegate):
-    def createEditor(self, parent, QStyleOptionViewItem, QModelIndex):
+    def create_editor(
+            self,
+            parent: QtWidgets.QWidget,
+            option: QtWidgets.QStyleOptionViewItem,
+            index: Union[QtCore.QModelIndex, QtCore.QPersistentModelIndex]
+    ) -> QtWidgets.QWidget:
         editor = QtWidgets.QDoubleSpinBox(parent)
-        editor.setFrame(False)
-        editor.setMinimum(0)
-        editor.setMaximum(1_000_000)
-        editor.setDecimals(2)
-        editor.setButtonSymbols(QtWidgets.QAbstractSpinBox.NoButtons)
+        editor.frame = False
+        editor.minimum = 0
+        editor.maximum = 1_000_000
+        editor.decimals = 2
+        editor.button_symbols = QtWidgets.QAbstractSpinBox.NoButtons
         return editor
-
-    def setEditorData(self, QWidget, QModelIndex):
-        value = float(QModelIndex.model().data(QModelIndex, QtCore.Qt.EditRole))
-        QWidget.setValue(value)
-
-    def setModelData(self, QWidget, QAbstractItemModel, QModelIndex):
-        value = QWidget.text()
-        QAbstractItemModel.setData(QModelIndex, value, QtCore.Qt.EditRole)
-
-    def updateEditorGeometry(self, QWidget, QStyleOptionViewItem, QModelIndex):
-        QWidget.setGeometry(QStyleOptionViewItem.rect)
