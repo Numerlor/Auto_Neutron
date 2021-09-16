@@ -1,12 +1,13 @@
 import logging
 import os
-import traceback
 from contextlib import contextmanager
 from pathlib import Path
 from types import MethodType, TracebackType
 from typing import Iterator, List, Optional, Tuple, Type
 
-from PyQt5 import QtCore
+from PySide6 import QtCore
+# noinspection PyUnresolvedReferences
+from __feature__ import snake_case, true_property
 
 from auto_neutron.constants import JPATH
 
@@ -31,9 +32,9 @@ def patch_log_module(logger: logging.Logger, module_name: str) -> Iterator[None]
     """Patch logs using `logger` within this context manager to use `module_name` as the module name."""
     original_find_caller = logger.findCaller
 
-    def patched_caller(self: logging.Logger, stack_info: bool) -> Tuple[str, int, str, Optional[str]]:
+    def patched_caller(self: logging.Logger, stack_info: bool, stack_level: int) -> Tuple[str, int, str, Optional[str]]:
         """Patch filename on logs after this was applied to be `module_name`."""
-        _, lno, func, sinfo = original_find_caller(stack_info)
+        _, lno, func, sinfo = original_find_caller(stack_info, stack_level)
         return module_name, lno, func, sinfo
 
     logger.findCaller = MethodType(patched_caller, logger)
@@ -46,7 +47,7 @@ def patch_log_module(logger: logging.Logger, module_name: str) -> Iterator[None]
 class ExceptionHandler(QtCore.QObject):
     """Handles exceptions when linked to sys.excepthook."""
 
-    triggered = QtCore.pyqtSignal()
+    triggered = QtCore.Signal()
 
     def handler(self, exctype: Type[BaseException], value: BaseException, tb: TracebackType) -> None:
         """Log exception using `self.logger` and emit `traceback_sig`` with formatted exception."""
