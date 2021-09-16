@@ -26,6 +26,7 @@ flake8-isort = "~4.0"
 flake8-print = "~4.0"
 isort = "~5.9"
 black = "21.9b0"
+pre-commit = "~2.15"
 pyinstaller = "~4.5"
 taskipy = "~1.8"
 
@@ -47,5 +48,5 @@ target-version = ["py39"]
 
 [tool.taskipy.tasks]
 start = "python main.py"
-lint = "python -m flake8"
+lint = "pre-commit run --all-files"
 pyside-pyi = "pyside6-genpyi all --feature snake_case true_property"

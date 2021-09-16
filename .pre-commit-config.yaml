@@ -1,0 +1,32 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.0.1
+    hooks:
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+  - repo: local
+    hooks:
+
+      - id: isort
+        name: isort
+        description: Run isort with poetry.
+        entry: poetry run isort
+        language: system
+        types: [python]
+        require_serial: true
+
+      - id: black
+        name: black
+        description: Run black with poetry.
+        entry: poetry run black
+        language: system
+        types: [python]
+        require_serial: true
+
+      - id: flake8
+        name: flake8
+        description: Run flake8 with poetry.
+        entry: poetry run flake8
+        language: system
+        types: [python]
+        require_serial: true
