@@ -5,11 +5,13 @@ from typing import Union
 from PySide6 import QtCore, QtWidgets
 
 # noinspection PyUnresolvedReferences
-from __feature__ import snake_case, true_property
+from __feature__ import snake_case, true_property  # noqa F401
 
 
 class SpinBoxDelegate(QtWidgets.QStyledItemDelegate):
-    def create_editor(
+    """Item delegate for a table to use cells as `SpinBox`es."""
+
+    def create_editor(  # noqa D102
         self,
         parent: QtWidgets.QWidget,
         option: QtWidgets.QStyleOptionViewItem,
@@ -24,7 +26,9 @@ class SpinBoxDelegate(QtWidgets.QStyledItemDelegate):
 
 
 class DoubleSpinBoxDelegate(QtWidgets.QStyledItemDelegate):
-    def create_editor(
+    """Item delegate for a table to use cells as `DoubleSpinBox`es."""
+
+    def create_editor(  # noqa D102
         self,
         parent: QtWidgets.QWidget,
         option: QtWidgets.QStyleOptionViewItem,

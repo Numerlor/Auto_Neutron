@@ -2,7 +2,7 @@
 # Copyright (C) 2019-2020  Numerlor
 
 
-import pickle
+import pickle  # noqa S403
 from base64 import b64decode, b64encode
 from contextlib import contextmanager
 from pathlib import Path
@@ -12,7 +12,7 @@ from PySide6.QtCore import QByteArray, QSettings
 from PySide6.QtGui import QFont
 
 # noinspection PyUnresolvedReferences
-from __feature__ import snake_case, true_property
+from __feature__ import snake_case, true_property  # noqa F401
 
 __all__ = ["General", "Paths", "Window", "Alerts", "set_settings"]
 
@@ -137,7 +137,7 @@ class General(metaclass=SettingsCategory):  # noqa D101
         str,
         "gASVBwAAAAAAAABLAF2UhpQu",  # (0, [[]])
         lambda val: b64encode(pickle.dumps(val)).decode(),
-        lambda val: pickle.loads(b64decode(val.encode())),
+        lambda val: pickle.loads(b64decode(val.encode())),  # noqa S301
     )
     copy_mode: bool = SettingsParams(bool, True)
 
