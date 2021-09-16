@@ -27,7 +27,12 @@ from __feature__ import snake_case, true_property  # noqa F401
 from auto_neutron import hub
 from auto_neutron.constants import APP, APPID, ORG
 from auto_neutron.settings import set_settings
-from auto_neutron.utils import ExceptionHandler, UsernameFormatter, init_qt_logging
+from auto_neutron.utils import (
+    ExceptionHandler,
+    UsernameFormatter,
+    create_interrupt_timer,
+    init_qt_logging,
+)
 
 
 def resource_path(relative_path: Path) -> str:
@@ -66,6 +71,7 @@ if __debug__:
     stream_handler.setFormatter(log_format)
     root_logger.addHandler(stream_handler)
     root_logger.setLevel(logging.DEBUG)
+    qt_interrupt_timer = create_interrupt_timer()
 else:
     root_logger.setLevel(logging.INFO)
 init_qt_logging()

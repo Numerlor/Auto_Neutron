@@ -1,5 +1,6 @@
 import logging
 import os
+import sys
 from contextlib import contextmanager
 from pathlib import Path
 from types import MethodType, TracebackType
@@ -55,6 +56,9 @@ class ExceptionHandler(QtCore.QObject):
         self, exctype: Type[BaseException], value: BaseException, tb: TracebackType
     ) -> None:
         """Log exception using `self.logger` and emit `traceback_sig`` with formatted exception."""
+        if exctype is KeyboardInterrupt:
+            sys.exit()
+
         exception_file_path = Path(tb.tb_frame.f_code.co_filename)
         with patch_log_module(log, exception_file_path.stem):
             log.critical("Uncaught exception:", exc_info=(exctype, value, tb))
@@ -84,3 +88,12 @@ def init_qt_logging() -> None:
             log.log(QT_LOG_LEVELS[level], message)
 
     QtCore.qInstallMessageHandler(handler)
+
+
+def create_interrupt_timer() -> QtCore.QTimer:
+    """Interrupt the Qt event loop regularly to let python process signals."""
+    timer = QtCore.QTimer()
+    timer.interval = 50
+    timer.timeout.connect(lambda: None)
+    timer.start()
+    return timer
