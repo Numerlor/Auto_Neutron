@@ -115,6 +115,7 @@ class Journal:
     def reload(self) -> None:
         """Parse the whole journal file and create a `GameState` for it behind `self.game_state`."""
         loadout = None
+        shut_down = False
         with self.path.open(encoding="utf8") as journal_file:
             for line in journal_file:
                 entry = json.loads(line)
@@ -123,7 +124,8 @@ class Journal:
                 elif entry["event"] == "Location":
                     location = entry["StarSystem"]
                 elif entry["event"] == "Shutdown":
-                    self.game_state.shut_down = True
+                    shut_down = True
         if loadout is not None:
             self.game_state = GameState(loadout)
+        self.game_state.shut_down = shut_down
         self.game_state.location = location
