@@ -1,5 +1,5 @@
 # This file is part of Auto_Neutron.
-# Copyright (C)2019  Numerlor
+# Copyright (C) 2019  Numerlor
 from typing import Union
 
 from PySide6 import QtCore, QtWidgets
