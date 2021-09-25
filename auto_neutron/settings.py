@@ -1,7 +1,6 @@
 # This file is part of Auto_Neutron.
 # Copyright (C) 2019  Numerlor
 
-
 import pickle  # noqa S403
 from base64 import b64decode, b64encode
 from contextlib import contextmanager

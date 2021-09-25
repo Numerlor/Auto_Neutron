@@ -26,6 +26,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 from __feature__ import snake_case, true_property  # noqa F401
 from auto_neutron import hub
 from auto_neutron.constants import APP, APPID, ORG
+from auto_neutron.journal import Journal
 from auto_neutron.settings import set_settings
 from auto_neutron.utils import (
     ExceptionHandler,
@@ -33,6 +34,7 @@ from auto_neutron.utils import (
     create_interrupt_timer,
     init_qt_logging,
 )
+from auto_neutron.workers import CopyPlotter
 
 
 def resource_path(relative_path: Path) -> str:
@@ -88,5 +90,11 @@ set_settings(
     QtCore.QSettings(str(config_path / "config.ini"), QtCore.QSettings.IniFormat)
 )
 ui = hub.Hub(ex_handler)
-ui.startup()
+ui.plotter_state.journal = Journal(
+    Path(
+        r"C:\Users\miso1\Saved Games\Frontier Developments\Elite Dangerous\Journal.210919003144.01.log"
+    )
+)
+ui.plotter_state.create_worker_with_route(["Fuelum"] * 3)
+ui.plotter_state.plotter = CopyPlotter()
 sys.exit(app.exec())

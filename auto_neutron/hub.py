@@ -1,3 +1,6 @@
+# This file is part of Auto_Neutron.
+# Copyright (C) 2019  Numerlor
+
 from __future__ import annotations
 
 import typing as t
