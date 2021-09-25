@@ -3,6 +3,10 @@ import json
 import typing
 from pathlib import Path
 
+from PySide6 import QtCore
+
+# noinspection PyUnresolvedReferences
+from __feature__ import snake_case, true_property  # noqa: F401
 from auto_neutron.constants import BOOSTER_CONSTANTS, FSD_CONSTANTS, FrameShiftDrive
 
 
@@ -77,20 +81,19 @@ class GameState:
         return fsd
 
 
-class Journal:
+class Journal(QtCore.QObject):
     """Keep track of a journal file and the state of the game from it."""
 
+    system_sig = QtCore.Signal(str)
+    shutdown_sig = QtCore.Signal()
+
     def __init__(self, journal_path: Path):
+        super().__init__()
         self.path = journal_path
         self.game_state: typing.Optional[GameState] = None
         self.reload()
 
-    def tail(
-        self,
-        *,
-        system_callback: collections.abc.Callable[[str], typing.Any],
-        shutdown_callback: collections.abc.Callable[[], typing.Any],
-    ) -> collections.abc.Iterator[None]:
+    def tail(self) -> collections.abc.Generator[None, None, None]:
         """Follow a log file, updating `self.game_state` on location and loadout changes and on shutdown."""
         with self.path.open(encoding="utf8") as journal_file:
             journal_file.seek(0, 2)
@@ -99,7 +102,7 @@ class Journal:
                     entry = json.loads(line)
                     if entry["event"] == "FSDJump":
                         self.game_state.location = entry["StarSystem"]
-                        system_callback(entry["StarSystem"])
+                        self.system_sig.emit(entry["StarSystem"])
 
                     elif entry["event"] == "Loadout":
                         if self.game_state is not None:
@@ -108,7 +111,7 @@ class Journal:
                             self.game_state = GameState(entry)
 
                     elif entry["event"] == "Shutdown":
-                        shutdown_callback()
+                        self.shutdown_sig.emit()
                 else:
                     yield
 
