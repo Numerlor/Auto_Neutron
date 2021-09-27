@@ -80,6 +80,8 @@ class UsernameFormatter(logging.Formatter):
     def format(self, record: logging.LogRecord) -> str:
         """Redact Windows usernames from `record` message."""
         message = super().format(record)
+        if __debug__:
+            return message
         return message.replace(f"\\{self.os_username}", "\\USERNAME")
 
 
