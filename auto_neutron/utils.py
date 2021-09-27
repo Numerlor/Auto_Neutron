@@ -1,15 +1,20 @@
 # This file is part of Auto_Neutron.
 # Copyright (C) 2019  Numerlor
-
+import collections.abc
 import logging
 import os
 import sys
+import typing as t
+import urllib.parse
 from contextlib import contextmanager
+from functools import partial
 from pathlib import Path
 from types import MethodType, TracebackType
 from typing import Iterator, List, Optional, Tuple, Type
 
-from PySide6 import QtCore
+from PySide6 import QtCore, QtNetwork
+
+import auto_neutron
 
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa F401
@@ -24,6 +29,10 @@ QT_LOG_LEVELS = {
     2: logging.ERROR,
     3: logging.CRITICAL,
 }
+
+
+class NetworkError(Exception):
+    """Raised for Qt network errors."""
 
 
 def get_journals(n: int) -> List[Path]:
@@ -83,6 +92,30 @@ class UsernameFormatter(logging.Formatter):
         if __debug__:
             return message
         return message.replace(f"\\{self.os_username}", "\\USERNAME")
+
+
+def make_network_request(
+    url: str,
+    *,
+    params: dict = {},  # noqa B006
+    callback: collections.abc.Callable[[QtNetwork.QNetworkReply], t.Any],
+) -> None:
+    """Make a network request to `url` with a `params` query and connect its reply to `callback`."""
+    url = QtCore.QUrl(url + urllib.parse.urlencode(params))
+    request = QtNetwork.QNetworkRequest(url)
+    reply = auto_neutron.network_mgr.get(request)
+    reply.finished.connect(partial(callback, reply))
+
+
+def data_from_network_req(reply: QtNetwork.QNetworkReply) -> bytes:
+    """Decode bytes from the `QNetworkReply` object or raise an error on failed requests."""
+    try:
+        if reply.error() is QtNetwork.QNetworkReply.NetworkError.NoError:
+            return reply.read_all().data()
+        else:
+            raise NetworkError(reply.error_string())
+    finally:
+        reply.delete_later()
 
 
 def init_qt_logging() -> None:
