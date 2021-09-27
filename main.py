@@ -20,7 +20,9 @@ import sys
 from logging import handlers
 from pathlib import Path
 
-from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6 import QtCore, QtGui, QtNetwork, QtWidgets
+
+import auto_neutron
 
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa F401
@@ -48,6 +50,8 @@ app = QtWidgets.QApplication(sys.argv)
 app.window_icon = QtGui.QIcon(resource_path(Path("icons_library.ico")))
 app.application_name = APP
 app.organization_name = ORG
+auto_neutron.network_mgr = mgr = QtNetwork.QNetworkAccessManager()
+
 
 config_path = Path(
     QtCore.QStandardPaths.writable_location(QtCore.QStandardPaths.AppConfigLocation)
