@@ -2,7 +2,7 @@
 # Copyright (C) 2019  Numerlor
 
 import abc
-import collections
+import collections.abc
 import contextlib
 import logging
 import subprocess  # noqa S404
