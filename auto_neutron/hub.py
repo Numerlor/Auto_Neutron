@@ -43,7 +43,6 @@ class NeutronPlotRow:
     system: str
     dist_to_arrival: float
     dist_rem: float
-    neutron_star: bool
     jumps: int
 
     def __eq__(self, other: t.Union[NeutronPlotRow, str]):
