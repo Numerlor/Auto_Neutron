@@ -10,6 +10,8 @@ APP = "Auto_Neutron"
 ORG = "Numerlor"
 APPID = f"{ORG}|{APP}|{VERSION}"
 
+SPANSH_API_URL = "https://spansh.co.uk/api"
+
 
 class FrameShiftDrive(typing.NamedTuple):
     """Hold information about a frame shift drive module."""
