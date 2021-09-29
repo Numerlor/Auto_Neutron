@@ -30,12 +30,8 @@ from auto_neutron import hub
 from auto_neutron.constants import APP, APPID, ORG
 from auto_neutron.journal import Journal
 from auto_neutron.settings import set_settings
-from auto_neutron.utils import (
-    ExceptionHandler,
-    UsernameFormatter,
-    create_interrupt_timer,
-    init_qt_logging,
-)
+from auto_neutron.utils.logging import UsernameFormatter, init_qt_logging
+from auto_neutron.utils.utils import ExceptionHandler, create_interrupt_timer
 from auto_neutron.workers import CopyPlotter
 
 
