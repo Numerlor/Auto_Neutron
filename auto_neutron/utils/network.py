@@ -40,6 +40,6 @@ def json_from_network_req(reply: QtNetwork.QNetworkReply) -> dict:
         if reply.error() is QtNetwork.QNetworkReply.NetworkError.NoError:
             return json.loads(reply.read_all().data())
         else:
-            raise NetworkError(reply.error_string())
+            raise NetworkError(reply.error_string() + reply.read_all().data())
     finally:
         reply.delete_later()
