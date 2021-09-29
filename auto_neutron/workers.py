@@ -65,7 +65,6 @@ class AhkPlotter(Plotter):
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
             )
-            self.process.stdout.readline()
             with contextlib.suppress(TimeoutError):
                 self.process.wait(0.1)
                 raise RuntimeError("AHK failed to start.")
