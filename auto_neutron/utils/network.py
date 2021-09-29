@@ -25,8 +25,10 @@ def make_network_request(
     callback: collections.abc.Callable[[QtNetwork.QNetworkReply], t.Any],
 ) -> None:
     """Make a network request to `url` with a `params` query and connect its reply to `callback`."""
-    url = QtCore.QUrl(url + urllib.parse.urlencode(params))
-    request = QtNetwork.QNetworkRequest(url)
+    if params:
+        url += "?" + urllib.parse.urlencode(params)
+    qurl = QtCore.QUrl(url)
+    request = QtNetwork.QNetworkRequest(qurl)
     reply = auto_neutron.network_mgr.get(request)
     reply.finished.connect(partial(callback, reply))
 
