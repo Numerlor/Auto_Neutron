@@ -72,3 +72,14 @@ STATUS_PATH = (
     / "Saved Games/Frontier Developments/Elite Dangerous/Status.json"
 )
 AHK_PATH = Path(os.environ["PROGRAMW6432"]) / "AutoHotkey/AutoHotkey.exe"
+
+AHK_TEMPLATE = """\
+stdin := FileOpen("*", "r")
+
+${hotkey}::
+    while not stdin.AtEof
+    {
+        system := Trim(stdin.ReadLine(),"`n ")
+    }
+    ${user_script}
+"""
