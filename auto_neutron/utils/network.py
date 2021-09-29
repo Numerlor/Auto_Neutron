@@ -22,7 +22,7 @@ def make_network_request(
     url: str,
     *,
     params: dict = {},  # noqa B006
-    callback: collections.abc.Callable[[QtNetwork.QNetworkReply], t.Any],
+    reply_callback: collections.abc.Callable[[QtNetwork.QNetworkReply], t.Any],
 ) -> None:
     """Make a network request to `url` with a `params` query and connect its reply to `callback`."""
     if params:
@@ -30,7 +30,7 @@ def make_network_request(
     qurl = QtCore.QUrl(url)
     request = QtNetwork.QNetworkRequest(qurl)
     reply = auto_neutron.network_mgr.get(request)
-    reply.finished.connect(partial(callback, reply))
+    reply.finished.connect(partial(reply_callback, reply))
 
 
 def data_from_network_req(reply: QtNetwork.QNetworkReply) -> bytes:
