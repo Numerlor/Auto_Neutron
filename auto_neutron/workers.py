@@ -58,7 +58,7 @@ class AhkPlotter(Plotter):
         If the process terminates with 100ms (e.g. an invalid script file), a RuntimeError is raised.
         """
         self.stop()
-        with self.create_temp_script_file() as script_path:
+        with self._create_temp_script_file() as script_path:
             log.info(f"Spawning AHK subprocess with {Paths.ahk=} {script_path=}")
             self.process = subprocess.Popen(  # noqa S603
                 [Paths.ahk, str(script_path)],
@@ -87,7 +87,7 @@ class AhkPlotter(Plotter):
 
     @staticmethod
     @contextlib.contextmanager
-    def create_temp_script_file() -> collections.abc.Iterator[Path]:
+    def _create_temp_script_file() -> collections.abc.Iterator[Path]:
         """Create a temp file with the AHK script as its content."""
         temp_path = Path(
             tempfile.gettempdir(), tempfile.gettempprefix() + "_auto_neutron_script"
