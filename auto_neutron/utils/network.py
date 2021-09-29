@@ -2,6 +2,7 @@
 # Copyright (C) 2021  Numerlor
 
 import collections.abc
+import json
 import typing as t
 import urllib.parse
 from functools import partial
@@ -33,11 +34,11 @@ def make_network_request(
     reply.finished.connect(partial(reply_callback, reply))
 
 
-def data_from_network_req(reply: QtNetwork.QNetworkReply) -> bytes:
+def json_from_network_req(reply: QtNetwork.QNetworkReply) -> dict:
     """Decode bytes from the `QNetworkReply` object or raise an error on failed requests."""
     try:
         if reply.error() is QtNetwork.QNetworkReply.NetworkError.NoError:
-            return reply.read_all().data()
+            return json.loads(reply.read_all().data())
         else:
             raise NetworkError(reply.error_string())
     finally:
