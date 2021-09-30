@@ -3,8 +3,17 @@
 
 from __future__ import annotations
 
+import collections.abc
 import typing as t
 from dataclasses import dataclass
+from functools import partial
+
+from PySide6 import QtNetwork
+
+# noinspection PyUnresolvedReferences
+from __feature__ import snake_case, true_property  # noqa F401
+from auto_neutron.constants import SPANSH_API_URL
+from auto_neutron.utils.network import json_from_network_req, make_network_request
 
 
 @dataclass
@@ -41,3 +50,31 @@ class NeutronPlotRow:
 
 
 RouteList = t.Union[list[ExactPlotRow], list[NeutronPlotRow]]
+
+
+def spansh_neutron_callback(
+    reply: QtNetwork.QNetworkReply,
+    *,
+    result_callback: collections.abc.Callable[[list[NeutronPlotRow]], t.Any],
+) -> None:
+    """Handle a reply from Spansh's neutron plotter and call `result_callback` with the result when it's available."""
+    result = json_from_network_req(reply)
+    if result.get("status") == "queued":
+        make_network_request(
+            SPANSH_API_URL + "/results/" + result["job"],
+            reply_callback=partial(
+                spansh_neutron_callback, result_callback=result_callback
+            ),
+        )
+    elif result.get("result") is not None:
+        result_callback(
+            [
+                NeutronPlotRow(
+                    row["system"],
+                    row["distance_jumped"],
+                    row["distance_left"],
+                    row["jumps"],
+                )
+                for row in result["result"]["system_jumps"]
+            ]
+        )
