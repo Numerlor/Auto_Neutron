@@ -4,16 +4,19 @@
 from __future__ import annotations
 
 import collections.abc
+import logging
 import typing as t
 from dataclasses import dataclass
 from functools import partial
 
-from PySide6 import QtNetwork
+from PySide6 import QtCore, QtNetwork
 
 # noinspection PyUnresolvedReferences
-from __feature__ import snake_case, true_property  # noqa F401
+from __feature__ import snake_case  # noqa F401
 from auto_neutron.constants import SPANSH_API_URL
 from auto_neutron.utils.network import json_from_network_req, make_network_request
+
+log = logging.getLogger(__name__)
 
 
 @dataclass
@@ -56,17 +59,32 @@ def spansh_neutron_callback(
     reply: QtNetwork.QNetworkReply,
     *,
     result_callback: collections.abc.Callable[[list[NeutronPlotRow]], t.Any],
+    delay_iterator: collections.abc.Iterator[float],
 ) -> None:
-    """Handle a reply from Spansh's neutron plotter and call `result_callback` with the result when it's available."""
+    """
+    Handle a reply from Spansh's neutron plotter and call `result_callback` with the result when it's available.
+
+    If the job is still queued, make an another request in `delay` seconds,
+    where `delay` is the next value from the `delay_iterator`
+    """
     result = json_from_network_req(reply)
     if result.get("status") == "queued":
-        make_network_request(
-            SPANSH_API_URL + "/results/" + result["job"],
-            reply_callback=partial(
-                spansh_neutron_callback, result_callback=result_callback
+        sec_delay = next(delay_iterator)
+        log.debug(f"Re-requesting queued job result in {sec_delay} seconds.")
+        QtCore.QTimer.single_shot(
+            sec_delay * 1000,
+            partial(
+                make_network_request,
+                SPANSH_API_URL + "/results/" + result["job"],
+                reply_callback=partial(
+                    spansh_neutron_callback,
+                    result_callback=result_callback,
+                    delay_iterator=delay_iterator,
+                ),
             ),
         )
     elif result.get("result") is not None:
+        log.debug("Received finished neutron job.")
         result_callback(
             [
                 NeutronPlotRow(
