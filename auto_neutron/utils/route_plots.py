@@ -78,3 +78,8 @@ def spansh_neutron_callback(
                 for row in result["result"]["system_jumps"]
             ]
         )
+    else:
+        raise RuntimeError(
+            "Received invalid JSON response from Spansh neutron route.",
+            reply.read_all().data(),
+        )
