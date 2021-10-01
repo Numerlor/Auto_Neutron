@@ -54,49 +54,58 @@ class NeutronPlotRow:
 RouteList = t.Union[list[ExactPlotRow], list[NeutronPlotRow]]
 
 
-def spansh_neutron_callback(
+def _spansh_job_callback(
     reply: QtNetwork.QNetworkReply,
     *,
     result_callback: collections.abc.Callable[[list[NeutronPlotRow]], t.Any],
     delay_iterator: collections.abc.Iterator[float],
+    result_decode_func: collections.abc.Callable[[dict], t.Any],
 ) -> None:
     """
-    Handle a reply from Spansh's neutron plotter and call `result_callback` with the result when it's available.
+    Handle a Spansh job reply, wait until a response is available and then return `result_decode_func` applied to it.
 
-    If the job is still queued, make an another request in `delay` seconds,
+    When re-requesting for status, wait for `delay` seconds,
     where `delay` is the next value from the `delay_iterator`
     """
-    result = json_from_network_req(reply)
-    if result.get("status") == "queued":
+    job_response = json_from_network_req(reply)
+    if job_response.get("status") == "queued":
         sec_delay = next(delay_iterator)
         log.debug(f"Re-requesting queued job result in {sec_delay} seconds.")
         QtCore.QTimer.single_shot(
             sec_delay * 1000,
             partial(
                 make_network_request,
-                SPANSH_API_URL + "/results/" + result["job"],
+                SPANSH_API_URL + "/results/" + job_response["job"],
                 reply_callback=partial(
-                    spansh_neutron_callback,
+                    _spansh_job_callback,
                     result_callback=result_callback,
                     delay_iterator=delay_iterator,
+                    result_decode_func=result_decode_func,
                 ),
             ),
         )
-    elif result.get("result") is not None:
+    elif job_response.get("result") is not None:
         log.debug("Received finished neutron job.")
-        result_callback(
-            [
-                NeutronPlotRow(
-                    row["system"],
-                    row["distance_jumped"],
-                    row["distance_left"],
-                    row["jumps"],
-                )
-                for row in result["result"]["system_jumps"]
-            ]
-        )
+        result_callback(result_decode_func(job_response["result"]))
     else:
         raise RuntimeError(
             "Received invalid JSON response from Spansh neutron route.",
-            result,
+            job_response,
         )
+
+
+def _decode_neutron_result(result: dict) -> list[NeutronPlotRow]:
+    return [
+        NeutronPlotRow(
+            row["system"],
+            row["distance_jumped"],
+            row["distance_left"],
+            row["jumps"],
+        )
+        for row in result["system_jumps"]
+    ]
+
+
+spansh_neutron_callback = partial(
+    _spansh_job_callback, result_decode_func=_decode_neutron_result
+)
