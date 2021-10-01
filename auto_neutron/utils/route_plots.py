@@ -12,6 +12,7 @@ from functools import partial
 from PySide6 import QtCore, QtNetwork
 
 # noinspection PyUnresolvedReferences
+# Can't use true_property because QTimer's single_shot method turns into a property for is_single_shot
 from __feature__ import snake_case  # noqa F401
 from auto_neutron.constants import SPANSH_API_URL
 from auto_neutron.utils.network import json_from_network_req, make_network_request
