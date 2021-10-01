@@ -106,6 +106,22 @@ def _decode_neutron_result(result: dict) -> list[NeutronPlotRow]:
     ]
 
 
+def _decode_exact_result(result: dict) -> list[ExactPlotRow]:
+    return [
+        ExactPlotRow(
+            row["name"],
+            row["distance"],
+            row["distance_to_destination"],
+            bool(row["must_refuel"]),  # Spansh returns 0 or 1
+            row["has_neutron"],
+        )
+        for row in result["jumps"]
+    ]
+
+
 spansh_neutron_callback = partial(
     _spansh_job_callback, result_decode_func=_decode_neutron_result
+)
+spansh_exact_callback = partial(
+    _spansh_job_callback, result_decode_func=_decode_exact_result
 )
