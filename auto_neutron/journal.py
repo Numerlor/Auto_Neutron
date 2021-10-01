@@ -22,9 +22,11 @@ class GameState:
 
     def __init__(self, loadout_dict: dict):
         # Assigned from update_from_loadout
-        self._fsd = None
-        self._jump_range_boost = None
-        self._fueled_mass = None
+        self.fsd = None
+        self.jump_range_boost = None
+        self.tank_size = None
+        self.reserve_size = None
+        self.unladen_mass = None
 
         self.update_from_loadout(loadout_dict)
         self.shut_down = False
@@ -33,19 +35,19 @@ class GameState:
     def jump_range(self, *, cargo_mass: int) -> float:
         """Calculate the jump range with `cargo_mass` t of cargo."""
         return (
-            self._fsd.optimal_mass
-            * (1000 * self._fsd.max_fuel_usage / self._fsd.rating_const)
-            ** (1 / self._fsd.size_const)
-            / (self._fueled_mass + cargo_mass)
-        ) + self._jump_range_boost
+            self.fsd.optimal_mass
+            * (1000 * self.fsd.max_fuel_usage / self.fsd.rating_const)
+            ** (1 / self.fsd.size_const)
+            / (self.unladen_mass + self.tank_size + self.reserve_size + cargo_mass)
+        ) + self.jump_range_boost
 
     def update_from_loadout(self, loadout_dict: dict) -> None:
         """Update the state from a loadout event dict."""
-        self._fsd = self._fsd_from_loadout_dict(loadout_dict)
-        self._jump_range_boost = self._fsd_boost_from_loadout_dict(loadout_dict)
-        self._fueled_mass = loadout_dict["UnladenMass"] + sum(
-            loadout_dict["FuelCapacity"].values()
-        )
+        self.fsd = self._fsd_from_loadout_dict(loadout_dict)
+        self.jump_range_boost = self._fsd_boost_from_loadout_dict(loadout_dict)
+        self.unladen_mass = loadout_dict["UnladenMass"]
+        self.tank_size = loadout_dict["FuelCapacity"]["Main"]
+        self.reserve_size = loadout_dict["FuelCapacity"]["Reserve"]
 
     @staticmethod
     def _fsd_boost_from_loadout_dict(loadout: dict) -> float:
