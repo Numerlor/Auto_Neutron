@@ -9,7 +9,6 @@ license = "GPL-3.0-or-later"
 python = "3.9.*"
 
 PySide6 = "~6.2.0"
-requests = "~2.26"
 
 [tool.poetry.dev-dependencies]
 # Base tools
