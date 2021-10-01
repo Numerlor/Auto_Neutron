@@ -100,5 +100,5 @@ def spansh_neutron_callback(
     else:
         raise RuntimeError(
             "Received invalid JSON response from Spansh neutron route.",
-            reply.read_all().data(),
+            result,
         )
