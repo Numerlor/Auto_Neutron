@@ -1,6 +1,8 @@
 # This file is part of Auto_Neutron.
 # Copyright (C) 2021  Numerlor
 
+import collections.abc
+import itertools
 import logging
 import sys
 from pathlib import Path
@@ -44,3 +46,8 @@ def create_interrupt_timer() -> QtCore.QTimer:
     timer.timeout.connect(lambda: None)
     timer.start()
     return timer
+
+
+def create_request_delay_iterator() -> collections.abc.Iterator[int]:
+    """Create an iterator for re-request delays."""
+    return itertools.chain(iter([1, 2, 4, 4, 4, 6, 6]), itertools.cycle([10]))
