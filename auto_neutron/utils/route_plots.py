@@ -27,9 +27,7 @@ class ExactPlotRow:
     system: str
     dist: float
     dist_rem: float
-    fuel_left: t.Optional[float]
-    fuel_used: t.Optional[float]
-    refuel: t.Optional[bool]
+    refuel: bool
     neutron_star: bool
 
     def __eq__(self, other: t.Union[ExactPlotRow, str]):
