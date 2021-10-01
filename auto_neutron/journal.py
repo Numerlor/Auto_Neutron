@@ -71,7 +71,7 @@ class GameState:
         engineering = fsd_dict.get("Engineering")
         if engineering is not None:
             for modifier in engineering["Modifiers"]:
-                if modifier["Label"] == "FrameShiftDriveOptimalMass":
+                if modifier["Label"] == "FSDOptimalMass":
                     engineered_optimal_mass = modifier["Value"]
                 elif modifier["Label"] == "MaxFuelPerJump":
                     engineered_jump_fuel_cap = modifier["Value"]
