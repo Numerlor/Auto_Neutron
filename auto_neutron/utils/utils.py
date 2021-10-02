@@ -4,12 +4,11 @@
 import collections.abc
 import itertools
 import logging
-import sys
 import typing as t
 from pathlib import Path
 from types import TracebackType
 
-from PySide6 import QtCore
+from PySide6 import QtCore, QtWidgets
 
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa F401
@@ -35,7 +34,8 @@ class ExceptionHandler(QtCore.QObject):
         If the traceback is not provided, use "UNKNOWN" as the module name.
         """
         if exctype is KeyboardInterrupt:
-            sys.exit()
+            QtWidgets.QApplication.instance().exit()
+            return
 
         if tb is None:
             module_to_patch = "UNKNOWN"
