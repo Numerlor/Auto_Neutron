@@ -12,7 +12,7 @@ from PySide6 import QtCore
 
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa: F401
-from auto_neutron.journal import Journal
+from auto_neutron.journal import GameState, Journal
 from auto_neutron.utils.route_plots import RouteList
 from auto_neutron.utils.utils import ExceptionHandler
 from auto_neutron.workers import Plotter
@@ -80,6 +80,11 @@ class PlotterState:
             self.tail_worker.route = route
 
     @property
+    def game_state(self) -> GameState:
+        """Return the active journal's game state, or None if there is no journal."""
+        return getattr(self.journal, "game_state", None)
+
+    @property
     def plotter(self) -> Plotter:
         """Return the active plotter instance."""
         return self._plotter
@@ -129,5 +134,6 @@ class Hub(QtCore.QObject):
     def __init__(self, exception_handler: ExceptionHandler):
         super().__init__()
         self.window = MainWindow()
+        self.window.insert_row([1, 1, 1, 1])
         self.window.show()
         self.plotter_state = PlotterState()
