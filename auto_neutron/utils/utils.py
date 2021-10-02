@@ -5,6 +5,7 @@ import collections.abc
 import itertools
 import logging
 import sys
+import typing as t
 from pathlib import Path
 from types import TracebackType
 
@@ -23,14 +24,24 @@ class ExceptionHandler(QtCore.QObject):
     triggered = QtCore.Signal()
 
     def handler(
-        self, exctype: type[BaseException], value: BaseException, tb: TracebackType
+        self,
+        exctype: type[BaseException],
+        value: BaseException,
+        tb: t.Optional[TracebackType],
     ) -> None:
-        """Log exception using `self.logger` and emit `traceback_sig`` with formatted exception."""
+        """
+        Log exception, mocking the module to the traceback's module and emit `traceback_sig`` with formatted exception.
+
+        If the traceback is not provided, use "UNKNOWN" as the module name.
+        """
         if exctype is KeyboardInterrupt:
             sys.exit()
 
-        exception_file_path = Path(tb.tb_frame.f_code.co_filename)
-        with patch_log_module(log, exception_file_path.stem):
+        if tb is None:
+            module_to_patch = "UNKNOWN"
+        else:
+            module_to_patch = Path(tb.tb_frame.f_code.co_filename).stem
+        with patch_log_module(log, module_to_patch):
             log.critical("Uncaught exception:", exc_info=(exctype, value, tb))
             log.critical(
                 ""
