@@ -11,9 +11,9 @@ from PySide6 import QtCore
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa: F401
 from auto_neutron.journal import GameState, Journal
-from auto_neutron.utils.route_plots import RouteList
+from auto_neutron.utils.route_plots import Plotter, RouteList
 from auto_neutron.utils.utils import ExceptionHandler
-from auto_neutron.workers import GameWorker, Plotter
+from auto_neutron.workers import GameWorker
 from QTest import MainWindow
 
 
