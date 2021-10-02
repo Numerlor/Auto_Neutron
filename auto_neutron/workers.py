@@ -11,7 +11,7 @@ from PySide6 import QtCore
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa F401
 from auto_neutron.journal import Journal
-from auto_neutron.utils.route_plots import RouteList
+from auto_neutron.route_plots import RouteList
 
 log = logging.getLogger(__name__)
 
