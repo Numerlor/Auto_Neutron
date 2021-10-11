@@ -86,7 +86,7 @@ class StatusWorker(QtCore.QObject):
         self._generator.close()
         self._running = False
 
-    def read_status(self) -> collections.abc[None, None, None]:
+    def read_status(self) -> collections.abc.Generator[None, None, None]:
         """Emit status_signal with the status dict on every status file change."""
         last_content = None
         with open(STATUS_PATH, encoding="utf8") as file:
