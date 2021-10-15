@@ -5,26 +5,43 @@ from __future__ import annotations
 
 import typing as t
 from dataclasses import dataclass
+from functools import partial
 
 from PySide6 import QtCore
 
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa: F401
-from auto_neutron.journal import GameState, Journal
+from auto_neutron.journal import Journal
 from auto_neutron.route_plots import Plotter, RouteList
+from auto_neutron.ship import Ship
 from auto_neutron.utils.utils import ExceptionHandler
 from auto_neutron.workers import GameWorker
 from QTest import MainWindow
 
 
 @dataclass
+class GameState:
+    """
+    Hold the current state of the game from the journal.
+
+    The state can be updated through assignments on public attributes or using `update_from_loadout`.
+    """
+
+    ship = Ship()
+    shut_down: bool = None
+    location: str = None
+
+
 class PlotterState:
     """Hold the state required for a plotter to function."""
 
-    tail_worker: t.Optional[GameWorker] = None
-    _active_journal: t.Optional[Journal] = None
-    _active_route: t.Optional[list] = None
-    _plotter: t.Optional[Plotter] = None
+    def __init__(self, game_state: GameState):
+        self._game_state = game_state
+
+        self.tail_worker: t.Optional[GameWorker] = None
+        self._active_journal: t.Optional[Journal] = None
+        self._active_route: t.Optional[list] = None
+        self._plotter: t.Optional[Plotter] = None
 
     def create_worker_with_route(self, route: RouteList) -> None:
         """
@@ -36,11 +53,6 @@ class PlotterState:
             self.tail_worker = GameWorker(route, self.journal)
         else:
             self.tail_worker.route = route
-
-    @property
-    def game_state(self) -> GameState:
-        """Return the active journal's game state, or None if there is no journal."""
-        return getattr(self.journal, "game_state", None)
 
     @property
     def plotter(self) -> Plotter:
@@ -94,4 +106,9 @@ class Hub(QtCore.QObject):
         self.window = MainWindow()
         self.window.insert_row([1, 1, 1, 1])
         self.window.show()
-        self.plotter_state = PlotterState()
+        self.game_state = GameState()
+        Journal.shut_down_sig.connect(partial(setattr, self.game_state, "shut_down"))
+        Journal.system_sig.connect(partial(setattr, self.game_state, "shut_down"))
+        Journal.loadout_sig.connect(self.game_state.ship.update_from_loadout)
+
+        self.plotter_state = PlotterState(self.game_state)
