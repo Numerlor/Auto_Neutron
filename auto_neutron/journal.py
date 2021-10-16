@@ -44,7 +44,6 @@ class Journal(QtCore.QObject):
         """Parse the whole journal file and emit signals with the appropriate data."""
         loadout = None
         location = None
-        shut_down = False
         with self.path.open(encoding="utf8") as journal_file:
             for line in journal_file:
                 entry = json.loads(line)
@@ -53,10 +52,9 @@ class Journal(QtCore.QObject):
                 elif entry["event"] == "Location":
                     location = entry["StarSystem"]
                 elif entry["event"] == "Shutdown":
-                    shut_down = True
+                    self.shut_down_sig.emit()
 
         if location is not None:
             self.system_sig.emit(location)
         if loadout is not None:
             self.loadout_sig.emit(loadout)
-        self.shut_down_sig.emit(shut_down)

@@ -89,6 +89,12 @@ class PlotterState:
         In case a plotter is active, a new tail worker from the journal is created and connected to it.
         """
         if journal is not None:
+            self._game_state.shut_down = False
+            journal.shut_down_sig.connect(
+                partial(setattr, self._game_state, "shut_down", True)
+            )
+            journal.system_sig.connect(partial(setattr, self._game_state, "location"))
+            journal.loadout_sig.connect(self._game_state.ship.update_from_loadout)
             journal.reload()
             if self._plotter is not None:
                 self.tail_worker.stop()
@@ -107,8 +113,5 @@ class Hub(QtCore.QObject):
         self.window.insert_row([1, 1, 1, 1])
         self.window.show()
         self.game_state = GameState()
-        Journal.shut_down_sig.connect(partial(setattr, self.game_state, "shut_down"))
-        Journal.system_sig.connect(partial(setattr, self.game_state, "shut_down"))
-        Journal.loadout_sig.connect(self.game_state.ship.update_from_loadout)
 
         self.plotter_state = PlotterState(self.game_state)
