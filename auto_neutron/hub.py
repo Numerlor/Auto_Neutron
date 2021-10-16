@@ -7,10 +7,11 @@ import typing as t
 from dataclasses import dataclass
 from functools import partial
 
-from PySide6 import QtCore
+from PySide6 import QtCore, QtGui, QtWidgets
 
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa: F401
+from auto_neutron import settings
 from auto_neutron.journal import Journal
 from auto_neutron.route_plots import Plotter, RouteList
 from auto_neutron.ship import Ship
@@ -115,3 +116,30 @@ class Hub(QtCore.QObject):
         self.game_state = GameState()
 
         self.plotter_state = PlotterState(self.game_state)
+
+        set_theme()
+
+
+def set_theme() -> None:
+    """Set the app's theme depending on the user's preferences."""
+    app = QtWidgets.QApplication.instance()
+
+    if settings.Window.dark_mode:
+        p = QtGui.QPalette()
+        p.set_color(QtGui.QPalette.Window, QtGui.QColor(53, 53, 53))
+        p.set_color(QtGui.QPalette.WindowText, QtGui.QColor(247, 247, 247))
+        p.set_color(QtGui.QPalette.Base, QtGui.QColor(25, 25, 25))
+        p.set_color(QtGui.QPalette.Text, QtGui.QColor(247, 247, 247))
+        p.set_color(QtGui.QPalette.Button, QtGui.QColor(60, 60, 60))
+        p.set_color(QtGui.QPalette.AlternateBase, QtGui.QColor(45, 45, 45))
+        p.set_color(QtGui.QPalette.ToolTipText, QtCore.Qt.white)
+        p.set_color(QtGui.QPalette.ButtonText, QtCore.Qt.white)
+        p.set_color(
+            QtGui.QPalette.Disabled, QtGui.QPalette.Light, QtGui.QColor(0, 0, 0)
+        )
+        p.set_color(
+            QtGui.QPalette.Disabled, QtGui.QPalette.Text, QtGui.QColor(110, 110, 100)
+        )
+    else:
+        p = app.style().standardPalette()
+    app.set_palette(p)
