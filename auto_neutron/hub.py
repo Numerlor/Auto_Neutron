@@ -141,7 +141,7 @@ def set_theme() -> None:
             QtGui.QPalette.Disabled, QtGui.QPalette.Text, QtGui.QColor(110, 110, 100)
         )
     else:
-        p = app.style().standardPalette()
+        p = app.style().standard_palette()
     p.set_color(QtGui.QPalette.Highlight, QtGui.QColor(255, 255, 255, 0))
     p.set_color(QtGui.QPalette.HighlightedText, QtGui.QColor(0, 123, 255))
     app.set_palette(p)
