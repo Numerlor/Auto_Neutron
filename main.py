@@ -46,6 +46,8 @@ app = QtWidgets.QApplication(sys.argv)
 app.window_icon = QtGui.QIcon(resource_path(Path("icons_library.ico")))
 app.application_name = APP
 app.organization_name = ORG
+app.set_style("Fusion")
+
 auto_neutron.network_mgr = mgr = QtNetwork.QNetworkAccessManager()
 
 
