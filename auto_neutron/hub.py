@@ -16,8 +16,8 @@ from auto_neutron.journal import Journal
 from auto_neutron.route_plots import Plotter, RouteList
 from auto_neutron.ship import Ship
 from auto_neutron.utils.utils import ExceptionHandler
+from auto_neutron.windows.main_window import MainWindow
 from auto_neutron.workers import GameWorker
-from QTest import MainWindow
 
 
 @dataclass
@@ -111,7 +111,6 @@ class Hub(QtCore.QObject):
     def __init__(self, exception_handler: ExceptionHandler):
         super().__init__()
         self.window = MainWindow()
-        self.window.insert_row([1, 1, 1, 1])
         self.window.show()
         self.game_state = GameState()
 
