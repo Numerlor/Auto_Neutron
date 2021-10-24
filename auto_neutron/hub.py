@@ -16,6 +16,7 @@ from auto_neutron.journal import Journal
 from auto_neutron.route_plots import Plotter, RouteList
 from auto_neutron.ship import Ship
 from auto_neutron.utils.utils import ExceptionHandler
+from auto_neutron.windows.gui.license_window import LicenseWindow
 from auto_neutron.windows.main_window import MainWindow
 from auto_neutron.workers import GameWorker
 
@@ -112,6 +113,7 @@ class Hub(QtCore.QObject):
         super().__init__()
         self.window = MainWindow()
         self.window.show()
+        self.window.about_action.triggered.connect(partial(LicenseWindow, self.window))
         self.game_state = GameState()
 
         self.plotter_state = PlotterState(self.game_state)
