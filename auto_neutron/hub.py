@@ -35,12 +35,16 @@ class GameState:
     location: str = None
 
 
-class PlotterState:
+class PlotterState(QtCore.QObject):
     """Hold the state required for a plotter to function."""
 
+    new_system_signal = QtCore.Signal(str, int)
+
     def __init__(self, game_state: GameState):
+        super().__init__()
         self._game_state = game_state
 
+        self._route_index = 0
         self.tail_worker: t.Optional[GameWorker] = None
         self._active_journal: t.Optional[Journal] = None
         self._active_route: t.Optional[list] = None
@@ -56,6 +60,18 @@ class PlotterState:
             self.tail_worker = GameWorker(route, self.journal)
         else:
             self.tail_worker.route = route
+        self._active_route = route
+
+    @property
+    def route_index(self) -> int:
+        """Return the current route index."""
+        return self._route_index
+
+    @route_index.setter
+    def route_index(self, index: int) -> None:
+        """Set the current route index and emit `self.new_system_signal` with the system at it, and the index itself."""
+        self._route_index = index
+        self.new_system_signal.emit(self._active_route[index].system, index)
 
     @property
     def plotter(self) -> Plotter:
@@ -68,15 +84,18 @@ class PlotterState:
         Set the active plotter to `plotter`.
 
         If a previous plotter exists, stop it before replacing.
-        The tail worker is started and has its `next_system_sig` connected to the plotter's `update_system` method.
+        The tail worker is started and has its `new_system_index_sig` connected to the plotter's `update_system` method.
         """
         if self._plotter is not None:
             self._plotter.stop()
 
         self._plotter = plotter
+        self.new_system_signal.connect(self._plotter.update_system)
 
         self.tail_worker.start()
-        self.tail_worker.next_system_sig.connect(self._plotter.update_system)
+        self.tail_worker.new_system_index_sig.connect(
+            partial(setattr, self, "route_index")
+        )
 
     @property
     def journal(self) -> Journal:
@@ -103,7 +122,11 @@ class PlotterState:
                 self.tail_worker.stop()
                 self.tail_worker = GameWorker(self.tail_worker.route, self.journal)
                 self.tail_worker.start()
-                self.tail_worker.next_system_sig.connect(self._plotter.update_system)
+                self.tail_worker.new_system_index_sig.connect(
+                    self.tail_worker.new_system_index_sig.connect(
+                        partial(setattr, self, "route_index")
+                    )
+                )
         self._active_journal = journal
 
 

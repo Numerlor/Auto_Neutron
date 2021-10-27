@@ -22,7 +22,7 @@ log = logging.getLogger(__name__)
 class GameWorker(QtCore.QObject):
     """Handle dispatching route signals from the journal's tailer."""
 
-    next_system_sig = QtCore.Signal(str, int)
+    new_system_index_sig = QtCore.Signal(int)
     route_end_sig = QtCore.Signal()
 
     def __init__(self, route: RouteList, journal: Journal):
@@ -38,11 +38,8 @@ class GameWorker(QtCore.QObject):
     def _emit_next_system(self, system_name: str) -> None:
         """Emit the next system in the route and its index, or end of route."""
         with contextlib.suppress(ValueError):
-            new_system_index = self.route.index(system_name) + 1
             try:
-                self.next_system_sig.emit(
-                    self.route[new_system_index], new_system_index
-                )
+                self.new_system_index_sig.emit(self.route.index(system_name) + 1)
             except IndexError:
                 self.route_end_sig.emit()
 
