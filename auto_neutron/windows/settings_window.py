@@ -4,7 +4,7 @@
 import typing as t
 from operator import attrgetter
 
-from PySide6 import QtWidgets
+from PySide6 import QtCore, QtWidgets
 
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa: F401
@@ -14,6 +14,8 @@ from auto_neutron.windows.gui.settings_window import SettingsWindowGUI
 
 class SettingsWindow(SettingsWindowGUI):
     """Implement the settings functionality."""
+
+    settings_applied = QtCore.Signal()
 
     def __init__(self, parent: t.Optional[QtWidgets.QWidget]):
         super().__init__(parent)
@@ -32,6 +34,8 @@ class SettingsWindow(SettingsWindowGUI):
         )
         self.refresh_widgets()
         self.apply_button.pressed.connect(self.save_settings)
+        self.apply_button.pressed.connect(self.settings_applied)
+        self.ok_button.pressed.connect(self.settings_applied)
         self.ok_button.pressed.connect(self.save_settings)
         self.ok_button.pressed.connect(self.close)
 
