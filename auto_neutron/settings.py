@@ -179,7 +179,7 @@ class Window(metaclass=SettingsCategory):  # noqa D101
     font: QFont = SettingsParams(
         str,
         "Arial,-1,-1,5,50,0,0,0,0,0",
-        lambda val: val.toString(),
+        lambda val: val.to_string(),
         _font_deserializer,
     )
 
