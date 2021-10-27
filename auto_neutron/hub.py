@@ -120,7 +120,7 @@ class Hub(QtCore.QObject):
 
         self.plotter_state = PlotterState(self.game_state)
 
-        set_theme()
+        self.apply_appearance_settings()
 
     def apply_appearance_settings(self) -> None:
         """Update the theme and the main table's font."""
