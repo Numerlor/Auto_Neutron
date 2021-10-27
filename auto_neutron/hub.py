@@ -131,7 +131,7 @@ def set_theme() -> None:
 
     if settings.Window.dark_mode:
         p = QtGui.QPalette()
-        p.set_color(QtGui.QPalette.Window, QtGui.QColor(53, 53, 53))
+        p.set_color(QtGui.QPalette.Window, QtGui.QColor(35, 35, 35))
         p.set_color(QtGui.QPalette.WindowText, QtGui.QColor(247, 247, 247))
         p.set_color(QtGui.QPalette.Base, QtGui.QColor(25, 25, 25))
         p.set_color(QtGui.QPalette.Text, QtGui.QColor(247, 247, 247))
