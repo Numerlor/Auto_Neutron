@@ -42,7 +42,9 @@ class SettingsWindow(SettingsWindowGUI):
             if isinstance(widget, QtWidgets.QCheckBox):
                 widget.checked = setting_value
             elif isinstance(widget, QtWidgets.QLineEdit):
-                widget.text = str(setting_value)  # Sometimes this is a Path
+                widget.text = (
+                    str(setting_value) if setting_value is not None else ""
+                )  # Sometimes this is a Path
             elif isinstance(widget, QtWidgets.QTextEdit):
                 widget.plain_text = setting_value
             else:
