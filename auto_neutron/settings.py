@@ -141,7 +141,7 @@ class General(metaclass=SettingsCategory):  # noqa D101
     copy_mode: bool = SettingsParams(bool, True)
 
 
-def _path_serializer(path: Optional[Path]) -> str:
+def _path_serializer(path: Union[None, Path, str]) -> str:
     if path is None:
         return ""
     return str(path)
@@ -156,7 +156,7 @@ def _path_deserializer(path_string: str) -> Optional[Path]:
 class Paths(metaclass=SettingsCategory):  # noqa D101
     ahk: Optional[Path] = SettingsParams(str, "", _path_serializer, _path_deserializer)
     csv: Optional[Path] = SettingsParams(str, "", _path_serializer, _path_deserializer)
-    alert_sound: Optional[Path] = SettingsParams(
+    alert_sound: Union[None, Path, str] = SettingsParams(
         str, "", _path_serializer, _path_deserializer
     )
 
