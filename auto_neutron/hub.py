@@ -115,14 +115,22 @@ class Hub(QtCore.QObject):
         self.window = MainWindow()
         self.window.show()
         self.window.about_action.triggered.connect(partial(LicenseWindow, self.window))
-        self.window.settings_action.triggered.connect(
-            partial(SettingsWindow, self.window)
-        )
+        self.window.settings_action.triggered.connect(self.display_settings)
         self.game_state = GameState()
 
         self.plotter_state = PlotterState(self.game_state)
 
         set_theme()
+
+    def apply_appearance_settings(self) -> None:
+        """Update the theme and the main table's font."""
+        self.window.table.font = settings.Window.font
+        set_theme()
+
+    def display_settings(self) -> None:
+        """Display the settings window and connect the applied signal to refresh appearance."""
+        window = SettingsWindow(self.window)
+        window.settings_applied.connect(self.apply_appearance_settings)
 
 
 def set_theme() -> None:
