@@ -38,9 +38,10 @@ class GameWorker(QtCore.QObject):
     def _emit_next_system(self, system_name: str) -> None:
         """Emit the next system in the route and its index, or end of route."""
         with contextlib.suppress(ValueError):
-            try:
-                self.new_system_index_sig.emit(self.route.index(system_name) + 1)
-            except IndexError:
+            new_index = self.route.index(system_name) + 1
+            if new_index < len(self.route):
+                self.new_system_index_sig.emit(new_index)
+            else:
                 self.route_end_sig.emit()
 
     def start(self) -> None:
