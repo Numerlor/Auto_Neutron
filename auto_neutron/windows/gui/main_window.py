@@ -47,6 +47,9 @@ class MainWindowGUI(QtWidgets.QMainWindow):
         self.table.selection_mode = QtWidgets.QAbstractItemView.SingleSelection
         self.table.edit_triggers = QtWidgets.QAbstractItemView.NoEditTriggers
         self.table.alternating_row_colors = True
+        self.table.horizontal_scroll_bar_policy = (
+            QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff
+        )
 
     def _create_base_headers(self) -> None:
         """Create all header items and set the static resize modes and deleagtes."""
@@ -64,6 +67,10 @@ class MainWindowGUI(QtWidgets.QMainWindow):
         self.table.set_item_delegate_for_column(2, self._double_spinbox_delegate)
         # 3rd column delegate is variable and set by the subclass
         self.table.set_item_delegate_for_column(4, self._checkbox_delegate)
+
+        self.table.horizontal_header_item(0).set_text("System name")
+        self.table.horizontal_header_item(1).set_text("Distance")
+        self.table.horizontal_header_item(2).set_text("Remaining")
 
     def inactivate_before_index(self, index: int) -> None:
         """Make all the items before `index` grey, and after, the default color."""
