@@ -139,11 +139,19 @@ class Hub(QtCore.QObject):
         self.window.show()
         self.window.about_action.triggered.connect(partial(LicenseWindow, self.window))
         self.window.settings_action.triggered.connect(self.display_settings)
+        self.window.table.doubleClicked.connect(self.get_index_row)
         self.game_state = GameState()
 
         self.plotter_state = PlotterState(self.game_state)
+        self.plotter_state.new_system_signal.connect(
+            lambda _, idx: self.window.inactivate_before_index(idx)
+        )
 
         self.apply_appearance_settings()
+
+    def get_index_row(self, index: QtCore.QModelIndex) -> None:
+        """Set the current route index to `index`'s row."""
+        self.plotter_state.route_index = index.row()
 
     def apply_appearance_settings(self) -> None:
         """Update the theme and the main table's font."""
