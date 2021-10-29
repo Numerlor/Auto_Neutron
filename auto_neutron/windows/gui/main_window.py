@@ -1,13 +1,18 @@
 # This file is part of Auto_Neutron.
 # Copyright (C) 2021  Numerlor
 
+import collections.abc
 import typing as t
 
 from PySide6 import QtCore, QtGui, QtWidgets
 
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa: F401
-from auto_neutron.delegates import DoubleSpinBoxDelegate, SpinBoxDelegate
+from auto_neutron.delegates import (
+    CheckBoxDelegate,
+    DoubleSpinBoxDelegate,
+    SpinBoxDelegate,
+)
 
 
 class MainWindowGUI(QtWidgets.QMainWindow):
@@ -18,6 +23,7 @@ class MainWindowGUI(QtWidgets.QMainWindow):
         self.table = QtWidgets.QTableWidget()
         self._double_spinbox_delegate = DoubleSpinBoxDelegate()
         self._spinbox_delegate = SpinBoxDelegate()
+        self._checkbox_delegate = CheckBoxDelegate()
         self.set_central_widget(self.table)
 
         self._setup_table()
@@ -35,7 +41,6 @@ class MainWindowGUI(QtWidgets.QMainWindow):
         self.table.customContextMenuRequested.connect(self._table_context)
 
     def _setup_table(self) -> None:
-        self.table.column_count = 4
         self.table.vertical_header().visible = False
 
         self.table.grid_style = QtCore.Qt.PenStyle.NoPen
@@ -43,18 +48,22 @@ class MainWindowGUI(QtWidgets.QMainWindow):
         self.table.edit_triggers = QtWidgets.QAbstractItemView.NoEditTriggers
         self.table.alternating_row_colors = True
 
-        for column in range(4):
+    def _create_base_headers(self) -> None:
+        """Create all header items and set the static resize modes and deleagtes."""
+        for column in range(self.table.column_count):
             self.table.set_horizontal_header_item(column, QtWidgets.QTableWidgetItem())
 
         horizontal_header = self.table.horizontal_header()
         horizontal_header.set_section_resize_mode(1, QtWidgets.QHeaderView.Stretch)
         horizontal_header.set_section_resize_mode(2, QtWidgets.QHeaderView.Stretch)
         horizontal_header.set_section_resize_mode(3, QtWidgets.QHeaderView.Fixed)
+        horizontal_header.set_section_resize_mode(4, QtWidgets.QHeaderView.Fixed)
         horizontal_header.highlight_sections = False
 
         self.table.set_item_delegate_for_column(1, self._double_spinbox_delegate)
         self.table.set_item_delegate_for_column(2, self._double_spinbox_delegate)
-        self.table.set_item_delegate_for_column(3, self._spinbox_delegate)
+        # 3rd column delegate is variable and set by the subclass
+        self.table.set_item_delegate_for_column(4, self._checkbox_delegate)
 
     def inactivate_before_index(self, index: int) -> None:
         """Make all the items before `index` grey, and after, the default color."""
@@ -90,7 +99,7 @@ class MainWindowGUI(QtWidgets.QMainWindow):
         menu.add_action(self.about_action)
         menu.exec(self.table.viewport().map_to_global(location))
 
-    def insert_row(self, data: list[t.Any]) -> None:
+    def insert_row(self, data: collections.abc.Iterable[t.Any]) -> None:
         """Create a new row and insert up to column count amount of items from data."""
         row_pos = self.table.row_count
         self.table.row_count = row_pos + 1
