@@ -4,6 +4,7 @@
 import collections.abc
 import dataclasses
 import typing as t
+from contextlib import contextmanager
 
 from PySide6 import QtWidgets
 
@@ -44,14 +45,16 @@ class MainWindow(MainWindowGUI):
 
         The `self.conn` itemChanged signal is temporarily disconnected to accommodate this.
         """
-        self.disconnect(self.conn)
-        for row in data:
-            self.insert_row(row)
-        self.table.resize_column_to_contents(0)
-        self.table.resize_rows_to_contents()
-        self.conn = self.table.itemChanged.connect(
-            partial_no_external(self.table.resize_column_to_contents, 0)
-        )
+        with self.block_item_changed_signal():
+            for row in data:
+                self.insert_row(row)
+            self.table.resize_column_to_contents(0)
+            self.table.resize_rows_to_contents()
+
+    def inactivate_before_index(self, index: int) -> None:
+        """Ensure the itemChanged signal is not connected when changing the item color."""
+        with self.block_item_changed_signal():
+            super().inactivate_before_index(index)
 
     def initialize_table(self, route: RouteList) -> None:
         """Clear the table and insert plot rows from `RouteList` into it with appropriate columns."""
@@ -82,3 +85,12 @@ class MainWindow(MainWindowGUI):
         elif self._current_route_type is NeutronPlotRow:
             self.table.horizontal_header_item(3).set_text("Jumps")
             self.table.resize_column_to_contents(3)
+
+    @contextmanager
+    def block_item_changed_signal(self) -> collections.abc.Iterator[None]:
+        """Temporarily disconnect `self.conn` for the duration of the context manager."""
+        self.disconnect(self.conn)
+        yield
+        self.conn = self.table.itemChanged.connect(
+            partial_no_external(self.table.resize_column_to_contents, 0)
+        )
