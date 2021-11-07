@@ -4,7 +4,6 @@
 import collections.abc
 import dataclasses
 import typing as t
-from contextlib import contextmanager
 
 from PySide6 import QtWidgets
 
@@ -13,6 +12,7 @@ from __feature__ import snake_case, true_property  # noqa: F401
 from auto_neutron.route_plots import ExactPlotRow, NeutronPlotRow, RouteList
 from auto_neutron.utils.utils import partial_no_external
 
+from ..utils.signal import ReconnectingSignal
 from .gui.main_window import MainWindowGUI
 
 
@@ -25,9 +25,12 @@ class MainWindow(MainWindowGUI):
             lambda: self.table.edit_item(self.table.current_item())
         )
         self.copy_action.triggered.connect(self.copy_table_item_text)
-        self.conn = self.table.itemChanged.connect(
-            partial_no_external(self.table.resize_column_to_contents, 0)
+        self.resize_connection = ReconnectingSignal(
+            self.table.itemChanged,
+            partial_no_external(self.table.resize_column_to_contents, 0),
         )
+        self.resize_connection.connect()
+
         self._current_route_type: t.Optional[
             t.Union[type[ExactPlotRow], type[NeutronPlotRow]]
         ] = None
@@ -45,7 +48,7 @@ class MainWindow(MainWindowGUI):
 
         The `self.conn` itemChanged signal is temporarily disconnected to accommodate this.
         """
-        with self.block_item_changed_signal():
+        with self.resize_connection.temporarily_disconnect():
             for row in data:
                 self.insert_row(row)
             self.table.resize_column_to_contents(0)
@@ -53,7 +56,7 @@ class MainWindow(MainWindowGUI):
 
     def inactivate_before_index(self, index: int) -> None:
         """Ensure the itemChanged signal is not connected when changing the item color."""
-        with self.block_item_changed_signal():
+        with self.resize_connection.temporarily_disconnect():
             super().inactivate_before_index(index)
 
     def initialize_table(self, route: RouteList) -> None:
@@ -85,12 +88,3 @@ class MainWindow(MainWindowGUI):
         elif self._current_route_type is NeutronPlotRow:
             self.table.horizontal_header_item(3).set_text("Jumps")
             self.table.resize_column_to_contents(3)
-
-    @contextmanager
-    def block_item_changed_signal(self) -> collections.abc.Iterator[None]:
-        """Temporarily disconnect `self.conn` for the duration of the context manager."""
-        self.disconnect(self.conn)
-        yield
-        self.conn = self.table.itemChanged.connect(
-            partial_no_external(self.table.resize_column_to_contents, 0)
-        )
