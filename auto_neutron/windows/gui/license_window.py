@@ -18,7 +18,7 @@ class LicenseWindow(QtWidgets.QDialog):
         self.set_fixed_size(350, 175)
         self.set_window_flag(QtCore.Qt.WindowContextHelpButtonHint, False)
         self.set_attribute(QtCore.Qt.WidgetAttribute.WA_DeleteOnClose, True)
-        self.window_title = "Auto Neutron " + VERSION
+        self.window_title = "Auto_Neutron " + VERSION
 
         self.text = QtWidgets.QTextBrowser(self)
         self.text.open_external_links = True
