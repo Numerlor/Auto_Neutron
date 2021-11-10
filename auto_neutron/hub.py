@@ -144,9 +144,7 @@ class Hub(QtCore.QObject):
         self.game_state = GameState()
 
         self.plotter_state = PlotterState(self.game_state)
-        self.plotter_state.new_system_signal.connect(
-            lambda _, idx: self.window.inactivate_before_index(idx)
-        )
+        self.plotter_state.new_system_signal.connect(self.new_system_callback)
 
         self.apply_appearance_settings()
 
@@ -161,9 +159,20 @@ class Hub(QtCore.QObject):
             table_item.column()
         ] = table_item.data(QtCore.Qt.ItemDataRole.DisplayRole)
 
+    def new_system_callback(self, _: t.Any, index: int) -> None:
+        """Ensure we don't edit the route when inactivating rows."""
+        with self.edit_route_update_connection.temporarily_disconnect():
+            self.window.inactivate_before_index(index)
+
     def get_index_row(self, index: QtCore.QModelIndex) -> None:
         """Set the current route index to `index`'s row."""
         self.plotter_state.route_index = index.row()
+
+    def new_route(self, route: RouteList) -> None:
+        """Create a new worker with `route` and populate the main table with it."""
+        self.plotter_state.create_worker_with_route(route)
+        with self.edit_route_update_connection.temporarily_disconnect():
+            self.window.initialize_table(route)
 
     def apply_appearance_settings(self) -> None:
         """Update the theme and the main table's font."""
