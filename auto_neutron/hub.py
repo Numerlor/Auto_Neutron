@@ -15,6 +15,7 @@ from auto_neutron import settings
 from auto_neutron.journal import Journal
 from auto_neutron.route_plots import Plotter, RouteList
 from auto_neutron.ship import Ship
+from auto_neutron.utils.signal import ReconnectingSignal
 from auto_neutron.utils.utils import ExceptionHandler
 from auto_neutron.windows.gui.license_window import LicenseWindow
 from auto_neutron.windows.main_window import MainWindow
@@ -148,6 +149,17 @@ class Hub(QtCore.QObject):
         )
 
         self.apply_appearance_settings()
+
+        self.edit_route_update_connection = ReconnectingSignal(
+            self.window.table.itemChanged, self.update_route_from_edit
+        )
+        self.edit_route_update_connection.connect()
+
+    def update_route_from_edit(self, table_item: QtWidgets.QTableWidgetItem) -> None:
+        """Edit the plotter's route with the new data in `table_item`."""
+        self.plotter_state.tail_worker.route[table_item.row()][
+            table_item.column()
+        ] = table_item.data(QtCore.Qt.ItemDataRole.DisplayRole)
 
     def get_index_row(self, index: QtCore.QModelIndex) -> None:
         """Set the current route index to `index`'s row."""

@@ -6,11 +6,11 @@ from __future__ import annotations
 import abc
 import collections.abc
 import contextlib
+import dataclasses
 import logging
 import subprocess  # noqa S404
 import tempfile
 import typing as t
-from dataclasses import dataclass
 from functools import partial
 from zipfile import Path
 
@@ -26,8 +26,26 @@ from auto_neutron.utils.network import json_from_network_req, make_network_reque
 log = logging.getLogger(__name__)
 
 
-@dataclass
-class ExactPlotRow:
+class DataClassBase:
+    """
+    Provide indexed access to dataclass items.
+
+    This class must be subclassed by a dataclass.
+    """
+
+    def __init__(self):
+        raise RuntimeError(
+            f"{self.__class__.__name__} cannot be instantiated directly."
+        )
+
+    def __setitem__(self, key: int, value: object) -> None:
+        """Implement index based item assignment."""
+        attr_name = dataclasses.fields(self)[key].name
+        setattr(self, attr_name, value)
+
+
+@dataclasses.dataclass
+class ExactPlotRow(DataClassBase):
     """One row entry of an exact plot from the Spansh Galaxy Plotter."""
 
     system: str
@@ -42,8 +60,8 @@ class ExactPlotRow:
         return super().__eq__(other)
 
 
-@dataclass
-class NeutronPlotRow:
+@dataclasses.dataclass
+class NeutronPlotRow(DataClassBase):
     """One row entry of an exact plot from the Spansh Neutron Router."""
 
     system: str
