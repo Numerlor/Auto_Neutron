@@ -40,6 +40,7 @@ class GameState:
     ship = Ship()
     shut_down: t.Optional[bool] = None
     location: t.Optional[Location] = None
+    current_cargo: t.Optional[int] = None
 
 
 class PlotterState(QtCore.QObject):
@@ -123,6 +124,9 @@ class PlotterState(QtCore.QObject):
                 partial(setattr, self._game_state, "shut_down", True)
             )
             journal.system_sig.connect(partial(setattr, self._game_state, "location"))
+            journal.cargo_sig.connect(
+                partial(setattr, self._game_state, "current_cargo")
+            )
             journal.loadout_sig.connect(self._game_state.ship.update_from_loadout)
             journal.reload()
             if self._plotter is not None:

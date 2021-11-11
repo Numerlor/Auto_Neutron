@@ -48,10 +48,13 @@ class Journal(QtCore.QObject):
                 else:
                     yield
 
-    def get_static_state(self) -> tuple[t.Optional[Ship], t.Optional[Location], bool]:
-        """Parse the whole journal file and returns the ship, location and whether the game was shut down."""
+    def get_static_state(
+        self,
+    ) -> tuple[t.Optional[Ship], t.Optional[Location], t.Optional[int], bool]:
+        """Parse the whole journal file and return the ship, location, current cargo and game was shut down state."""
         loadout = None
         location = None
+        cargo = None
         with self.path.open(encoding="utf8") as journal_file:
             for line in journal_file:
                 entry = json.loads(line)
@@ -59,14 +62,16 @@ class Journal(QtCore.QObject):
                     loadout = entry
                 elif entry["event"] == "Location":
                     location = Location(entry["StarSystem"], *entry["StarPos"])
+                elif entry["event"] == "Cargo" and entry["Vessel"] == "Ship":
+                    cargo = entry["Count"]
                 elif entry["event"] == "Shutdown":
-                    return loadout, location, True
+                    return loadout, location, cargo, True
 
-        return loadout, location, False
+        return loadout, location, cargo, False
 
     def reload(self) -> None:
         """Parse the whole journal file and emit signals with the appropriate data."""
-        loadout, location, shut_down = self.get_static_state()
+        loadout, location, cargo, shut_down = self.get_static_state()
 
         if shut_down:
             self.shut_down_sig.emit()
@@ -74,3 +79,5 @@ class Journal(QtCore.QObject):
             self.system_sig.emit(location)
         if loadout is not None:
             self.loadout_sig.emit(loadout)
+        if cargo is not None:
+            self.cargo_sig.emit(cargo)
