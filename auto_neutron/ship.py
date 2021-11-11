@@ -20,6 +20,7 @@ class Ship:
         self.tank_size: t.Optional[int] = None
         self.reserve_size: t.Optional[float] = None
         self.unladen_mass: t.Optional[float] = None
+        self.max_cargo: t.Optional[int] = None
 
     def jump_range(self, *, cargo_mass: int) -> float:
         """Calculate the jump range with `cargo_mass` t of cargo."""
@@ -45,6 +46,7 @@ class Ship:
         self.unladen_mass = loadout_dict["UnladenMass"]
         self.tank_size = loadout_dict["FuelCapacity"]["Main"]
         self.reserve_size = loadout_dict["FuelCapacity"]["Reserve"]
+        self.max_cargo = loadout_dict["CargoCapacity"]
 
     @staticmethod
     def _fsd_from_loadout_dict(loadout: dict) -> FrameShiftDrive:
@@ -99,6 +101,7 @@ class Ship:
         self.unladen_mass = coriolis_json["unladenMass"]
         self.tank_size = coriolis_json["fuelCapacity"]
         self.tank_size = coriolis_json["reserveFuelCapacity"]
+        self.max_cargo = coriolis_json["cargoCapacity"]
 
     @classmethod
     def _fsd_from_coriolis_json(cls, json_data: dict) -> FrameShiftDrive:
