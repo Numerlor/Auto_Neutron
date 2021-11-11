@@ -134,4 +134,7 @@ class PlotterState(QtCore.QObject):
                         partial(setattr, self, "route_index")
                     )
                 )
+        else:
+            if self._plotter is not None:
+                self.tail_worker.stop()
         self._active_journal = journal
