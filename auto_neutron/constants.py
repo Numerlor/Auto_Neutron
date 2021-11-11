@@ -74,9 +74,6 @@ BOOSTER_CONSTANTS = {
     "int_guardianfsdbooster_size5": 10.5,
 }
 
-# Constant until localization is figured out.
-LAST_JOURNALS_TEXT = ("Last journal", "Second to last", "Third to last")
-
 JPATH = (
     Path(os.environ["userprofile"])
     / "Saved Games/Frontier Developments/Elite Dangerous"
