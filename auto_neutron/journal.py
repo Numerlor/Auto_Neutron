@@ -1,8 +1,11 @@
 # This file is part of Auto_Neutron.
 # Copyright (C) 2021  Numerlor
 
+from __future__ import annotations
+
 import collections.abc
 import json
+import typing as t
 from pathlib import Path
 
 from PySide6 import QtCore
@@ -11,12 +14,16 @@ from PySide6 import QtCore
 from __feature__ import snake_case, true_property  # noqa: F401
 from auto_neutron.game_state import Location
 
+if t.TYPE_CHECKING:
+    from auto_neutron.ship import Ship
+
 
 class Journal(QtCore.QObject):
     """Keep track of a journal file and the state of the game from it."""
 
     system_sig = QtCore.Signal(Location)
     loadout_sig = QtCore.Signal(dict)
+    cargo_sig = QtCore.Signal(int)
     shut_down_sig = QtCore.Signal()
 
     def __init__(self, journal_path: Path):
@@ -41,8 +48,8 @@ class Journal(QtCore.QObject):
                 else:
                     yield
 
-    def reload(self) -> None:
-        """Parse the whole journal file and emit signals with the appropriate data."""
+    def get_static_state(self) -> tuple[t.Optional[Ship], t.Optional[Location], bool]:
+        """Parse the whole journal file and returns the ship, location and whether the game was shut down."""
         loadout = None
         location = None
         with self.path.open(encoding="utf8") as journal_file:
@@ -53,8 +60,16 @@ class Journal(QtCore.QObject):
                 elif entry["event"] == "Location":
                     location = Location(entry["StarSystem"], *entry["StarPos"])
                 elif entry["event"] == "Shutdown":
-                    self.shut_down_sig.emit()
+                    return loadout, location, True
 
+        return loadout, location, False
+
+    def reload(self) -> None:
+        """Parse the whole journal file and emit signals with the appropriate data."""
+        loadout, location, shut_down = self.get_static_state()
+
+        if shut_down:
+            self.shut_down_sig.emit()
         if location is not None:
             self.system_sig.emit(location)
         if loadout is not None:
