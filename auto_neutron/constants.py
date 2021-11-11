@@ -74,7 +74,7 @@ BOOSTER_CONSTANTS = {
     "int_guardianfsdbooster_size5": 10.5,
 }
 
-JPATH = (
+JOURNAL_PATH = (
     Path(os.environ["userprofile"])
     / "Saved Games/Frontier Developments/Elite Dangerous"
 )
