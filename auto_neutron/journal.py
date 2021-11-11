@@ -9,12 +9,13 @@ from PySide6 import QtCore
 
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa: F401
+from auto_neutron.game_state import Location
 
 
 class Journal(QtCore.QObject):
     """Keep track of a journal file and the state of the game from it."""
 
-    system_sig = QtCore.Signal(str)
+    system_sig = QtCore.Signal(Location)
     loadout_sig = QtCore.Signal(dict)
     shut_down_sig = QtCore.Signal()
 
@@ -50,7 +51,7 @@ class Journal(QtCore.QObject):
                 if entry["event"] == "Loadout":
                     loadout = entry
                 elif entry["event"] == "Location":
-                    location = entry["StarSystem"]
+                    location = Location(entry["StarSystem"], *entry["StarPos"])
                 elif entry["event"] == "Shutdown":
                     self.shut_down_sig.emit()
 

@@ -1,11 +1,14 @@
 # This file is part of Auto_Neutron.
 # Copyright (C) 2019  Numerlor
 
+from __future__ import annotations
+
 import collections.abc
 import contextlib
 import json
 import logging
 import subprocess  # noqa S404
+import typing as t
 from functools import partial
 
 from PySide6 import QtCore
@@ -13,8 +16,10 @@ from PySide6 import QtCore
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa F401
 from auto_neutron.constants import STATUS_PATH
-from auto_neutron.journal import Journal
-from auto_neutron.route_plots import RouteList
+
+if t.TYPE_CHECKING:
+    from auto_neutron.journal import Journal
+    from auto_neutron.route_plots import RouteList
 
 log = logging.getLogger(__name__)
 
