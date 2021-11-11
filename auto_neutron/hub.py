@@ -199,6 +199,7 @@ def set_theme() -> None:
         p.set_color(QtGui.QPalette.AlternateBase, QtGui.QColor(45, 45, 45))
         p.set_color(QtGui.QPalette.ToolTipText, QtCore.Qt.white)
         p.set_color(QtGui.QPalette.ButtonText, QtCore.Qt.white)
+        p.set_color(QtGui.QPalette.PlaceholderText, QtGui.QColor(110, 110, 100))
         p.set_color(
             QtGui.QPalette.Disabled, QtGui.QPalette.Light, QtGui.QColor(0, 0, 0)
         )
