@@ -14,9 +14,6 @@ from PySide6 import QtCore
 from __feature__ import snake_case, true_property  # noqa: F401
 from auto_neutron.game_state import Location
 
-if t.TYPE_CHECKING:
-    from auto_neutron.ship import Ship
-
 
 class Journal(QtCore.QObject):
     """Keep track of a journal file and the state of the game from it."""
@@ -50,7 +47,7 @@ class Journal(QtCore.QObject):
 
     def get_static_state(
         self,
-    ) -> tuple[t.Optional[Ship], t.Optional[Location], t.Optional[int], bool]:
+    ) -> tuple[t.Optional[dict], t.Optional[Location], t.Optional[int], bool]:
         """Parse the whole journal file and return the ship, location, current cargo and game was shut down state."""
         loadout = None
         location = None
