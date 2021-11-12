@@ -3,12 +3,14 @@
 
 import typing as t
 from operator import attrgetter
+from pathlib import Path
 
 from PySide6 import QtCore, QtWidgets
 
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa: F401
 from auto_neutron import settings
+from auto_neutron.constants import AHK_PATH
 from auto_neutron.windows.gui.settings_window import SettingsWindowGUI
 
 
@@ -33,11 +35,43 @@ class SettingsWindow(SettingsWindowGUI):
             (self.copy_mode_checkbox, ("General", "copy_mode")),
         )
         self.refresh_widgets()
+
+        if settings.Paths.ahk is None or not settings.Paths.ahk.exists():
+            self.copy_mode_checkbox.enabled = False
+            self.copy_mode_checkbox.checked = False
+
+        self.ahk_path_button.pressed.connect(self.get_ahk_path)
+        self.alert_path_button.pressed.connect(self.get_sound_path)
+
         self.apply_button.pressed.connect(self.save_settings)
         self.apply_button.pressed.connect(self.settings_applied)
         self.ok_button.pressed.connect(self.settings_applied)
         self.ok_button.pressed.connect(self.save_settings)
         self.ok_button.pressed.connect(self.close)
+
+    def get_ahk_path(self) -> None:
+        """Ask the user for the AHK executable file path and save it to the setting."""
+        path, _ = QtWidgets.QFileDialog.get_open_file_name(
+            self,
+            "Select AHK executable",
+            str(AHK_PATH),
+            filter="Executable files (*.exe)",
+        )
+        if path:
+            settings.Paths.ahk = Path(path)
+            self.copy_mode_checkbox.enabled = True
+
+    def get_sound_path(self) -> None:
+        """Ask the user for the alert file path and save it to the line edit."""
+        path, _ = QtWidgets.QFileDialog.get_open_file_name(
+            self,
+            "Select alert file",
+            "",
+            filter="Audio files (*.wav *.mp3);;All types (*.*)",
+        )
+        if path:
+            self.alert_path_line_edit.text = str(Path(path))
+            settings.Paths.alert_sound = Path(path)
 
     def refresh_widgets(self) -> None:
         """Refresh the state of the widgets to reflect the current settings."""
