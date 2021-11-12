@@ -112,9 +112,6 @@ class Plotter(abc.ABC):
         """Stop the plotter."""
         ...
 
-    def recheck_settings(self) -> t.Any:
-        """Check if the plotter needs to be refreshed with new settings."""
-
 
 class CopyPlotter(Plotter):
     """Plot by copying given systems on the route into the clipboard."""
@@ -159,6 +156,12 @@ class AhkPlotter(Plotter):
 
     def update_system(self, system: str, system_index: t.Optional[int] = None) -> None:
         """Update the ahk script with `system`."""
+        if (
+            Paths.ahk != self._used_ahk_path
+            or General.script != self._used_script
+            or General.bind != self._used_hotkey
+        ):
+            self.stop()
         if self.process is None or self.process.poll() is not None:
             self._start_ahk()
         self._last_system = system
@@ -172,16 +175,6 @@ class AhkPlotter(Plotter):
             log.debug("Terminating AHK subprocess.")
             self.process.terminate()
             self.process = None
-
-    def recheck_settings(self) -> None:
-        """Check if settings were changed from the ones used in the process, and reset if that is the case."""
-        if self.process is not None and (
-            Paths.ahk != self._used_ahk_path
-            or General.script != self._used_script
-            or General.bind != self._used_hotkey
-        ):
-            self.stop()
-            self.update_system(self._last_system)
 
     @contextlib.contextmanager
     def _create_temp_script_file(self) -> collections.abc.Iterator[Path]:
