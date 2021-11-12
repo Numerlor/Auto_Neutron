@@ -138,7 +138,7 @@ class AhkPlotter(Plotter):
         with self._create_temp_script_file() as script_path:
             log.info(f"Spawning AHK subprocess with {Paths.ahk=} {script_path=}")
             self.process = subprocess.Popen(  # noqa S603
-                [Paths.ahk, str(script_path)],
+                [Paths.ahk, script_path],
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
             )
