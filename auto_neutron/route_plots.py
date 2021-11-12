@@ -141,6 +141,9 @@ class AhkPlotter(Plotter):
         self.stop()
         with self._create_temp_script_file() as script_path:
             log.info(f"Spawning AHK subprocess with {Paths.ahk=} {script_path=}")
+            if Paths.ahk is None or not Paths.ahk.exists():
+                log.error("AHK path not set or invalid.")
+                return
             self.process = subprocess.Popen(  # noqa S603
                 [Paths.ahk, script_path],
                 stdin=subprocess.PIPE,
