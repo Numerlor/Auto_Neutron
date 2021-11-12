@@ -125,8 +125,8 @@ class AhkPlotter(Plotter):
     """Plot through ahk by supplying the system through stdin to the ahk process."""
 
     def __init__(self, start_system: t.Optional[str] = None):
-        super().__init__(start_system)
         self.process: t.Optional[subprocess.Popen] = None
+        super().__init__(start_system)
 
     def _start_ahk(self) -> None:
         """
