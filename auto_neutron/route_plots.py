@@ -202,8 +202,8 @@ def _decode_neutron_result(result: dict) -> list[NeutronPlotRow]:
     return [
         NeutronPlotRow(
             row["system"],
-            row["distance_jumped"],
-            row["distance_left"],
+            round(row["distance_jumped"], 2),
+            round(row["distance_left"], 2),
             row["jumps"],
         )
         for row in result["system_jumps"]
@@ -214,8 +214,8 @@ def _decode_exact_result(result: dict) -> list[ExactPlotRow]:
     return [
         ExactPlotRow(
             row["name"],
-            row["distance"],
-            row["distance_to_destination"],
+            round(row["distance"], 2),
+            round(row["distance_to_destination"], 2),
             bool(row["must_refuel"]),  # Spansh returns 0 or 1
             row["has_neutron"],
         )
