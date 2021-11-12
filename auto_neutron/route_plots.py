@@ -112,6 +112,9 @@ class Plotter(abc.ABC):
         """Stop the plotter."""
         ...
 
+    def recheck_settings(self) -> t.Any:
+        """Check if the plotter needs to be refreshed with new settings."""
+
 
 class CopyPlotter(Plotter):
     """Plot by copying given systems on the route into the clipboard."""
@@ -126,6 +129,10 @@ class AhkPlotter(Plotter):
 
     def __init__(self, start_system: t.Optional[str] = None):
         self.process: t.Optional[subprocess.Popen] = None
+        self._used_script = None
+        self._used_ahk_path = None
+        self._used_hotkey = None
+        self._last_system = None
         super().__init__(start_system)
 
     def _start_ahk(self) -> None:
@@ -145,12 +152,16 @@ class AhkPlotter(Plotter):
             with contextlib.suppress(subprocess.TimeoutExpired):
                 self.process.wait(0.1)
                 raise RuntimeError("AHK failed to start.")
+            self._used_ahk_path = Paths.ahk
+            self._used_script = General.script
+            self._used_hotkey = General.bind
         log.debug("Created AHK subprocess.")
 
     def update_system(self, system: str, system_index: t.Optional[int] = None) -> None:
         """Update the ahk script with `system`."""
         if self.process is None or self.process.poll() is not None:
             self._start_ahk()
+        self._last_system = system
         self.process.stdin.write(system.encode() + b"\n")
         self.process.stdin.flush()
         log.debug(f"Wrote {system!r} to AHK.")
@@ -162,9 +173,18 @@ class AhkPlotter(Plotter):
             self.process.terminate()
             self.process = None
 
-    @staticmethod
+    def recheck_settings(self) -> None:
+        """Check if settings were changed from the ones used in the process, and reset if that is the case."""
+        if self.process is not None and (
+            Paths.ahk != self._used_ahk_path
+            or General.script != self._used_script
+            or General.bind != self._used_hotkey
+        ):
+            self.stop()
+            self.update_system(self._last_system)
+
     @contextlib.contextmanager
-    def _create_temp_script_file() -> collections.abc.Iterator[Path]:
+    def _create_temp_script_file(self) -> collections.abc.Iterator[Path]:
         """Create a temp file with the AHK script as its content."""
         temp_path = Path(
             tempfile.gettempdir(), tempfile.gettempprefix() + "_auto_neutron_script"
