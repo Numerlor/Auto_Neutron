@@ -87,6 +87,17 @@ class PlotterState(QtCore.QObject):
         self.new_system_signal.emit(self._active_route[index].system, index)
 
     @property
+    def route(self) -> RouteList:
+        """Return the active route."""
+        return self._active_route
+
+    @route.setter
+    def route(self, route: RouteList) -> None:
+        """Set the active route and update the worker."""
+        self._active_route = route
+        self.tail_worker.route = route
+
+    @property
     def plotter(self) -> Plotter:
         """Return the active plotter instance."""
         return self._plotter
@@ -145,7 +156,7 @@ class PlotterState(QtCore.QObject):
 
             if self._plotter is not None:
                 self.tail_worker.stop()
-                self.tail_worker = GameWorker(self.tail_worker.route, self.journal)
+                self.tail_worker = GameWorker(self.route, self.journal)
                 self.tail_worker.start()
                 self.tail_worker.new_system_index_sig.connect(
                     partial(setattr, self, "route_index")

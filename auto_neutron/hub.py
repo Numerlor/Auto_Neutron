@@ -55,7 +55,7 @@ class Hub(QtCore.QObject):
 
     def update_route_from_edit(self, table_item: QtWidgets.QTableWidgetItem) -> None:
         """Edit the plotter's route with the new data in `table_item`."""
-        self.plotter_state.tail_worker.route[table_item.row()][
+        self.plotter_state.route[table_item.row()][
             table_item.column()
         ] = table_item.data(QtCore.Qt.ItemDataRole.DisplayRole)
 
