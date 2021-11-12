@@ -79,10 +79,7 @@ JOURNAL_PATH = (
     Path(os.environ["userprofile"])
     / "Saved Games/Frontier Developments/Elite Dangerous"
 )
-STATUS_PATH = (
-    Path(os.environ["userprofile"])
-    / "Saved Games/Frontier Developments/Elite Dangerous/Status.json"
-)
+STATUS_PATH = JOURNAL_PATH / "Status.json"
 AHK_PATH = Path(os.environ["PROGRAMW6432"]) / "AutoHotkey/AutoHotkey.exe"
 
 AHK_TEMPLATE = Template(
