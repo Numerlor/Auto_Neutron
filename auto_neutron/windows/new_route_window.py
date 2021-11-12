@@ -2,9 +2,11 @@
 # Copyright (C) 2021  Numerlor
 
 import contextlib
+import csv
 import json
 import typing as t
 from functools import partial
+from pathlib import Path
 
 from PySide6 import QtCore, QtWidgets
 
@@ -12,10 +14,16 @@ from PySide6 import QtCore, QtWidgets
 from __feature__ import snake_case, true_property  # noqa F401
 from auto_neutron.hub import GameState
 
+from .. import settings
 from ..constants import JOURNAL_PATH, SPANSH_API_URL
 from ..game_state import Location
 from ..journal import Journal
-from ..route_plots import spansh_exact_callback, spansh_neutron_callback
+from ..route_plots import (
+    ExactPlotRow,
+    NeutronPlotRow,
+    spansh_exact_callback,
+    spansh_neutron_callback,
+)
 from ..ship import Ship
 from ..utils.network import make_network_request
 from ..utils.signal import ReconnectingSignal
@@ -73,6 +81,13 @@ class NewRouteWindow(NewRouteWindowGUI):
         self.spansh_neutron_tab.submit_button.pressed.connect(self._submit_neutron)
         self.spansh_exact_tab.submit_button.pressed.connect(self._submit_exact)
 
+        # endregion
+
+        # region csv tab init
+        self.csv_tab.path_popup_button.pressed.connect(self._path_select_popup)
+        self.csv_tab.submit_button.pressed.connect(self._csv_submit)
+        if settings.Paths.csv is not None:
+            self.csv_tab.path_edit.text = str(settings.Paths.csv)
         # endregion
 
         self.combo_signals = (
@@ -230,6 +245,52 @@ class NewRouteWindow(NewRouteWindowGUI):
         """Update the line edits with `system_name_result_label` contents from `window`."""
         for line_edit in line_edits:
             line_edit.text = window.system_name_result_label.text
+
+    # endregion
+
+    # region csv
+
+    def _path_select_popup(self) -> None:
+        """Ask the user for a path and write it to the CSV text edit."""
+        if settings.Paths.csv is not None:
+            start_path = str(settings.Paths.csv.parent)
+        else:
+            start_path = ""
+        path, _ = QtWidgets.QFileDialog.get_open_file_name(
+            self, "Select CSV file", start_path, "CSV (*.csv);;All types (*.*)"
+        )
+        if path:
+            self.csv_tab.path_edit.text = str(Path(path))
+
+    def _csv_submit(self) -> None:
+        """Parse a CSV file of Spansh rows and emit the route created signal."""
+        path = Path(self.csv_tab.path_edit.text)
+        try:
+            with path.open(encoding="utf8") as csv_file:
+                reader = csv.reader(csv_file)
+                header = next(reader)
+                if len(header) == 5:
+                    row_type = NeutronPlotRow
+                elif len(header) == 7:
+                    row_type = ExactPlotRow
+                else:
+                    self.status_bar.show_message("Invalid CSV file.", 5_000)
+                    return
+                self.route_created_signal.emit(
+                    self.selected_journal,
+                    [row_type.from_csv_row(row) for row in reader],
+                )
+                settings.Paths.csv = path
+        except FileNotFoundError:
+            self.status_bar.show_message("CSV file doesn't exist.", 5_000)
+        except csv.Error as error:
+            self.status_bar.show_message("Invalid CSV file: " + str(error), 5_000)
+        except IndexError:
+            self.status_bar.show_message("Truncated data in CSV file.", 5_000)
+        except ValueError:
+            self.status_bar.show_message("Invalid data in CSV file.", 5_000)
+        except OSError:
+            self.status_bar.show_message("Invalid path.", 5_000)
 
     # endregion
 
