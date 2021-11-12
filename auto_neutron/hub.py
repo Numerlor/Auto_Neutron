@@ -17,6 +17,7 @@ from auto_neutron.utils.signal import ReconnectingSignal
 from auto_neutron.utils.utils import ExceptionHandler
 from auto_neutron.windows.gui.license_window import LicenseWindow
 from auto_neutron.windows.main_window import MainWindow
+from auto_neutron.windows.new_route_window import NewRouteWindow
 from auto_neutron.windows.settings_window import SettingsWindow
 
 
@@ -28,6 +29,7 @@ class Hub(QtCore.QObject):
         self.window = MainWindow()
         self.window.show()
         self.window.about_action.triggered.connect(partial(LicenseWindow, self.window))
+        self.window.new_route_action.triggered.connect(self.new_route_window)
         self.window.settings_action.triggered.connect(self.display_settings)
         self.window.table.doubleClicked.connect(self.get_index_row)
         self.game_state = GameState()
@@ -41,6 +43,11 @@ class Hub(QtCore.QObject):
             self.window.table.itemChanged, self.update_route_from_edit
         )
         self.edit_route_update_connection.connect()
+
+    def new_route_window(self) -> None:
+        """Display the `NewRouteWindow` and connect its signals."""
+        route_window = NewRouteWindow(self.window, self.game_state)
+        route_window.route_created_signal.connect(self.new_route)
 
     def update_route_from_edit(self, table_item: QtWidgets.QTableWidgetItem) -> None:
         """Edit the plotter's route with the new data in `table_item`."""
