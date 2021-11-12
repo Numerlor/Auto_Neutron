@@ -13,13 +13,14 @@ import tempfile
 import typing as t
 from functools import partial
 from pathlib import Path
+from string import Template
 
 from PySide6 import QtCore, QtNetwork, QtWidgets
 
 # noinspection PyUnresolvedReferences
 # Can't use true_property because QTimer's single_shot method turns into a property for is_single_shot
 from __feature__ import snake_case  # noqa F401
-from auto_neutron.constants import SPANSH_API_URL
+from auto_neutron.constants import AHK_TEMPLATE, SPANSH_API_URL
 from auto_neutron.settings import General, Paths
 from auto_neutron.utils.network import json_from_network_req, make_network_request
 
@@ -190,7 +191,11 @@ class AhkPlotter(Plotter):
             tempfile.gettempdir(), tempfile.gettempprefix() + "_auto_neutron_script"
         )
         try:
-            temp_path.write_text(General.script)
+            temp_path.write_text(
+                Template(AHK_TEMPLATE).safe_substitute(
+                    hotkey=General.bind, user_script=General.script
+                )
+            )
             yield temp_path
         finally:
             temp_path.unlink(missing_ok=True)
