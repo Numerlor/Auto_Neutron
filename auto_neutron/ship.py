@@ -98,10 +98,10 @@ class Ship:
         """Update the state from a coriolis json dump."""
         self.fsd = self._fsd_from_coriolis_json(coriolis_json)
         self.jump_range_boost = self._fsd_boost_from_coriolis_json(coriolis_json)
-        self.unladen_mass = coriolis_json["unladenMass"]
-        self.tank_size = coriolis_json["fuelCapacity"]
-        self.tank_size = coriolis_json["reserveFuelCapacity"]
-        self.max_cargo = coriolis_json["cargoCapacity"]
+        self.unladen_mass = coriolis_json["stats"]["unladenMass"]
+        self.tank_size = coriolis_json["stats"]["fuelCapacity"]
+        self.reserve_size = coriolis_json["stats"]["reserveFuelCapacity"]
+        self.max_cargo = coriolis_json["stats"]["cargoCapacity"]
 
     @classmethod
     def _fsd_from_coriolis_json(cls, json_data: dict) -> FrameShiftDrive:
