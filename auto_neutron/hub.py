@@ -12,13 +12,17 @@ from PySide6 import QtCore, QtGui, QtWidgets
 from __feature__ import snake_case, true_property  # noqa: F401
 from auto_neutron import settings
 from auto_neutron.game_state import GameState, PlotterState
-from auto_neutron.route_plots import RouteList
+from auto_neutron.route_plots import CopyPlotter
 from auto_neutron.utils.signal import ReconnectingSignal
-from auto_neutron.utils.utils import ExceptionHandler
 from auto_neutron.windows.gui.license_window import LicenseWindow
 from auto_neutron.windows.main_window import MainWindow
 from auto_neutron.windows.new_route_window import NewRouteWindow
 from auto_neutron.windows.settings_window import SettingsWindow
+
+if t.TYPE_CHECKING:
+    from auto_neutron.journal import Journal
+    from auto_neutron.route_plots import RouteList
+    from auto_neutron.utils.utils import ExceptionHandler
 
 
 class Hub(QtCore.QObject):
@@ -64,9 +68,11 @@ class Hub(QtCore.QObject):
         """Set the current route index to `index`'s row."""
         self.plotter_state.route_index = index.row()
 
-    def new_route(self, route: RouteList) -> None:
+    def new_route(self, journal: Journal, route: RouteList) -> None:
         """Create a new worker with `route` and populate the main table with it."""
+        self.plotter_state.journal = journal
         self.plotter_state.create_worker_with_route(route)
+        self.plotter_state.plotter = CopyPlotter()  # TODO
         with self.edit_route_update_connection.temporarily_disconnect():
             self.window.initialize_table(route)
 

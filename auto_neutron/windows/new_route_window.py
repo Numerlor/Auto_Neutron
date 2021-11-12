@@ -3,6 +3,7 @@
 
 import contextlib
 import json
+import typing as t
 from functools import partial
 
 from PySide6 import QtCore, QtWidgets
@@ -26,13 +27,14 @@ from .nearest_window import NearestWindow
 class NewRouteWindow(NewRouteWindowGUI):
     """The UI for plotting a new route, from CSV, Spansh plotters, or the last saved route."""
 
-    route_created_signal = QtCore.Signal(list)
+    route_created_signal = QtCore.Signal(Journal, list)
 
     def __init__(self, parent: QtWidgets.QWidget, game_state: GameState):
         super().__init__(parent)
         self.game_state = game_state
 
         self.current_ship = self.game_state.ship
+        self.selected_journal: t.Optional[Journal] = None
 
         self.spansh_neutron_tab.nearest_button.pressed.connect(
             self._display_nearest_window
@@ -105,7 +107,9 @@ class NewRouteWindow(NewRouteWindowGUI):
             reply_callback=partial(
                 spansh_neutron_callback,
                 delay_iterator=create_request_delay_iterator(),
-                result_callback=self.route_created_signal.emit,
+                result_callback=partial(
+                    self.route_created_signal.emit, self.selected_journal
+                ),
             ),
         )
 
@@ -147,7 +151,9 @@ class NewRouteWindow(NewRouteWindowGUI):
             reply_callback=partial(
                 spansh_exact_callback,
                 delay_iterator=create_request_delay_iterator(),
-                result_callback=self.route_created_signal.emit,
+                result_callback=partial(
+                    self.route_created_signal.emit, self.selected_journal
+                ),
             ),
         )
 
@@ -170,9 +176,8 @@ class NewRouteWindow(NewRouteWindowGUI):
             reverse=True,
         )[index]
 
-        loadout, location, cargo_mass, shut_down = Journal(
-            journal_path
-        ).get_static_state()
+        journal = Journal(journal_path)
+        loadout, location, cargo_mass, shut_down = journal.get_static_state()
 
         if shut_down:
             self.status_bar.show_message(
@@ -184,6 +189,7 @@ class NewRouteWindow(NewRouteWindowGUI):
             self.last_route_tab.submit_button.enabled = False
             return
         self.current_ship = Ship.from_loadout(loadout)
+        self.selected_journal = journal
 
         self.status_bar.clear_message()
         self.csv_tab.submit_button.enabled = True

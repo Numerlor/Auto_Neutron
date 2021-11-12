@@ -64,8 +64,13 @@ class PlotterState(QtCore.QObject):
 
         If the worker didn't exist yes, it is created without starting.
         """
+        assert self.journal is not None, "Journal must be set first."
         if self.tail_worker is None:
             self.tail_worker = GameWorker(route, self.journal)
+            if self.plotter is not None:
+                self.tail_worker.new_system_index_sig.connect(
+                    partial(setattr, self, "route_index")
+                )
         else:
             self.tail_worker.route = route
         self._active_route = route
@@ -94,16 +99,18 @@ class PlotterState(QtCore.QObject):
         If a previous plotter exists, stop it before replacing.
         The tail worker is started and has its `new_system_index_sig` connected to the plotter's `update_system` method.
         """
+        assert self.journal is not None, "Journal must be set first."
         if self._plotter is not None:
             self._plotter.stop()
 
         self._plotter = plotter
         self.new_system_signal.connect(self._plotter.update_system)
 
-        self.tail_worker.start()
-        self.tail_worker.new_system_index_sig.connect(
-            partial(setattr, self, "route_index")
-        )
+        if self.tail_worker is not None:
+            self.tail_worker.start()
+            self.tail_worker.new_system_index_sig.connect(
+                partial(setattr, self, "route_index")
+            )
 
     @property
     def journal(self) -> Journal:
@@ -118,17 +125,24 @@ class PlotterState(QtCore.QObject):
         If a `Journal` instance is passed, it is refreshed.
         In case a plotter is active, a new tail worker from the journal is created and connected to it.
         """
+        self._active_journal = journal
+
         if journal is not None:
             self._game_state.shut_down = False
-            journal.shut_down_sig.connect(
+            self._active_journal.shut_down_sig.connect(
                 partial(setattr, self._game_state, "shut_down", True)
             )
-            journal.system_sig.connect(partial(setattr, self._game_state, "location"))
-            journal.cargo_sig.connect(
+            self._active_journal.system_sig.connect(
+                partial(setattr, self._game_state, "location")
+            )
+            self._active_journal.cargo_sig.connect(
                 partial(setattr, self._game_state, "current_cargo")
             )
-            journal.loadout_sig.connect(self._game_state.ship.update_from_loadout)
-            journal.reload()
+            self._active_journal.loadout_sig.connect(
+                self._game_state.ship.update_from_loadout
+            )
+            self._active_journal.reload()
+
             if self._plotter is not None:
                 self.tail_worker.stop()
                 self.tail_worker = GameWorker(self.tail_worker.route, self.journal)
@@ -139,6 +153,5 @@ class PlotterState(QtCore.QObject):
                     )
                 )
         else:
-            if self._plotter is not None:
+            if self.tail_worker is not None:
                 self.tail_worker.stop()
-        self._active_journal = journal
