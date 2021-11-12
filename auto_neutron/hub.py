@@ -72,7 +72,8 @@ class Hub(QtCore.QObject):
         """Create a new worker with `route` and populate the main table with it."""
         self.plotter_state.journal = journal
         self.plotter_state.create_worker_with_route(route)
-        self.plotter_state.plotter = CopyPlotter()  # TODO
+        if self.plotter_state.plotter is None:
+            self.plotter_state.plotter = CopyPlotter()  # TODO
         with self.edit_route_update_connection.temporarily_disconnect():
             self.window.initialize_table(route)
 
