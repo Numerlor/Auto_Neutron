@@ -62,6 +62,7 @@ class MainWindow(MainWindowGUI):
     def initialize_table(self, route: RouteList) -> None:
         """Clear the table and insert plot rows from `RouteList` into it with appropriate columns."""
         self.table.clear_contents()
+        self.table.row_count = 0
         self._current_route_type = type(route[0])
 
         if self._current_route_type is ExactPlotRow:
