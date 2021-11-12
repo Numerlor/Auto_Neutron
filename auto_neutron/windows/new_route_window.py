@@ -36,6 +36,7 @@ class NewRouteWindow(NewRouteWindowGUI):
         self.current_ship = self.game_state.ship
         self.selected_journal: t.Optional[Journal] = None
 
+        # region spansh tabs init
         self.spansh_neutron_tab.nearest_button.pressed.connect(
             self._display_nearest_window
         )
@@ -63,6 +64,17 @@ class NewRouteWindow(NewRouteWindowGUI):
             self._recalculate_range
         )
 
+        self.spansh_neutron_tab.journal_combo.currentIndexChanged.connect(
+            self._change_journal
+        )
+        self.spansh_exact_tab.journal_combo.currentIndexChanged.connect(
+            self._change_journal
+        )
+        self.spansh_neutron_tab.submit_button.pressed.connect(self._submit_neutron)
+        self.spansh_exact_tab.submit_button.pressed.connect(self._submit_exact)
+
+        # endregion
+
         self.combo_signals = (
             ReconnectingSignal(
                 self.csv_tab.journal_combo.currentIndexChanged,
@@ -84,16 +96,9 @@ class NewRouteWindow(NewRouteWindowGUI):
         for signal in self.combo_signals:
             signal.connect()
 
-        self.spansh_neutron_tab.journal_combo.currentIndexChanged.connect(
-            self._change_journal
-        )
-        self.spansh_exact_tab.journal_combo.currentIndexChanged.connect(
-            self._change_journal
-        )
-        self.spansh_neutron_tab.submit_button.pressed.connect(self._submit_neutron)
-        self.spansh_exact_tab.submit_button.pressed.connect(self._submit_exact)
         self._change_journal(0)
 
+    # region spansh plotters
     def _submit_neutron(self) -> None:
         """Submit a neutron plotter request to spansh."""
         make_network_request(
@@ -225,6 +230,8 @@ class NewRouteWindow(NewRouteWindowGUI):
         """Update the line edits with `system_name_result_label` contents from `window`."""
         for line_edit in line_edits:
             line_edit.text = window.system_name_result_label.text
+
+    # endregion
 
     def _sync_journal_combos(self, index: int) -> None:
         """Assign all journal combo boxes to display the item at `index`."""
