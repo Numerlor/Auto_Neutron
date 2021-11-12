@@ -148,9 +148,7 @@ class PlotterState(QtCore.QObject):
                 self.tail_worker = GameWorker(self.tail_worker.route, self.journal)
                 self.tail_worker.start()
                 self.tail_worker.new_system_index_sig.connect(
-                    self.tail_worker.new_system_index_sig.connect(
-                        partial(setattr, self, "route_index")
-                    )
+                    partial(setattr, self, "route_index")
                 )
         else:
             if self.tail_worker is not None:
