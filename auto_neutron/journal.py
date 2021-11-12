@@ -35,7 +35,9 @@ class Journal(QtCore.QObject):
                 if line := journal_file.readline():
                     entry = json.loads(line)
                     if entry["event"] == "FSDJump":
-                        self.system_sig.emit(entry["StarSystem"])
+                        self.system_sig.emit(
+                            Location(entry["StarSystem"], *entry["StarPos"])
+                        )
 
                     elif entry["event"] == "Loadout":
                         self.loadout_sig.emit(entry)

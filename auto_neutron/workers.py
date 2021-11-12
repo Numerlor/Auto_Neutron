@@ -18,6 +18,7 @@ from __feature__ import snake_case, true_property  # noqa F401
 from auto_neutron.constants import STATUS_PATH
 
 if t.TYPE_CHECKING:
+    from auto_neutron.game_state import Location
     from auto_neutron.journal import Journal
     from auto_neutron.route_plots import RouteList
 
@@ -40,10 +41,10 @@ class GameWorker(QtCore.QObject):
         self.route = route
         journal.system_sig.connect(self._emit_next_system)
 
-    def _emit_next_system(self, system_name: str) -> None:
+    def _emit_next_system(self, location: Location) -> None:
         """Emit the next system in the route and its index, or end of route."""
         with contextlib.suppress(ValueError):
-            new_index = self.route.index(system_name) + 1
+            new_index = self.route.index(location.name) + 1
             if new_index < len(self.route):
                 self.new_system_index_sig.emit(new_index)
             else:
