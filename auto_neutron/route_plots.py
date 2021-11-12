@@ -12,7 +12,7 @@ import subprocess  # noqa S404
 import tempfile
 import typing as t
 from functools import partial
-from zipfile import Path
+from pathlib import Path
 
 from PySide6 import QtCore, QtNetwork, QtWidgets
 
