@@ -73,7 +73,10 @@ class Hub(QtCore.QObject):
         self.plotter_state.journal = journal
         self.plotter_state.create_worker_with_route(route)
         if self.plotter_state.plotter is None:
-            self.plotter_state.plotter = CopyPlotter()  # TODO
+            if settings.General.copy_mode:
+                self.plotter_state.plotter = CopyPlotter(start_system=route[0].system)
+            else:
+                self.plotter_state.plotter = AhkPlotter(start_system=route[0].system)
         with self.edit_route_update_connection.temporarily_disconnect():
             self.window.initialize_table(route)
 
