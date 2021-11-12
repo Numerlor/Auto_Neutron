@@ -61,25 +61,16 @@ class MainWindow(MainWindowGUI):
 
     def initialize_table(self, route: RouteList) -> None:
         """Clear the table and insert plot rows from `RouteList` into it with appropriate columns."""
-        self.table.clear_contents()
+        self.table.clear()
         self.table.row_count = 0
         self._current_route_type = type(route[0])
 
-        if self._current_route_type is ExactPlotRow:
-            self.table.set_item_delegate_for_column(3, self._checkbox_delegate)
-            self.table.resize_column_to_contents(3)
-            self.table.resize_column_to_contents(4)
-            self.table.column_count = 5
-
-        elif self._current_route_type is NeutronPlotRow:
-            self.table.set_item_delegate_for_column(3, self._spinbox_delegate)
-            self.table.column_count = 4
-            self.table.resize_column_to_contents(4)
-
         self._create_base_headers()
+
         self.mass_insert(dataclasses.astuple(row) for row in route)
 
         if self._current_route_type is ExactPlotRow:
+            self.table.set_item_delegate_for_column(3, self._checkbox_delegate)
             self.table.horizontal_header_item(3).set_text("Scoopable")
             self.table.horizontal_header_item(4).set_text("Neutron")
 
@@ -87,5 +78,7 @@ class MainWindow(MainWindowGUI):
             self.table.resize_column_to_contents(4)
 
         elif self._current_route_type is NeutronPlotRow:
+            self.table.column_count = 4  # reset column count to 4 to hide last col
+            self.table.set_item_delegate_for_column(3, self._spinbox_delegate)
             self.table.horizontal_header_item(3).set_text("Jumps")
             self.table.resize_column_to_contents(3)

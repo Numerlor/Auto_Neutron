@@ -52,8 +52,9 @@ class MainWindowGUI(QtWidgets.QMainWindow):
         )
 
     def _create_base_headers(self) -> None:
-        """Create all header items and set the static resize modes and deleagtes."""
-        for column in range(self.table.column_count):
+        """Create all header items and set the static resize modes and delegates."""
+        self.table.column_count = 5
+        for column in range(5):
             self.table.set_horizontal_header_item(column, QtWidgets.QTableWidgetItem())
 
         horizontal_header = self.table.horizontal_header()
