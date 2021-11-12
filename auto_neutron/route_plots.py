@@ -21,7 +21,11 @@ from PySide6 import QtCore, QtNetwork, QtWidgets
 from __feature__ import snake_case  # noqa F401
 from auto_neutron.constants import AHK_TEMPLATE, SPANSH_API_URL
 from auto_neutron.settings import General, Paths
-from auto_neutron.utils.network import json_from_network_req, make_network_request
+from auto_neutron.utils.network import (
+    NetworkError,
+    json_from_network_req,
+    make_network_request,
+)
 
 log = logging.getLogger(__name__)
 
@@ -198,6 +202,7 @@ def _spansh_job_callback(
     reply: QtNetwork.QNetworkReply,
     *,
     result_callback: collections.abc.Callable[[list[NeutronPlotRow]], t.Any],
+    error_callback: collections.abc.Callable[[str], t.Any],
     delay_iterator: collections.abc.Iterator[float],
     result_decode_func: collections.abc.Callable[[dict], t.Any],
 ) -> None:
@@ -207,31 +212,40 @@ def _spansh_job_callback(
     When re-requesting for status, wait for `delay` seconds,
     where `delay` is the next value from the `delay_iterator`
     """
-    job_response = json_from_network_req(reply)
-    if job_response.get("status") == "queued":
-        sec_delay = next(delay_iterator)
-        log.debug(f"Re-requesting queued job result in {sec_delay} seconds.")
-        QtCore.QTimer.single_shot(
-            sec_delay * 1000,
-            partial(
-                make_network_request,
-                SPANSH_API_URL + "/results/" + job_response["job"],
-                reply_callback=partial(
-                    _spansh_job_callback,
-                    result_callback=result_callback,
-                    delay_iterator=delay_iterator,
-                    result_decode_func=result_decode_func,
+    try:
+        job_response = json_from_network_req(reply)
+        if job_response.get("status") == "queued":
+            sec_delay = next(delay_iterator)
+            log.debug(f"Re-requesting queued job result in {sec_delay} seconds.")
+            QtCore.QTimer.single_shot(
+                sec_delay * 1000,
+                partial(
+                    make_network_request,
+                    SPANSH_API_URL + "/results/" + job_response["job"],
+                    reply_callback=partial(
+                        _spansh_job_callback,
+                        result_callback=result_callback,
+                        error_callback=error_callback,
+                        delay_iterator=delay_iterator,
+                        result_decode_func=result_decode_func,
+                    ),
                 ),
-            ),
-        )
-    elif job_response.get("result") is not None:
-        log.debug("Received finished neutron job.")
-        result_callback(result_decode_func(job_response["result"]))
-    else:
-        raise RuntimeError(
-            "Received invalid JSON response from Spansh neutron route.",
-            job_response,
-        )
+            )
+        elif job_response.get("result") is not None:
+            log.debug("Received finished neutron job.")
+            result_callback(result_decode_func(job_response["result"]))
+        else:
+            error_callback("Received invalid response from Spansh.")
+    except NetworkError as e:
+        if e.spansh_error is not None:
+            error_callback(f"Received error from Spansh: {e.spansh_error}")
+        else:
+            error_callback(
+                e.error_message
+            )  # Fall back to Qt error message if spansh didn't respond
+    except Exception as e:
+        error_callback(str(e))
+        logging.error(e)
 
 
 def _decode_neutron_result(result: dict) -> list[NeutronPlotRow]:

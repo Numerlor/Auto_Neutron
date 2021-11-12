@@ -126,6 +126,7 @@ class NewRouteWindow(NewRouteWindowGUI):
             },
             reply_callback=partial(
                 spansh_neutron_callback,
+                error_callback=partial(self.status_bar.show_message, timeout=10_000),
                 delay_iterator=create_request_delay_iterator(),
                 result_callback=partial(
                     self.route_created_signal.emit, self.selected_journal
@@ -170,6 +171,7 @@ class NewRouteWindow(NewRouteWindowGUI):
             },
             reply_callback=partial(
                 spansh_exact_callback,
+                error_callback=partial(self.status_bar.show_message, timeout=10_000),
                 delay_iterator=create_request_delay_iterator(),
                 result_callback=partial(
                     self.route_created_signal.emit, self.selected_journal
