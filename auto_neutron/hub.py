@@ -12,7 +12,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 from __feature__ import snake_case, true_property  # noqa: F401
 from auto_neutron import settings
 from auto_neutron.game_state import GameState, PlotterState
-from auto_neutron.route_plots import CopyPlotter
+from auto_neutron.route_plots import AhkPlotter, CopyPlotter
 from auto_neutron.utils.signal import ReconnectingSignal
 from auto_neutron.windows.gui.license_window import LicenseWindow
 from auto_neutron.windows.main_window import MainWindow
@@ -41,7 +41,7 @@ class Hub(QtCore.QObject):
         self.plotter_state = PlotterState(self.game_state)
         self.plotter_state.new_system_signal.connect(self.new_system_callback)
 
-        self.apply_appearance_settings()
+        self.apply_settings()
 
         self.edit_route_update_connection = ReconnectingSignal(
             self.window.table.itemChanged, self.update_route_from_edit
@@ -77,15 +77,28 @@ class Hub(QtCore.QObject):
         with self.edit_route_update_connection.temporarily_disconnect():
             self.window.initialize_table(route)
 
-    def apply_appearance_settings(self) -> None:
-        """Update the theme and the main table's font."""
+    def apply_settings(self) -> None:
+        """Update the appearance and plotter with new settings."""
         self.window.table.font = settings.Window.font
         set_theme()
+
+        if self.plotter_state.plotter is not None:
+            current_sys = self.plotter_state.route[self.plotter_state.route_index]
+            if settings.General.copy_mode and not isinstance(
+                self.plotter_state.plotter, CopyPlotter
+            ):
+                self.plotter_state.plotter = CopyPlotter(
+                    start_system=current_sys.system
+                )
+            elif not settings.General.copy_mode and not isinstance(
+                self.plotter_state.plotter, AhkPlotter
+            ):
+                self.plotter_state.plotter = AhkPlotter(start_system=current_sys.system)
 
     def display_settings(self) -> None:
         """Display the settings window and connect the applied signal to refresh appearance."""
         window = SettingsWindow(self.window)
-        window.settings_applied.connect(self.apply_appearance_settings)
+        window.settings_applied.connect(self.apply_settings)
 
 
 def set_theme() -> None:
