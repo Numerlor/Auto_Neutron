@@ -157,48 +157,6 @@ class NewRouteWindow(NewRouteWindowGUI):
             ),
         )
 
-    def _sync_journal_combos(self, index: int) -> None:
-        """Assign all journal combo boxes to display the item at `index`."""
-        exit_stack = contextlib.ExitStack()
-        with exit_stack:
-            for signal in self.combo_signals:
-                exit_stack.enter_context(signal.temporarily_disconnect())
-            self.csv_tab.journal_combo.current_index = index
-            self.spansh_neutron_tab.journal_combo.current_index = index
-            self.spansh_exact_tab.journal_combo.current_index = index
-            self.last_route_tab.journal_combo.current_index = index
-
-    def _change_journal(self, index: int) -> None:
-        """Change the current journal and update the UI with its data, or display an error if shut down."""
-        journal_path = sorted(
-            JOURNAL_PATH.glob("Journal.*.log"),
-            key=lambda path: path.stat().st_ctime,
-            reverse=True,
-        )[index]
-
-        journal = Journal(journal_path)
-        loadout, location, cargo_mass, shut_down = journal.get_static_state()
-
-        if shut_down:
-            self.status_bar.show_message(
-                "Selected journal ended with a shut down event.", 10_000
-            )
-            self.csv_tab.submit_button.enabled = False
-            self.spansh_neutron_tab.submit_button.enabled = False
-            self.spansh_exact_tab.submit_button.enabled = False
-            self.last_route_tab.submit_button.enabled = False
-            return
-        self.current_ship = Ship.from_loadout(loadout)
-        self.selected_journal = journal
-
-        self.status_bar.clear_message()
-        self.csv_tab.submit_button.enabled = True
-        self.spansh_neutron_tab.submit_button.enabled = True
-        self.spansh_exact_tab.submit_button.enabled = True
-        self.last_route_tab.submit_button.enabled = True
-
-        self._set_widget_values(location, self.current_ship, cargo_mass)
-
     def _set_widget_values(
         self, location: Location, ship: Ship, current_cargo: int
     ) -> None:
@@ -267,3 +225,45 @@ class NewRouteWindow(NewRouteWindowGUI):
         """Update the line edits with `system_name_result_label` contents from `window`."""
         for line_edit in line_edits:
             line_edit.text = window.system_name_result_label.text
+
+    def _sync_journal_combos(self, index: int) -> None:
+        """Assign all journal combo boxes to display the item at `index`."""
+        exit_stack = contextlib.ExitStack()
+        with exit_stack:
+            for signal in self.combo_signals:
+                exit_stack.enter_context(signal.temporarily_disconnect())
+            self.csv_tab.journal_combo.current_index = index
+            self.spansh_neutron_tab.journal_combo.current_index = index
+            self.spansh_exact_tab.journal_combo.current_index = index
+            self.last_route_tab.journal_combo.current_index = index
+
+    def _change_journal(self, index: int) -> None:
+        """Change the current journal and update the UI with its data, or display an error if shut down."""
+        journal_path = sorted(
+            JOURNAL_PATH.glob("Journal.*.log"),
+            key=lambda path: path.stat().st_ctime,
+            reverse=True,
+        )[index]
+
+        journal = Journal(journal_path)
+        loadout, location, cargo_mass, shut_down = journal.get_static_state()
+
+        if shut_down:
+            self.status_bar.show_message(
+                "Selected journal ended with a shut down event.", 10_000
+            )
+            self.csv_tab.submit_button.enabled = False
+            self.spansh_neutron_tab.submit_button.enabled = False
+            self.spansh_exact_tab.submit_button.enabled = False
+            self.last_route_tab.submit_button.enabled = False
+            return
+        self.current_ship = Ship.from_loadout(loadout)
+        self.selected_journal = journal
+
+        self.status_bar.clear_message()
+        self.csv_tab.submit_button.enabled = True
+        self.spansh_neutron_tab.submit_button.enabled = True
+        self.spansh_exact_tab.submit_button.enabled = True
+        self.last_route_tab.submit_button.enabled = True
+
+        self._set_widget_values(location, self.current_ship, cargo_mass)
