@@ -12,18 +12,18 @@ PySide6 = "~6.2.0"
 
 [tool.poetry.dev-dependencies]
 # Base tools
-flake8 = "~3.9"
+flake8 = "~4.0"
 
-flake8-annotations = "~2.6"
+flake8-annotations = "~2.7"
 flake8-bandit = "~2.1"
 flake8-bugbear = "21.9.2"
 flake8-docstrings = "~1.6"
-flake8-isort = "~4.0"
+flake8-isort = "~4.1"
 flake8-print = "~4.0"
-isort = "~5.9"
-black = "21.9b0"
+isort = "~5.10"
+black = "21.10b0"
 pre-commit = "~2.15"
-pyinstaller = "~4.5"
+pyinstaller = "~4.7"
 taskipy = "~1.9"
 
 [build-system]
