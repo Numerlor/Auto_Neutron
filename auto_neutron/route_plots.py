@@ -13,7 +13,6 @@ import tempfile
 import typing as t
 from functools import partial
 from pathlib import Path
-from string import Template
 
 from PySide6 import QtCore, QtNetwork, QtWidgets
 
@@ -192,9 +191,7 @@ class AhkPlotter(Plotter):
         )
         try:
             temp_path.write_text(
-                Template(AHK_TEMPLATE).safe_substitute(
-                    hotkey=General.bind, user_script=General.script
-                )
+                AHK_TEMPLATE.substitute(hotkey=General.bind, user_script=General.script)
             )
             yield temp_path
         finally:

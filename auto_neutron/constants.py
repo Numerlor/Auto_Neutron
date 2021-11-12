@@ -4,6 +4,7 @@
 import os
 import typing
 from pathlib import Path
+from string import Template
 
 VERSION = "2.0a1"
 APP = "Auto_Neutron"
@@ -84,7 +85,8 @@ STATUS_PATH = (
 )
 AHK_PATH = Path(os.environ["PROGRAMW6432"]) / "AutoHotkey/AutoHotkey.exe"
 
-AHK_TEMPLATE = """\
+AHK_TEMPLATE = Template(
+    """\
 stdin := FileOpen("*", "r")
 
 ${hotkey}::
@@ -94,3 +96,4 @@ ${hotkey}::
     }
     ${user_script}
 """
+)
