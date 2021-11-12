@@ -59,6 +59,17 @@ class ExactPlotRow(DataClassBase):
             return self.system.lower() == other.lower()
         return super().__eq__(other)
 
+    @classmethod
+    def from_csv_row(cls, row: list[str]) -> ExactPlotRow:
+        """Create a row dataclass from the given csv row."""
+        return ExactPlotRow(
+            row[0],
+            round(float(row[1]), 2),
+            round(float(row[2]), 2),
+            row[5][0] == "Y",
+            row[6][0] == "Y",
+        )
+
 
 @dataclasses.dataclass
 class NeutronPlotRow(DataClassBase):
@@ -73,6 +84,13 @@ class NeutronPlotRow(DataClassBase):
         if isinstance(other, str):
             return self.system.lower() == other.lower()
         return super().__eq__(other)
+
+    @classmethod
+    def from_csv_row(cls, row: list[str]) -> NeutronPlotRow:
+        """Create a row dataclass from the given csv row."""
+        return NeutronPlotRow(
+            row[0], round(float(row[1]), 2), round(float(row[2]), 2), int(row[4])
+        )
 
 
 RouteList = t.Union[list[ExactPlotRow], list[NeutronPlotRow]]
