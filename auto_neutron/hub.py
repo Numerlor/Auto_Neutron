@@ -120,10 +120,24 @@ def set_theme() -> None:
         p.set_color(QtGui.QPalette.ButtonText, QtCore.Qt.white)
         p.set_color(QtGui.QPalette.PlaceholderText, QtGui.QColor(110, 110, 100))
         p.set_color(
-            QtGui.QPalette.Disabled, QtGui.QPalette.Light, QtGui.QColor(0, 0, 0)
+            QtGui.QPalette.Disabled,
+            QtGui.QPalette.Light,
+            QtGui.QColor(0, 0, 0),
         )
         p.set_color(
-            QtGui.QPalette.Disabled, QtGui.QPalette.Text, QtGui.QColor(110, 110, 100)
+            QtGui.QPalette.Disabled,
+            QtGui.QPalette.Text,
+            QtGui.QColor(110, 110, 100),
+        )
+        p.set_color(
+            QtGui.QPalette.Disabled,
+            QtGui.QPalette.ButtonText,
+            QtGui.QColor(110, 110, 100),
+        )
+        p.set_color(
+            QtGui.QPalette.Disabled,
+            QtGui.QPalette.Button,
+            QtGui.QColor(50, 50, 50),
         )
     else:
         p = app.style().standard_palette()
