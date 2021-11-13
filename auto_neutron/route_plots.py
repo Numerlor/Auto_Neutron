@@ -208,7 +208,7 @@ class AhkPlotter(Plotter):
 def _spansh_job_callback(
     reply: QtNetwork.QNetworkReply,
     *,
-    result_callback: collections.abc.Callable[[list[NeutronPlotRow]], t.Any],
+    result_callback: collections.abc.Callable[[RouteList], t.Any],
     error_callback: collections.abc.Callable[[str], t.Any],
     delay_iterator: collections.abc.Iterator[float],
     result_decode_func: collections.abc.Callable[[dict], t.Any],
