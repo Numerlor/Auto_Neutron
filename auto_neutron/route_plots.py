@@ -140,7 +140,7 @@ class AhkPlotter(Plotter):
         """
         Restart the ahk process.
 
-        If the process terminates with 100ms (e.g. an invalid script file), a RuntimeError is raised.
+        If the process terminates within 100ms (e.g. an invalid script file), a RuntimeError is raised.
         """
         self.stop()
         with self._create_temp_script_file() as script_path:
