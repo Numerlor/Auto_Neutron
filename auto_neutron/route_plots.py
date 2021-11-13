@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import abc
+import atexit
 import collections.abc
 import contextlib
 import dataclasses
@@ -158,9 +159,10 @@ class AhkPlotter(Plotter):
             with contextlib.suppress(subprocess.TimeoutExpired):
                 self.process.wait(0.1)
                 raise RuntimeError("AHK failed to start.")
-            self._used_ahk_path = settings.Paths.ahk
-            self._used_script = settings.General.script
-            self._used_hotkey = settings.General.bind
+        self._used_ahk_path = settings.Paths.ahk
+        self._used_script = settings.General.script
+        self._used_hotkey = settings.General.bind
+        atexit.register(self.process.terminate)
         log.debug("Created AHK subprocess.")
 
     def update_system(self, system: str, system_index: t.Optional[int] = None) -> None:
@@ -183,6 +185,7 @@ class AhkPlotter(Plotter):
         if self.process is not None:
             log.debug("Terminating AHK subprocess.")
             self.process.terminate()
+            atexit.unregister(self.process.terminate)
             self.process = None
 
     @contextlib.contextmanager
