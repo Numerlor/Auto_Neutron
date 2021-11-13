@@ -38,7 +38,7 @@ class SettingsWindow(SettingsWindowGUI):
 
         if settings.Paths.ahk is None or not settings.Paths.ahk.exists():
             self.copy_mode_checkbox.enabled = False
-            self.copy_mode_checkbox.checked = False
+            self.copy_mode_checkbox.checked = True
 
         self.ahk_path_button.pressed.connect(self.get_ahk_path)
         self.alert_path_button.pressed.connect(self.get_sound_path)
