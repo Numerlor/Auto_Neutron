@@ -50,6 +50,10 @@ class MainWindowGUI(QtWidgets.QMainWindow):
         self.table.horizontal_scroll_bar_policy = (
             QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff
         )
+        palette = QtGui.QPalette()
+        palette.set_color(QtGui.QPalette.Highlight, QtGui.QColor(255, 255, 255, 0))
+        palette.set_color(QtGui.QPalette.HighlightedText, QtGui.QColor(0, 123, 255))
+        self.table.palette = palette
 
     def _create_base_headers(self) -> None:
         """Create all header items and set the static resize modes and delegates."""

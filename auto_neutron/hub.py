@@ -141,6 +141,5 @@ def set_theme() -> None:
         )
     else:
         p = app.style().standard_palette()
-    p.set_color(QtGui.QPalette.Highlight, QtGui.QColor(255, 255, 255, 0))
-    p.set_color(QtGui.QPalette.HighlightedText, QtGui.QColor(0, 123, 255))
+
     app.set_palette(p)
