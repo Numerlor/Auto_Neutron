@@ -19,8 +19,8 @@ from PySide6 import QtCore, QtNetwork, QtWidgets
 # noinspection PyUnresolvedReferences
 # Can't use true_property because QTimer's single_shot method turns into a property for is_single_shot
 from __feature__ import snake_case  # noqa F401
+from auto_neutron import settings
 from auto_neutron.constants import AHK_TEMPLATE, SPANSH_API_URL
-from auto_neutron.settings import General, Paths
 from auto_neutron.utils.network import (
     NetworkError,
     json_from_network_req,
@@ -144,29 +144,31 @@ class AhkPlotter(Plotter):
         """
         self.stop()
         with self._create_temp_script_file() as script_path:
-            log.info(f"Spawning AHK subprocess with {Paths.ahk=} {script_path=}")
-            if Paths.ahk is None or not Paths.ahk.exists():
+            log.info(
+                f"Spawning AHK subprocess with {settings.Paths.ahk=} {script_path=}"
+            )
+            if settings.Paths.ahk is None or not settings.Paths.ahk.exists():
                 log.error("AHK path not set or invalid.")
                 return
             self.process = subprocess.Popen(  # noqa S603
-                [Paths.ahk, script_path],
+                [settings.Paths.ahk, script_path],
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
             )
             with contextlib.suppress(subprocess.TimeoutExpired):
                 self.process.wait(0.1)
                 raise RuntimeError("AHK failed to start.")
-            self._used_ahk_path = Paths.ahk
-            self._used_script = General.script
-            self._used_hotkey = General.bind
+            self._used_ahk_path = settings.Paths.ahk
+            self._used_script = settings.General.script
+            self._used_hotkey = settings.General.bind
         log.debug("Created AHK subprocess.")
 
     def update_system(self, system: str, system_index: t.Optional[int] = None) -> None:
         """Update the ahk script with `system`."""
         if (
-            Paths.ahk != self._used_ahk_path
-            or General.script != self._used_script
-            or General.bind != self._used_hotkey
+            settings.Paths.ahk != self._used_ahk_path
+            or settings.General.script != self._used_script
+            or settings.General.bind != self._used_hotkey
         ):
             self.stop()
         if self.process is None or self.process.poll() is not None:
@@ -191,7 +193,9 @@ class AhkPlotter(Plotter):
         )
         try:
             temp_path.write_text(
-                AHK_TEMPLATE.substitute(hotkey=General.bind, user_script=General.script)
+                AHK_TEMPLATE.substitute(
+                    hotkey=settings.General.bind, user_script=settings.General.script
+                )
             )
             yield temp_path
         finally:
