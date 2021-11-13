@@ -109,6 +109,7 @@ class CheckBoxDelegate(QtWidgets.QStyledItemDelegate):
         focus_option.rect = option.rect
         focus_option.state |= QtWidgets.QStyle.State_KeyboardFocusChange
         focus_option.state |= QtWidgets.QStyle.State_Item
+        focus_option.palette = option.palette
         QtWidgets.QApplication.style().draw_primitive(
             QtWidgets.QStyle.PE_FrameFocusRect, focus_option, painter, None
         )
