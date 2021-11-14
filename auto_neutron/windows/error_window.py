@@ -19,7 +19,6 @@ class ErrorWindow(ErrorWindowGUI):
     def __init__(self, parent: QtWidgets.QWidget):
         self._num_errors = 0
         super().__init__(parent)
-        self.save_button.pressed.connect(self.show)
 
     def show(self) -> None:
         """Show the window, if the window was already displayed, change the label and increments its counter instead."""
