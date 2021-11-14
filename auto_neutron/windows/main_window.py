@@ -10,11 +10,11 @@ from PySide6 import QtWidgets
 
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa: F401
+from auto_neutron import settings
 from auto_neutron.route_plots import ExactPlotRow, NeutronPlotRow, RouteList
+from auto_neutron.utils.signal import ReconnectingSignal
 from auto_neutron.utils.utils import partial_no_external
 
-from .. import settings
-from ..utils.signal import ReconnectingSignal
 from .gui.main_window import MainWindowGUI
 
 

@@ -12,23 +12,28 @@ from PySide6 import QtCore, QtWidgets
 
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa F401
+from auto_neutron import settings
+from auto_neutron.constants import (
+    JOURNAL_PATH,
+    ROUTE_FILE_NAME,
+    SPANSH_API_URL,
+    get_config_dir,
+)
+from auto_neutron.game_state import Location
 from auto_neutron.hub import GameState
-
-from .. import settings
-from ..constants import JOURNAL_PATH, ROUTE_FILE_NAME, SPANSH_API_URL, get_config_dir
-from ..game_state import Location
-from ..journal import Journal
-from ..route_plots import (
+from auto_neutron.journal import Journal
+from auto_neutron.route_plots import (
     ExactPlotRow,
     NeutronPlotRow,
     RouteList,
     spansh_exact_callback,
     spansh_neutron_callback,
 )
-from ..ship import Ship
-from ..utils.network import make_network_request
-from ..utils.signal import ReconnectingSignal
-from ..utils.utils import create_request_delay_iterator
+from auto_neutron.ship import Ship
+from auto_neutron.utils.network import make_network_request
+from auto_neutron.utils.signal import ReconnectingSignal
+from auto_neutron.utils.utils import create_request_delay_iterator
+
 from .gui.new_route_window import NewRouteWindowGUI
 from .nearest_window import NearestWindow
 
