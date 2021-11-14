@@ -74,7 +74,7 @@ class Hub(QtCore.QObject):
     def new_system_callback(self, _: t.Any, index: int) -> None:
         """Ensure we don't edit the route when inactivating rows."""
         with self.edit_route_update_connection.temporarily_disconnect():
-            self.window.inactivate_before_index(index)
+            self.window.set_current_row(index)
 
     def get_index_row(self, index: QtCore.QModelIndex) -> None:
         """Set the current route index to `index`'s row."""
