@@ -12,6 +12,7 @@ from __feature__ import snake_case, true_property  # noqa: F401
 from auto_neutron.route_plots import ExactPlotRow, NeutronPlotRow, RouteList
 from auto_neutron.utils.utils import partial_no_external
 
+from .. import settings
 from ..utils.signal import ReconnectingSignal
 from .gui.main_window import MainWindowGUI
 
@@ -34,6 +35,9 @@ class MainWindow(MainWindowGUI):
         self._current_route_type: t.Optional[
             t.Union[type[ExactPlotRow], type[NeutronPlotRow]]
         ] = None
+
+        QtWidgets.QApplication.instance().aboutToQuit.connect(self.save_window)
+        self.restore_window()
 
     def copy_table_item_text(self) -> None:
         """Copy the text of the selected table item into the clipboard."""
@@ -82,3 +86,11 @@ class MainWindow(MainWindowGUI):
             self.table.set_item_delegate_for_column(3, self._spinbox_delegate)
             self.table.horizontal_header_item(3).set_text("Jumps")
             self.table.resize_column_to_contents(3)
+
+    def restore_window(self) -> None:
+        """Restore the size and position from the settings."""
+        self.restore_geometry(settings.Window.geometry)
+
+    def save_window(self) -> None:
+        """Save size and position to settings."""
+        settings.Window.geometry = self.save_geometry()
