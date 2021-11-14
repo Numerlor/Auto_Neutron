@@ -1,6 +1,7 @@
 # This file is part of Auto_Neutron.
 # Copyright (C) 2021  Numerlor
 
+import atexit
 import collections.abc
 import dataclasses
 import typing as t
@@ -36,7 +37,7 @@ class MainWindow(MainWindowGUI):
             t.Union[type[ExactPlotRow], type[NeutronPlotRow]]
         ] = None
 
-        QtWidgets.QApplication.instance().aboutToQuit.connect(self.save_window)
+        atexit.register(self.save_window)
         self.restore_window()
 
     def copy_table_item_text(self) -> None:
