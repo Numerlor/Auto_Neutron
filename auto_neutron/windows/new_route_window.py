@@ -163,7 +163,7 @@ class NewRouteWindow(NewRouteWindowGUI):
                 "fuel_power": ship.fsd.size_const,
                 "fuel_multiplier": ship.fsd.rating_const / 1000,
                 "optimal_mass": ship.fsd.optimal_mass,
-                "base_mass": ship.unladen_mass,
+                "base_mass": ship.unladen_mass + ship.reserve_size,
                 "tank_size": ship.tank_size,
                 "internal_tank_size": ship.reserve_size,
                 "max_fuel_per_jump": ship.fsd.max_fuel_usage,
