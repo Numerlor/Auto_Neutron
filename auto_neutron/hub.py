@@ -36,6 +36,7 @@ class Hub(QtCore.QObject):
         super().__init__()
         self.window = MainWindow()
         self.error_window = ErrorWindow(self.window)
+        self.error_window.save_button.pressed.connect(partial(self.save_route, True))
         exception_handler.triggered.connect(self.error_window.show)
         self.window.show()
 
@@ -116,9 +117,11 @@ class Hub(QtCore.QObject):
         window = SettingsWindow(self.window)
         window.settings_applied.connect(self.apply_settings)
 
-    def save_route(self) -> None:
-        """If route auto saving is enabled, save the route to the config directory."""
-        if settings.General.save_on_quit and self.plotter_state.route is not None:
+    def save_route(self, force: bool = False) -> None:
+        """If route auto saving is enabled, or force is True, save the route to the config directory."""
+        if (
+            force or settings.General.save_on_quit
+        ) and self.plotter_state.route is not None:
             with open(
                 get_config_dir() / ROUTE_FILE_NAME, "w", encoding="utf8", newline=""
             ) as out_file:
