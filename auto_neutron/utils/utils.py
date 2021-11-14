@@ -5,7 +5,6 @@ import collections.abc
 import itertools
 import logging
 import typing as t
-from functools import partial
 from pathlib import Path
 from types import TracebackType
 
@@ -49,14 +48,6 @@ class ExceptionHandler(QtCore.QObject):
             )  # log empty message to give a bit of space around traceback
 
         self.triggered.emit()
-
-
-class partial_no_external(partial):
-    """Create a partial that swallows arguments provided to the call to the partial object."""
-
-    def __call__(self, *args: t.Any, **kwargs: t.Any):
-        """Call the function only with the arguments provided to the partial object."""
-        return self.func(*self.args, **self.keywords)
 
 
 def create_interrupt_timer() -> QtCore.QTimer:
