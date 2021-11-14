@@ -23,6 +23,7 @@ from auto_neutron.windows.gui.license_window import LicenseWindow
 from auto_neutron.windows.main_window import MainWindow
 from auto_neutron.windows.new_route_window import NewRouteWindow
 from auto_neutron.windows.settings_window import SettingsWindow
+from auto_neutron.windows.shut_down_window import ShutDownWindow
 from auto_neutron.workers import StatusWorker
 
 if t.TYPE_CHECKING:
@@ -51,6 +52,7 @@ class Hub(QtCore.QObject):
 
         self.plotter_state = PlotterState(self.game_state)
         self.plotter_state.new_system_signal.connect(self.new_system_callback)
+        self.plotter_state.shut_down_signal.connect(self.display_shut_down_window)
 
         self.apply_settings()
 
@@ -88,8 +90,15 @@ class Hub(QtCore.QObject):
         """Set the current route index to `index`'s row."""
         self.plotter_state.route_index = index.row()
 
-    def new_route(self, journal: Journal, route: RouteList, route_index: int) -> None:
+    def new_route(
+        self, journal: Journal, route: RouteList = None, route_index: int = None
+    ) -> None:
         """Create a new worker with `route`, populate the main table with it, and set the route index."""
+        if route is None:
+            route = self.plotter_state.route
+        if route_index is None:
+            route_index = self.plotter_state.route_index
+
         self.plotter_state.journal = journal
         self.plotter_state.create_worker_with_route(route)
         if self.plotter_state.plotter is None:
@@ -123,6 +132,12 @@ class Hub(QtCore.QObject):
         """Display the settings window and connect the applied signal to refresh appearance."""
         window = SettingsWindow(self.window)
         window.settings_applied.connect(self.apply_settings)
+
+    def display_shut_down_window(self) -> None:
+        """Display the shut down window and connect it to create a new route and save the current one."""
+        window = ShutDownWindow(self.window)
+        window.new_journal_signal.connect(self.new_route)
+        window.save_route_button.pressed.connect(partial(self.save_route, force=True))
 
     def save_route(self, force: bool = False) -> None:
         """If route auto saving is enabled, or force is True, save the route to the config directory."""

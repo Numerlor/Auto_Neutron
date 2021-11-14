@@ -47,6 +47,7 @@ class PlotterState(QtCore.QObject):
     """Hold the state required for a plotter to function."""
 
     new_system_signal = QtCore.Signal(str, int)
+    shut_down_signal = QtCore.Signal()
 
     def __init__(self, game_state: GameState):
         super().__init__()
@@ -152,6 +153,7 @@ class PlotterState(QtCore.QObject):
             self._active_journal.loadout_sig.connect(
                 self._game_state.ship.update_from_loadout
             )
+            self._active_journal.shut_down_sig.connect(self.shut_down_signal.emit)
             self._active_journal.reload()
 
             if self._plotter is not None:
