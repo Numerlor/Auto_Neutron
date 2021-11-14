@@ -40,6 +40,13 @@ class FrameShiftDrive(typing.NamedTuple):
         return self._SIZE_CONSTANTS[self.size]
 
 
+def get_config_dir() -> Path:
+    """Create the config directory constant after the app was initialzied."""
+    return Path(
+        QtCore.QStandardPaths.writable_location(QtCore.QStandardPaths.AppConfigLocation)
+    )
+
+
 FSD_CONSTANTS = {
     "int_hyperdrive_size2_class1": FrameShiftDrive(2, 1, 0.60, 48),
     "int_hyperdrive_size2_class2": FrameShiftDrive(2, 2, 0.60, 54),
@@ -86,9 +93,6 @@ JOURNAL_PATH = (
 )
 STATUS_PATH = JOURNAL_PATH / "Status.json"
 AHK_PATH = Path(os.environ["PROGRAMW6432"]) / "AutoHotkey/AutoHotkey.exe"
-CONFIG_DIRECTORY = Path(
-    QtCore.QStandardPaths.writable_location(QtCore.QStandardPaths.AppConfigLocation)
-)
 ROUTE_FILE_NAME = "route.csv"
 AHK_TEMPLATE = Template(
     """\
