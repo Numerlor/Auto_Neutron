@@ -79,10 +79,6 @@ class CheckBoxDelegate(QtWidgets.QStyledItemDelegate):
         """Pain the checkbox in the center."""
         # TODO Handle color set by the table item's color brushes
         check_box_style_option = QtWidgets.QStyleOptionButton()
-        if index.flags() & QtCore.Qt.ItemIsEditable:
-            check_box_style_option.state |= QtWidgets.QStyle.State_Enabled
-        else:
-            check_box_style_option.state |= QtWidgets.QStyle.State_ReadOnly
 
         if index.data():  # checked
             check_box_style_option.state |= QtWidgets.QStyle.State_On
@@ -94,6 +90,13 @@ class CheckBoxDelegate(QtWidgets.QStyledItemDelegate):
             self.draw_focus_rect(painter, option)
             check_box_style_option.palette.set_color(
                 QtGui.QPalette.Text, option.palette.highlighted_text().color()
+            )
+
+        elif (
+            foreground_brush := index.data(QtCore.Qt.ItemDataRole.ForegroundRole)
+        ) is not None:
+            check_box_style_option.palette.set_color(
+                QtGui.QPalette.Text, foreground_brush.color()
             )
 
         QtWidgets.QApplication.style().draw_control(
