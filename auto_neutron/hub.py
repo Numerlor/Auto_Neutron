@@ -14,6 +14,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 from __feature__ import snake_case, true_property  # noqa: F401
 from auto_neutron import settings
 from auto_neutron.constants import ROUTE_FILE_NAME, get_config_dir
+from auto_neutron.fuel_warn import FuelWarn
 from auto_neutron.game_state import GameState, PlotterState
 from auto_neutron.route_plots import AhkPlotter, CopyPlotter, NeutronPlotRow
 from auto_neutron.utils.signal import ReconnectingSignal
@@ -22,6 +23,7 @@ from auto_neutron.windows.gui.license_window import LicenseWindow
 from auto_neutron.windows.main_window import MainWindow
 from auto_neutron.windows.new_route_window import NewRouteWindow
 from auto_neutron.windows.settings_window import SettingsWindow
+from auto_neutron.workers import StatusWorker
 
 if t.TYPE_CHECKING:
     from auto_neutron.journal import Journal
@@ -56,6 +58,11 @@ class Hub(QtCore.QObject):
             self.window.table.itemChanged, self.update_route_from_edit
         )
         self.edit_route_update_connection.connect()
+
+        self.fuel_warner = FuelWarn(self.game_state, self.window)
+        self.warn_worker = StatusWorker()
+        self.warn_worker.status_signal.connect(self.fuel_warner.warn)
+        self.warn_worker.start()
 
         atexit.register(self.save_route)
 
