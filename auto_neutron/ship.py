@@ -44,7 +44,7 @@ class Ship:
         self.fsd = self._fsd_from_loadout_dict(loadout_dict)
         self.jump_range_boost = self._fsd_boost_from_loadout_dict(loadout_dict)
         self.unladen_mass = loadout_dict["UnladenMass"]
-        self.tank_size = loadout_dict["FuelCapacity"]["Main"]
+        self.tank_size = int(loadout_dict["FuelCapacity"]["Main"])
         self.reserve_size = loadout_dict["FuelCapacity"]["Reserve"]
         self.max_cargo = loadout_dict["CargoCapacity"]
 
