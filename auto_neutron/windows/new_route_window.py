@@ -15,12 +15,13 @@ from __feature__ import snake_case, true_property  # noqa F401
 from auto_neutron.hub import GameState
 
 from .. import settings
-from ..constants import JOURNAL_PATH, SPANSH_API_URL
+from ..constants import JOURNAL_PATH, ROUTE_FILE_NAME, SPANSH_API_URL, get_config_dir
 from ..game_state import Location
 from ..journal import Journal
 from ..route_plots import (
     ExactPlotRow,
     NeutronPlotRow,
+    RouteList,
     spansh_exact_callback,
     spansh_neutron_callback,
 )
@@ -35,7 +36,7 @@ from .nearest_window import NearestWindow
 class NewRouteWindow(NewRouteWindowGUI):
     """The UI for plotting a new route, from CSV, Spansh plotters, or the last saved route."""
 
-    route_created_signal = QtCore.Signal(Journal, list)
+    route_created_signal = QtCore.Signal(Journal, list, int)
 
     def __init__(self, parent: QtWidgets.QWidget, game_state: GameState):
         super().__init__(parent)
@@ -90,6 +91,8 @@ class NewRouteWindow(NewRouteWindowGUI):
             self.csv_tab.path_edit.text = str(settings.Paths.csv)
         # endregion
 
+        self.last_route_tab.submit_button.pressed.connect(self._last_route_submit)
+
         self.combo_signals = (
             ReconnectingSignal(
                 self.csv_tab.journal_combo.currentIndexChanged,
@@ -129,7 +132,7 @@ class NewRouteWindow(NewRouteWindowGUI):
                 error_callback=partial(self.status_bar.show_message, timeout=10_000),
                 delay_iterator=create_request_delay_iterator(),
                 result_callback=partial(
-                    self.route_created_signal.emit, self.selected_journal
+                    self.route_created_signal.emit, self.selected_journal, 1
                 ),
             ),
         )
@@ -175,7 +178,7 @@ class NewRouteWindow(NewRouteWindowGUI):
                 error_callback=partial(self.status_bar.show_message, timeout=10_000),
                 delay_iterator=create_request_delay_iterator(),
                 result_callback=partial(
-                    self.route_created_signal.emit, self.selected_journal
+                    self.route_created_signal.emit, self.selected_journal, 1
                 ),
             ),
         )
@@ -267,6 +270,25 @@ class NewRouteWindow(NewRouteWindowGUI):
     def _csv_submit(self) -> None:
         """Parse a CSV file of Spansh rows and emit the route created signal."""
         path = Path(self.csv_tab.path_edit.text)
+        route = self._route_from_csv(path)
+        if route is not None:
+            self.route_created_signal.emit(
+                self.selected_journal,
+                route,
+                1,
+            )
+        settings.Paths.csv = path
+
+    def _last_route_submit(self) -> None:
+        route = self._route_from_csv(get_config_dir() / ROUTE_FILE_NAME)
+        if route is not None:
+            self.route_created_signal.emit(
+                self.selected_journal,
+                route,
+                settings.General.last_route_index,
+            )
+
+    def _route_from_csv(self, path: Path) -> t.Optional[RouteList]:
         try:
             with path.open(encoding="utf8") as csv_file:
                 reader = csv.reader(csv_file)
@@ -278,11 +300,7 @@ class NewRouteWindow(NewRouteWindowGUI):
                 else:
                     self.status_bar.show_message("Invalid CSV file.", 5_000)
                     return
-                self.route_created_signal.emit(
-                    self.selected_journal,
-                    [row_type.from_csv_row(row) for row in reader],
-                )
-                settings.Paths.csv = path
+                return [row_type.from_csv_row(row) for row in reader]
         except FileNotFoundError:
             self.status_bar.show_message("CSV file doesn't exist.", 5_000)
         except csv.Error as error:

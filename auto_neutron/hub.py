@@ -78,17 +78,18 @@ class Hub(QtCore.QObject):
         """Set the current route index to `index`'s row."""
         self.plotter_state.route_index = index.row()
 
-    def new_route(self, journal: Journal, route: RouteList) -> None:
-        """Create a new worker with `route` and populate the main table with it."""
+    def new_route(self, journal: Journal, route: RouteList, route_index: int) -> None:
+        """Create a new worker with `route`, populate the main table with it, and set the route index."""
         self.plotter_state.journal = journal
         self.plotter_state.create_worker_with_route(route)
         if self.plotter_state.plotter is None:
             if settings.General.copy_mode:
-                self.plotter_state.plotter = CopyPlotter(start_system=route[1].system)
+                self.plotter_state.plotter = CopyPlotter()
             else:
-                self.plotter_state.plotter = AhkPlotter(start_system=route[1].system)
+                self.plotter_state.plotter = AhkPlotter()
         with self.edit_route_update_connection.temporarily_disconnect():
             self.window.initialize_table(route)
+        self.plotter_state.route_index = route_index
 
     def apply_settings(self) -> None:
         """Update the appearance and plotter with new settings."""
