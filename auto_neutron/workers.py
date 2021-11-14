@@ -72,8 +72,8 @@ class StatusWorker(QtCore.QObject):
         super().__init__()
         self._generator = self.read_status()
         self._timer = QtCore.QTimer()
-        self._timer.interval = 250
         self._timer.timeout.connect(partial(next, self._generator))
+        self._timer.interval = 250
         self._running = False
 
     def start(self) -> None:
@@ -81,7 +81,6 @@ class StatusWorker(QtCore.QObject):
         if self._running:
             raise RuntimeError("Worker already started")
         self._running = True
-        self._generator = self.read_status()
         self._timer.start()
 
     def stop(self) -> None:
