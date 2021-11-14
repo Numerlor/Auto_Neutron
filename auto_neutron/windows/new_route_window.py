@@ -133,7 +133,9 @@ class NewRouteWindow(NewRouteWindowGUI):
                 spansh_neutron_callback,
                 error_callback=partial(self.status_bar.show_message, timeout=10_000),
                 delay_iterator=create_request_delay_iterator(),
-                result_callback=partial(self.emit_and_close, self.selected_journal, 1),
+                result_callback=partial(
+                    self.emit_and_close, self.selected_journal, route_index=1
+                ),
             ),
         )
 
@@ -178,7 +180,9 @@ class NewRouteWindow(NewRouteWindowGUI):
                 spansh_exact_callback,
                 error_callback=partial(self.status_bar.show_message, timeout=10_000),
                 delay_iterator=create_request_delay_iterator(),
-                result_callback=partial(self.emit_and_close, self.selected_journal, 1),
+                result_callback=partial(
+                    self.emit_and_close, self.selected_journal, route_index=1
+                ),
             ),
         )
 
@@ -278,7 +282,7 @@ class NewRouteWindow(NewRouteWindowGUI):
             self.emit_and_close(
                 self.selected_journal,
                 route,
-                1,
+                route_index=1,
             )
         log.info(f"Set saved csv {path=}")
         settings.Paths.csv = path
@@ -290,7 +294,7 @@ class NewRouteWindow(NewRouteWindowGUI):
             self.emit_and_close(
                 self.selected_journal,
                 route,
-                settings.General.last_route_index,
+                route_index=settings.General.last_route_index,
             )
 
     def _route_from_csv(self, path: Path) -> t.Optional[RouteList]:

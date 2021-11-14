@@ -103,8 +103,10 @@ class Hub(QtCore.QObject):
     ) -> None:
         """Create a new worker with `route`, populate the main table with it, and set the route index."""
         if route is None:
+            logging.debug("Using current plotter route.")
             route = self.plotter_state.route
         if route_index is None:
+            logging.debug("Using current plotter index.")
             route_index = self.plotter_state.route_index
         logging.debug(
             f"Creating a new {type(route[0]).__name__} route with {route_index=}."
