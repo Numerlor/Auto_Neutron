@@ -133,9 +133,7 @@ class NewRouteWindow(NewRouteWindowGUI):
                 spansh_neutron_callback,
                 error_callback=partial(self.status_bar.show_message, timeout=10_000),
                 delay_iterator=create_request_delay_iterator(),
-                result_callback=partial(
-                    self.route_created_signal.emit, self.selected_journal, 1
-                ),
+                result_callback=partial(self.emit_and_close, self.selected_journal, 1),
             ),
         )
 
@@ -180,9 +178,7 @@ class NewRouteWindow(NewRouteWindowGUI):
                 spansh_exact_callback,
                 error_callback=partial(self.status_bar.show_message, timeout=10_000),
                 delay_iterator=create_request_delay_iterator(),
-                result_callback=partial(
-                    self.route_created_signal.emit, self.selected_journal, 1
-                ),
+                result_callback=partial(self.emit_and_close, self.selected_journal, 1),
             ),
         )
 
@@ -277,7 +273,7 @@ class NewRouteWindow(NewRouteWindowGUI):
         path = Path(self.csv_tab.path_edit.text)
         route = self._route_from_csv(path)
         if route is not None:
-            self.route_created_signal.emit(
+            self.emit_and_close(
                 self.selected_journal,
                 route,
                 1,
@@ -289,7 +285,7 @@ class NewRouteWindow(NewRouteWindowGUI):
         log.info("Submitting last route.")
         route = self._route_from_csv(get_config_dir() / ROUTE_FILE_NAME)
         if route is not None:
-            self.route_created_signal.emit(
+            self.emit_and_close(
                 self.selected_journal,
                 route,
                 settings.General.last_route_index,
@@ -364,3 +360,10 @@ class NewRouteWindow(NewRouteWindowGUI):
         self.last_route_tab.submit_button.enabled = True
 
         self._set_widget_values(location, self.current_ship, cargo_mass)
+
+    def emit_and_close(
+        self, journal: Journal, route: RouteList, route_index: int
+    ) -> None:
+        """Emit a new route and close the window."""
+        self.route_created_signal.emit(journal, route, route_index)
+        self.close()
