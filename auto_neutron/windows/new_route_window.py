@@ -168,6 +168,7 @@ class NewRouteWindow(NewRouteWindowGUI):
                 "internal_tank_size": ship.reserve_size,
                 "max_fuel_per_jump": ship.fsd.max_fuel_usage,
                 "range_boost": ship.jump_range_boost,
+                "cargo": self.spansh_exact_tab.cargo_slider.value,
             },
             reply_callback=partial(
                 spansh_exact_callback,
