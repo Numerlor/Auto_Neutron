@@ -16,14 +16,18 @@ class ReconnectingSignal:
     def __init__(self, signal: QtCore.SignalInstance, slot: collections.abc.Callable):
         self.signal = signal
         self.slot = slot
+        self._disconnected = False
 
     def connect(self) -> None:
         """Connect the signal to the slot."""
         self.signal.connect(self.slot)
+        self._disconnected = False
 
     def disconnect(self) -> None:
         """Disconnect the signal from the slot."""
-        self.signal.disconnect(self.slot)
+        if not self._disconnected:
+            self.signal.disconnect(self.slot)
+            self._disconnected = True
 
     @contextmanager
     def temporarily_disconnect(self) -> collections.abc.Iterator[None]:
