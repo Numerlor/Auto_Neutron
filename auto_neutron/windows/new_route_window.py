@@ -194,15 +194,17 @@ class NewRouteWindow(NewRouteWindowGUI):
 
         self.spansh_exact_tab.cargo_slider.value = current_cargo
 
-        self.spansh_neutron_tab.range_spin.value = ship.jump_range(
-            cargo_mass=current_cargo
-        )
+        if self.current_ship.fsd is not None:
+            self.spansh_neutron_tab.range_spin.value = ship.jump_range(
+                cargo_mass=current_cargo
+            )
 
     def _recalculate_range(self, cargo_mass: int) -> None:
         """Recalculate jump range with the new cargo_mass."""
-        self.spansh_neutron_tab.range_spin.value = self.current_ship.jump_range(
-            cargo_mass=cargo_mass
-        )
+        if self.current_ship.fsd is not None:
+            self.spansh_neutron_tab.range_spin.value = self.current_ship.jump_range(
+                cargo_mass=cargo_mass
+            )
 
     def _set_neutron_submit(self) -> None:
         """Enable the neutron submit button if both inputs are filled, disable otherwise."""
