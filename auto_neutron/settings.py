@@ -132,6 +132,7 @@ class General(metaclass=SettingsCategory):  # noqa D101
         ),
     )
     copy_mode: bool = SettingsParams(bool, True)
+    last_route_index: int = SettingsParams(int, 0)
 
 
 def _path_serializer(path: Union[None, Path, str]) -> str:

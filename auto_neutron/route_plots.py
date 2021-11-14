@@ -75,6 +75,18 @@ class ExactPlotRow(DataClassBase):
             row[6][0] == "Y",
         )
 
+    def to_csv(self) -> list[str]:
+        """Dump the row into a csv list of the appropriate size."""
+        return [
+            self.system,
+            self.dist,
+            self.dist_rem,
+            "",
+            "",
+            "Yes" if self.refuel else "No",
+            "Yes" if self.refuel else "No",
+        ]
+
 
 @dataclasses.dataclass
 class NeutronPlotRow(DataClassBase):
@@ -96,6 +108,10 @@ class NeutronPlotRow(DataClassBase):
         return NeutronPlotRow(
             row[0], round(float(row[1]), 2), round(float(row[2]), 2), int(row[4])
         )
+
+    def to_csv(self) -> list[str]:
+        """Dump the row into a csv list of the appropriate size."""
+        return [self.system, self.dist_to_arrival, self.dist_rem, "", self.jumps]
 
 
 RouteList = t.Union[list[ExactPlotRow], list[NeutronPlotRow]]

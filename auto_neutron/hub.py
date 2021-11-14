@@ -3,8 +3,11 @@
 
 from __future__ import annotations
 
+import atexit
+import csv
 import typing as t
 from functools import partial
+from pathlib import Path
 
 from PySide6 import QtCore, QtGui, QtWidgets
 
@@ -12,7 +15,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 from __feature__ import snake_case, true_property  # noqa: F401
 from auto_neutron import settings
 from auto_neutron.game_state import GameState, PlotterState
-from auto_neutron.route_plots import AhkPlotter, CopyPlotter
+from auto_neutron.route_plots import AhkPlotter, CopyPlotter, NeutronPlotRow
 from auto_neutron.utils.signal import ReconnectingSignal
 from auto_neutron.windows.error_window import ErrorWindow
 from auto_neutron.windows.gui.license_window import LicenseWindow
@@ -39,6 +42,7 @@ class Hub(QtCore.QObject):
         self.window.about_action.triggered.connect(partial(LicenseWindow, self.window))
         self.window.new_route_action.triggered.connect(self.new_route_window)
         self.window.settings_action.triggered.connect(self.display_settings)
+        self.window.save_action.triggered.connect(self.save_route)
         self.window.table.doubleClicked.connect(self.get_index_row)
         self.game_state = GameState()
 
@@ -51,6 +55,8 @@ class Hub(QtCore.QObject):
             self.window.table.itemChanged, self.update_route_from_edit
         )
         self.edit_route_update_connection.connect()
+
+        atexit.register(self.save_route)
 
     def new_route_window(self) -> None:
         """Display the `NewRouteWindow` and connect its signals."""
@@ -106,6 +112,45 @@ class Hub(QtCore.QObject):
         """Display the settings window and connect the applied signal to refresh appearance."""
         window = SettingsWindow(self.window)
         window.settings_applied.connect(self.apply_settings)
+
+    def save_route(self) -> None:
+        """If route auto saving is enabled, save the route to the config directory."""
+        if settings.General.save_on_quit and self.plotter_state.route is not None:
+            config_path = Path(
+                QtCore.QStandardPaths.writable_location(
+                    QtCore.QStandardPaths.AppConfigLocation
+                )
+            )
+            with open(
+                config_path / "route_file.csv", "w", encoding="utf8", newline=""
+            ) as out_file:
+                route_type = type(self.plotter_state.route[0])
+                writer = csv.writer(out_file, quoting=csv.QUOTE_ALL)
+                if route_type is NeutronPlotRow:
+                    writer.writerow(
+                        [
+                            "System Name",
+                            "Distance To Arrival",
+                            "Distance Remaining",
+                            "Neutron Star",
+                            "Jumps",
+                        ]
+                    )
+                else:
+                    writer.writerow(
+                        [
+                            "System Name",
+                            "Distance",
+                            "Distance Remaining",
+                            "Fuel Left",
+                            "Fuel Used",
+                            "Refuel",
+                            "Neutron Star",
+                        ]
+                    )
+                writer.writerows(row.to_csv() for row in self.plotter_state.route)
+
+            settings.General.last_route_index = self.plotter_state.route_index
 
 
 def set_theme() -> None:
