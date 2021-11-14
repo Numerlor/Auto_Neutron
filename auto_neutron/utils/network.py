@@ -3,6 +3,7 @@
 
 import collections.abc
 import json
+import logging
 import typing as t
 import urllib.parse
 from functools import partial
@@ -13,6 +14,8 @@ import auto_neutron
 
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa F401
+
+log = logging.getLogger(__name__)
 
 
 class NetworkError(Exception):
@@ -31,6 +34,7 @@ def make_network_request(
     reply_callback: collections.abc.Callable[[QtNetwork.QNetworkReply], t.Any],
 ) -> None:
     """Make a network request to `url` with a `params` query and connect its reply to `callback`."""
+    log.debug(f"Sending request to {url} with {params=}")
     if params:
         url += "?" + urllib.parse.urlencode(params)
     qurl = QtCore.QUrl(url)
