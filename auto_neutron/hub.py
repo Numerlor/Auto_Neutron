@@ -14,6 +14,7 @@ from auto_neutron import settings
 from auto_neutron.game_state import GameState, PlotterState
 from auto_neutron.route_plots import AhkPlotter, CopyPlotter
 from auto_neutron.utils.signal import ReconnectingSignal
+from auto_neutron.windows.error_window import ErrorWindow
 from auto_neutron.windows.gui.license_window import LicenseWindow
 from auto_neutron.windows.main_window import MainWindow
 from auto_neutron.windows.new_route_window import NewRouteWindow
@@ -31,7 +32,10 @@ class Hub(QtCore.QObject):
     def __init__(self, exception_handler: ExceptionHandler):
         super().__init__()
         self.window = MainWindow()
+        self.error_window = ErrorWindow(self.window)
+        exception_handler.triggered.connect(self.error_window.show)
         self.window.show()
+
         self.window.about_action.triggered.connect(partial(LicenseWindow, self.window))
         self.window.new_route_action.triggered.connect(self.new_route_window)
         self.window.settings_action.triggered.connect(self.display_settings)
