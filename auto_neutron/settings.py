@@ -5,7 +5,7 @@ import pickle  # noqa S403
 from base64 import b64decode, b64encode
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, Callable, Dict, List, NamedTuple, Optional, Tuple, Union
+from typing import Any, Callable, Dict, NamedTuple, Optional, Tuple, Union
 
 from PySide6.QtCore import QByteArray, QSettings
 from PySide6.QtGui import QFont
@@ -130,13 +130,6 @@ class General(metaclass=SettingsCategory):  # noqa D101
             "SetKeyDelay, 1, 2\n"
             "send, {enter}\n"
         ),
-    )
-
-    last_route: Tuple[int, List[Union[str, float, float, int]]] = SettingsParams(
-        str,
-        "gASVBwAAAAAAAABLAF2UhpQu",  # (0, [[]])
-        lambda val: b64encode(pickle.dumps(val)).decode(),
-        lambda val: pickle.loads(b64decode(val.encode())),  # noqa S301
     )
     copy_mode: bool = SettingsParams(bool, True)
 
