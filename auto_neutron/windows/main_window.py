@@ -87,6 +87,11 @@ class MainWindow(MainWindowGUI):
         with self.resize_connection.temporarily_disconnect():
             super().inactivate_before_index(index)
             self.update_remaining_count(index)
+        top_item = self.table.item_at(QtCore.QPoint(1, 1))
+        if settings.Window.autoscroll and top_item.row() == index - 1:
+            self.table.scroll_to_item(
+                self.table.item(index, 0), QtWidgets.QAbstractItemView.PositionAtTop
+            )
 
     def update_remaining_count(self, index: int) -> None:
         """
