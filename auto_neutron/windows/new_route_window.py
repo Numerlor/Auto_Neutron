@@ -189,7 +189,6 @@ class NewRouteWindow(NewRouteWindowGUI):
         self.spansh_neutron_tab.cargo_slider.maximum = ship.max_cargo
         self.spansh_neutron_tab.cargo_slider.value = current_cargo
 
-        self.spansh_exact_tab.cargo_slider.maximum = ship.max_cargo
         self.spansh_exact_tab.cargo_slider.value = current_cargo
 
         self.spansh_neutron_tab.range_spin.value = ship.jump_range(
