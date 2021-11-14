@@ -27,12 +27,10 @@ import auto_neutron
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa F401
 from auto_neutron import hub
-from auto_neutron.constants import APP, APPID, ORG
-from auto_neutron.journal import Journal
+from auto_neutron.constants import APP, APPID, CONFIG_DIRECTORY, ORG
 from auto_neutron.settings import set_settings
 from auto_neutron.utils.logging import UsernameFormatter, init_qt_logging
 from auto_neutron.utils.utils import ExceptionHandler, create_interrupt_timer
-from auto_neutron.workers import CopyPlotter
 
 
 def resource_path(relative_path: Path) -> str:
@@ -51,11 +49,8 @@ app.set_style("Fusion")
 auto_neutron.network_mgr = mgr = QtNetwork.QNetworkAccessManager()
 
 
-config_path = Path(
-    QtCore.QStandardPaths.writable_location(QtCore.QStandardPaths.AppConfigLocation)
-)
 # create org and app folders
-config_path.mkdir(parents=True, exist_ok=True)
+CONFIG_DIRECTORY.mkdir(parents=True, exist_ok=True)
 
 root_logger = logging.getLogger()
 logging.getLogger("ahk").setLevel(logging.WARNING)
@@ -75,7 +70,7 @@ if __debug__:
     logger_path.parent.mkdir(exist_ok=True)
 else:
     root_logger.setLevel(logging.INFO)
-    logger_path = config_path / "log.log"
+    logger_path = CONFIG_DIRECTORY / "log.log"
 init_qt_logging()
 
 file_handler = handlers.RotatingFileHandler(
@@ -89,14 +84,7 @@ ex_handler = ExceptionHandler()
 sys.excepthook = ex_handler.handler
 
 set_settings(
-    QtCore.QSettings(str(config_path / "config.ini"), QtCore.QSettings.IniFormat)
+    QtCore.QSettings(str(CONFIG_DIRECTORY / "config.ini"), QtCore.QSettings.IniFormat)
 )
-ui = hub.Hub(ex_handler)
-ui.plotter_state.journal = Journal(
-    Path(
-        r"C:\Users\miso1\Saved Games\Frontier Developments\Elite Dangerous\Journal.210919003144.01.log"
-    )
-)
-ui.plotter_state.create_worker_with_route(["Fuelum"] * 3)
-ui.plotter_state.plotter = CopyPlotter()
+hub = hub.Hub(ex_handler)
 sys.exit(app.exec())

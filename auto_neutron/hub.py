@@ -7,13 +7,13 @@ import atexit
 import csv
 import typing as t
 from functools import partial
-from pathlib import Path
 
 from PySide6 import QtCore, QtGui, QtWidgets
 
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa: F401
 from auto_neutron import settings
+from auto_neutron.constants import CONFIG_DIRECTORY, ROUTE_FILE_NAME
 from auto_neutron.game_state import GameState, PlotterState
 from auto_neutron.route_plots import AhkPlotter, CopyPlotter, NeutronPlotRow
 from auto_neutron.utils.signal import ReconnectingSignal
@@ -116,13 +116,8 @@ class Hub(QtCore.QObject):
     def save_route(self) -> None:
         """If route auto saving is enabled, save the route to the config directory."""
         if settings.General.save_on_quit and self.plotter_state.route is not None:
-            config_path = Path(
-                QtCore.QStandardPaths.writable_location(
-                    QtCore.QStandardPaths.AppConfigLocation
-                )
-            )
             with open(
-                config_path / "route_file.csv", "w", encoding="utf8", newline=""
+                CONFIG_DIRECTORY / ROUTE_FILE_NAME, "w", encoding="utf8", newline=""
             ) as out_file:
                 route_type = type(self.plotter_state.route[0])
                 writer = csv.writer(out_file, quoting=csv.QUOTE_ALL)

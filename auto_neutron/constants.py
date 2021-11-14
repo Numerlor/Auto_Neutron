@@ -6,6 +6,11 @@ import typing
 from pathlib import Path
 from string import Template
 
+from PySide6 import QtCore
+
+# noinspection PyUnresolvedReferences
+from __feature__ import snake_case, true_property  # noqa: F401
+
 VERSION = "2.0a1"
 APP = "Auto_Neutron"
 ORG = "Numerlor"
@@ -81,7 +86,10 @@ JOURNAL_PATH = (
 )
 STATUS_PATH = JOURNAL_PATH / "Status.json"
 AHK_PATH = Path(os.environ["PROGRAMW6432"]) / "AutoHotkey/AutoHotkey.exe"
-
+CONFIG_DIRECTORY = Path(
+    QtCore.QStandardPaths.writable_location(QtCore.QStandardPaths.AppConfigLocation)
+)
+ROUTE_FILE_NAME = "route.csv"
 AHK_TEMPLATE = Template(
     """\
 stdin := FileOpen("*", "r")
