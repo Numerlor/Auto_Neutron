@@ -77,13 +77,6 @@ class NewRouteWindow(NewRouteWindowGUI):
         self.spansh_neutron_tab.cargo_slider.valueChanged.connect(
             self._recalculate_range
         )
-
-        self.spansh_neutron_tab.journal_combo.currentIndexChanged.connect(
-            self._change_journal
-        )
-        self.spansh_exact_tab.journal_combo.currentIndexChanged.connect(
-            self._change_journal
-        )
         self.spansh_neutron_tab.submit_button.pressed.connect(self._submit_neutron)
         self.spansh_exact_tab.submit_button.pressed.connect(self._submit_exact)
 
@@ -329,6 +322,7 @@ class NewRouteWindow(NewRouteWindowGUI):
             self.spansh_neutron_tab.journal_combo.current_index = index
             self.spansh_exact_tab.journal_combo.current_index = index
             self.last_route_tab.journal_combo.current_index = index
+        self._change_journal(index)
 
     def _change_journal(self, index: int) -> None:
         """Change the current journal and update the UI with its data, or display an error if shut down."""
