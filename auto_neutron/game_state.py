@@ -87,7 +87,7 @@ class PlotterState(QtCore.QObject):
         self.new_system_signal.emit(self._active_route[index].system, index)
 
     @property
-    def route(self) -> RouteList:
+    def route(self) -> t.Optional[RouteList]:
         """Return the active route."""
         return self._active_route
 
@@ -98,7 +98,7 @@ class PlotterState(QtCore.QObject):
         self.tail_worker.route = route
 
     @property
-    def plotter(self) -> Plotter:
+    def plotter(self) -> t.Optional[Plotter]:
         """Return the active plotter instance."""
         return self._plotter
 
@@ -124,7 +124,7 @@ class PlotterState(QtCore.QObject):
             )
 
     @property
-    def journal(self) -> Journal:
+    def journal(self) -> t.Optional[Journal]:
         """Return the active journal instance."""
         return self._active_journal
 
