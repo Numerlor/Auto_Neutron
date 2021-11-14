@@ -58,17 +58,16 @@ log_format = UsernameFormatter(
     datefmt="%H:%M:%S",
     style="{",
 )
+root_logger.setLevel(logging.DEBUG)
 if __debug__:
     stream_handler = logging.StreamHandler(stream=sys.stdout)
     stream_handler.setFormatter(log_format)
     root_logger.addHandler(stream_handler)
-    root_logger.setLevel(logging.DEBUG)
     qt_interrupt_timer = create_interrupt_timer()
 
     logger_path = Path("logs/log.log")
     logger_path.parent.mkdir(exist_ok=True)
 else:
-    root_logger.setLevel(logging.INFO)
     logger_path = get_config_dir() / "log.log"
 init_qt_logging()
 
