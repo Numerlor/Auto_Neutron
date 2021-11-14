@@ -41,7 +41,7 @@ class FuelWarn:
 
         status_flags = status_dict["Flags"]
         fuel_threshold = (
-            self._game_state.ship.tank_size * settings.Alerts.threshold / 100
+            self._game_state.ship.fsd.max_fuel_usage * settings.Alerts.threshold / 100
         )
         if (
             not self._warned
