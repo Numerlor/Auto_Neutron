@@ -68,6 +68,8 @@ class Hub(QtCore.QObject):
         self.plotter_state.route[table_item.row()][
             table_item.column()
         ] = table_item.data(QtCore.Qt.ItemDataRole.DisplayRole)
+        if table_item.row() == self.plotter_state.route_index:
+            self.plotter_state.route_index = self.plotter_state.route_index
 
     def new_system_callback(self, _: t.Any, index: int) -> None:
         """Ensure we don't edit the route when inactivating rows."""
