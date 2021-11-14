@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import collections.abc
 import json
+import logging
 import typing as t
 from pathlib import Path
 
@@ -13,6 +14,8 @@ from PySide6 import QtCore
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa: F401
 from auto_neutron.game_state import Location
+
+log = logging.getLogger(__name__)
 
 
 class Journal(QtCore.QObject):
@@ -29,6 +32,7 @@ class Journal(QtCore.QObject):
 
     def tail(self) -> collections.abc.Generator[None, None, None]:
         """Follow a log file, and emit signals for new systems, loadout changes and game shut down."""
+        log.info(f"Starting tailer of journal file at {self.path}.")
         with self.path.open(encoding="utf8") as journal_file:
             journal_file.seek(0, 2)
             while True:
@@ -51,6 +55,7 @@ class Journal(QtCore.QObject):
         self,
     ) -> tuple[t.Optional[dict], t.Optional[Location], t.Optional[int], bool]:
         """Parse the whole journal file and return the ship, location, current cargo and game was shut down state."""
+        log.info(f"Statically parsing journal file at {self.path}.")
         loadout = None
         location = None
         cargo = None

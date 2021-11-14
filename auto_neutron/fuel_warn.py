@@ -72,6 +72,7 @@ class FuelWarn:
 
         If the visual alert is enabled, attempt to flash the taskbar icon for 5 seconds.
         """
+        log.info("Attempting to execute fuel alert.")
         if settings.Alerts.audio:
             if settings.Paths.alert_sound:
                 new_url = QtCore.QUrl.from_local_file(str(settings.Paths.alert_sound))
@@ -82,6 +83,8 @@ class FuelWarn:
 
             else:
                 QtWidgets.QApplication.instance().beep()
+                log.info("Application beep for audi alert.")
 
         if settings.Alerts.visual:
             QtWidgets.QApplication.instance().alert(self._alert_widget, 5000)
+            log.info("Executed flash alert.")

@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import atexit
 import csv
+import logging
 import typing as t
 from functools import partial
 
@@ -30,6 +31,8 @@ if t.TYPE_CHECKING:
     from auto_neutron.journal import Journal
     from auto_neutron.route_plots import RouteList
     from auto_neutron.utils.utils import ExceptionHandler
+
+log = logging.getLogger(__name__)
 
 
 class Hub(QtCore.QObject):
@@ -70,11 +73,15 @@ class Hub(QtCore.QObject):
 
     def new_route_window(self) -> None:
         """Display the `NewRouteWindow` and connect its signals."""
+        logging.info("Displaying new route window.")
         route_window = NewRouteWindow(self.window, self.game_state)
         route_window.route_created_signal.connect(self.new_route)
 
     def update_route_from_edit(self, table_item: QtWidgets.QTableWidgetItem) -> None:
         """Edit the plotter's route with the new data in `table_item`."""
+        log.debug(
+            f"Updating info from edited item at x={table_item.row()} y={table_item.column()}."
+        )
         self.plotter_state.route[table_item.row()][
             table_item.column()
         ] = table_item.data(QtCore.Qt.ItemDataRole.DisplayRole)
@@ -88,6 +95,7 @@ class Hub(QtCore.QObject):
 
     def get_index_row(self, index: QtCore.QModelIndex) -> None:
         """Set the current route index to `index`'s row."""
+        log.debug("Setting route index after user interaction.")
         self.plotter_state.route_index = index.row()
 
     def new_route(
@@ -98,7 +106,9 @@ class Hub(QtCore.QObject):
             route = self.plotter_state.route
         if route_index is None:
             route_index = self.plotter_state.route_index
-
+        logging.debug(
+            f"Creating a new {type(route[0]).__name__} route with {route_index=}."
+        )
         self.plotter_state.journal = journal
         self.plotter_state.create_worker_with_route(route)
         if self.plotter_state.plotter is None:
@@ -112,6 +122,7 @@ class Hub(QtCore.QObject):
 
     def apply_settings(self) -> None:
         """Update the appearance and plotter with new settings."""
+        log.debug("Refreshing settings.")
         self.window.table.font = settings.Window.font
         set_theme()
 
@@ -130,11 +141,13 @@ class Hub(QtCore.QObject):
 
     def display_settings(self) -> None:
         """Display the settings window and connect the applied signal to refresh appearance."""
+        log.info("Displaying settings window.")
         window = SettingsWindow(self.window)
         window.settings_applied.connect(self.apply_settings)
 
     def display_shut_down_window(self) -> None:
         """Display the shut down window and connect it to create a new route and save the current one."""
+        log.info("Displaying shut down window.")
         window = ShutDownWindow(self.window)
         window.new_journal_signal.connect(self.new_route)
         window.save_route_button.pressed.connect(partial(self.save_route, force=True))
@@ -144,6 +157,7 @@ class Hub(QtCore.QObject):
         if (
             force or settings.General.save_on_quit
         ) and self.plotter_state.route is not None:
+            log.info("Saving route.")
             with open(
                 get_config_dir() / ROUTE_FILE_NAME, "w", encoding="utf8", newline=""
             ) as out_file:

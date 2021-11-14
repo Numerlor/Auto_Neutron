@@ -52,12 +52,14 @@ class GameWorker(QtCore.QObject):
 
     def start(self) -> None:
         """Start the worker to tail the journal file."""
+        log.debug("Starting GameWorker.")
         if self._stopped:
             raise RuntimeError("Can't restart a stopped worker.")
         self._timer.start()
 
     def stop(self) -> None:
         """Stop the worker from tailing the journal file."""
+        log.debug("Stopping GameWorker.")
         self._timer.stop()
         self._generator.close()
         self._stopped = True
@@ -78,6 +80,7 @@ class StatusWorker(QtCore.QObject):
 
     def start(self) -> None:
         """Start the worker to follow the status file."""
+        log.debug("Starting StatusWorker.")
         if self._running:
             raise RuntimeError("Worker already started")
         self._running = True
@@ -85,6 +88,7 @@ class StatusWorker(QtCore.QObject):
 
     def stop(self) -> None:
         """Stop following the status file."""
+        log.debug("Stopping StatusWorker.")
         self._timer.stop()
         self._generator.close()
         self._running = False

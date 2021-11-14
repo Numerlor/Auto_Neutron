@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import logging
 import typing as t
 from dataclasses import dataclass
 from functools import partial
@@ -17,6 +18,8 @@ from auto_neutron.workers import GameWorker
 if t.TYPE_CHECKING:
     from auto_neutron.journal import Journal
     from auto_neutron.route_plots import Plotter, RouteList
+
+log = logging.getLogger(__name__)
 
 
 class Location(t.NamedTuple):
@@ -84,6 +87,7 @@ class PlotterState(QtCore.QObject):
     @route_index.setter
     def route_index(self, index: int) -> None:
         """Set the current route index and emit `self.new_system_signal` with the system at it, and the index itself."""
+        log.info(f"Setting route_{index=}.")
         self._route_index = index
         self.new_system_signal.emit(self._active_route[index].system, index)
 
@@ -95,6 +99,7 @@ class PlotterState(QtCore.QObject):
     @route.setter
     def route(self, route: RouteList) -> None:
         """Set the active route and update the worker."""
+        log.info("Setting new route.")
         self._active_route = route
         self.tail_worker.route = route
 
@@ -112,6 +117,7 @@ class PlotterState(QtCore.QObject):
         The tail worker is started and has its `new_system_index_sig` connected to the plotter's `update_system` method.
         """
         assert self.journal is not None, "Journal must be set first."
+        log.info("Setting new plotter.")
         if self._plotter is not None:
             self._plotter.stop()
 
@@ -138,7 +144,7 @@ class PlotterState(QtCore.QObject):
         In case a plotter is active, a new tail worker from the journal is created and connected to it.
         """
         self._active_journal = journal
-
+        log.info("Setting new journal.")
         if journal is not None:
             self._game_state.shut_down = False
             self._active_journal.shut_down_sig.connect(

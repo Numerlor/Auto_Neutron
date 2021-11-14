@@ -1,6 +1,7 @@
 # This file is part of Auto_Neutron.
 # Copyright (C) 2021  Numerlor
 
+import logging
 import typing as t
 from operator import attrgetter
 from pathlib import Path
@@ -12,6 +13,8 @@ from __feature__ import snake_case, true_property  # noqa: F401
 from auto_neutron import settings
 from auto_neutron.constants import AHK_PATH
 from auto_neutron.windows.gui.settings_window import SettingsWindowGUI
+
+log = logging.getLogger(__name__)
 
 
 class SettingsWindow(SettingsWindowGUI):
@@ -59,6 +62,7 @@ class SettingsWindow(SettingsWindowGUI):
         )
         if path:
             settings.Paths.ahk = Path(path)
+            log.info("Setting ahk path to {path}")
             self.copy_mode_checkbox.enabled = True
 
     def get_sound_path(self) -> None:

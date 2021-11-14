@@ -4,6 +4,7 @@
 import contextlib
 import csv
 import json
+import logging
 import typing as t
 from functools import partial
 from pathlib import Path
@@ -36,6 +37,8 @@ from auto_neutron.utils.utils import create_request_delay_iterator
 
 from .gui.new_route_window import NewRouteWindowGUI
 from .nearest_window import NearestWindow
+
+log = logging.getLogger(__name__)
 
 
 class NewRouteWindow(NewRouteWindowGUI):
@@ -117,6 +120,7 @@ class NewRouteWindow(NewRouteWindowGUI):
     # region spansh plotters
     def _submit_neutron(self) -> None:
         """Submit a neutron plotter request to spansh."""
+        log.info("Submitting neutron job.")
         make_network_request(
             SPANSH_API_URL + "/route",
             params={
@@ -137,6 +141,7 @@ class NewRouteWindow(NewRouteWindowGUI):
 
     def _submit_exact(self) -> None:
         """Submit an exact plotter request to spansh."""
+        log.info("Submitting exact job.")
         if self.spansh_exact_tab.use_clipboard_checkbox.checked:
             ship = Ship.from_coriolis(
                 json.loads(QtWidgets.QApplication.instance().clipboard().text())
@@ -219,6 +224,7 @@ class NewRouteWindow(NewRouteWindowGUI):
 
     def _display_nearest_window(self) -> None:
         """Display the nearest system finder window and link its signals."""
+        log.info("Displaying nearest window.")
         current_loc = self.game_state.location
         if current_loc is not None:
             coordinates = (current_loc.x, current_loc.y, current_loc.z)
@@ -267,6 +273,7 @@ class NewRouteWindow(NewRouteWindowGUI):
 
     def _csv_submit(self) -> None:
         """Parse a CSV file of Spansh rows and emit the route created signal."""
+        log.info("Submitting CSV route.")
         path = Path(self.csv_tab.path_edit.text)
         route = self._route_from_csv(path)
         if route is not None:
@@ -275,9 +282,11 @@ class NewRouteWindow(NewRouteWindowGUI):
                 route,
                 1,
             )
+        log.info(f"Set saved csv {path=}")
         settings.Paths.csv = path
 
     def _last_route_submit(self) -> None:
+        log.info("Submitting last route.")
         route = self._route_from_csv(get_config_dir() / ROUTE_FILE_NAME)
         if route is not None:
             self.route_created_signal.emit(
@@ -298,6 +307,7 @@ class NewRouteWindow(NewRouteWindowGUI):
                 else:
                     self.status_bar.show_message("Invalid CSV file.", 5_000)
                     return
+                log.info(f"Parsing csv file of type {row_type.__name__} at {path}.")
                 return [row_type.from_csv_row(row) for row in reader]
         except FileNotFoundError:
             self.status_bar.show_message("CSV file doesn't exist.", 5_000)
@@ -331,7 +341,7 @@ class NewRouteWindow(NewRouteWindowGUI):
             key=lambda path: path.stat().st_ctime,
             reverse=True,
         )[index]
-
+        log.info(f"Changing selected journal to {journal_path}.")
         journal = Journal(journal_path)
         loadout, location, cargo_mass, shut_down = journal.get_static_state()
 
