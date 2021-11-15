@@ -36,11 +36,12 @@ class ShutDownWindow(ShutDownWindowGUI):
 
     def _change_journal(self, index: int) -> None:
         """Change the selected journal, enable/disable the button depending on its shut down state."""
-        journal_path = sorted(
+        journals = sorted(
             JOURNAL_PATH.glob("Journal.*.log"),
             key=lambda path: path.stat().st_ctime,
             reverse=True,
-        )[index]
+        )
+        journal_path = journals[min(index, len(journals) - 1)]
         journal = Journal(journal_path)
         _, _, _, shut_down = journal.get_static_state()
         self.new_journal_button.enabled = not shut_down
