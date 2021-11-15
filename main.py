@@ -67,12 +67,14 @@ if __debug__:
 
     logger_path = Path("logs/log.log")
     logger_path.parent.mkdir(exist_ok=True)
+    logging_max_bytes = 1024 * 1024 // 4
 else:
     logger_path = get_config_dir() / "log.log"
+    logging_max_bytes = 2 * 1024 * 1024
 init_qt_logging()
 
 file_handler = handlers.RotatingFileHandler(
-    logger_path, maxBytes=2 * 1024 * 1024, backupCount=3, encoding="utf8"
+    logger_path, maxBytes=logging_max_bytes, backupCount=3, encoding="utf8"
 )
 file_handler.setFormatter(log_format)
 root_logger.addHandler(file_handler)
