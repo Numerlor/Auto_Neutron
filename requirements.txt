@@ -1,4 +1,0 @@
-PyQt5
-ahk
-pyperclip
-requests

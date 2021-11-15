@@ -1,0 +1,49 @@
+[tool.poetry]
+name = "Auto_Neutron"
+version = "2.0.0"
+description = "An automatic neutron route plotter for Elite Dangerous"
+authors = ["Numerlor <numerlor@users.noreply.github.com>"]
+license = "GPL-3.0-or-later"
+
+[tool.poetry.dependencies]
+python = "3.9.*"
+
+PySide6 = "~6.2.0"
+
+[tool.poetry.dev-dependencies]
+# Base tools
+flake8 = "~4.0"
+
+flake8-annotations = "~2.7"
+flake8-bandit = "~2.1"
+flake8-bugbear = "21.9.2"
+flake8-docstrings = "~1.6"
+flake8-isort = "~4.1"
+flake8-print = "~4.0"
+isort = "~5.10"
+black = "21.10b0"
+pre-commit = "~2.15"
+pyinstaller = "~4.7"
+taskipy = "~1.9"
+python-dotenv = "~0.19.2"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.isort]
+atomic = true
+profile = "black"
+multi_line_output = 3
+line_length = 88
+include_trailing_comma = true
+use_parentheses = true
+known_first_party = ["auto_neutron", "__feature__", "delete_dlls"]
+
+[tool.black]
+target-version = ["py39"]
+
+[tool.taskipy.tasks]
+start = "python main.py"
+lint = "pre-commit run --all-files"
+pyside-pyi = "pyside6-genpyi all --feature snake_case true_property"
