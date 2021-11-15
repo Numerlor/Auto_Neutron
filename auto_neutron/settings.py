@@ -122,7 +122,8 @@ class General(metaclass=SettingsCategory):  # noqa D101
             "send, e\n"
             "send, {Space}\n"
             "ClipOld := ClipboardAll\n"
-            'Clipboard := "|SYSTEMDATA|"\n'
+            ";system is the variable with the injected system\n"
+            "Clipboard := system\n"
             "sleep, 100\n"
             "Send, ^v\n"
             "Clipboard := ClipOld\n"
