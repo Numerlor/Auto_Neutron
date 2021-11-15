@@ -2,78 +2,61 @@
 # Copyright (C) 2020  Numerlor
 
 """
-Deletes dlls from PyQt5 install that aren't needed for this app.
+Deletes dlls from the PySide6 install that aren't needed for this app.
 
-Deletes specified DLLs and directories from the VENV_DIR or .venv if unspecified
+Deletes specified DLLs and directories from the current python
 without which the app runs fine, reducing its packaged size.
 """
 
-import os
+import shutil
+import sys
+from pathlib import Path
 
-IMAGE_FORMATS = (
-    "qgif.dll",
-    "qicns.dll",
-    "qjpeg.dll",
-    "qsvg.dll",
-    "qtga.dll",
-    "qtiff.dll",
-    "qwbmp.dll",
-    "qwebp.dll",
-)
-
-PLATFORMS = (
-    "qminimal.dll",
-    "qoffscreen.dll",
-    "qwebgl.dll",
-)
-
-BIN = (
-    "d3dcompiler_47.dll",
-    "libcrypto-1_1-x64.dll",
-    "libeay32.dll",
-    "libEGL.dll",
-    "libGLESv2.dll",
-    "libss2-1_1-x64.dll",
+ROOT_DELETE = (
     "opengl32sw.dll",
-    "Qt5DBus.dll",
-    "Qt5Svg.dll",
+    "Qt6OpenGL.dll",
+    "Qt6Quick.dll",
+    "Qt6QmlModels.dll",
+    "Qt6Svg.dll",
+    "Qt6VirtualKeyboard.dll",
+)
+PLUGINS_DELETE = (
+    "iconengines/qsvgicon.dll",
+    "imageformats/qgif.dll",
+    "imageformats/qicns.dll",
+    "imageformats/qjpeg.dll",
+    "imageformats/qsvg.dll",
+    "imageformats/qtga.dll",
+    "imageformats/qtiff.dll",
+    "imageformats/qwbmp.dll",
+    "imageformats/qwebp.dll",
+    "platforminputcontexts/qtvirtualkeyboardplugin.dll",
+    "platforms/qdirect2d.dll",
+    "platforms/qminimal.dll",
+    "platforms/qoffscreen.dll",
+    "styles/qwindowsvistastyle.dll",
 )
 
-os.chdir(f"..\\{os.environ.get('VENV_DIR', '.venv')}\\Lib\\site-packages\\PyQt5\\Qt")
-try:
-    for file in os.listdir("translations"):
-        try:
-            os.remove("translations\\" + file)
-        except FileNotFoundError:
-            pass
-    os.rmdir("translations")
-except FileNotFoundError:
-    pass
 
-for file in IMAGE_FORMATS:
-    try:
-        os.remove("plugins\\imageformats\\" + file)
-    except FileNotFoundError:
-        pass
+def get_pyside_dir() -> Path:
+    """Get the pyside site-packages path of the current interpreter."""
+    parent_dir = Path(sys.executable).parent
+    if parent_dir.name == "Scripts":
+        root_dir = parent_dir.parent
+    else:
+        root_dir = parent_dir
+    return root_dir / "Lib" / "site-packages" / "PySide6"
 
-for file in PLATFORMS:
-    try:
-        os.remove("plugins\\platforms\\" + file)
-    except FileNotFoundError:
-        pass
 
-try:
-    for file in os.listdir("plugins\\styles"):
-        try:
-            os.remove("plugins\\styles\\" + file)
-        except FileNotFoundError:
-            pass
-    os.rmdir("plugins\\styles")
-except FileNotFoundError:
-    pass
+def main() -> None:
+    """Delete all the files listed in ROOT_DELETE and PLUGINS_DELETE and the translations directory."""
+    pyside_dir = get_pyside_dir()
+    for file in ROOT_DELETE:
+        (pyside_dir / file).unlink(missing_ok=True)
+    for file in PLUGINS_DELETE:
+        (pyside_dir / "plugins" / file).unlink(missing_ok=True)
+    shutil.rmtree(pyside_dir / "translations", ignore_errors=True)
 
-for file in BIN:
-    try:
-        os.remove("bin\\" + file)
-    except FileNotFoundError:
-        pass
+
+if __name__ == "__main__":
+    main()
