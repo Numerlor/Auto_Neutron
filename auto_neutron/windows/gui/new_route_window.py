@@ -22,6 +22,7 @@ class LabeledSlider(QtWidgets.QSlider):
         self._value_label.size_policy = QtWidgets.QSizePolicy(
             QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
         )
+        self._value_label.hide()
 
         self._label_hide_timer = QtCore.QTimer(self)
         self._label_hide_timer.single_shot = True
