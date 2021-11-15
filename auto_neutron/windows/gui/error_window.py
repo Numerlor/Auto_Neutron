@@ -1,8 +1,6 @@
 # This file is part of Auto_Neutron.
 # Copyright (C) 2021  Numerlor
 
-from pathlib import Path
-
 from PySide6 import QtCore, QtGui, QtWidgets
 
 # noinspection PyUnresolvedReferences
@@ -30,7 +28,7 @@ class ErrorWindowGUI(QtWidgets.QDialog):
             f"Please make sure to report the bug at <br>"
             f'<a href="{issues_html}" style="color: #007bff">{issues_html}</a>,<br>'
             f"including the latest log file from<br>"
-            f' <a href="{Path(log_path)}" style="color: #007bff">{log_path}</a>'
+            f' <a href="{log_path}" style="color: #007bff">{log_path}</a>'
         )
         self.text_browser.open_external_links = True
 
