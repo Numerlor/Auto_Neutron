@@ -173,7 +173,7 @@ class Window(metaclass=SettingsCategory):  # noqa D101
     autoscroll: bool = SettingsParams(bool, True)
     font: QFont = SettingsParams(
         str,
-        "Arial,-1,-1,5,50,0,0,0,0,0",
+        "Arial,9,-1,5,700,0,0,0,0,0,0,0,0,0,0,1",
         lambda val: val.to_string(),
         _font_deserializer,
     )
