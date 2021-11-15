@@ -69,6 +69,8 @@ class Hub(QtCore.QObject):
         self.warn_worker.status_signal.connect(self.fuel_warner.warn)
         self.warn_worker.start()
 
+        self.new_route_window()
+
         atexit.register(self.save_route)
 
     def new_route_window(self) -> None:
