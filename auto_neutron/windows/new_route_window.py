@@ -340,11 +340,12 @@ class NewRouteWindow(NewRouteWindowGUI):
 
     def _change_journal(self, index: int) -> None:
         """Change the current journal and update the UI with its data, or display an error if shut down."""
-        journal_path = sorted(
+        journals = sorted(
             JOURNAL_PATH.glob("Journal.*.log"),
             key=lambda path: path.stat().st_ctime,
             reverse=True,
-        )[index]
+        )
+        journal_path = journals[min(index, len(journals) - 1)]
         log.info(f"Changing selected journal to {journal_path}.")
         journal = Journal(journal_path)
         loadout, location, cargo_mass, shut_down = journal.get_static_state()
