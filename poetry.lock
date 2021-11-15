@@ -456,6 +456,17 @@ python-versions = ">=3.6, <3.11"
 shiboken6 = "6.2.1"
 
 [[package]]
+name = "python-dotenv"
+version = "0.19.2"
+description = "Read key-value pairs from a .env file and set them as environment variables"
+category = "dev"
+optional = false
+python-versions = ">=3.5"
+
+[package.extras]
+cli = ["click (>=5.0)"]
+
+[[package]]
 name = "pywin32-ctypes"
 version = "0.2.0"
 description = ""
@@ -595,7 +606,7 @@ testing = ["coverage (>=4)", "coverage-enable-subprocess (>=1)", "flaky (>=3)", 
 [metadata]
 lock-version = "1.1"
 python-versions = "3.9.*"
-content-hash = "bc4bdb58c4388d7c10b88363fef385569358fdb79bf1af0450c2852dc423b10e"
+content-hash = "4d667c986c2d033cd76eb50a97e0a51f0101b4d676aa259defdeddcc3578d95d"
 
 [metadata.files]
 altgraph = [
@@ -788,6 +799,10 @@ pyside6 = [
     {file = "PySide6-6.2.1-6.2.1-cp36.cp37.cp38.cp39.cp310-abi3-macosx_10_14_x86_64.whl", hash = "sha256:f1ac2cd8b9712d2a2fbe0780a895afc0d4cdb7869d698d64ea75bde6b862ed8a"},
     {file = "PySide6-6.2.1-6.2.1-cp36.cp37.cp38.cp39.cp310-abi3-manylinux1_x86_64.whl", hash = "sha256:8fd5a9d0948392098f293a82ecf44d3daf347704e8058c654b4b5fdd2d96ee68"},
     {file = "PySide6-6.2.1-6.2.1-cp36.cp37.cp38.cp39.cp310-none-win_amd64.whl", hash = "sha256:9e2397584304c3d3084dabae0571bd879f0b12145ec81a31873872a26abd9010"},
+]
+python-dotenv = [
+    {file = "python-dotenv-0.19.2.tar.gz", hash = "sha256:a5de49a31e953b45ff2d2fd434bbc2670e8db5273606c1e737cc6b93eff3655f"},
+    {file = "python_dotenv-0.19.2-py2.py3-none-any.whl", hash = "sha256:32b2bdc1873fd3a3c346da1c6db83d0053c3c62f28f1f38516070c4c8971b1d3"},
 ]
 pywin32-ctypes = [
     {file = "pywin32-ctypes-0.2.0.tar.gz", hash = "sha256:24ffc3b341d457d48e8922352130cf2644024a4ff09762a2261fd34c36ee5942"},
