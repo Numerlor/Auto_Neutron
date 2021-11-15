@@ -215,6 +215,7 @@ class NewRouteWindow(NewRouteWindowGUI):
         self.spansh_neutron_tab.submit_button.enabled = bool(
             self.spansh_neutron_tab.source_edit.text
             and self.spansh_neutron_tab.target_edit.text
+            and not self.selected_journal.finished
         )
 
     def _set_exact_submit(self) -> None:
@@ -222,6 +223,7 @@ class NewRouteWindow(NewRouteWindowGUI):
         self.spansh_exact_tab.submit_button.enabled = bool(
             self.spansh_exact_tab.source_edit.text
             and self.spansh_exact_tab.target_edit.text
+            and not self.selected_journal.finished
         )
 
     def _display_nearest_window(self) -> None:
@@ -347,22 +349,22 @@ class NewRouteWindow(NewRouteWindowGUI):
         journal = Journal(journal_path)
         loadout, location, cargo_mass, shut_down = journal.get_static_state()
 
+        self.selected_journal = journal
         if shut_down:
             self.status_bar.show_message(
                 "Selected journal ended with a shut down event.", 10_000
             )
             self.csv_tab.submit_button.enabled = False
-            self.spansh_neutron_tab.submit_button.enabled = False
-            self.spansh_exact_tab.submit_button.enabled = False
+            self._set_neutron_submit()
+            self._set_exact_submit()
             self.last_route_tab.submit_button.enabled = False
             return
         self.current_ship = Ship.from_loadout(loadout)
-        self.selected_journal = journal
 
         self.status_bar.clear_message()
         self.csv_tab.submit_button.enabled = True
-        self.spansh_neutron_tab.submit_button.enabled = True
-        self.spansh_exact_tab.submit_button.enabled = True
+        self._set_neutron_submit()
+        self._set_exact_submit()
         self.last_route_tab.submit_button.enabled = True
 
         self._set_widget_values(location, self.current_ship, cargo_mass)
