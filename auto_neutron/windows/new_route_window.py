@@ -359,15 +359,16 @@ class NewRouteWindow(NewRouteWindowGUI):
             self._set_exact_submit()
             self.last_route_tab.submit_button.enabled = False
             return
-        self.current_ship = Ship.from_loadout(loadout)
+
+        if loadout is not None and location is not None and cargo_mass is not None:
+            self.current_ship = Ship.from_loadout(loadout)
+            self._set_widget_values(location, self.current_ship, cargo_mass)
 
         self.status_bar.clear_message()
         self.csv_tab.submit_button.enabled = True
         self._set_neutron_submit()
         self._set_exact_submit()
         self.last_route_tab.submit_button.enabled = True
-
-        self._set_widget_values(location, self.current_ship, cargo_mass)
 
     def emit_and_close(
         self, journal: Journal, route: RouteList, route_index: int
