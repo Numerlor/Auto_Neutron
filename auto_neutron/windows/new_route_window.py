@@ -251,6 +251,10 @@ class NewRouteWindow(NewRouteWindowGUI):
                 window=window,
             )
         )
+        window.copy_to_source_button.pressed.connect(
+            partial(setattr, self.spansh_neutron_tab.source_edit, "modified", True)
+        )
+
         window.copy_to_destination_button.pressed.connect(
             partial(
                 self._set_line_edits_from_nearest,
@@ -258,6 +262,9 @@ class NewRouteWindow(NewRouteWindowGUI):
                 self.spansh_exact_tab.target_edit,
                 window=window,
             )
+        )
+        window.copy_to_destination_button.pressed.connect(
+            partial(setattr, self.spansh_neutron_tab.source_edit, "modified", True)
         )
 
     def _set_line_edits_from_nearest(
