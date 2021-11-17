@@ -139,7 +139,7 @@ class CopyPlotter(Plotter):
 
     def update_system(self, system: str, system_index: t.Optional[int] = None) -> None:
         """Set the system clipboard to `system`."""
-        log.info("Pasting {system!r} to clipboard.")
+        log.info(f"Pasting {system!r} to clipboard.")
         QtWidgets.QApplication.clipboard().set_text(system)
 
 
