@@ -190,8 +190,16 @@ class NewRouteWindow(NewRouteWindowGUI):
         self, location: Location, ship: Ship, current_cargo: int
     ) -> None:
         """Update the UI with values from `location`, `ship` and `current_cargo`."""
-        self.spansh_neutron_tab.source_edit.text = location.name
-        self.spansh_exact_tab.source_edit.text = location.name
+        if (
+            not self.spansh_neutron_tab.source_edit.modified
+            or not self.spansh_neutron_tab.source_edit.text
+        ):
+            self.spansh_neutron_tab.source_edit.text = location.name
+        if (
+            not self.spansh_exact_tab.source_edit.modified
+            or not self.spansh_exact_tab.source_edit.text
+        ):
+            self.spansh_exact_tab.source_edit.text = location.name
 
         self.spansh_neutron_tab.cargo_slider.maximum = ship.max_cargo
         self.spansh_neutron_tab.cargo_slider.value = current_cargo
