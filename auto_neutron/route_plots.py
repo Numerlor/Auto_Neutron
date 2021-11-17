@@ -225,7 +225,11 @@ class AhkPlotter(Plotter):
             )
             yield temp_path
         finally:
-            temp_path.unlink(missing_ok=True)
+            try:
+                temp_path.unlink(missing_ok=True)
+            except OSError:
+                # There probably was an error in AHK and it's still holding the file open.
+                log.warning(f"Unable to delete temp file at {temp_path}.")
 
 
 def _spansh_job_callback(
