@@ -1,11 +1,12 @@
 # This file is part of Auto_Neutron.
 # Copyright (C) 2019  Numerlor
 
+import collections.abc
 import pickle  # noqa S403
 from base64 import b64decode, b64encode
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, Callable, Dict, NamedTuple, Optional, Tuple, Union
+from typing import Any, Callable, NamedTuple, Optional, Union
 
 from PySide6.QtCore import QByteArray, QSettings
 from PySide6.QtGui import QFont
@@ -14,6 +15,18 @@ from PySide6.QtGui import QFont
 from __feature__ import snake_case, true_property  # noqa F401
 
 __all__ = ["General", "Paths", "Window", "Alerts", "set_settings"]
+
+_settings: Optional[QSettings] = None
+
+
+def set_settings(settings: QSettings) -> None:
+    """Set the `settings` object for all categories."""
+    global _settings
+    _settings = settings
+
+
+def get_settings() -> QSettings:
+    return _settings
 
 
 class SettingsParams(NamedTuple):
@@ -43,7 +56,7 @@ class SettingsCategory(type):
     ...     setting2: type = SettingsParams(..., ..., ..., ...)
     ...
 
-    The `cls._settings` value must be set to a QSettings object before any access is attempted.
+    A QSettings object must be set through `set_settings` before any access is attempted.
 
     Each annotated name in the class represents a value in the underlying QSettings category,
     metadata in its `SettingsParams` value that's used when it's accessed or set on the class.
@@ -54,24 +67,36 @@ class SettingsCategory(type):
     On attribtue setting the same behaviour applies but in reverse.
     The user given value is passed through `on_save` before being passed to the QSettings object.
     Attribute setting without using the `delay_sync` context manager automatically syncs the settings to the ini file.
+
+    A `settings_getter` kwarg can be specified when creating a new class to a function which returns the settings
+    object to be used by the class.
     """
 
-    def __init__(cls, name: str, bases: Tuple[type, ...], namespace: Dict[str, Any]):
+    def __new__(
+        metacls,
+        *args,
+        settings_getter: collections.abc.Callable[[], QSettings] = get_settings,
+        **kwargs,
+    ):
+        obj = super().__new__(metacls, *args, **kwargs)
+        obj._settings_getter = settings_getter
+        return obj
+
+    def __init__(cls, name: str, bases: tuple[type, ...], namespace: dict[str, Any]):
         super().__init__(name, bases, namespace)
-        cls._settings: Optional[QSettings] = None
         cls._auto_sync = True
 
     def __getattribute__(cls, key: str):
         """
-        Get an attribute from the class, if the attribute is an annotated setting fetch its value from `cls._settings`.
+        If the attribute is an annotated setting, fetch its value from the class' settings instead of the class itself.
 
         If the SettingsParams object of the setting defines an `on_load` callable, the callable is applied to `value`
-        before it's returned to the caller..
+        before it's returned to the caller.
         """
         getattr_ = super().__getattribute__
         value: SettingsParams = getattr_(key)
         if key in getattr_("__annotations__"):
-            settings_val = getattr_("_settings").value(
+            settings_val = cls._settings_getter().value(
                 f"{cls.__name__}/{key}", value.default, value.setting_type
             )
             if value.on_load is not None:
@@ -81,20 +106,20 @@ class SettingsCategory(type):
 
     def __setattr__(cls, key: str, value: Any):
         """
-        Set the attribute of the object, if the attribute is an annotated setting set it on `cls._settings`.
+        Set the attribute of the object, if the attribute is an annotated setting set it on `_settings`.
 
         When setting an attribute of an annotated setting, the actual value of the attribute is left unchanged,
         if `cls._auto_sync` is true, the settings are synced to the file after they're set.
 
         If the SettingsParams object of the setting defines an `on_save` callable, the callable is applied to `value`
-        before it's saved to `cls._settings`.
+        before it's saved to the class' settings.
         """
         if key in cls.__annotations__:
             if super().__getattribute__(key).on_save is not None:
                 value = super().__getattribute__(key).on_save(value)
-            cls._settings.set_value(f"{cls.__name__}/{key}", value)
+            cls._settings_getter().set_value(f"{cls.__name__}/{key}", value)
             if cls._auto_sync:
-                cls._settings.sync()
+                cls._settings_getter().sync()
         else:
             super().__setattr__(key, value)
 
@@ -104,7 +129,7 @@ class SettingsCategory(type):
         cls._auto_sync = False
         yield
         cls._auto_sync = True
-        cls._settings.sync()
+        cls._settings_getter().sync()
 
 
 class General(metaclass=SettingsCategory):  # noqa D101
@@ -183,9 +208,3 @@ class Alerts(metaclass=SettingsCategory):  # noqa D101
     audio: bool = SettingsParams(bool, False)
     visual: bool = SettingsParams(bool, False)
     threshold: int = SettingsParams(int, 150)
-
-
-def set_settings(settings: QSettings) -> None:
-    """Set the `settings` object for all categories."""
-    for category in General, Paths, Window, Alerts:
-        category._settings = settings
