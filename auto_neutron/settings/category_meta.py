@@ -2,37 +2,21 @@
 # Copyright (C) 2019  Numerlor
 
 import collections.abc
-import pickle  # noqa S403
 import typing as t
 import weakref
-from base64 import b64decode, b64encode
 from contextlib import contextmanager
-from pathlib import Path
-from typing import Any, Callable, NamedTuple, Optional, Union
 
-from PySide6.QtCore import QByteArray, QSettings
-from PySide6.QtGui import QFont
+from PySide6.QtCore import QSettings
+
+import auto_neutron.settings as settings
 
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa F401
 
-__all__ = ["General", "Paths", "Window", "Alerts", "set_settings"]
-
-_settings: Optional[QSettings] = None
 _created_categories: weakref.WeakSet["SettingsCategory"] = weakref.WeakSet()
 
 
-def set_settings(settings: QSettings) -> None:
-    """Set the `settings` object for all categories."""
-    global _settings
-    _settings = settings
-
-
-def get_settings() -> QSettings:
-    return _settings
-
-
-class SettingsParams(NamedTuple):
+class SettingsParams(t.NamedTuple):
     """
     Metadata for a setting in `SettingsCategory`.
 
@@ -43,9 +27,9 @@ class SettingsParams(NamedTuple):
     """
 
     setting_type: type
-    default: Any
-    on_save: Optional[Callable[[Any], Any]] = None
-    on_load: Optional[Callable[[Any], Any]] = None
+    default: t.Any
+    on_save: t.Optional[collections.abc.Callable[[t.Any], t.Any]] = None
+    on_load: t.Optional[collections.abc.Callable[[t.Any], t.Any]] = None
 
 
 class SettingsCategory(type):
@@ -85,9 +69,12 @@ class SettingsCategory(type):
         namespace: dict[str, t.Any],
         *,
         auto_sync: bool = True,
-        settings_getter: collections.abc.Callable[[], QSettings] = get_settings,
+        settings_getter: collections.abc.Callable[
+            [], QSettings
+        ] = settings.get_settings,
         **kwargs,
     ):
+        """Create the category object and set its settings getter and auto sync from the kwargs."""
         obj = super().__new__(metacls, name, bases, namespace, **kwargs)
         obj._settings_getter = settings_getter
         obj.auto_sync_ = auto_sync
@@ -112,7 +99,7 @@ class SettingsCategory(type):
             return settings_val
         return value
 
-    def __setattr__(cls, key: str, value: Any):
+    def __setattr__(cls, key: str, value: t.Any):
         """
         Set the attribute of the object, if the attribute is an annotated setting set it on `_settings`.
 
@@ -135,8 +122,8 @@ class SettingsCategory(type):
 @contextmanager
 def delay_sync(
     *,
-    categories: t.Optional[collections.abc.Iterable["SettingsCategory"]] = None,
-    exclude_categories: t.Optional[collections.abc.Iterable["SettingsCategory"]] = (),
+    categories: t.Optional[collections.abc.Iterable[SettingsCategory]] = None,
+    exclude_categories: t.Optional[collections.abc.Iterable[SettingsCategory]] = (),
     module_filter_include: t.Optional[collections.abc.Container[str]] = None,
     module_filter_exclude: t.Optional[collections.abc.Container[str]] = None,
 ) -> None:
@@ -186,81 +173,3 @@ def delay_sync(
 
     for settings_obj in settings_objs:
         settings_obj.sync()
-
-
-class General(metaclass=SettingsCategory):  # noqa D101
-    save_on_quit: bool = SettingsParams(bool, True)
-    bind: str = SettingsParams(str, "F5")
-    script: str = SettingsParams(
-        str,
-        (
-            "SetKeyDelay, 50, 50\n"
-            ";bind to open map\n"
-            "send, {Numpad7}\n"
-            "; wait for map to open\n"
-            "sleep, 850\n"
-            ";navigate to second map tab and focus on search field\n"
-            "send, e\n"
-            "send, {Space}\n"
-            "ClipOld := ClipboardAll\n"
-            ";system is the variable with the injected system\n"
-            "Clipboard := system\n"
-            "sleep, 100\n"
-            "Send, ^v\n"
-            "Clipboard := ClipOld\n"
-            "ClipOld =\n"
-            "SetKeyDelay, 1, 2\n"
-            "send, {enter}\n"
-        ),
-    )
-    copy_mode: bool = SettingsParams(bool, True)
-    last_route_index: int = SettingsParams(int, 0)
-
-
-def _path_serializer(path: Union[None, Path, str]) -> str:
-    if path is None:
-        return ""
-    return str(path)
-
-
-def _path_deserializer(path_string: str) -> Optional[Path]:
-    if path_string == "":
-        return None
-    return Path(path_string)
-
-
-class Paths(metaclass=SettingsCategory):  # noqa D101
-    ahk: Optional[Path] = SettingsParams(str, "", _path_serializer, _path_deserializer)
-    csv: Optional[Path] = SettingsParams(str, "", _path_serializer, _path_deserializer)
-    alert_sound: Union[None, Path, str] = SettingsParams(
-        str, "", _path_serializer, _path_deserializer
-    )
-
-
-def _font_deserializer(val: str) -> QFont:
-    font = QFont()
-    font.from_string(val)
-    return font
-
-
-class Window(metaclass=SettingsCategory):  # noqa D101
-    geometry: QByteArray = SettingsParams(
-        str,
-        "AdnQywADAAAAAAJ/AAAA+QAABDQAAAH9AAACgAAAARgAAAQzAAAB/AAAAAAAAAAAB4AAAAKAAAABGAAABDMAAAH8",
-        lambda val: b64encode(val.data()).decode(),
-        lambda val: QByteArray(b64decode(val.encode())),
-    )
-    dark_mode: bool = SettingsParams(bool, True)
-    autoscroll: bool = SettingsParams(bool, True)
-    font: QFont = SettingsParams(
-        str,
-        "Arial,9,-1,5,700,0,0,0,0,0,0,0,0,0,0,1",
-        lambda val: val.to_string(),
-        _font_deserializer,
-    )
-
-
-class Alerts(metaclass=SettingsCategory):  # noqa D101
-    audio: bool = SettingsParams(bool, False)
-    visual: bool = SettingsParams(bool, False)
-    threshold: int = SettingsParams(int, 150)
