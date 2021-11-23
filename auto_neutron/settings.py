@@ -3,6 +3,7 @@
 
 import collections.abc
 import pickle  # noqa S403
+import typing as t
 from base64 import b64decode, b64encode
 from contextlib import contextmanager
 from pathlib import Path
@@ -70,21 +71,25 @@ class SettingsCategory(type):
 
     A `settings_getter` kwarg can be specified when creating a new class to a function which returns the settings
     object to be used by the class.
+
+    When `auto_sync_` is True, the settings are synced with the settings object on every value change.
+    The initial value for `auto_sync_` can be set through the class' `auto_sync` kwargs.
     """
 
     def __new__(
         metacls,
-        *args,
+        name: str,
+        bases: tuple[type, ...],
+        namespace: dict[str, t.Any],
+        *,
+        auto_sync: bool = True,
         settings_getter: collections.abc.Callable[[], QSettings] = get_settings,
         **kwargs,
     ):
-        obj = super().__new__(metacls, *args, **kwargs)
+        obj = super().__new__(metacls, name, bases, namespace, **kwargs)
         obj._settings_getter = settings_getter
+        obj.auto_sync_ = auto_sync
         return obj
-
-    def __init__(cls, name: str, bases: tuple[type, ...], namespace: dict[str, Any]):
-        super().__init__(name, bases, namespace)
-        cls._auto_sync = True
 
     def __getattribute__(cls, key: str):
         """
@@ -109,7 +114,7 @@ class SettingsCategory(type):
         Set the attribute of the object, if the attribute is an annotated setting set it on `_settings`.
 
         When setting an attribute of an annotated setting, the actual value of the attribute is left unchanged,
-        if `cls._auto_sync` is true, the settings are synced to the file after they're set.
+        if `cls.auto_sync_` is true, the settings are synced to the file after they're set.
 
         If the SettingsParams object of the setting defines an `on_save` callable, the callable is applied to `value`
         before it's saved to the class' settings.
@@ -118,7 +123,7 @@ class SettingsCategory(type):
             if super().__getattribute__(key).on_save is not None:
                 value = super().__getattribute__(key).on_save(value)
             cls._settings_getter().set_value(f"{cls.__name__}/{key}", value)
-            if cls._auto_sync:
+            if cls.auto_sync_:
                 cls._settings_getter().sync()
         else:
             super().__setattr__(key, value)
