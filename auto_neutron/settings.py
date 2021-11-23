@@ -4,6 +4,7 @@
 import collections.abc
 import pickle  # noqa S403
 import typing as t
+import weakref
 from base64 import b64decode, b64encode
 from contextlib import contextmanager
 from pathlib import Path
@@ -18,6 +19,7 @@ from __feature__ import snake_case, true_property  # noqa F401
 __all__ = ["General", "Paths", "Window", "Alerts", "set_settings"]
 
 _settings: Optional[QSettings] = None
+_created_categories: weakref.WeakSet["SettingsCategory"] = weakref.WeakSet()
 
 
 def set_settings(settings: QSettings) -> None:
@@ -89,6 +91,7 @@ class SettingsCategory(type):
         obj = super().__new__(metacls, name, bases, namespace, **kwargs)
         obj._settings_getter = settings_getter
         obj.auto_sync_ = auto_sync
+        _created_categories.add(obj)
         return obj
 
     def __getattribute__(cls, key: str):
@@ -128,13 +131,61 @@ class SettingsCategory(type):
         else:
             super().__setattr__(key, value)
 
-    @contextmanager
-    def delay_sync(cls) -> None:
-        """Delay settings sync until the end of the context manager."""
-        cls._auto_sync = False
-        yield
-        cls._auto_sync = True
-        cls._settings_getter().sync()
+
+@contextmanager
+def delay_sync(
+    *,
+    categories: t.Optional[collections.abc.Iterable["SettingsCategory"]] = None,
+    exclude_categories: t.Optional[collections.abc.Iterable["SettingsCategory"]] = (),
+    module_filter_include: t.Optional[collections.abc.Container[str]] = None,
+    module_filter_exclude: t.Optional[collections.abc.Container[str]] = None,
+) -> None:
+    """
+    Delay sync of settings from specified categories until the end of the context manager.
+
+    The `categories` and `module_filter_include` filters specify which categories to include, categories from the
+    categories kwarg are used directly, and all categories from modules within the `module_filter_include`
+    container are included to the delayed syncing.
+
+    The categories specified by the above explained kwargs (or all the categories if the kwargs are unset) are then
+    further filtered to remove categories from the `exclude_categories` iterable and categories from modules
+    in the `module_filter_exclude` container.
+    """
+    if categories is None:
+        if module_filter_include is None:
+            categories = set(_created_categories)
+        else:
+            categories = set()
+    else:
+        categories = set(categories)
+
+    if module_filter_include is not None:
+        for category in _created_categories:
+            if category.__module__ in module_filter_include:
+                categories.add(category)
+
+    if module_filter_exclude is not None:
+        for category in categories.copy():
+            if category.__module__ in module_filter_exclude:
+                categories.remove(category)
+
+    categories.difference_update(exclude_categories)
+    categories.difference_update(
+        category for category in categories if not category.auto_sync_
+    )
+
+    for category in categories:
+        category.auto_sync_ = False
+
+    yield
+
+    settings_objs: set[QSettings] = set()
+    for category in categories:
+        category.auto_sync_ = True
+        settings_objs.add(category._settings_getter())
+
+    for settings_obj in settings_objs:
+        settings_obj.sync()
 
 
 class General(metaclass=SettingsCategory):  # noqa D101
