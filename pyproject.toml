@@ -26,6 +26,8 @@ pre-commit = "~2.15"
 pyinstaller = "~4.7"
 taskipy = "~1.9"
 python-dotenv = "~0.19.2"
+tomli = "~1.2.2"
+tomli-w = "~0.4.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
