@@ -29,6 +29,21 @@ class RecursiveDefaultDict(dict[_KT, _VT], t.Generic[_KT, _VT]):
         self.parent = parent
         self._create_missing = create_missing
 
+    def update_from_dict_recursive(self, dict_: dict[_KT, _VT]) -> None:
+        """Add the contents from `dict_` and replaces all dictionaries with this type."""
+        old_create_missing = self._create_missing
+        self._create_missing = False
+        try:
+            for key, value in dict_.items():
+                if isinstance(value, dict):
+                    new_dict = self.__class__(create_missing=None, parent=self)
+                    self[key] = new_dict
+                    new_dict.update_from_dict_recursive(value)
+                else:
+                    self[key] = value
+        finally:
+            self._create_missing = old_create_missing
+
     @property
     def create_missing(self) -> bool:
         """
