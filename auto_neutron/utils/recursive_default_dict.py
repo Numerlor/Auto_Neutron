@@ -3,11 +3,13 @@
 
 from __future__ import annotations
 
+import collections.abc
 import typing as t
 
 _KT = t.TypeVar("_KT")
 _VT = t.TypeVar("_VT")
 _S = t.TypeVar("_S", bound="RecursiveDefaultDict")
+_MISSING_SENTINEL = object()
 
 
 class RecursiveDefaultDict(dict[_KT, _VT], t.Generic[_KT, _VT]):
@@ -29,18 +31,30 @@ class RecursiveDefaultDict(dict[_KT, _VT], t.Generic[_KT, _VT]):
         self.parent = parent
         self._create_missing = create_missing
 
-    def update_from_dict_recursive(self, dict_: dict[_KT, _VT]) -> None:
+    def update_from_dict_recursive(
+        self: _S, dict_: dict[_KT, _VT], *, ignore_conflicts: bool = True
+    ) -> None:
         """Add the contents from `dict_` and replaces all dictionaries with this type."""
         old_create_missing = self._create_missing
         self._create_missing = False
         try:
             for key, value in dict_.items():
                 if isinstance(value, dict):
+                    check_conflict = not ignore_conflicts and key in self
+                    if check_conflict and not isinstance(self[key], dict):
+                        self._check_conflict(self, key, value)
+
                     new_dict = self.__class__(create_missing=None, parent=self)
-                    self[key] = new_dict
                     new_dict.update_from_dict_recursive(value)
+                    value = new_dict
+
+                    if check_conflict:
+                        for sub_key in new_dict.keys() & self[key].keys():
+                            self._check_conflict(self[key], sub_key, new_dict[sub_key])
                 else:
-                    self[key] = value
+                    if not ignore_conflicts:
+                        self._check_conflict(self, key, value)
+                self[key] = value
         finally:
             self._create_missing = old_create_missing
 
@@ -68,3 +82,16 @@ class RecursiveDefaultDict(dict[_KT, _VT], t.Generic[_KT, _VT]):
             self[key] = created_dict
             return created_dict
         raise KeyError(key)
+
+    @staticmethod
+    def _check_conflict(
+        dict_: dict, key: collections.abc.Hashable, new_value: object
+    ) -> None:
+        """Check if `key`'s value in `dict_` differs from `new_value`, if it does raise a ValueError."""
+        if (
+            current_value := dict_.get(key, _MISSING_SENTINEL)
+        ) is not _MISSING_SENTINEL:
+            if current_value != new_value:
+                raise ValueError(
+                    f"Value conflict with {key=!r} {current_value=!r} {new_value=!r}."
+                )
