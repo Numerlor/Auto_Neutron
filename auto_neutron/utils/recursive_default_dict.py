@@ -45,6 +45,8 @@ class RecursiveDefaultDict(dict[_KT, _VT], t.Generic[_KT, _VT]):
                         self._check_conflict(self, key, value)
 
                     new_dict = self.__class__(create_missing=None, parent=self)
+                    if key in self:
+                        new_dict.update_from_dict_recursive(self[key])
                     new_dict.update_from_dict_recursive(value)
                     value = new_dict
 
