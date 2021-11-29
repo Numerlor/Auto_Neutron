@@ -17,6 +17,7 @@ def set_settings(settings: QSettings) -> None:
     _settings = settings
 
 
-def get_settings() -> t.Optional[QSettings]:
-    """Return the default settings object, if it was set."""
+def get_settings() -> QSettings:
+    """Return the set default settings object, `set_settings` should be called before.."""
+    assert _settings is not None, "Global settings uninitialized."
     return _settings
