@@ -62,6 +62,9 @@ class SettingsCategory(type):
     The initial value for `auto_sync_` can be set through the class' `auto_sync` kwargs.
     """
 
+    auto_sync: bool
+    _settings_getter: collections.abc.Callable[[], QSettings]
+
     def __new__(
         metacls,
         name: str,
@@ -123,10 +126,10 @@ class SettingsCategory(type):
 def delay_sync(
     *,
     categories: t.Optional[collections.abc.Iterable[SettingsCategory]] = None,
-    exclude_categories: t.Optional[collections.abc.Iterable[SettingsCategory]] = (),
+    exclude_categories: collections.abc.Iterable[SettingsCategory] = (),
     module_filter_include: t.Optional[collections.abc.Container[str]] = None,
     module_filter_exclude: t.Optional[collections.abc.Container[str]] = None,
-) -> None:
+) -> collections.abc.Iterator[None]:
     """
     Delay sync of settings from specified categories until the end of the context manager.
 
