@@ -1,19 +1,20 @@
 # This file is part of Auto_Neutron.
 # Copyright (C) 2019  Numerlor
 
-import collections.abc
+from __future__ import annotations
+
 import typing as t
 import weakref
 from contextlib import contextmanager
 
-from PySide6.QtCore import QSettings
-
 import auto_neutron.settings as settings
 
-# noinspection PyUnresolvedReferences
-from __feature__ import snake_case, true_property  # noqa F401
+if t.TYPE_CHECKING:
+    import collections.abc
 
-_created_categories: weakref.WeakSet["SettingsCategory"] = weakref.WeakSet()
+    from .toml_settings import TOMLSettings
+
+_created_categories: weakref.WeakSet[SettingsCategory] = weakref.WeakSet()
 
 
 class SettingsParams(t.NamedTuple):
@@ -63,7 +64,7 @@ class SettingsCategory(type):
     """
 
     auto_sync: bool
-    _settings_getter: collections.abc.Callable[[], QSettings]
+    _settings_getter: collections.abc.Callable[[], TOMLSettings]
 
     def __new__(
         metacls,
@@ -73,7 +74,7 @@ class SettingsCategory(type):
         *,
         auto_sync: bool = True,
         settings_getter: collections.abc.Callable[
-            [], QSettings
+            [], TOMLSettings
         ] = settings.get_settings,
         **kwargs,
     ):
@@ -95,7 +96,7 @@ class SettingsCategory(type):
         value: SettingsParams = getattr_(key)
         if key in getattr_("__annotations__"):
             settings_val = cls._settings_getter().value(
-                f"{cls.__name__}/{key}", value.default, value.setting_type
+                (cls.__name__,), key, default=value.default
             )
             if value.on_load is not None:
                 return value.on_load(settings_val)
@@ -115,7 +116,7 @@ class SettingsCategory(type):
         if key in cls.__annotations__:
             if super().__getattribute__(key).on_save is not None:
                 value = super().__getattribute__(key).on_save(value)
-            cls._settings_getter().set_value(f"{cls.__name__}/{key}", value)
+            cls._settings_getter().set_value((cls.__name__,), key, value)
             if cls.auto_sync_:
                 cls._settings_getter().sync()
         else:
@@ -169,7 +170,7 @@ def delay_sync(
 
     yield
 
-    settings_objs: set[QSettings] = set()
+    settings_objs: set[TOMLSettings] = set()
     for category in categories:
         category.auto_sync_ = True
         settings_objs.add(category._settings_getter())

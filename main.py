@@ -20,7 +20,7 @@ import sys
 from logging import handlers
 from pathlib import Path
 
-from PySide6 import QtCore, QtGui, QtNetwork, QtWidgets
+from PySide6 import QtGui, QtNetwork, QtWidgets
 
 import auto_neutron
 
@@ -29,6 +29,7 @@ from __feature__ import snake_case, true_property  # noqa F401
 from auto_neutron import hub
 from auto_neutron.constants import APP, APPID, ORG, get_config_dir
 from auto_neutron.settings import set_settings
+from auto_neutron.settings.toml_settings import TOMLSettings
 from auto_neutron.utils.logging import UsernameFormatter, init_qt_logging
 from auto_neutron.utils.utils import ExceptionHandler, create_interrupt_timer
 
@@ -83,8 +84,6 @@ root_logger.addHandler(file_handler)
 ex_handler = ExceptionHandler()
 sys.excepthook = ex_handler.handler
 
-set_settings(
-    QtCore.QSettings(str(get_config_dir() / "config.ini"), QtCore.QSettings.IniFormat)
-)
+set_settings(TOMLSettings((get_config_dir() / "config.toml")))
 hub = hub.Hub(ex_handler)
 sys.exit(app.exec())
