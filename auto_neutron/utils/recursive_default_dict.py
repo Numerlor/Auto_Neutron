@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import collections.abc
 import typing as t
+from contextlib import contextmanager
 
 _KT = t.TypeVar("_KT")
 _VT = t.TypeVar("_VT")
@@ -35,9 +36,7 @@ class RecursiveDefaultDict(dict[_KT, _VT], t.Generic[_KT, _VT]):
         self: _S, dict_: dict[_KT, _VT], *, ignore_conflicts: bool = True
     ) -> None:
         """Add the contents from `dict_` and replaces all dictionaries with this type."""
-        old_create_missing = self._create_missing
-        self._create_missing = False
-        try:
+        with self.disable_defaults_for_missing():
             for key, value in dict_.items():
                 if isinstance(value, dict):
                     check_conflict = not ignore_conflicts and key in self
@@ -57,8 +56,6 @@ class RecursiveDefaultDict(dict[_KT, _VT], t.Generic[_KT, _VT]):
                     if not ignore_conflicts:
                         self._check_conflict(self, key, value)
                 self[key] = value
-        finally:
-            self._create_missing = old_create_missing
 
     @property
     def create_missing(self) -> bool:
@@ -84,6 +81,16 @@ class RecursiveDefaultDict(dict[_KT, _VT], t.Generic[_KT, _VT]):
             self[key] = created_dict
             return created_dict
         raise KeyError(key)
+
+    @contextmanager
+    def disable_defaults_for_missing(self) -> collections.abc.Iterator[None]:
+        """Disable creating defaults for missing keys for the duration of the context manager."""
+        old_create_missing = self._create_missing
+        self._create_missing = False
+        try:
+            yield
+        finally:
+            self._create_missing = old_create_missing
 
     @staticmethod
     def _check_conflict(
