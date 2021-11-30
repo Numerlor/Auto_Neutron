@@ -293,9 +293,9 @@ class TOMLSettings:
         if atomic:
             temp_path = self.path.with_stem("_TEMP" + self.path.stem)
             with temp_path.open("wb") as settings_file:
-                tomli_w.dump(self._settings_dict, settings_file)
+                tomli_w.dump(self._settings_dict, settings_file, multiline_strings=True)
 
             shutil.move(temp_path, self.path)
         else:
             with self.path.open("wb") as settings_file:
-                tomli_w.dump(self._settings_dict, settings_file)
+                tomli_w.dump(self._settings_dict, settings_file, multiline_strings=True)
