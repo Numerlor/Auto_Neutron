@@ -10,7 +10,7 @@ from contextlib import contextmanager
 _KT = t.TypeVar("_KT")
 _VT = t.TypeVar("_VT")
 _S = t.TypeVar("_S", bound="RecursiveDefaultDict")
-_MISSING_SENTINEL = object()
+_DEFAULT_SENTINEL = object()
 
 
 class RecursiveDefaultDict(dict[_KT, _VT], t.Generic[_KT, _VT]):
@@ -98,8 +98,8 @@ class RecursiveDefaultDict(dict[_KT, _VT], t.Generic[_KT, _VT]):
     ) -> None:
         """Check if `key`'s value in `dict_` differs from `new_value`, if it does raise a ValueError."""
         if (
-            current_value := dict_.get(key, _MISSING_SENTINEL)
-        ) is not _MISSING_SENTINEL:
+            current_value := dict_.get(key, _DEFAULT_SENTINEL)
+        ) is not _DEFAULT_SENTINEL:
             if current_value != new_value:
                 raise ValueError(
                     f"Value conflict with {key=!r} {current_value=!r} {new_value=!r}."
