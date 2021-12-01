@@ -56,7 +56,7 @@ class TOMLSettings:
         categories: collections.abc.Iterable[str],
         key: str,
         *,
-        default: t.Any = _DEFAULT_SENTINEL,
+        default: t.Any = _MISSING_SENTINEL,
         sync_on_missing: bool = False,
     ) -> TOMLType:
         """Get the value of `key` in the category specified by `categories`."""
@@ -66,7 +66,7 @@ class TOMLSettings:
         self,
         key: str,
         *,
-        default: t.Any = _DEFAULT_SENTINEL,
+        default: t.Any = _MISSING_SENTINEL,
         sync_on_missing: bool = False,
     ) -> TOMLType:
         ...
