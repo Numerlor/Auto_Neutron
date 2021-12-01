@@ -21,13 +21,11 @@ class SettingsParams(t.NamedTuple):
     """
     Metadata for a setting in `SettingsCategory`.
 
-    `settings_type` contains the tpye under which QSetting saved the object
     `default` is the default value of the setting
     `on_save` is a callable that's applied before an user given value is saved
     `on_load` is a callable that's applied before a value from settings is returned to the user
     """
 
-    setting_type: type
     default: t.Any
     on_save: t.Optional[collections.abc.Callable[[t.Any], t.Any]] = None
     on_load: t.Optional[collections.abc.Callable[[t.Any], t.Any]] = None
