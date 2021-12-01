@@ -42,9 +42,7 @@ class TOMLSettings:
     def __init__(self, file_path: Path):
         self.path = file_path
 
-        self._settings_dict: t.Optional[
-            RecursiveDefaultDict[str, t.Any]
-        ] = RecursiveDefaultDict()
+        self._settings_dict: RecursiveDefaultDict[str, t.Any] = RecursiveDefaultDict()
         with suppress(FileNotFoundError):
             with self.path.open("rb") as settings_file:
                 self._settings_dict.update_from_dict_recursive(
@@ -263,8 +261,8 @@ class TOMLSettings:
 
     @staticmethod
     def _get_category_dict(
-        dict_: dict, categories: collections.Iterable[str]
-    ) -> RecursiveDefaultDict:
+        dict_: dict, categories: collections.abc.Iterable[str]
+    ) -> dict:
         """Get the category specified by `categories`."""
         for category in categories:
             dict_ = dict_[category]
