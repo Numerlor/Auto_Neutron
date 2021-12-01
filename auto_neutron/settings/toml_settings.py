@@ -59,7 +59,7 @@ class TOMLSettings:
         default: t.Any = _MISSING_SENTINEL,
         sync_on_missing: bool = False,
     ) -> TOMLType:
-        """Get the value of `key` in the category specified by `categories`."""
+        ...
 
     @t.overload
     def value(  # noqa D102
