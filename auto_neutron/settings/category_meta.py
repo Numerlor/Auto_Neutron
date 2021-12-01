@@ -92,16 +92,18 @@ class SettingsCategory(type):
         If the SettingsParams object of the setting defines an `on_load` callable, the callable is applied to `value`
         before it's returned to the caller.
         """
-        getattr_ = super().__getattribute__
-        value: SettingsParams = getattr_(key)
-        if key in getattr_("__annotations__"):
+        annotations_dict = super().__getattribute__("__annotations__")
+        if (annotation := annotations_dict.get(key)) is not None:
+            params = cls._get_params_from_annotation(annotation)
+            if params is None:
+                return super().__getattribute__(key)
             settings_val = cls._settings_getter().value(
-                (cls.__name__,), key, default=value.default
+                (cls.__name__,), key, default=params.default
             )
-            if value.on_load is not None:
-                return value.on_load(settings_val)
+            if params.on_load is not None:
+                return params.on_load(settings_val)
             return settings_val
-        return value
+        return super().__getattribute__(key)
 
     def __setattr__(cls, key: str, value: t.Any):
         """
@@ -113,14 +115,27 @@ class SettingsCategory(type):
         If the SettingsParams object of the setting defines an `on_save` callable, the callable is applied to `value`
         before it's saved to the class' settings.
         """
-        if key in cls.__annotations__:
-            if super().__getattribute__(key).on_save is not None:
-                value = super().__getattribute__(key).on_save(value)
+        if (annotation := cls.__annotations__.get(key)) is not None:
+            params = cls._get_params_from_annotation(annotation)
+            if params is None:
+                super().__setattr__(key, value)
+                return
+
+            if params.on_save is not None:
+                value = params.on_save(value)
             cls._settings_getter().set_value((cls.__name__,), key, value)
             if cls.auto_sync_:
                 cls._settings_getter().sync()
         else:
             super().__setattr__(key, value)
+
+    @staticmethod
+    def _get_params_from_annotation(annotation: t.Any) -> t.Optional[SettingsParams]:
+        """Try to find a `SettingsParams` object in a `typing.Annotated` `annotation`."""
+        annotation_args = t.get_args(annotation)
+        return next(
+            filter(lambda ann: isinstance(ann, SettingsParams), annotation_args), None
+        )
 
 
 @contextmanager

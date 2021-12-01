@@ -15,32 +15,35 @@ from .category_meta import SettingsCategory, SettingsParams
 
 
 class General(metaclass=SettingsCategory):  # noqa D101
-    save_on_quit: bool = SettingsParams(bool, True)
-    bind: str = SettingsParams(str, "F5")
-    script: str = SettingsParams(
+    save_on_quit: t.Annotated[bool, SettingsParams(bool, True)]
+    bind: t.Annotated[str, SettingsParams(str, "F5")]
+    script: t.Annotated[
         str,
-        (
-            "SetKeyDelay, 50, 50\n"
-            ";bind to open map\n"
-            "send, {Numpad7}\n"
-            "; wait for map to open\n"
-            "sleep, 850\n"
-            ";navigate to second map tab and focus on search field\n"
-            "send, e\n"
-            "send, {Space}\n"
-            "ClipOld := ClipboardAll\n"
-            ";system is the variable with the injected system\n"
-            "Clipboard := system\n"
-            "sleep, 100\n"
-            "Send, ^v\n"
-            "Clipboard := ClipOld\n"
-            "ClipOld =\n"
-            "SetKeyDelay, 1, 2\n"
-            "send, {enter}\n"
+        SettingsParams(
+            str,
+            (
+                "SetKeyDelay, 50, 50\n"
+                ";bind to open map\n"
+                "send, {Numpad7}\n"
+                "; wait for map to open\n"
+                "sleep, 850\n"
+                ";navigate to second map tab and focus on search field\n"
+                "send, e\n"
+                "send, {Space}\n"
+                "ClipOld := ClipboardAll\n"
+                ";system is the variable with the injected system\n"
+                "Clipboard := system\n"
+                "sleep, 100\n"
+                "Send, ^v\n"
+                "Clipboard := ClipOld\n"
+                "ClipOld =\n"
+                "SetKeyDelay, 1, 2\n"
+                "send, {enter}\n"
+            ),
         ),
-    )
-    copy_mode: bool = SettingsParams(bool, True)
-    last_route_index: int = SettingsParams(int, 0)
+    ]
+    copy_mode: t.Annotated[bool, SettingsParams(bool, True)]
+    last_route_index: t.Annotated[int, SettingsParams(int, 0)]
 
 
 def _path_serializer(path: t.Union[None, Path, str]) -> str:
@@ -56,15 +59,16 @@ def _path_deserializer(path_string: str) -> t.Optional[Path]:
 
 
 class Paths(metaclass=SettingsCategory):  # noqa D101
-    ahk: t.Optional[Path] = SettingsParams(
-        str, "", _path_serializer, _path_deserializer
-    )
-    csv: t.Optional[Path] = SettingsParams(
-        str, "", _path_serializer, _path_deserializer
-    )
-    alert_sound: t.Union[None, Path, str] = SettingsParams(
-        str, "", _path_serializer, _path_deserializer
-    )
+    ahk: t.Annotated[
+        t.Optional[Path], SettingsParams(str, "", _path_serializer, _path_deserializer)
+    ]
+    csv: t.Annotated[
+        t.Optional[Path], SettingsParams(str, "", _path_serializer, _path_deserializer)
+    ]
+    alert_sound: t.Annotated[
+        t.Union[None, Path, str],
+        SettingsParams(str, "", _path_serializer, _path_deserializer),
+    ]
 
 
 def _font_deserializer(val: str) -> QFont:
@@ -74,23 +78,29 @@ def _font_deserializer(val: str) -> QFont:
 
 
 class Window(metaclass=SettingsCategory):  # noqa D101
-    geometry: QByteArray = SettingsParams(
-        str,
-        "AdnQywADAAAAAAJ/AAAA+QAABDQAAAH9AAACgAAAARgAAAQzAAAB/AAAAAAAAAAAB4AAAAKAAAABGAAABDMAAAH8",
-        lambda val: b64encode(val.data()).decode(),
-        lambda val: QByteArray(b64decode(val.encode())),
-    )
-    dark_mode: bool = SettingsParams(bool, True)
-    autoscroll: bool = SettingsParams(bool, True)
-    font: QFont = SettingsParams(
-        str,
-        "Arial,9,-1,5,700,0,0,0,0,0,0,0,0,0,0,1",
-        lambda val: val.to_string(),
-        _font_deserializer,
-    )
+    geometry: t.Annotated[
+        QByteArray,
+        SettingsParams(
+            str,
+            "AdnQywADAAAAAAJ/AAAA+QAABDQAAAH9AAACgAAAARgAAAQzAAAB/AAAAAAAAAAAB4AAAAKAAAABGAAABDMAAAH8",
+            lambda val: b64encode(val.data()).decode(),
+            lambda val: QByteArray(b64decode(val.encode())),
+        ),
+    ]
+    dark_mode: t.Annotated[bool, SettingsParams(bool, True)]
+    autoscroll: t.Annotated[bool, SettingsParams(bool, True)]
+    font: t.Annotated[
+        QFont,
+        SettingsParams(
+            str,
+            "Arial,9,-1,5,700,0,0,0,0,0,0,0,0,0,0,1",
+            lambda val: val.to_string(),
+            _font_deserializer,
+        ),
+    ]
 
 
 class Alerts(metaclass=SettingsCategory):  # noqa D101
-    audio: bool = SettingsParams(bool, False)
-    visual: bool = SettingsParams(bool, False)
-    threshold: int = SettingsParams(int, 150)
+    audio: t.Annotated[bool, SettingsParams(bool, False)]
+    visual: t.Annotated[bool, SettingsParams(bool, False)]
+    threshold: t.Annotated[int, SettingsParams(int, 150)]
