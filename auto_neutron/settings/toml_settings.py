@@ -279,7 +279,7 @@ class TOMLSettings:
         If `atomic` is True, the contents are written to a temporary file and then moved to the target path;
         otherwise if it is set to False, the contents are written directly to the file.
         """
-        file_settings = RecursiveDefaultDict()
+        file_settings: RecursiveDefaultDict[str, t.Any] = RecursiveDefaultDict()
         with suppress(FileNotFoundError):
             with self.path.open("rb") as settings_file:
                 file_settings.update_from_dict_recursive(tomli.load(settings_file))
