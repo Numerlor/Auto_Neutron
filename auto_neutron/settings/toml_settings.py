@@ -252,5 +252,12 @@ class TOMLSettings:
             with self.path.open("wb") as settings_file:
                 tomli_w.dump(self._settings_dict, settings_file, multiline_strings=True)
 
+    def load_from_file(self) -> None:
+        """Load new settings from the file path of the settings object."""
+        file_settings: RecursiveDefaultDict[str, t.Any] = RecursiveDefaultDict()
+        with self.path.open("rb") as settings_file:
+            file_settings.update_from_dict_recursive(tomli.load(settings_file))
+        self._settings_dict = file_settings
+
 
 t.overload = _overload_dummy
