@@ -139,7 +139,7 @@ class CopyPlotter(Plotter):
 
     def update_system(self, system: str, system_index: t.Optional[int] = None) -> None:
         """Set the system clipboard to `system`."""
-        log.info("Pasting {system!r} to clipboard.")
+        log.info(f"Pasting {system!r} to clipboard.")
         QtWidgets.QApplication.clipboard().set_text(system)
 
 
@@ -225,7 +225,11 @@ class AhkPlotter(Plotter):
             )
             yield temp_path
         finally:
-            temp_path.unlink(missing_ok=True)
+            try:
+                temp_path.unlink(missing_ok=True)
+            except OSError:
+                # There probably was an error in AHK and it's still holding the file open.
+                log.warning(f"Unable to delete temp file at {temp_path}.")
 
 
 def _spansh_job_callback(

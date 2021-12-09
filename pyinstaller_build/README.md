@@ -1,13 +1,8 @@
 This folder contains resources for building the app using PyInstaller.
 
-Two environmental variables can be set in a .env file:
-
-- UPX_DIR which defaults to ` `
-
-The `build.py` module launches PyInstaller with `PYTHONOPTIMIZE=2` under the venv from `VENV_DIR`,
-with UPX dir set to `UPX_DIR`, if not specified UPX will not be used.
+The `build.py` module launches PyInstaller with `PYTHONOPTIMIZE=2` with UPX dir set to the value in the `UPX_DIR` env var; if not specified UPX will not be used.
 
 `delete_dlls.py` deletes unused dlls which PyInstaller packs from the PySide6 install to reduce the size,
-this module is run at the start of in `build.py`
+this module is automatically ran at the start of `build.py`
 
-Specified files in this directory use the MIT license included in LICENSE.md
+Specified files in this directory use the MIT license included in this directory's LICENSE.md
