@@ -12,7 +12,6 @@ a = Analysis(
     binaries=[],
     datas=[
         ("../resources/icons_library.ico", "."),
-        ("../resources/ahk_templates/*", "ahk/templates"),
     ],
     hiddenimports=[],
     hookspath=[],
