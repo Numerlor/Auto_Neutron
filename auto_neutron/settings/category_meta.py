@@ -59,10 +59,15 @@ class SettingsCategory(type):
 
     When `auto_sync_` is True, the settings are synced with the settings object on every value change.
     The initial value for `auto_sync_` can be set through the class' `auto_sync` kwargs.
+
+    If prefix or suffix categories are specified, the settings category is prefixed/suffixed with them
+    when looking up a value (e.g. category B with ('A',) prefix_categories becomes the A.B category).
     """
 
     auto_sync: bool
     _settings_getter: collections.abc.Callable[[], TOMLSettings]
+    _prefix_categories: collections.abc.Iterable[str]
+    _suffix_categories: collections.abc.Iterable[str]
 
     def __new__(
         metacls,
@@ -74,11 +79,15 @@ class SettingsCategory(type):
         settings_getter: collections.abc.Callable[
             [], TOMLSettings
         ] = settings.get_settings,
+        prefix_categories: collections.abc.Iterable[str] = (),
+        suffix_categories: collections.abc.Iterable[str] = (),
         **kwargs,
     ):
         """Create the category object and set its settings getter and auto sync from the kwargs."""
         obj = super().__new__(metacls, name, bases, namespace, **kwargs)
         obj._settings_getter = settings_getter
+        obj._prefix_categories = prefix_categories
+        obj._suffix_categories = suffix_categories
         obj.auto_sync_ = auto_sync
         _created_categories.add(obj)
         return obj
@@ -96,7 +105,9 @@ class SettingsCategory(type):
             if params is None:
                 return super().__getattribute__(key)
             settings_val = cls._settings_getter().value(
-                (cls.__name__,), key, default=params.default
+                (*cls._prefix_categories, cls.__name__, *cls._suffix_categories),
+                key,
+                default=params.default,
             )
             if params.on_load is not None:
                 return params.on_load(settings_val)
@@ -121,7 +132,11 @@ class SettingsCategory(type):
 
             if params.on_save is not None:
                 value = params.on_save(value)
-            cls._settings_getter().set_value((cls.__name__,), key, value)
+            cls._settings_getter().set_value(
+                (*cls._prefix_categories, cls.__name__, *cls._suffix_categories),
+                key,
+                value,
+            )
             if cls.auto_sync_:
                 cls._settings_getter().sync()
         else:
