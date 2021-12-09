@@ -1,7 +1,7 @@
 # This file is part of Auto_Neutron.
 # Copyright (C) 2021  Numerlor
 
-from .default_settings import get_settings, set_settings  # isort:skip
+from .default_settings_obj import get_settings, set_settings  # isort:skip
 from .categories import Alerts, General, Paths, Window
 from .category_meta import SettingsCategory, SettingsParams
 
