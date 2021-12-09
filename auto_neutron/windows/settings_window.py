@@ -12,6 +12,7 @@ from PySide6 import QtCore, QtWidgets
 from __feature__ import snake_case, true_property  # noqa: F401
 from auto_neutron import settings
 from auto_neutron.constants import AHK_PATH
+from auto_neutron.settings.category_meta import delay_sync
 from auto_neutron.windows.gui.settings_window import SettingsWindowGUI
 
 log = logging.getLogger(__name__)
@@ -99,18 +100,19 @@ class SettingsWindow(SettingsWindowGUI):
 
     def save_settings(self) -> None:
         """Save the settings from the widgets."""
-        for widget, (setting_group, setting_name) in self.settings_pairs:
-            settings_category = getattr(settings, setting_group)
-            if isinstance(widget, QtWidgets.QCheckBox):
-                setattr(settings_category, setting_name, widget.checked)
-            elif isinstance(widget, QtWidgets.QLineEdit):
-                setattr(settings_category, setting_name, widget.text)
-            elif isinstance(widget, QtWidgets.QTextEdit):
-                setattr(settings_category, setting_name, widget.plain_text)
-            else:
-                setattr(settings_category, setting_name, widget.value)
+        with delay_sync():
+            for widget, (setting_group, setting_name) in self.settings_pairs:
+                settings_category = getattr(settings, setting_group)
+                if isinstance(widget, QtWidgets.QCheckBox):
+                    setattr(settings_category, setting_name, widget.checked)
+                elif isinstance(widget, QtWidgets.QLineEdit):
+                    setattr(settings_category, setting_name, widget.text)
+                elif isinstance(widget, QtWidgets.QTextEdit):
+                    setattr(settings_category, setting_name, widget.plain_text)
+                else:
+                    setattr(settings_category, setting_name, widget.value)
 
-        font = self.font_chooser.current_font
-        font.set_point_size(self.font_size_chooser.value)
-        font.set_bold(self.font_bold_checkbox.checked)
-        settings.Window.font = font
+            font = self.font_chooser.current_font
+            font.set_point_size(self.font_size_chooser.value)
+            font.set_bold(self.font_bold_checkbox.checked)
+            settings.Window.font = font
