@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import inspect
 import shutil
 import typing as t
 from contextlib import suppress
@@ -34,6 +35,9 @@ if t.TYPE_CHECKING:
 
 _DEFAULT_SENTINEL = t.cast(t.Any, object())
 _MISSING_SENTINEL = t.cast(t.Any, object())
+_overload_dummy = t.overload
+if not t.TYPE_CHECKING:
+    t.overload = lambda x: x
 
 
 class TOMLSettings:
@@ -61,6 +65,8 @@ class TOMLSettings:
     ) -> TOMLType:
         ...
 
+    _value_sig_key_and_categories = inspect.Signature.from_callable(value)
+
     @t.overload
     def value(  # noqa D102
         self,
@@ -71,18 +77,9 @@ class TOMLSettings:
     ) -> TOMLType:
         ...
 
-    def value(  # type: ignore
-        self,
-        categories_or_key: t.Union[
-            collections.abc.Iterable[str], str
-        ] = _MISSING_SENTINEL,
-        /,
-        key: str = _MISSING_SENTINEL,
-        *,
-        default: t.Any = _MISSING_SENTINEL,
-        sync_on_missing: bool = False,
-        categories: collections.abc.Iterable[str] = _MISSING_SENTINEL,
-    ) -> TOMLType:
+    _value_sig_key_only = inspect.Signature.from_callable(value)
+
+    def value(self, *args, **kwargs) -> TOMLType:
         """
         Get the value of `key`.
 
@@ -94,7 +91,9 @@ class TOMLSettings:
         When `sync_on_missing` is True, the settings will be synced on the first lookup fail and an another attempt
         will be done.
         """
-        categories, key = self._get_value_arguments(categories_or_key, categories, key)
+        categories, key, default, sync_on_missing = self._get_value_arguments(
+            self, *args, **kwargs
+        )
 
         with self._settings_dict.disable_defaults_for_missing():
             try:
@@ -123,41 +122,33 @@ class TOMLSettings:
 
         return value
 
-    @staticmethod
+    @classmethod
     def _get_value_arguments(
-        categories_or_key: t.Union[collections.abc.Iterable[str], str],
-        categories: collections.abc.Iterable[str],
-        key: str,
-    ) -> tuple[collections.abc.Iterable[str], str]:
+        cls,
+        *args,
+        **kwargs,
+    ) -> tuple[collections.abc.Iterable[str], str, t.Any, bool]:
         """
         Construct `categories` and `key` from arguments passed to the `value` method.
 
         If the passed arguments are missing or have conflicts, raise an error.
         """
-        if key is _MISSING_SENTINEL and categories_or_key is _MISSING_SENTINEL:
-            raise TypeError("value() missing 1 required positional argument: 'key'")
-        if (
-            categories is not _MISSING_SENTINEL
-            and categories_or_key is not _MISSING_SENTINEL
-        ):
-            raise TypeError("value() got multiple values for argument 'categories'")
+        try:
+            bound_arguments = cls._value_sig_key_only.bind(*args, **kwargs)
+            bound_arguments.apply_defaults()
+            split_key = bound_arguments.arguments["key"].split(".")
+            categories = split_key[:-1]
+            key = split_key[-1]
+        except TypeError:
+            bound_arguments = cls._value_sig_key_and_categories.bind(*args, **kwargs)
+            bound_arguments.apply_defaults()
+            key = bound_arguments.arguments["key"]
+            categories = bound_arguments.arguments["categories"]
 
-        if key is not _MISSING_SENTINEL and (
-            categories_or_key is not _MISSING_SENTINEL
-            or categories is not _MISSING_SENTINEL
-        ):
-            if categories is _MISSING_SENTINEL:
-                categories = categories_or_key
+        default = bound_arguments.arguments["default"]
+        sync_on_missing = bound_arguments.arguments["sync_on_missing"]
 
-        else:
-            if categories_or_key is not _MISSING_SENTINEL:
-                split_categories_and_key = t.cast(str, categories_or_key).split(".")
-            else:
-                split_categories_and_key = key.split(".")
-            categories = split_categories_and_key[:-1]
-            key = split_categories_and_key[-1]
-
-        return categories, key
+        return categories, key, default, sync_on_missing
 
     __getitem__ = value
 
@@ -170,21 +161,15 @@ class TOMLSettings:
     ) -> None:
         ...
 
+    _set_value_sig_key_and_categories = inspect.Signature.from_callable(set_value)
+
     @t.overload
     def set_value(self, key: str, value: TOMLType) -> None:  # noqa D102
         ...
 
-    def set_value(  # type: ignore
-        self,
-        categories_or_key: t.Union[
-            collections.abc.Iterable[str], str
-        ] = _MISSING_SENTINEL,
-        key_or_value: t.Union[str, TOMLType] = _MISSING_SENTINEL,
-        value: TOMLType = _MISSING_SENTINEL,
-        *,
-        key: str = _MISSING_SENTINEL,
-        categories: collections.abc.Iterable[str] = _MISSING_SENTINEL,
-    ) -> None:
+    _set_value_sig_key_only = inspect.Signature.from_callable(set_value)
+
+    def set_value(self, *args, **kwargs) -> None:
         """
         Set the value of `key` to `value`.
 
@@ -193,66 +178,35 @@ class TOMLSettings:
 
         If only the key and value is specified, the key may contain a dotted path containing categories.
         """
-        categories, key, value = self._set_value_arguments(
-            categories_or_key, key_or_value, value, key, categories
-        )
+        categories, key, value = self._set_value_arguments(self, *args, **kwargs)
         category_dict = self._get_category_dict(self._settings_dict, categories)
         category_dict[key] = value
 
-    @staticmethod
+    @classmethod
     def _set_value_arguments(
-        categories_or_key: t.Union[
-            collections.abc.Iterable[str], str
-        ] = _MISSING_SENTINEL,
-        key_or_value: t.Union[str, TOMLType] = _MISSING_SENTINEL,
-        value: TOMLType = _MISSING_SENTINEL,
-        key: str = _MISSING_SENTINEL,
-        categories: collections.abc.Iterable[str] = _MISSING_SENTINEL,
+        cls,
+        *args,
+        **kwargs,
     ) -> tuple[collections.abc.Iterable[str], str, TOMLType]:
         """
         Construct `categories`, `key`, and `value` from arguments passed to the `set_value` method.
 
         If the passed arguments are missing or have conflicts, raise an error.
         """
-        if key is _MISSING_SENTINEL and categories_or_key is _MISSING_SENTINEL:
-            raise TypeError("set_value() missing 1 required positional argument: 'key'")
-        if value is _MISSING_SENTINEL and key_or_value is _MISSING_SENTINEL:
-            raise TypeError(
-                "set_value() missing 1 required positional argument: 'value'"
+        try:
+            bound_arguments = cls._set_value_sig_key_only.bind(*args, **kwargs)
+            bound_arguments.apply_defaults()
+            split_key = bound_arguments.arguments["key"].split(".")
+            categories = split_key[:-1]
+            key = split_key[-1]
+        except TypeError:
+            bound_arguments = cls._set_value_sig_key_and_categories.bind(
+                *args, **kwargs
             )
-        if (
-            categories is not _MISSING_SENTINEL
-            and categories_or_key is not _MISSING_SENTINEL
-        ):
-            raise TypeError("set_value() got multiple values for argument 'categories'")
-        if key is not _MISSING_SENTINEL and key_or_value is not _MISSING_SENTINEL:
-            raise TypeError("set_value() got multiple values for argument 'key'")
-
-        if key is _MISSING_SENTINEL:
-            if value is _MISSING_SENTINEL:
-                key = t.cast(str, categories_or_key)
-            else:
-                key = t.cast(str, key_or_value)
-
-        if (
-            value is not _MISSING_SENTINEL
-            and (
-                categories_or_key is not _MISSING_SENTINEL
-                or categories is not _MISSING_SENTINEL
-            )
-            and (key_or_value is not _MISSING_SENTINEL or key is not _MISSING_SENTINEL)
-        ):
-            if categories_or_key is not _MISSING_SENTINEL:
-                categories = categories_or_key
-        else:
-            if categories_or_key is not _MISSING_SENTINEL:
-                split_categories_and_key = t.cast(str, categories_or_key).split(".")
-            else:
-                split_categories_and_key = key.split(".")
-            categories = split_categories_and_key[:-1]
-            key = split_categories_and_key[-1]
-            if value is _MISSING_SENTINEL:
-                value = key_or_value
+            bound_arguments.apply_defaults()
+            key = bound_arguments.arguments["key"]
+            categories = bound_arguments.arguments["categories"]
+        value = bound_arguments.arguments["value"]
         return categories, key, value
 
     __setitem__ = set_value
@@ -297,3 +251,6 @@ class TOMLSettings:
         else:
             with self.path.open("wb") as settings_file:
                 tomli_w.dump(self._settings_dict, settings_file, multiline_strings=True)
+
+
+t.overload = _overload_dummy
