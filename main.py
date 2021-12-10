@@ -27,7 +27,7 @@ import auto_neutron
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa F401
 from auto_neutron import hub
-from auto_neutron.constants import APP, APPID, ORG, get_config_dir
+from auto_neutron.constants import APP, APPID, ORG, VERSION, get_config_dir
 from auto_neutron.settings import set_settings
 from auto_neutron.settings.toml_settings import TOMLSettings
 from auto_neutron.utils.logging import UsernameFormatter, init_qt_logging
@@ -85,5 +85,6 @@ ex_handler = ExceptionHandler()
 sys.excepthook = ex_handler.handler
 
 set_settings(TOMLSettings((get_config_dir() / "config.toml")))
+root_logger.info(f"Starting Auto_Neutron ver {VERSION}")
 hub = hub.Hub(ex_handler)
 sys.exit(app.exec())
