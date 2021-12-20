@@ -13,6 +13,7 @@ from PySide6 import QtCore
 
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa F401
+from auto_neutron.utils.file import create_delete_share_file
 
 log = logging.getLogger(__name__)
 
@@ -65,7 +66,9 @@ class SessionBackupHandler(logging.FileHandler):
         if self.backup_count and base_path.exists():
             base_path.rename(Path(f"{self.baseFilename}.1"))
 
-        return base_path.open(self.mode, encoding=self.encoding, errors=self.errors)
+        return create_delete_share_file(
+            base_path, encoding=self.encoding, errors=self.errors
+        )
 
 
 @contextmanager
