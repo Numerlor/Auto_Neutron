@@ -1,3 +1,6 @@
+# This file is part of Auto_Neutron.
+# Copyright (C) 2021  Numerlor
+
 import ctypes
 import msvcrt
 import os
