@@ -86,7 +86,7 @@ class Hub(QtCore.QObject):
     def new_route_window(self) -> None:
         """Display the `NewRouteWindow` and connect its signals."""
         logging.info("Displaying new route window.")
-        route_window = NewRouteWindow(self.window, self.game_state)
+        route_window = NewRouteWindow(self.window)
         route_window.route_created_signal.connect(self.new_route)
 
     def update_route_from_edit(self, table_item: QtWidgets.QTableWidgetItem) -> None:

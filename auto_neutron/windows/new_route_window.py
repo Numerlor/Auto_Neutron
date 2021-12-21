@@ -46,11 +46,9 @@ class NewRouteWindow(NewRouteWindowGUI):
 
     route_created_signal = QtCore.Signal(Journal, list, int)
 
-    def __init__(self, parent: QtWidgets.QWidget, game_state: GameState):
+    def __init__(self, parent: QtWidgets.QWidget):
         super().__init__(parent)
-        self.game_state = game_state
-
-        self.current_ship = self.game_state.ship
+        self.game_state: t.Optional[GameState] = None
         self.selected_journal: t.Optional[Journal] = None
 
         # region spansh tabs init
@@ -147,7 +145,7 @@ class NewRouteWindow(NewRouteWindowGUI):
                 json.loads(QtWidgets.QApplication.instance().clipboard().text())
             )
         else:
-            ship = self.current_ship
+            ship = self.game_state.ship
 
         make_network_request(
             SPANSH_API_URL + "/generic/route",
@@ -206,15 +204,15 @@ class NewRouteWindow(NewRouteWindowGUI):
 
         self.spansh_exact_tab.cargo_slider.value = current_cargo
 
-        if self.current_ship.fsd is not None:
+        if self.game_state.ship.fsd is not None:
             self.spansh_neutron_tab.range_spin.value = ship.jump_range(
                 cargo_mass=current_cargo
             )
 
     def _recalculate_range(self, cargo_mass: int) -> None:
         """Recalculate jump range with the new cargo_mass."""
-        if self.current_ship.fsd is not None:
-            self.spansh_neutron_tab.range_spin.value = self.current_ship.jump_range(
+        if self.game_state.ship.fsd is not None:
+            self.spansh_neutron_tab.range_spin.value = self.game_state.ship.jump_range(
                 cargo_mass=cargo_mass
             )
 
@@ -371,6 +369,9 @@ class NewRouteWindow(NewRouteWindowGUI):
             shut_down,
         ) = journal.get_static_state()
 
+        self.game_state = GameState(
+            Ship(), shut_down, location, last_target, cargo_mass
+        )
         self.selected_journal = journal
         if shut_down:
             self.status_bar.show_message(
@@ -383,8 +384,8 @@ class NewRouteWindow(NewRouteWindowGUI):
             return
 
         if loadout is not None and location is not None and cargo_mass is not None:
-            self.current_ship = Ship.from_loadout(loadout)
-            self._set_widget_values(location, self.current_ship, cargo_mass)
+            self.game_state.ship.update_from_loadout(loadout)
+            self._set_widget_values(location, self.game_state.ship, cargo_mass)
 
         self.status_bar.clear_message()
         self.csv_tab.submit_button.enabled = True
