@@ -24,6 +24,14 @@ CreateFileW.argtypes = [
     wintypes.HANDLE,
 ]
 
+GetFinalPathNameByHandle = ctypes.windll.Kernel32.GetFinalPathNameByHandleW
+GetFinalPathNameByHandle.argtypes = [
+    wintypes.HANDLE,
+    ctypes.c_wchar_p,
+    wintypes.DWORD,
+    wintypes.DWORD,
+]
+
 
 def create_delete_share_file(
     file: Path, encoding: t.Optional[str] = None, errors: t.Optional[str] = None
@@ -51,3 +59,19 @@ def create_delete_share_file(
         encoding=encoding,
         errors=errors,
     )
+
+
+def get_file_name(file: t.IO) -> str:
+    """Get the path of `file`."""
+    handle = msvcrt.get_osfhandle(file.fileno())
+    buffer = ctypes.create_unicode_buffer(wintypes.MAX_PATH)
+
+    ret_val = GetFinalPathNameByHandle(handle, buffer, wintypes.MAX_PATH, 0)
+    if ret_val > wintypes.MAX_PATH:
+        buffer = ctypes.create_unicode_buffer(ret_val)
+        ret_val = GetFinalPathNameByHandle(handle, buffer, ret_val, 0)
+
+    if ret_val == 0:
+        raise ctypes.WinError()
+
+    return buffer.value.removeprefix("\\\\?\\")
