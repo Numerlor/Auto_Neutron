@@ -1,6 +1,8 @@
 import os
+import shutil
 import subprocess  # noqa S404
 import sys
+from pathlib import Path
 
 import dotenv
 
@@ -30,3 +32,7 @@ for spec_file in spec_files:
         run_args.insert(1, "-OO")
 
     subprocess.run(run_args)  # noqa S603
+
+if not debug:
+    if Path("dist/Auto_Neutron").exists():
+        shutil.make_archive("dist/Auto_Neutron", "zip", "dist/Auto_Neutron")
