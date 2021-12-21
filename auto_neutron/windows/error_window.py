@@ -13,9 +13,9 @@ root_logger = logging.getLogger()
 
 ISSUES_URL = "https://github.com/Numerlor/Auto_Neutron/issues/new"
 ERROR_TEXT = (
-    f"Please make sure to report the bug at <br>"
+    "Please make sure to report the bug at <br>"
     f'<a href="{ISSUES_URL}" style="color: #007bff">{ISSUES_URL}</a>,<br>'
-    "including the latest log file from<br>"
+    "and include the latest log file from<br>"
     ' <a href="{log_path}" style="color: #007bff">{log_path}</a>'
 )
 
