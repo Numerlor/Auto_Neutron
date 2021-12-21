@@ -259,6 +259,12 @@ class NewRouteWindow(NewRouteWindowGUI):
         window.copy_to_destination_button.pressed.connect(
             partial(setattr, self.spansh_neutron_tab.source_edit, "modified", True)
         )
+        window.from_target_button.pressed.connect(
+            lambda: window.set_input_values_from_location(self.game_state.last_target)
+        )
+        window.from_location_button.pressed.connect(
+            lambda: window.set_input_values_from_location(self.game_state.location)
+        )
 
     def _set_line_edits_from_nearest(
         self, *line_edits: QtWidgets.QLineEdit, window: NearestWindow
