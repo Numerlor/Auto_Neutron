@@ -363,7 +363,13 @@ class NewRouteWindow(NewRouteWindowGUI):
         journal_path = journals[min(index, len(journals) - 1)]
         log.info(f"Changing selected journal to {journal_path}.")
         journal = Journal(journal_path)
-        loadout, location, cargo_mass, shut_down = journal.get_static_state()
+        (
+            loadout,
+            location,
+            last_target,
+            cargo_mass,
+            shut_down,
+        ) = journal.get_static_state()
 
         self.selected_journal = journal
         if shut_down:
