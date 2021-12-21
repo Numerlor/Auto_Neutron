@@ -81,7 +81,7 @@ class Journal(QtCore.QObject):
                 entry = json.loads(line)
                 if entry["event"] == "Loadout":
                     loadout = entry
-                elif entry["event"] == "Location":
+                elif entry["event"] == "Location" or entry["event"] == "FSDJump":
                     location = Location(entry["StarSystem"], *entry["StarPos"])
                 elif entry["event"] == "FSDTarget":
                     target = Location(
