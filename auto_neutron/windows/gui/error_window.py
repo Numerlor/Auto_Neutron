@@ -1,7 +1,7 @@
 # This file is part of Auto_Neutron.
 # Copyright (C) 2021  Numerlor
 
-from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6 import QtGui, QtWidgets
 
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa: F401
@@ -20,16 +20,6 @@ class ErrorWindowGUI(QtWidgets.QDialog):
         self.info_label.font = font
 
         self.text_browser = QtWidgets.QTextBrowser()
-        issues_html = "https://github.com/Numerlor/Auto_Neutron/issues/new"
-        log_path = QtCore.QStandardPaths.writable_location(
-            QtCore.QStandardPaths.AppConfigLocation
-        )
-        self.text_browser.insert_html(
-            f"Please make sure to report the bug at <br>"
-            f'<a href="{issues_html}" style="color: #007bff">{issues_html}</a>,<br>'
-            f"including the latest log file from<br>"
-            f' <a href="{log_path}" style="color: #007bff">{log_path}</a>'
-        )
         self.text_browser.open_external_links = True
 
         self.button_layout = QtWidgets.QHBoxLayout()
