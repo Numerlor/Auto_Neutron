@@ -43,6 +43,7 @@ class GameState:
     ship = Ship()
     shut_down: t.Optional[bool] = None
     location: t.Optional[Location] = None
+    last_target: t.Optional[Location] = None
     current_cargo: t.Optional[int] = None
 
 
@@ -152,6 +153,9 @@ class PlotterState(QtCore.QObject):
             )
             self._active_journal.system_sig.connect(
                 partial(setattr, self._game_state, "location")
+            )
+            self._active_journal.target_signal.connect(
+                partial(setattr, self._game_state, "last_target")
             )
             self._active_journal.cargo_sig.connect(
                 partial(setattr, self._game_state, "current_cargo")
