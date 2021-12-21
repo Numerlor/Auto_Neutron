@@ -72,7 +72,9 @@ class NearestWindowGUI(QtWidgets.QDialog):
         )
 
         self.from_target_button = QtWidgets.QPushButton("From target", self)
-        self.from_target_button.tool_tip = "Copy coordinates from the current target"
+        self.from_target_button.tool_tip = (
+            "Copy approximate coordinates from the current target"
+        )
 
         self.copy_to_source_button = QtWidgets.QPushButton("To source", self)
         self.copy_to_source_button.tool_tip = (
