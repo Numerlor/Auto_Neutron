@@ -46,6 +46,14 @@ class GameState:
     last_target: t.Optional[Location] = None
     current_cargo: t.Optional[int] = None
 
+    def connect_journal(self, journal: Journal) -> None:
+        """Connect the signals from `journal` to set the appropriate attributes when emitted."""
+        journal.shut_down_sig.connect(partial(setattr, self, "shut_down", True))
+        journal.system_sig.connect(partial(setattr, self, "location"))
+        journal.target_signal.connect(partial(setattr, self, "last_target"))
+        journal.cargo_sig.connect(partial(setattr, self, "current_cargo"))
+        journal.loadout_sig.connect(self.ship.update_from_loadout)
+
 
 class PlotterState(QtCore.QObject):
     """Hold the state required for a plotter to function."""
@@ -148,23 +156,9 @@ class PlotterState(QtCore.QObject):
         log.info("Setting new journal.")
         if journal is not None:
             self._game_state.shut_down = False
-            self._active_journal.shut_down_sig.connect(
-                partial(setattr, self._game_state, "shut_down", True)
-            )
-            self._active_journal.system_sig.connect(
-                partial(setattr, self._game_state, "location")
-            )
-            self._active_journal.target_signal.connect(
-                partial(setattr, self._game_state, "last_target")
-            )
-            self._active_journal.cargo_sig.connect(
-                partial(setattr, self._game_state, "current_cargo")
-            )
-            self._active_journal.loadout_sig.connect(
-                self._game_state.ship.update_from_loadout
-            )
-            self._active_journal.shut_down_sig.connect(self.shut_down_signal.emit)
-            self._active_journal.reload()
+            self._game_state.connect_journal(journal)
+            journal.shut_down_sig.connect(self.shut_down_signal.emit)
+            journal.reload()
 
             if self._plotter is not None:
                 self.tail_worker.stop()
