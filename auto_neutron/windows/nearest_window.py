@@ -11,7 +11,7 @@ from auto_neutron.windows.gui.nearest_window import NearestWindowGUI
 
 
 class NearestWindow(NearestWindowGUI):
-    """Provide an UI to Spansh's nearest API and let the user get the result through the provided buttons."""
+    """Provide a UI to Spansh's nearest API and let the user get the result through the provided buttons."""
 
     def __init__(self, parent: QtWidgets.QWidget, x: float, y: float, z: float):
         super().__init__(parent)
