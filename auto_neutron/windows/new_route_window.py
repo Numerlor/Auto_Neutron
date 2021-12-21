@@ -235,12 +235,7 @@ class NewRouteWindow(NewRouteWindowGUI):
     def _display_nearest_window(self) -> None:
         """Display the nearest system finder window and link its signals."""
         log.info("Displaying nearest window.")
-        current_loc = self.game_state.location
-        if current_loc is not None:
-            coordinates = (current_loc.x, current_loc.y, current_loc.z)
-        else:
-            coordinates = (0, 0, 0)
-        window = NearestWindow(self, *coordinates)
+        window = NearestWindow(self, self.game_state.location)
         window.copy_to_source_button.pressed.connect(
             partial(
                 self._set_line_edits_from_nearest,
