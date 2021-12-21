@@ -1,6 +1,3 @@
-# This file uses the MIT license.
-# Copyright (C) 2020  Numerlor
-
 # -*- mode: python ; coding: utf-8 -*-
 
 block_cipher = None
