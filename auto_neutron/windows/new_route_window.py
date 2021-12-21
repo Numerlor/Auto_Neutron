@@ -34,6 +34,7 @@ from auto_neutron.ship import Ship
 from auto_neutron.utils.network import make_network_request
 from auto_neutron.utils.signal import ReconnectingSignal
 from auto_neutron.utils.utils import create_request_delay_iterator
+from auto_neutron.workers import GameWorker
 
 from .gui.new_route_window import NewRouteWindowGUI
 from .nearest_window import NearestWindow
@@ -50,6 +51,7 @@ class NewRouteWindow(NewRouteWindowGUI):
         super().__init__(parent)
         self.game_state: t.Optional[GameState] = None
         self.selected_journal: t.Optional[Journal] = None
+        self._journal_worker: t.Optional[GameWorker] = None
 
         # region spansh tabs init
         self.spansh_neutron_tab.nearest_button.pressed.connect(
@@ -382,7 +384,14 @@ class NewRouteWindow(NewRouteWindowGUI):
             self._set_neutron_submit()
             self._set_exact_submit()
             self.last_route_tab.submit_button.enabled = False
+            self._journal_worker = None
             return
+
+        self.game_state.connect_journal(journal)
+        if self._journal_worker is not None:
+            self._journal_worker.stop()
+        self._journal_worker = GameWorker([], journal)
+        self._journal_worker.start()
 
         if loadout is not None and location is not None and cargo_mass is not None:
             self.game_state.ship.update_from_loadout(loadout)
