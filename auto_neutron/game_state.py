@@ -40,7 +40,7 @@ class GameState:
     The state can be updated through assignments on public attributes or using `update_from_loadout`.
     """
 
-    ship = Ship()
+    ship: Ship = Ship()
     shut_down: t.Optional[bool] = None
     location: t.Optional[Location] = None
     last_target: t.Optional[Location] = None
