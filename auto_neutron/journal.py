@@ -31,7 +31,6 @@ class Journal(QtCore.QObject):
     def __init__(self, journal_path: Path):
         super().__init__()
         self.path = journal_path
-        self.finished = False
 
     def tail(self) -> collections.abc.Generator[None, None, None]:
         """Follow a log file, and emit signals for new systems, loadout changes and game shut down."""
@@ -57,7 +56,6 @@ class Journal(QtCore.QObject):
 
                     elif entry["event"] == "Shutdown":
                         self.shut_down_sig.emit()
-                        self.finished = True
                 else:
                     yield
 
@@ -90,7 +88,6 @@ class Journal(QtCore.QObject):
                 elif entry["event"] == "Cargo" and entry["Vessel"] == "Ship":
                     cargo = entry["Count"]
                 elif entry["event"] == "Shutdown":
-                    self.finished = True
                     return loadout, location, target, cargo, True
 
         return loadout, location, target, cargo, False
