@@ -37,46 +37,49 @@ class LabeledSlider(QtWidgets.QSlider):
     def slider_change(self, change: QtWidgets.QAbstractSlider.SliderChange) -> None:
         """Show the label above the slider's handle. If the user is not holding the slider, hide it in 1 second."""
         super().slider_change(change)
-
         if change == QtWidgets.QAbstractSlider.SliderChange.SliderValueChange:
-            option = QtWidgets.QStyleOptionSlider()
-            self.init_style_option(option)
+            self._display_value_tooltip()
 
-            handle_rect = self.style().sub_control_rect(
-                QtWidgets.QStyle.CC_Slider,
-                option,
-                QtWidgets.QStyle.SC_SliderHandle,
-                self,
-            )
+    def _display_value_tooltip(self) -> None:
+        """Display a value tooltip on top of the slider's handle."""
+        option = QtWidgets.QStyleOptionSlider()
+        self.init_style_option(option)
 
-            self._value_label.text = str(self.value)
-            self._value_label.adjust_size()
-            new_rect = QtCore.QRect(
-                self.map_to_parent(
-                    QtCore.QPoint(
-                        handle_rect.left()
-                        - (self._value_label.rect.width() - handle_rect.width()) / 2,
-                        handle_rect.top() - self._value_label.rect.height(),
-                    )
-                ),
-                self.map_to_parent(
-                    QtCore.QPoint(
-                        handle_rect.right()
-                        + (self._value_label.rect.width() - handle_rect.width()) / 2,
-                        handle_rect.top(),
-                    )
-                ),
-            )
-            self._value_label.geometry = new_rect
-            self._value_label.show()
-            if not self._pressed:
-                self._label_hide_timer.interval = 1000
-                self._label_hide_timer.start()
+        handle_rect = self.style().sub_control_rect(
+            QtWidgets.QStyle.CC_Slider,
+            option,
+            QtWidgets.QStyle.SC_SliderHandle,
+            self,
+        )
+        self._value_label.text = str(self.value)
+        self._value_label.adjust_size()
+        new_rect = QtCore.QRect(
+            self.map_to_parent(
+                QtCore.QPoint(
+                    handle_rect.left()
+                    - (self._value_label.rect.width() - handle_rect.width()) / 2,
+                    handle_rect.top() - self._value_label.rect.height(),
+                )
+            ),
+            self.map_to_parent(
+                QtCore.QPoint(
+                    handle_rect.right()
+                    + (self._value_label.rect.width() - handle_rect.width()) / 2,
+                    handle_rect.top(),
+                )
+            ),
+        )
+        self._value_label.geometry = new_rect
+        self._value_label.show()
+        if not self._pressed:
+            self._label_hide_timer.interval = 1000
+            self._label_hide_timer.start()
 
     def _on_press(self) -> None:
         """Set the slider as being pressed and stop the hide timer."""
         self._pressed = True
         self._label_hide_timer.stop()
+        self._display_value_tooltip()
 
     def _on_release(self) -> None:
         """Set the slider as being released and start the timer to hide the label in 500ms."""
