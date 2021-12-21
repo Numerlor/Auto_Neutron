@@ -16,6 +16,10 @@ from auto_neutron.utils.logging import patch_log_module
 
 log = logging.getLogger(__name__)
 
+X_OFFSET = -49985
+Y_OFFSET = -40985
+Z_OFFSET = -24105
+
 
 class ExceptionHandler(QtCore.QObject):
     """Handles exceptions when linked to sys.excepthook."""
@@ -62,3 +66,42 @@ def create_interrupt_timer() -> QtCore.QTimer:
 def create_request_delay_iterator() -> collections.abc.Iterator[int]:
     """Create an iterator for re-request delays."""
     return itertools.chain(iter([1, 2, 4, 4, 4, 6, 6]), itertools.cycle([10]))
+
+
+def get_sector_midpoint(address: int) -> tuple[int, int, int]:
+    """Get the mid-point of a sector of a system defined by `address`."""
+    bit_num = address
+
+    bit_num, layer = _pop_n_lower_bits(bit_num, 3)
+    bit_num, low_z_dir = _pop_n_lower_bits(bit_num, 7 - layer)
+    bit_num, high_z_dir = _pop_n_lower_bits(bit_num, 7)
+    bit_num, low_y_dir = _pop_n_lower_bits(bit_num, 7 - layer)
+    bit_num, high_y_dir = _pop_n_lower_bits(bit_num, 6)
+    bit_num, low_x_dir = _pop_n_lower_bits(bit_num, 7 - layer)
+    bit_num, high_x_dir = _pop_n_lower_bits(bit_num, 7)
+
+    mid_x = (
+        high_x_dir * 1280
+        + low_x_dir * 2 ** layer * 10
+        + X_OFFSET
+        + (10 * (2 ** layer) // 2)
+    )
+    mid_y = (
+        high_y_dir * 1280
+        + low_y_dir * 2 ** layer * 10
+        + Y_OFFSET
+        + (10 * (2 ** layer) // 2)
+    )
+    mid_z = (
+        high_z_dir * 1280
+        + low_z_dir * 2 ** layer * 10
+        + Z_OFFSET
+        + (10 * (2 ** layer) // 2)
+    )
+
+    return mid_x, mid_y, mid_z
+
+
+def _pop_n_lower_bits(number: int, n: int) -> tuple[int, int]:
+    """Get n lower-order bits from ˙number` and return the number without those bits, and the bits themselves."""
+    return number >> n, number & (1 << n) - 1
