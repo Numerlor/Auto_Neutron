@@ -16,7 +16,6 @@ FILE_ATTRIBUTE_NORMAL = 128
 INVALID_HANDLE_VALUE = -1
 
 CreateFileW = ctypes.windll.Kernel32.CreateFileW
-
 CreateFileW.argtypes = [
     wintypes.LPCWSTR,
     wintypes.DWORD,
