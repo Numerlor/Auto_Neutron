@@ -223,7 +223,7 @@ class NewRouteWindow(NewRouteWindowGUI):
         self.spansh_neutron_tab.submit_button.enabled = bool(
             self.spansh_neutron_tab.source_edit.text
             and self.spansh_neutron_tab.target_edit.text
-            and not self.selected_journal.finished
+            and not self.game_state.shut_down
         )
 
     def _set_exact_submit(self) -> None:
@@ -231,7 +231,7 @@ class NewRouteWindow(NewRouteWindowGUI):
         self.spansh_exact_tab.submit_button.enabled = bool(
             self.spansh_exact_tab.source_edit.text
             and self.spansh_exact_tab.target_edit.text
-            and not self.selected_journal.finished
+            and not self.game_state.shut_down
         )
 
     def _display_nearest_window(self) -> None:
@@ -387,6 +387,8 @@ class NewRouteWindow(NewRouteWindowGUI):
             self._journal_worker = None
             return
 
+        self.selected_journal.shut_down_sig.connect(self._set_neutron_submit)
+        self.selected_journal.shut_down_sig.connect(self._set_exact_submit)
         self.game_state.connect_journal(journal)
         if self._journal_worker is not None:
             self._journal_worker.stop()
