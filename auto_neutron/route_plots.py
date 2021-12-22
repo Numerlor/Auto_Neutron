@@ -18,8 +18,7 @@ from pathlib import Path
 from PySide6 import QtCore, QtNetwork, QtWidgets
 
 # noinspection PyUnresolvedReferences
-# Can't use true_property because QTimer's single_shot method turns into a property for is_single_shot
-from __feature__ import snake_case  # noqa F401
+from __feature__ import snake_case, true_property  # noqa F401
 from auto_neutron import settings
 from auto_neutron.constants import AHK_TEMPLATE, SPANSH_API_URL, get_config_dir
 from auto_neutron.utils.network import (
