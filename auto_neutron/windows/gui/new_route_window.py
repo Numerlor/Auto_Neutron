@@ -88,6 +88,7 @@ class LabeledSlider(QtWidgets.QSlider):
 
     def mouse_move_event(self, event: QtGui.QMouseEvent) -> None:
         """Show the value tooltip on hover."""
+        super().mouse_move_event(event)
         option = QtWidgets.QStyleOptionSlider()
         self.init_style_option(option)
 
@@ -107,15 +108,14 @@ class LabeledSlider(QtWidgets.QSlider):
             self._mouse_on_handle = False
             if not self._label_hide_timer.active:
                 self._value_label.hide()
-        super().mouse_move_event(event)
 
     def leave_event(self, event: QtCore.QEvent) -> None:
         """Hide the value label if the user was hovering over it and the hide timer is not active."""
+        super().leave_event(event)
         if self._mouse_on_handle:
             self._mouse_on_handle = False
             if not self._label_hide_timer.active:
                 self._value_label.hide()
-        super().leave_event(event)
 
     def _hide_value_label_if_not_hover(self) -> None:
         """Hide the value label if the cursor is not hovering over the handle."""
