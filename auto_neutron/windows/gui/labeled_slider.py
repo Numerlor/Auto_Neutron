@@ -14,14 +14,14 @@ class LabeledSlider(QtWidgets.QSlider):
         self, orientation: QtCore.Qt.OtherFocusReason, parent: QtWidgets.QWidget
     ):
         super().__init__(orientation, parent)
-        self._value_label = QtWidgets.QLabel(parent)
-        self._value_label.frame_shape = QtWidgets.QFrame.StyledPanel
-        self._value_label.frame_shadow = QtWidgets.QFrame.Raised
-        self._value_label.size_policy = QtWidgets.QSizePolicy(
+        self._value_spinbox = QtWidgets.QSpinBox(parent)
+        self._value_spinbox.size_policy = QtWidgets.QSizePolicy(
             QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
         )
-        self._value_label.auto_fill_background = True
-        self._value_label.hide()
+        self._value_spinbox.button_symbols = QtWidgets.QAbstractSpinBox.NoButtons
+        self._value_spinbox.minimum = self.minimum
+        self._value_spinbox.maximum = self.maximum
+        self._value_spinbox.hide()
 
         self._label_hide_timer = QtCore.QTimer(self)
         self._label_hide_timer.single_shot_ = True
@@ -50,26 +50,26 @@ class LabeledSlider(QtWidgets.QSlider):
             QtWidgets.QStyle.SC_SliderHandle,
             self,
         )
-        self._value_label.text = str(self.value)
-        self._value_label.adjust_size()
+        self._value_spinbox.value = self.value
+        self._value_spinbox.adjust_size()
         new_rect = QtCore.QRect(
             self.map_to_parent(
                 QtCore.QPoint(
                     handle_rect.left()
-                    - (self._value_label.rect.width() - handle_rect.width()) / 2,
-                    handle_rect.top() - self._value_label.rect.height(),
+                    - (self._value_spinbox.rect.width() - handle_rect.width()) / 2,
+                    handle_rect.top() - self._value_spinbox.rect.height(),
                 )
             ),
             self.map_to_parent(
                 QtCore.QPoint(
                     handle_rect.right()
-                    + (self._value_label.rect.width() - handle_rect.width()) / 2,
+                    + (self._value_spinbox.rect.width() - handle_rect.width()) / 2,
                     handle_rect.top(),
                 )
             ),
         )
-        self._value_label.geometry = new_rect
-        self._value_label.show()
+        self._value_spinbox.geometry = new_rect
+        self._value_spinbox.show()
         if start_hide_timer:
             self._label_hide_timer.interval = 1000
             self._label_hide_timer.start()
@@ -105,7 +105,7 @@ class LabeledSlider(QtWidgets.QSlider):
         elif not on_handle and self._mouse_on_handle:
             self._mouse_on_handle = False
             if not self._label_hide_timer.active:
-                self._value_label.hide()
+                self._value_spinbox.hide()
 
     def leave_event(self, event: QtCore.QEvent) -> None:
         """Hide the value label if the user was hovering over it and the hide timer is not active."""
@@ -113,9 +113,31 @@ class LabeledSlider(QtWidgets.QSlider):
         if self._mouse_on_handle:
             self._mouse_on_handle = False
             if not self._label_hide_timer.active:
-                self._value_label.hide()
+                self._value_spinbox.hide()
 
     def _hide_value_label_if_not_hover(self) -> None:
         """Hide the value label if the cursor is not hovering over the handle."""
         if not self._mouse_on_handle:
-            self._value_label.hide()
+            self._value_spinbox.hide()
+
+    @property
+    def maximum(self) -> int:
+        """Return the slider's maximum value."""
+        return super().maximum
+
+    @maximum.setter
+    def maximum(self, value: int) -> None:
+        """Set the slider's maximum value."""
+        super(self.__class__, self.__class__).maximum.__set__(self, value)
+        self._value_spinbox.maximum = value
+
+    @property
+    def minimum(self) -> int:
+        """Return the slider's minimum value."""
+        return super().minimum
+
+    @minimum.setter
+    def minimum(self, value: int) -> None:
+        """Set the slider's minimum value."""
+        super(self.__class__, self.__class__).minimum.__set__(self, value)
+        self._value_spinbox.minimum = value
