@@ -26,7 +26,7 @@ class LabeledSlider(QtWidgets.QSlider):
         self._value_label.hide()
 
         self._label_hide_timer = QtCore.QTimer(self)
-        self._label_hide_timer.single_shot = True
+        self._label_hide_timer.single_shot_ = True
         self._label_hide_timer.timeout.connect(self._value_label.hide)
 
         self._pressed = False
