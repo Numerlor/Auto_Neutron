@@ -1,6 +1,11 @@
 # This file is part of Auto_Neutron.
 # Copyright (C) 2021  Numerlor
 
+from __future__ import annotations
+
+import logging
+import typing as t
+
 from PySide6 import QtNetwork, QtWidgets
 
 # noinspection PyUnresolvedReferences
@@ -9,17 +14,28 @@ from auto_neutron.constants import SPANSH_API_URL
 from auto_neutron.utils.network import json_from_network_req, make_network_request
 from auto_neutron.windows.gui.nearest_window import NearestWindowGUI
 
+if t.TYPE_CHECKING:
+    from auto_neutron.game_state import Location
+
+
+log = logging.getLogger(__name__)
+
 
 class NearestWindow(NearestWindowGUI):
-    """Provide an UI to Spansh's nearest API and let the user get the result through the provided buttons."""
+    """Provide a UI to Spansh's nearest API and let the user get the result through the provided buttons."""
 
-    def __init__(self, parent: QtWidgets.QWidget, x: float, y: float, z: float):
+    def __init__(self, parent: QtWidgets.QWidget, start_location: Location):
         super().__init__(parent)
-
-        self.x_spinbox.value = x
-        self.y_spinbox.value = y
-        self.z_spinbox.value = z
+        self.set_input_values_from_location(start_location)
         self.search_button.pressed.connect(self._make_nearest_request)
+
+    def set_input_values_from_location(self, location: t.Optional[Location]) -> None:
+        """Set the input spinboxes to x, y, z."""
+        if location is not None:
+            log.debug(f"Applying spinbox values from {location=}")
+            self.x_spinbox.value = location.x
+            self.y_spinbox.value = location.y
+            self.z_spinbox.value = location.z
 
     def _make_nearest_request(self) -> None:
         """Make a request to Spansh's nearest endpoint with the values from spinboxes."""

@@ -1,6 +1,3 @@
-# This file uses the MIT license.
-# Copyright (C) 2021  Numerlor
-
 # -*- mode: python ; coding: utf-8 -*-
 
 block_cipher = None
@@ -30,7 +27,7 @@ exe = EXE(
     a.scripts,
     [],
     exclude_binaries=True,
-    name="Auto_Neutron",
+    name="Auto_Neutron_debug",
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
@@ -49,5 +46,5 @@ coll = COLLECT(
     strip=False,
     upx=True,
     upx_exclude=[],
-    name="Auto_Neutron",
+    name="Auto_Neutron_debug",
 )

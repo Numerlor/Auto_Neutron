@@ -66,8 +66,26 @@ class NearestWindowGUI(QtWidgets.QDialog):
                 QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
             )
 
+        self.from_location_button = QtWidgets.QPushButton("From location", self)
+        self.from_location_button.tool_tip = (
+            "Copy coordinates from the current location"
+        )
+
+        self.from_target_button = QtWidgets.QPushButton("From target", self)
+        self.from_target_button.tool_tip = (
+            "Copy approximate coordinates from the current target"
+        )
+
         self.copy_to_source_button = QtWidgets.QPushButton("To source", self)
+        self.copy_to_source_button.tool_tip = (
+            "Copy searched system name to the source input"
+        )
+
         self.copy_to_destination_button = QtWidgets.QPushButton("To destination", self)
+        self.copy_to_source_button.tool_tip = (
+            "Copy searched system name to the destination input"
+        )
+
         self.search_button = QtWidgets.QPushButton("Search", self)
 
         self.io_grid_layout.add_widget(self.system_name_label, 0, 0)
@@ -97,16 +115,21 @@ class NearestWindowGUI(QtWidgets.QDialog):
         )
 
         self.button_layout = QtWidgets.QHBoxLayout()
-        self.button_layout.add_widget(
-            self.search_button,
-        )
-        self.button_layout.add_widget(
-            self.copy_to_source_button,
-        )
-        self.button_layout.add_widget(
-            self.copy_to_destination_button,
-        )
+        self.from_buttons_layout = QtWidgets.QVBoxLayout()
 
+        self.from_buttons_layout.add_widget(self.from_location_button)
+        self.from_buttons_layout.add_widget(self.from_target_button)
+
+        self.to_buttons_layout = QtWidgets.QVBoxLayout()
+
+        self.to_buttons_layout.add_widget(self.copy_to_source_button)
+        self.to_buttons_layout.add_widget(self.copy_to_destination_button)
+
+        self.button_layout.add_layout(self.from_buttons_layout)
+        self.button_layout.add_layout(self.to_buttons_layout)
+        self.button_layout.add_widget(
+            self.search_button, alignment=QtCore.Qt.AlignmentFlag.AlignBottom
+        )
         self.main_layout.add_layout(self.io_grid_layout)
         self.main_layout.add_layout(self.button_layout)
 

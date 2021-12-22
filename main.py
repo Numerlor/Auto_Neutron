@@ -27,10 +27,14 @@ import auto_neutron
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa F401
 from auto_neutron import hub
-from auto_neutron.constants import APP, APPID, ORG, get_config_dir
+from auto_neutron.constants import APP, APPID, ORG, VERSION, get_config_dir
 from auto_neutron.settings import set_settings
 from auto_neutron.settings.toml_settings import TOMLSettings
-from auto_neutron.utils.logging import UsernameFormatter, init_qt_logging
+from auto_neutron.utils.logging import (
+    SessionBackupHandler,
+    UsernameFormatter,
+    init_qt_logging,
+)
 from auto_neutron.utils.utils import ExceptionHandler, create_interrupt_timer
 
 
@@ -68,15 +72,14 @@ if __debug__:
 
     logger_path = Path("logs/log.log")
     logger_path.parent.mkdir(exist_ok=True)
-    logging_max_bytes = 1024 * 1024 // 4
+    file_handler = handlers.RotatingFileHandler(
+        logger_path, maxBytes=1024 * 1024 // 4, backupCount=3, encoding="utf8"
+    )
 else:
-    logger_path = get_config_dir() / "log.log"
-    logging_max_bytes = 2 * 1024 * 1024
+    file_handler = SessionBackupHandler(get_config_dir() / "log.log", backup_count=2)
+
 init_qt_logging()
 
-file_handler = handlers.RotatingFileHandler(
-    logger_path, maxBytes=logging_max_bytes, backupCount=3, encoding="utf8"
-)
 file_handler.setFormatter(log_format)
 root_logger.addHandler(file_handler)
 
@@ -85,5 +88,6 @@ ex_handler = ExceptionHandler()
 sys.excepthook = ex_handler.handler
 
 set_settings(TOMLSettings((get_config_dir() / "config.toml")))
+root_logger.info(f"Starting Auto_Neutron ver {VERSION}")
 hub = hub.Hub(ex_handler)
 sys.exit(app.exec())

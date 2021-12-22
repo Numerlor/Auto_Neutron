@@ -34,6 +34,7 @@ from auto_neutron.ship import Ship
 from auto_neutron.utils.network import make_network_request
 from auto_neutron.utils.signal import ReconnectingSignal
 from auto_neutron.utils.utils import create_request_delay_iterator
+from auto_neutron.workers import GameWorker
 
 from .gui.new_route_window import NewRouteWindowGUI
 from .nearest_window import NearestWindow
@@ -46,12 +47,11 @@ class NewRouteWindow(NewRouteWindowGUI):
 
     route_created_signal = QtCore.Signal(Journal, list, int)
 
-    def __init__(self, parent: QtWidgets.QWidget, game_state: GameState):
+    def __init__(self, parent: QtWidgets.QWidget):
         super().__init__(parent)
-        self.game_state = game_state
-
-        self.current_ship = self.game_state.ship
+        self.game_state: t.Optional[GameState] = None
         self.selected_journal: t.Optional[Journal] = None
+        self._journal_worker: t.Optional[GameWorker] = None
 
         # region spansh tabs init
         self.spansh_neutron_tab.nearest_button.pressed.connect(
@@ -147,7 +147,7 @@ class NewRouteWindow(NewRouteWindowGUI):
                 json.loads(QtWidgets.QApplication.instance().clipboard().text())
             )
         else:
-            ship = self.current_ship
+            ship = self.game_state.ship
 
         make_network_request(
             SPANSH_API_URL + "/generic/route",
@@ -206,15 +206,15 @@ class NewRouteWindow(NewRouteWindowGUI):
 
         self.spansh_exact_tab.cargo_slider.value = current_cargo
 
-        if self.current_ship.fsd is not None:
+        if self.game_state.ship.fsd is not None:
             self.spansh_neutron_tab.range_spin.value = ship.jump_range(
                 cargo_mass=current_cargo
             )
 
     def _recalculate_range(self, cargo_mass: int) -> None:
         """Recalculate jump range with the new cargo_mass."""
-        if self.current_ship.fsd is not None:
-            self.spansh_neutron_tab.range_spin.value = self.current_ship.jump_range(
+        if self.game_state.ship.fsd is not None:
+            self.spansh_neutron_tab.range_spin.value = self.game_state.ship.jump_range(
                 cargo_mass=cargo_mass
             )
 
@@ -223,7 +223,7 @@ class NewRouteWindow(NewRouteWindowGUI):
         self.spansh_neutron_tab.submit_button.enabled = bool(
             self.spansh_neutron_tab.source_edit.text
             and self.spansh_neutron_tab.target_edit.text
-            and not self.selected_journal.finished
+            and not self.game_state.shut_down
         )
 
     def _set_exact_submit(self) -> None:
@@ -231,18 +231,13 @@ class NewRouteWindow(NewRouteWindowGUI):
         self.spansh_exact_tab.submit_button.enabled = bool(
             self.spansh_exact_tab.source_edit.text
             and self.spansh_exact_tab.target_edit.text
-            and not self.selected_journal.finished
+            and not self.game_state.shut_down
         )
 
     def _display_nearest_window(self) -> None:
         """Display the nearest system finder window and link its signals."""
         log.info("Displaying nearest window.")
-        current_loc = self.game_state.location
-        if current_loc is not None:
-            coordinates = (current_loc.x, current_loc.y, current_loc.z)
-        else:
-            coordinates = (0, 0, 0)
-        window = NearestWindow(self, *coordinates)
+        window = NearestWindow(self, self.game_state.location)
         window.copy_to_source_button.pressed.connect(
             partial(
                 self._set_line_edits_from_nearest,
@@ -265,6 +260,12 @@ class NewRouteWindow(NewRouteWindowGUI):
         )
         window.copy_to_destination_button.pressed.connect(
             partial(setattr, self.spansh_neutron_tab.source_edit, "modified", True)
+        )
+        window.from_target_button.pressed.connect(
+            lambda: window.set_input_values_from_location(self.game_state.last_target)
+        )
+        window.from_location_button.pressed.connect(
+            lambda: window.set_input_values_from_location(self.game_state.location)
         )
 
     def _set_line_edits_from_nearest(
@@ -363,8 +364,17 @@ class NewRouteWindow(NewRouteWindowGUI):
         journal_path = journals[min(index, len(journals) - 1)]
         log.info(f"Changing selected journal to {journal_path}.")
         journal = Journal(journal_path)
-        loadout, location, cargo_mass, shut_down = journal.get_static_state()
+        (
+            loadout,
+            location,
+            last_target,
+            cargo_mass,
+            shut_down,
+        ) = journal.get_static_state()
 
+        self.game_state = GameState(
+            Ship(), shut_down, location, last_target, cargo_mass
+        )
         self.selected_journal = journal
         if shut_down:
             self.status_bar.show_message(
@@ -374,11 +384,20 @@ class NewRouteWindow(NewRouteWindowGUI):
             self._set_neutron_submit()
             self._set_exact_submit()
             self.last_route_tab.submit_button.enabled = False
+            self._journal_worker = None
             return
 
+        self.selected_journal.shut_down_sig.connect(self._set_neutron_submit)
+        self.selected_journal.shut_down_sig.connect(self._set_exact_submit)
+        self.game_state.connect_journal(journal)
+        if self._journal_worker is not None:
+            self._journal_worker.stop()
+        self._journal_worker = GameWorker([], journal)
+        self._journal_worker.start()
+
         if loadout is not None and location is not None and cargo_mass is not None:
-            self.current_ship = Ship.from_loadout(loadout)
-            self._set_widget_values(location, self.current_ship, cargo_mass)
+            self.game_state.ship.update_from_loadout(loadout)
+            self._set_widget_values(location, self.game_state.ship, cargo_mass)
 
         self.status_bar.clear_message()
         self.csv_tab.submit_button.enabled = True

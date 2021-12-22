@@ -11,7 +11,7 @@ from PySide6 import QtCore
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa: F401
 
-VERSION = "2.0.1"
+VERSION = "2.0.2"
 APP = "Auto_Neutron"
 ORG = "Numerlor"
 APPID = f"{ORG}|{APP}|{VERSION}"

@@ -43,6 +43,6 @@ class ShutDownWindow(ShutDownWindowGUI):
         )
         journal_path = journals[min(index, len(journals) - 1)]
         journal = Journal(journal_path)
-        _, _, _, shut_down = journal.get_static_state()
+        *_, shut_down = journal.get_static_state()
         self.new_journal_button.enabled = not shut_down
         self._selected_journal = journal

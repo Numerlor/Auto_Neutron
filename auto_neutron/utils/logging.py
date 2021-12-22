@@ -6,12 +6,14 @@ import logging
 import os
 import typing as t
 from contextlib import contextmanager
+from pathlib import Path
 from types import MethodType
 
 from PySide6 import QtCore
 
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa F401
+from auto_neutron.utils.file import create_delete_share_file
 
 log = logging.getLogger(__name__)
 
@@ -35,6 +37,38 @@ class UsernameFormatter(logging.Formatter):
         if __debug__:
             return message
         return message.replace(f"\\{self.os_username}", "\\USERNAME")
+
+
+class SessionBackupHandler(logging.FileHandler):
+    """Rotate log files for every session that uses this class, up to `backup_count` backup log files are created."""
+
+    def __init__(
+        self,
+        filename: os.PathLike[t.AnyStr],
+        encoding: t.Optional[str] = None,
+        backup_count: int = 0,
+        delay: bool = False,
+        errors: t.Optional[str] = None,
+    ):
+        self.backup_count = backup_count
+        super().__init__(filename, "w", encoding, delay, errors)
+
+    def _open(self) -> t.TextIO:
+        base_path = Path(self.baseFilename)
+        Path(f"{self.baseFilename}.{self.backup_count}").unlink(missing_ok=True)
+        for i in range(self.backup_count - 1, 0, -1):
+            source_path = Path(f"{self.baseFilename}.{i}")
+            dest_path = Path(f"{self.baseFilename}.{i + 1}")
+
+            if source_path.exists():
+                source_path.rename(dest_path)
+
+        if self.backup_count and base_path.exists():
+            base_path.rename(Path(f"{self.baseFilename}.1"))
+
+        return create_delete_share_file(
+            base_path, encoding=self.encoding, errors=self.errors
+        )
 
 
 @contextmanager
