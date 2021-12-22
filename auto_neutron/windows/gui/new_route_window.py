@@ -29,8 +29,6 @@ class LabeledSlider(QtWidgets.QSlider):
         self._label_hide_timer.single_shot_ = True
         self._label_hide_timer.timeout.connect(self._value_label.hide)
 
-        self._pressed = False
-
         self.sliderPressed.connect(self._on_press)
         self.sliderReleased.connect(self._on_release)
 
@@ -38,9 +36,9 @@ class LabeledSlider(QtWidgets.QSlider):
         """Show the label above the slider's handle. If the user is not holding the slider, hide it in 1 second."""
         super().slider_change(change)
         if change == QtWidgets.QAbstractSlider.SliderChange.SliderValueChange:
-            self._display_value_tooltip()
+            self._display_value_tooltip(start_hide_timer=True)
 
-    def _display_value_tooltip(self) -> None:
+    def _display_value_tooltip(self, *, start_hide_timer: bool) -> None:
         """Display a value tooltip on top of the slider's handle."""
         option = QtWidgets.QStyleOptionSlider()
         self.init_style_option(option)
@@ -71,19 +69,17 @@ class LabeledSlider(QtWidgets.QSlider):
         )
         self._value_label.geometry = new_rect
         self._value_label.show()
-        if not self._pressed:
+        if start_hide_timer:
             self._label_hide_timer.interval = 1000
             self._label_hide_timer.start()
 
     def _on_press(self) -> None:
         """Set the slider as being pressed and stop the hide timer."""
-        self._pressed = True
         self._label_hide_timer.stop()
-        self._display_value_tooltip()
+        self._display_value_tooltip(start_hide_timer=False)
 
     def _on_release(self) -> None:
         """Set the slider as being released and start the timer to hide the label in 500ms."""
-        self._pressed = False
         self._label_hide_timer.interval = 500
         self._label_hide_timer.start()
 
