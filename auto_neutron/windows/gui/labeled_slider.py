@@ -21,6 +21,7 @@ class LabeledSlider(QtWidgets.QSlider):
         self._value_spinbox.button_symbols = QtWidgets.QAbstractSpinBox.NoButtons
         self._value_spinbox.minimum = self.minimum
         self._value_spinbox.maximum = self.maximum
+        self._value_spinbox.adjust_size()
         self._value_spinbox.hide()
 
         self._label_hide_timer = QtCore.QTimer(self)
@@ -51,13 +52,12 @@ class LabeledSlider(QtWidgets.QSlider):
             self,
         )
         self._value_spinbox.value = self.value
-        self._value_spinbox.adjust_size()
         new_rect = QtCore.QRect(
             self.map_to_parent(
                 QtCore.QPoint(
                     handle_rect.left()
                     - (self._value_spinbox.rect.width() - handle_rect.width()) / 2,
-                    handle_rect.top() - self._value_spinbox.rect.height(),
+                    handle_rect.top() - self._value_spinbox.rect.height() + 1,
                 )
             ),
             self.map_to_parent(
@@ -130,6 +130,7 @@ class LabeledSlider(QtWidgets.QSlider):
         """Set the slider's maximum value."""
         super(self.__class__, self.__class__).maximum.__set__(self, value)
         self._value_spinbox.maximum = value
+        self._value_spinbox.adjust_size()
 
     @property
     def minimum(self) -> int:
