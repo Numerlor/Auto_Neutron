@@ -3,7 +3,7 @@
 
 import typing as t
 
-from PySide6 import QtCore, QtWidgets
+from PySide6 import QtCore, QtGui, QtWidgets
 
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa F401
@@ -27,10 +27,13 @@ class LabeledSlider(QtWidgets.QSlider):
 
         self._label_hide_timer = QtCore.QTimer(self)
         self._label_hide_timer.single_shot_ = True
-        self._label_hide_timer.timeout.connect(self._value_label.hide)
+        self._label_hide_timer.timeout.connect(self._hide_value_label_if_not_hover)
 
         self.sliderPressed.connect(self._on_press)
         self.sliderReleased.connect(self._on_release)
+
+        self.mouse_tracking = True
+        self._mouse_on_handle = False
 
     def slider_change(self, change: QtWidgets.QAbstractSlider.SliderChange) -> None:
         """Show the label above the slider's handle. If the user is not holding the slider, hide it in 1 second."""
@@ -82,6 +85,42 @@ class LabeledSlider(QtWidgets.QSlider):
         """Set the slider as being released and start the timer to hide the label in 500ms."""
         self._label_hide_timer.interval = 500
         self._label_hide_timer.start()
+
+    def mouse_move_event(self, event: QtGui.QMouseEvent) -> None:
+        """Show the value tooltip on hover."""
+        option = QtWidgets.QStyleOptionSlider()
+        self.init_style_option(option)
+
+        handle_rect = self.style().sub_control_rect(
+            QtWidgets.QStyle.CC_Slider,
+            option,
+            QtWidgets.QStyle.SC_SliderHandle,
+            self,
+        )
+
+        on_handle = handle_rect.contains(event.pos())
+
+        if on_handle and not self._mouse_on_handle:
+            self._mouse_on_handle = True
+            self._display_value_tooltip(start_hide_timer=False)
+        elif not on_handle and self._mouse_on_handle:
+            self._mouse_on_handle = False
+            if not self._label_hide_timer.active:
+                self._value_label.hide()
+        super().mouse_move_event(event)
+
+    def leave_event(self, event: QtCore.QEvent) -> None:
+        """Hide the value label if the user was hovering over it and the hide timer is not active."""
+        if self._mouse_on_handle:
+            self._mouse_on_handle = False
+            if not self._label_hide_timer.active:
+                self._value_label.hide()
+        super().leave_event(event)
+
+    def _hide_value_label_if_not_hover(self) -> None:
+        """Hide the value label if the cursor is not hovering over the handle."""
+        if not self._mouse_on_handle:
+            self._value_label.hide()
 
 
 class TabBase(QtWidgets.QWidget):
