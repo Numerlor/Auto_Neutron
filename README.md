@@ -25,7 +25,7 @@ Example of AHK script in action, with no user keyboard input apart from the hotk
 To install, download the [latest](https://github.com/Numerlor/Auto_Neutron/releases/latest) release of Auto_Neutron, or [run it directly](#running-directly).
 You can choose either the self-contained executable file, or the zip archive which contains the application in a directory which is a bit faster to launch.
 
-On the initial launch, Windows will warn you about this being an untrusted application because it doesn't contain a known signed certificate, to ignore this warning, press the `Show more` button and then click `Run anyway`.
+On the initial launch, Windows will warn you about this being an untrusted application because it doesn't contain a known signed certificate, to ignore this warning, press on `More info` and then click `Run anyway`.
 
 ## Usage
 
