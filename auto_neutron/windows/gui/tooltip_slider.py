@@ -103,16 +103,6 @@ class TooltipSlider(QtWidgets.QSlider):
             self._tooltip_hide_timer.interval = 1000
             self._tooltip_hide_timer.start()
 
-    def _on_press(self) -> None:
-        """Stop the hide timer."""
-        self._tooltip_hide_timer.stop()
-        self._display_value_tooltip(start_hide_timer=False)
-
-    def _on_release(self) -> None:
-        """Start the timer to hide the label in 500ms."""
-        self._tooltip_hide_timer.interval = 500
-        self._tooltip_hide_timer.start()
-
     def mouse_move_event(self, event: QtGui.QMouseEvent) -> None:
         """Show the value tooltip on hover."""
         super().mouse_move_event(event)
@@ -141,6 +131,16 @@ class TooltipSlider(QtWidgets.QSlider):
             mouse_pos
         ):
             self._value_spinbox.hide()
+
+    def _on_press(self) -> None:
+        """Stop the hide timer."""
+        self._tooltip_hide_timer.stop()
+        self._display_value_tooltip(start_hide_timer=False)
+
+    def _on_release(self) -> None:
+        """Start the timer to hide the tooltip in 500ms."""
+        self._tooltip_hide_timer.interval = 500
+        self._tooltip_hide_timer.start()
 
     def _handle_rect(self) -> QtCore.QRect:
         """Get the rect of the handle's current position."""
