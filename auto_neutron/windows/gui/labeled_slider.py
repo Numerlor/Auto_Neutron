@@ -49,12 +49,7 @@ class LabeledSlider(QtWidgets.QSlider):
         option = QtWidgets.QStyleOptionSlider()
         self.init_style_option(option)
 
-        handle_rect = self.style().sub_control_rect(
-            QtWidgets.QStyle.CC_Slider,
-            option,
-            QtWidgets.QStyle.SC_SliderHandle,
-            self,
-        )
+        handle_rect = self._handle_rect()
         self._value_spinbox.value = self.value
         new_rect = QtCore.QRect(
             self.map_to_parent(
@@ -91,17 +86,7 @@ class LabeledSlider(QtWidgets.QSlider):
     def mouse_move_event(self, event: QtGui.QMouseEvent) -> None:
         """Show the value tooltip on hover."""
         super().mouse_move_event(event)
-        option = QtWidgets.QStyleOptionSlider()
-        self.init_style_option(option)
-
-        handle_rect = self.style().sub_control_rect(
-            QtWidgets.QStyle.CC_Slider,
-            option,
-            QtWidgets.QStyle.SC_SliderHandle,
-            self,
-        )
-
-        on_handle = handle_rect.contains(event.pos())
+        on_handle = self._handle_rect().contains(event.pos())
 
         if on_handle and not self._mouse_on_handle:
             self._mouse_on_handle = True
@@ -123,6 +108,18 @@ class LabeledSlider(QtWidgets.QSlider):
         """Hide the value label if the cursor is not hovering over the handle."""
         if not self._mouse_on_handle:
             self._value_spinbox.hide()
+
+    def _handle_rect(self) -> QtCore.QRect:
+        """Get the rect of the handle's current position."""
+        option = QtWidgets.QStyleOptionSlider()
+        self.init_style_option(option)
+
+        return self.style().sub_control_rect(
+            QtWidgets.QStyle.CC_Slider,
+            option,
+            QtWidgets.QStyle.SC_SliderHandle,
+            self,
+        )
 
     @property
     def maximum(self) -> int:
