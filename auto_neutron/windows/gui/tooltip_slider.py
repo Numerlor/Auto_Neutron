@@ -12,9 +12,7 @@ from __feature__ import snake_case, true_property  # noqa F401
 class TooltipSlider(QtWidgets.QSlider):
     """Slider that shows current value in an editable tooltip above the handle."""
 
-    def __init__(
-        self, orientation: QtCore.Qt.OtherFocusReason, parent: QtWidgets.QWidget
-    ):
+    def __init__(self, orientation: QtCore.Qt.Orientation, parent: QtWidgets.QWidget):
         super().__init__(orientation, parent)
         self._value_spinbox = QtWidgets.QSpinBox(parent)
         self._set_up_spinbox()
