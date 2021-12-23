@@ -248,6 +248,7 @@ class NewRouteWindowGUI(QtWidgets.QDialog):
     def __init__(self, parent: t.Optional[QtWidgets.QWidget]):
         super().__init__(parent)
         self.set_attribute(QtCore.Qt.WidgetAttribute.WA_DeleteOnClose)
+        self.focus_policy = QtCore.Qt.FocusPolicy.ClickFocus
 
         self.main_layout = QtWidgets.QVBoxLayout(self)
         self.main_layout.set_spacing(0)
