@@ -15,14 +15,7 @@ class LabeledSlider(QtWidgets.QSlider):
     ):
         super().__init__(orientation, parent)
         self._value_spinbox = QtWidgets.QSpinBox(parent)
-        self._value_spinbox.size_policy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
-        )
-        self._value_spinbox.button_symbols = QtWidgets.QAbstractSpinBox.NoButtons
-        self._value_spinbox.minimum = self.minimum
-        self._value_spinbox.maximum = self.maximum
-        self._value_spinbox.adjust_size()
-        self._value_spinbox.hide()
+        self._set_up_spinbox()
 
         self._label_hide_timer = QtCore.QTimer(self)
         self._label_hide_timer.single_shot_ = True
@@ -33,6 +26,17 @@ class LabeledSlider(QtWidgets.QSlider):
 
         self.mouse_tracking = True
         self._mouse_on_handle = False
+
+    def _set_up_spinbox(self) -> None:
+        """Set up the value spinbox and hide it."""
+        self._value_spinbox.size_policy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
+        )
+        self._value_spinbox.button_symbols = QtWidgets.QAbstractSpinBox.NoButtons
+        self._value_spinbox.minimum = self.minimum
+        self._value_spinbox.maximum = self.maximum
+        self._value_spinbox.adjust_size()
+        self._value_spinbox.hide()
 
     def slider_change(self, change: QtWidgets.QAbstractSlider.SliderChange) -> None:
         """Show the label above the slider's handle. If the user is not holding the slider, hide it in 1 second."""
