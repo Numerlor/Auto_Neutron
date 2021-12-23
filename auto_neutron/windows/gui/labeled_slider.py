@@ -66,7 +66,10 @@ class LabeledSlider(QtWidgets.QSlider):
     def slider_change(self, change: QtWidgets.QAbstractSlider.SliderChange) -> None:
         """Show the label above the slider's handle. If the user is not holding the slider, hide it in 1 second."""
         super().slider_change(change)
-        if change == QtWidgets.QAbstractSlider.SliderChange.SliderValueChange:
+        if (
+            not self._value_spinbox.focus
+            and change == QtWidgets.QAbstractSlider.SliderChange.SliderValueChange
+        ):
             self._display_value_tooltip(start_hide_timer=True)
 
     def _display_value_tooltip(self, *, start_hide_timer: bool) -> None:
@@ -118,7 +121,7 @@ class LabeledSlider(QtWidgets.QSlider):
             self._display_value_tooltip(start_hide_timer=False)
         elif not on_handle and self._mouse_on_handle:
             self._mouse_on_handle = False
-            if not self._label_hide_timer.active:
+            if not self._value_spinbox.focus and not self._label_hide_timer.active:
                 self._hide_value_spinbox_if_not_hover()
 
     def leave_event(self, event: QtCore.QEvent) -> None:
@@ -126,7 +129,7 @@ class LabeledSlider(QtWidgets.QSlider):
         super().leave_event(event)
         if self._mouse_on_handle:
             self._mouse_on_handle = False
-            if not self._label_hide_timer.active:
+            if not self._value_spinbox.focus and not self._label_hide_timer.active:
                 self._hide_value_spinbox_if_not_hover()
 
     def _hide_value_spinbox_if_not_hover(self) -> None:
