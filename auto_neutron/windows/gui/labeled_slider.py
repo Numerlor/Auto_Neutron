@@ -53,14 +53,6 @@ class LabeledSlider(QtWidgets.QSlider):
 
         self._value_spinbox.leave_event = hide_on_leave
 
-        base_enter_event = self._value_spinbox.enter_event
-
-        def show_on_enter(event: QtCore.QEvent) -> None:
-            base_enter_event(event)
-            self._value_spinbox.show()
-
-        self._value_spinbox.enter_event = show_on_enter
-
         base_key_release_event = self._value_spinbox.key_release_event
 
         def hide_on_confirm(event: QtGui.QKeyEvent) -> None:
