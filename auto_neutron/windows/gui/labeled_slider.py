@@ -61,6 +61,18 @@ class LabeledSlider(QtWidgets.QSlider):
 
         self._value_spinbox.enter_event = show_on_enter
 
+        base_key_release_event = self._value_spinbox.key_release_event
+
+        def hide_on_confirm(event: QtGui.QKeyEvent) -> None:
+            key = event.key()
+            if key == QtCore.Qt.Key.Key_Return or key == QtCore.Qt.Key.Key_Enter:
+                self._value_spinbox.clear_focus()
+                self._value_spinbox.hide()
+            else:
+                base_key_release_event(event)
+
+        self._value_spinbox.key_release_event = hide_on_confirm
+
         self._value_spinbox.valueChanged.connect(partial(setattr, self, "value"))
 
     def slider_change(self, change: QtWidgets.QAbstractSlider.SliderChange) -> None:
