@@ -63,6 +63,14 @@ class TooltipSlider(QtWidgets.QSlider):
 
         self._value_spinbox.key_release_event = hide_on_confirm
 
+        base_focus_out_event = self._value_spinbox.focus_out_event
+
+        def hide_on_focus_out(event: QtGui.QFocusEvent) -> None:
+            base_focus_out_event(event)
+            self._value_spinbox.hide()
+
+        self._value_spinbox.focus_out_event = hide_on_focus_out
+
         self._value_spinbox.valueChanged.connect(partial(setattr, self, "value"))
 
     def slider_change(self, change: QtWidgets.QAbstractSlider.SliderChange) -> None:
