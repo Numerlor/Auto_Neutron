@@ -9,8 +9,8 @@ from PySide6 import QtCore, QtGui, QtWidgets
 from __feature__ import snake_case, true_property  # noqa F401
 
 
-class LabeledSlider(QtWidgets.QSlider):
-    """Slider that shows current value in a boxed label above the handle."""
+class TooltipSlider(QtWidgets.QSlider):
+    """Slider that shows current value in an editable tooltip above the handle."""
 
     def __init__(
         self, orientation: QtCore.Qt.OtherFocusReason, parent: QtWidgets.QWidget
@@ -19,9 +19,9 @@ class LabeledSlider(QtWidgets.QSlider):
         self._value_spinbox = QtWidgets.QSpinBox(parent)
         self._set_up_spinbox()
 
-        self._label_hide_timer = QtCore.QTimer(self)
-        self._label_hide_timer.single_shot_ = True
-        self._label_hide_timer.timeout.connect(self._hide_value_spinbox_if_not_hover)
+        self._tooltip_hide_timer = QtCore.QTimer(self)
+        self._tooltip_hide_timer.single_shot_ = True
+        self._tooltip_hide_timer.timeout.connect(self._hide_value_tooltip_if_not_hover)
 
         self.sliderPressed.connect(self._on_press)
         self.sliderReleased.connect(self._on_release)
@@ -68,7 +68,7 @@ class LabeledSlider(QtWidgets.QSlider):
         self._value_spinbox.valueChanged.connect(partial(setattr, self, "value"))
 
     def slider_change(self, change: QtWidgets.QAbstractSlider.SliderChange) -> None:
-        """Show the label above the slider's handle. If the user is not holding the slider, hide it in 1 second."""
+        """Show the tooltip above the slider's handle. If the user is not holding the slider, hide it in 1 second."""
         super().slider_change(change)
         if (
             not self._value_spinbox.focus
@@ -102,18 +102,18 @@ class LabeledSlider(QtWidgets.QSlider):
         self._value_spinbox.geometry = new_rect
         self._value_spinbox.show()
         if start_hide_timer:
-            self._label_hide_timer.interval = 1000
-            self._label_hide_timer.start()
+            self._tooltip_hide_timer.interval = 1000
+            self._tooltip_hide_timer.start()
 
     def _on_press(self) -> None:
         """Set the slider as being pressed and stop the hide timer."""
-        self._label_hide_timer.stop()
+        self._tooltip_hide_timer.stop()
         self._display_value_tooltip(start_hide_timer=False)
 
     def _on_release(self) -> None:
         """Set the slider as being released and start the timer to hide the label in 500ms."""
-        self._label_hide_timer.interval = 500
-        self._label_hide_timer.start()
+        self._tooltip_hide_timer.interval = 500
+        self._tooltip_hide_timer.start()
 
     def mouse_move_event(self, event: QtGui.QMouseEvent) -> None:
         """Show the value tooltip on hover."""
@@ -125,19 +125,19 @@ class LabeledSlider(QtWidgets.QSlider):
             self._display_value_tooltip(start_hide_timer=False)
         elif not on_handle and self._mouse_on_handle:
             self._mouse_on_handle = False
-            if not self._value_spinbox.focus and not self._label_hide_timer.active:
-                self._hide_value_spinbox_if_not_hover()
+            if not self._value_spinbox.focus and not self._tooltip_hide_timer.active:
+                self._hide_value_tooltip_if_not_hover()
 
     def leave_event(self, event: QtCore.QEvent) -> None:
-        """Hide the value label if the user was hovering over it and the hide timer is not active."""
+        """Hide the value tooltip if the user was hovering over it and the hide timer is not active."""
         super().leave_event(event)
         if self._mouse_on_handle:
             self._mouse_on_handle = False
-            if not self._value_spinbox.focus and not self._label_hide_timer.active:
-                self._hide_value_spinbox_if_not_hover()
+            if not self._value_spinbox.focus and not self._tooltip_hide_timer.active:
+                self._hide_value_tooltip_if_not_hover()
 
-    def _hide_value_spinbox_if_not_hover(self) -> None:
-        """Hide the value label if the cursor is not hovering over the handle or the spinbox."""
+    def _hide_value_tooltip_if_not_hover(self) -> None:
+        """Hide the value tooltip if the cursor is not hovering over the handle or the spinbox."""
         mouse_pos = self.map_to_parent(self.map_from_global(QtGui.QCursor.pos()))
         if not self._mouse_on_handle and not self._value_spinbox.geometry.contains(
             mouse_pos

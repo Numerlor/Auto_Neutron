@@ -8,7 +8,7 @@ from PySide6 import QtCore, QtWidgets
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa F401
 
-from .labeled_slider import LabeledSlider
+from .tooltip_slider import TooltipSlider
 
 
 class TabBase(QtWidgets.QWidget):
@@ -49,7 +49,7 @@ class TabBase(QtWidgets.QWidget):
         QtWidgets.QLineEdit,
         QtWidgets.QLineEdit,
         QtWidgets.QLabel,
-        LabeledSlider,
+        TooltipSlider,
     ]:
         """Create a layout that holds the top system text edits and cargo slider."""
         layout = QtWidgets.QVBoxLayout()
@@ -61,7 +61,7 @@ class TabBase(QtWidgets.QWidget):
         target_system_edit.placeholder_text = "Destination system"
 
         cargo_label = QtWidgets.QLabel("Cargo", parent)
-        cargo_slider = LabeledSlider(QtCore.Qt.Orientation.Horizontal, parent)
+        cargo_slider = TooltipSlider(QtCore.Qt.Orientation.Horizontal, parent)
 
         layout.add_widget(source_system_edit)
         layout.add_widget(target_system_edit)
