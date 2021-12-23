@@ -1,6 +1,8 @@
 # This file is part of Auto_Neutron.
 # Copyright (C) 2021  Numerlor
 
+from functools import partial
+
 from PySide6 import QtCore, QtGui, QtWidgets
 
 # noinspection PyUnresolvedReferences
@@ -19,7 +21,7 @@ class LabeledSlider(QtWidgets.QSlider):
 
         self._label_hide_timer = QtCore.QTimer(self)
         self._label_hide_timer.single_shot_ = True
-        self._label_hide_timer.timeout.connect(self._hide_value_label_if_not_hover)
+        self._label_hide_timer.timeout.connect(self._hide_value_spinbox_if_not_hover)
 
         self.sliderPressed.connect(self._on_press)
         self.sliderReleased.connect(self._on_release)
@@ -37,6 +39,29 @@ class LabeledSlider(QtWidgets.QSlider):
         self._value_spinbox.maximum = self.maximum
         self._value_spinbox.adjust_size()
         self._value_spinbox.hide()
+
+        base_leave_event = self._value_spinbox.leave_event
+
+        def hide_on_leave(event: QtCore.QEvent) -> None:
+            base_leave_event(event)
+            cursor_pos = QtGui.QCursor.pos()
+            handle_rect = self._handle_rect()
+            if not self._value_spinbox.focus and not handle_rect.contains(
+                self.map_from_global(cursor_pos)
+            ):
+                self._value_spinbox.hide()
+
+        self._value_spinbox.leave_event = hide_on_leave
+
+        base_enter_event = self._value_spinbox.enter_event
+
+        def show_on_enter(event: QtCore.QEvent) -> None:
+            base_enter_event(event)
+            self._value_spinbox.show()
+
+        self._value_spinbox.enter_event = show_on_enter
+
+        self._value_spinbox.valueChanged.connect(partial(setattr, self, "value"))
 
     def slider_change(self, change: QtWidgets.QAbstractSlider.SliderChange) -> None:
         """Show the label above the slider's handle. If the user is not holding the slider, hide it in 1 second."""
@@ -94,7 +119,7 @@ class LabeledSlider(QtWidgets.QSlider):
         elif not on_handle and self._mouse_on_handle:
             self._mouse_on_handle = False
             if not self._label_hide_timer.active:
-                self._value_spinbox.hide()
+                self._hide_value_spinbox_if_not_hover()
 
     def leave_event(self, event: QtCore.QEvent) -> None:
         """Hide the value label if the user was hovering over it and the hide timer is not active."""
@@ -102,11 +127,14 @@ class LabeledSlider(QtWidgets.QSlider):
         if self._mouse_on_handle:
             self._mouse_on_handle = False
             if not self._label_hide_timer.active:
-                self._value_spinbox.hide()
+                self._hide_value_spinbox_if_not_hover()
 
-    def _hide_value_label_if_not_hover(self) -> None:
-        """Hide the value label if the cursor is not hovering over the handle."""
-        if not self._mouse_on_handle:
+    def _hide_value_spinbox_if_not_hover(self) -> None:
+        """Hide the value label if the cursor is not hovering over the handle or the spinbox."""
+        mouse_pos = self.map_to_parent(self.map_from_global(QtGui.QCursor.pos()))
+        if not self._mouse_on_handle and not self._value_spinbox.geometry.contains(
+            mouse_pos
+        ):
             self._value_spinbox.hide()
 
     def _handle_rect(self) -> QtCore.QRect:
