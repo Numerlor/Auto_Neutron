@@ -35,6 +35,9 @@ class TooltipSlider(QtWidgets.QSlider):
         self._value_spinbox.button_symbols = QtWidgets.QAbstractSpinBox.NoButtons
         self._value_spinbox.minimum = self.minimum
         self._value_spinbox.maximum = self.maximum
+        self._value_spinbox.style_sheet = (
+            "border:none;border:1px solid #282828;border-radius:3px;background:#181818;"
+        )
         self._value_spinbox.adjust_size()
         self._value_spinbox.hide()
 
