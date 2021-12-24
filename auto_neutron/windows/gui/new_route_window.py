@@ -144,7 +144,7 @@ class ExactTab(TabBase):
         ) = self.create_system_and_cargo_layout(self)
 
         self.cargo_slider.maximum = (
-            1000  # static value because ship may come from outside source
+            999  # static value because ship may come from outside source
         )
 
         self.is_supercharged_checkbox = QtWidgets.QCheckBox(
