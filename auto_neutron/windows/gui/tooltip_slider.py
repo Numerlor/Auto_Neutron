@@ -8,6 +8,8 @@ from PySide6 import QtCore, QtGui, QtWidgets
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa F401
 
+_SPINBOX_BORDER_STYLESHEET = "border:none;border:1px solid {border_color};border-radius:3px;background:palette(base);"
+
 
 class TooltipSlider(QtWidgets.QSlider):
     """Slider that shows current value in an editable tooltip above the handle."""
@@ -35,8 +37,8 @@ class TooltipSlider(QtWidgets.QSlider):
         self._value_spinbox.button_symbols = QtWidgets.QAbstractSpinBox.NoButtons
         self._value_spinbox.minimum = self.minimum
         self._value_spinbox.maximum = self.maximum
-        self._value_spinbox.style_sheet = (
-            "border:none;border:1px solid #282828;border-radius:3px;background:#181818;"
+        self._value_spinbox.style_sheet = _SPINBOX_BORDER_STYLESHEET.format(
+            border_color=self.palette.window().color().darker(140).name()
         )
         self._value_spinbox.adjust_size()
         self._value_spinbox.hide()
@@ -135,6 +137,14 @@ class TooltipSlider(QtWidgets.QSlider):
             and not self.slider_down
         ):
             self._value_spinbox.hide()
+
+    def change_event(self, event: QtCore.QEvent) -> None:
+        """Update the tooltip's colors when the palette changes."""
+        if event.type() == QtCore.QEvent.Type.PaletteChange:
+            self._value_spinbox.style_sheet = _SPINBOX_BORDER_STYLESHEET.format(
+                border_color=self.palette.window().color().darker(140).name()
+            )
+        super().change_event(event)
 
     def _on_press(self) -> None:
         """Stop the hide timer."""
