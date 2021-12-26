@@ -51,7 +51,7 @@ app.application_name = APP
 app.organization_name = ORG
 app.set_style("Fusion")
 
-auto_neutron.network_mgr = mgr = QtNetwork.QNetworkAccessManager()
+auto_neutron.network_mgr = QtNetwork.QNetworkAccessManager()
 
 # create org and app folders
 get_config_dir().mkdir(parents=True, exist_ok=True)
