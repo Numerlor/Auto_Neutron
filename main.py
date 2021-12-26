@@ -57,7 +57,7 @@ auto_neutron.network_mgr = QtNetwork.QNetworkAccessManager()
 get_config_dir().mkdir(parents=True, exist_ok=True)
 
 root_logger = logging.getLogger()
-logging.getLogger("ahk").setLevel(logging.WARNING)
+
 log_format = UsernameFormatter(
     "{asctime} | {module:>16} | {levelname:>7} | {message}",
     datefmt="%H:%M:%S",
