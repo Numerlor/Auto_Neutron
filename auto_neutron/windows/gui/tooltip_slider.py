@@ -129,8 +129,10 @@ class TooltipSlider(QtWidgets.QSlider):
     def _hide_value_tooltip_if_not_hover(self) -> None:
         """Hide the value tooltip if the cursor is not hovering over the handle or the spinbox."""
         mouse_pos = self.map_to_parent(self.map_from_global(QtGui.QCursor.pos()))
-        if not self._mouse_on_handle and not self._value_spinbox.geometry.contains(
-            mouse_pos
+        if (
+            not self._mouse_on_handle
+            and not self._value_spinbox.geometry.contains(mouse_pos)
+            and not self.slider_down
         ):
             self._value_spinbox.hide()
 
