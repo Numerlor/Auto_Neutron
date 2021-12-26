@@ -77,7 +77,6 @@ class CheckBoxDelegate(QtWidgets.QStyledItemDelegate):
         index: Union[QtCore.QModelIndex, QtCore.QPersistentModelIndex],
     ) -> None:
         """Pain the checkbox in the center."""
-        # TODO Handle color set by the table item's color brushes
         check_box_style_option = QtWidgets.QStyleOptionButton()
 
         if index.data():  # checked
