@@ -98,6 +98,13 @@ class CheckBoxDelegate(QtWidgets.QStyledItemDelegate):
                 QtGui.QPalette.Text, foreground_brush.color()
             )
 
+        check_box_style_option.palette.set_color(
+            QtGui.QPalette.Window, QtGui.QColor(100, 100, 0, 0)
+        )
+        check_box_style_option.palette.set_color(
+            QtGui.QPalette.Base, QtGui.QColor(100, 100, 0, 0)
+        )
+
         QtWidgets.QApplication.style().draw_control(
             QtWidgets.QStyle.CE_CheckBox, check_box_style_option, painter
         )
