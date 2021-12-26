@@ -81,6 +81,7 @@ class TooltipSlider(QtWidgets.QSlider):
         super().slider_change(change)
         if (
             not self._value_spinbox.focus
+            and self.visible
             and change == QtWidgets.QAbstractSlider.SliderChange.SliderValueChange
         ):
             self._display_value_tooltip(start_hide_timer=True)
