@@ -174,6 +174,10 @@ class SettingsWindowGUI(QtWidgets.QDialog):
         self.group_selector.currentRowChanged.connect(
             partial(setattr, self.widget_selector, "current_index")
         )
+
+        for button in self.find_children(QtWidgets.QPushButton):
+            button.auto_default = False
+
         self.show()
 
     def get_spacer(self) -> QtWidgets.QSpacerItem:

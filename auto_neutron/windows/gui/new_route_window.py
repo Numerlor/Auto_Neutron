@@ -271,4 +271,7 @@ class NewRouteWindowGUI(QtWidgets.QDialog):
         self.main_layout.add_widget(self.tab_widget)
         self.main_layout.add_widget(self.status_bar)
 
+        for button in self.find_children(QtWidgets.QPushButton):
+            button.auto_default = False
+
         self.show()

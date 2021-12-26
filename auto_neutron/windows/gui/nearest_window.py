@@ -133,4 +133,7 @@ class NearestWindowGUI(QtWidgets.QDialog):
         self.main_layout.add_layout(self.io_grid_layout)
         self.main_layout.add_layout(self.button_layout)
 
+        for button in self.find_children(QtWidgets.QPushButton):
+            button.auto_default = False
+
         self.show()
