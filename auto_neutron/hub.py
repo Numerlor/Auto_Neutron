@@ -13,7 +13,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa: F401
-from auto_neutron import settings
+from auto_neutron import Theme, settings
 from auto_neutron.constants import JOURNAL_PATH, ROUTE_FILE_NAME, get_config_dir
 from auto_neutron.fuel_warn import FuelWarn
 from auto_neutron.game_state import GameState, PlotterState
@@ -32,6 +32,7 @@ if t.TYPE_CHECKING:
     from auto_neutron.journal import Journal
     from auto_neutron.route_plots import RouteList
     from auto_neutron.utils.utils import ExceptionHandler
+    from auto_neutron.win_theme_change_listener import WinThemeChangeListener
 
 log = logging.getLogger(__name__)
 
@@ -39,7 +40,11 @@ log = logging.getLogger(__name__)
 class Hub(QtCore.QObject):
     """Manage windows and communication between them and workers."""
 
-    def __init__(self, exception_handler: ExceptionHandler):
+    def __init__(
+        self,
+        exception_handler: ExceptionHandler,
+        theme_listener: WinThemeChangeListener,
+    ):
         super().__init__()
         self.window = MainWindow()
         self.error_window = ErrorWindow(self.window)
@@ -47,6 +52,11 @@ class Hub(QtCore.QObject):
 
         exception_handler.triggered.connect(self.error_window.show)
         exception_handler.set_parent(self)
+
+        self._theme_listener = theme_listener
+        self._theme_listener.theme_changed.connect(self.set_theme_from_os)
+        self._theme_listener.set_parent(self)
+
         self.window.show()
 
         self.window.about_action.triggered.connect(partial(LicenseWindow, self.window))
@@ -140,7 +150,11 @@ class Hub(QtCore.QObject):
         """Update the appearance and plotter with new settings."""
         log.debug("Refreshing settings.")
         self.window.table.font = settings.Window.font
-        set_theme()
+        if settings.Window.dark_mode is Theme.OS_THEME:
+            dark = self._theme_listener.dark_theme
+        else:
+            dark = settings.Window.dark_mode is Theme.DARK_THEME
+        set_theme(dark)
 
         if self.plotter_state.plotter is not None:
             current_sys = self.plotter_state.route[self.plotter_state.route_index]
@@ -167,6 +181,11 @@ class Hub(QtCore.QObject):
         window = ShutDownWindow(self.window)
         window.new_journal_signal.connect(self.new_route)
         window.save_route_button.pressed.connect(partial(self.save_route, force=True))
+
+    def set_theme_from_os(self, dark: bool) -> None:
+        """Set the current theme to the OS' theme, if the theme setting is set to follow the OS."""
+        if settings.Window.dark_mode is Theme.OS_THEME:
+            set_theme(dark)
 
     def save_route(self, force: bool = False) -> None:
         """If route auto saving is enabled, or force is True, save the route to the config directory."""
@@ -206,11 +225,11 @@ class Hub(QtCore.QObject):
             settings.General.last_route_index = self.plotter_state.route_index
 
 
-def set_theme() -> None:
+def set_theme(dark: bool) -> None:
     """Set the app's theme depending on the user's preferences."""
     app = QtWidgets.QApplication.instance()
 
-    if settings.Window.dark_mode:
+    if dark:
         p = QtGui.QPalette()
         p.set_color(QtGui.QPalette.Window, QtGui.QColor(35, 35, 35))
         p.set_color(QtGui.QPalette.WindowText, QtGui.QColor(247, 247, 247))
