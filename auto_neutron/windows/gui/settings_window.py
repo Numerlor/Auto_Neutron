@@ -10,6 +10,22 @@ from PySide6 import QtCore, QtWidgets
 from __feature__ import snake_case, true_property  # noqa: F401
 
 
+class _ReorderedCheckBox(QtWidgets.QCheckBox):
+    """Checkbox with check states reordered so the partial state appears after both unchecked and checked."""
+
+    _CHECK_STATES = [
+        QtCore.Qt.CheckState.Unchecked,
+        QtCore.Qt.CheckState.Checked,
+        QtCore.Qt.CheckState.PartiallyChecked,
+    ]
+
+    def next_check_state(self) -> None:
+        """Set the next state."""
+        self.set_check_state(
+            self._CHECK_STATES[(self._CHECK_STATES.index(self.check_state()) + 1) % 3]
+        )
+
+
 class SettingsWindowGUI(QtWidgets.QDialog):
     """Implement the basic settings GUI with multiple settings categories from the settings module."""
 
@@ -76,9 +92,10 @@ class SettingsWindowGUI(QtWidgets.QDialog):
         self.font_chooser = QtWidgets.QFontComboBox(self.appearance_widget)
         self.font_size_chooser = QtWidgets.QSpinBox(self.appearance_widget)
         self.font_bold_checkbox = QtWidgets.QCheckBox("Bold", self.appearance_widget)
-        self.dark_mode_checkbox = QtWidgets.QCheckBox(
+        self.dark_mode_checkbox = _ReorderedCheckBox(
             "Dark mode", self.appearance_widget
         )
+        self.dark_mode_checkbox.tristate = True
 
         self.font_layout = QtWidgets.QHBoxLayout()
         self.font_layout.add_widget(self.font_chooser)
