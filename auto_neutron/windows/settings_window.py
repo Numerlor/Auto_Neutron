@@ -83,7 +83,7 @@ class SettingsWindow(SettingsWindowGUI):
         for widget, (setting_group, setting_name) in self.settings_pairs:
             setting_value = attrgetter(f"{setting_group}.{setting_name}")(settings)
             if isinstance(widget, QtWidgets.QCheckBox):
-                widget.checked = setting_value
+                widget.set_check_state(QtCore.Qt.CheckState(setting_value))
             elif isinstance(widget, QtWidgets.QLineEdit):
                 widget.text = (
                     str(setting_value) if setting_value is not None else ""
@@ -104,7 +104,7 @@ class SettingsWindow(SettingsWindowGUI):
             for widget, (setting_group, setting_name) in self.settings_pairs:
                 settings_category = getattr(settings, setting_group)
                 if isinstance(widget, QtWidgets.QCheckBox):
-                    setattr(settings_category, setting_name, widget.checked)
+                    setattr(settings_category, setting_name, int(widget.check_state()))
                 elif isinstance(widget, QtWidgets.QLineEdit):
                     setattr(settings_category, setting_name, widget.text)
                 elif isinstance(widget, QtWidgets.QTextEdit):
