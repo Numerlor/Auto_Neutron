@@ -110,7 +110,7 @@ class TooltipSlider(QtWidgets.QSlider):
     def mouse_move_event(self, event: QtGui.QMouseEvent) -> None:
         """Show the value tooltip on hover."""
         super().mouse_move_event(event)
-        on_handle = self._handle_rect().contains(event.pos())
+        on_handle = self._handle_rect().contains(event.position().to_point())
 
         if on_handle and not self._mouse_on_handle:
             self._mouse_on_handle = True
