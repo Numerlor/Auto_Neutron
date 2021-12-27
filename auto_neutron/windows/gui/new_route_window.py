@@ -234,6 +234,14 @@ class LastTab(TabBase):
             self.submit_button,
         ) = self.create_journal_and_submit_layout(self)
 
+        self.source_label = QtWidgets.QLabel(self)
+        self.location_label = QtWidgets.QLabel(self)
+        self.destination_label = QtWidgets.QLabel(self)
+
+        self.main_layout.add_widget(self.source_label)
+        self.main_layout.add_widget(self.location_label)
+        self.main_layout.add_widget(self.destination_label)
+
         self.main_layout.add_spacer_item(
             QtWidgets.QSpacerItem(
                 1, 1, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Expanding
