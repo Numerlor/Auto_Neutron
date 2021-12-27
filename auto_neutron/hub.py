@@ -44,7 +44,9 @@ class Hub(QtCore.QObject):
         self.window = MainWindow()
         self.error_window = ErrorWindow(self.window)
         self.error_window.save_button.pressed.connect(partial(self.save_route, True))
+
         exception_handler.triggered.connect(self.error_window.show)
+        exception_handler.set_parent(self)
         self.window.show()
 
         self.window.about_action.triggered.connect(partial(LicenseWindow, self.window))
