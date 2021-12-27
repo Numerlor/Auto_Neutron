@@ -115,6 +115,10 @@ class NewRouteWindow(NewRouteWindowGUI):
         for signal in self.combo_signals:
             signal.connect()
 
+        self.tab_widget.currentChanged.connect(self._display_saved_route)
+        self._route_displayed = False
+        self._loaded_route: t.Optional[list[NeutronPlotRow]] = None
+
         self._change_journal(0)
 
     # region spansh plotters
@@ -305,16 +309,6 @@ class NewRouteWindow(NewRouteWindowGUI):
         log.info(f"Set saved csv {path=}")
         settings.Paths.csv = path
 
-    def _last_route_submit(self) -> None:
-        log.info("Submitting last route.")
-        route = self._route_from_csv(get_config_dir() / ROUTE_FILE_NAME)
-        if route is not None:
-            self.emit_and_close(
-                self.selected_journal,
-                route,
-                route_index=settings.General.last_route_index,
-            )
-
     def _route_from_csv(self, path: Path) -> t.Optional[RouteList]:
         try:
             with path.open(encoding="utf8") as csv_file:
@@ -339,6 +333,36 @@ class NewRouteWindow(NewRouteWindowGUI):
             self.status_bar.show_message("Invalid data in CSV file.", 5_000)
         except OSError:
             self.status_bar.show_message("Invalid path.", 5_000)
+
+    # endregion
+
+    # region last_route
+    def _display_saved_route(self, index: int) -> None:
+        """Display saved route info if user switched to that tab for the first time."""
+        if not self._route_displayed and index == 3:
+            self._loaded_route = self._route_from_csv(
+                get_config_dir() / ROUTE_FILE_NAME
+            )
+            if self._loaded_route is not None:
+                self.last_route_tab.source_label.text = (
+                    f"Source: {self._loaded_route[0].system}"
+                )
+                self.last_route_tab.location_label.text = (
+                    f"Saved location: "
+                    f"{self._loaded_route[settings.General.last_route_index].system}"
+                )
+                self.last_route_tab.destination_label.text = (
+                    f"Destination: {self._loaded_route[-1].system}"
+                )
+
+    def _last_route_submit(self) -> None:
+        log.info("Submitting last route.")
+        if self._loaded_route is not None:
+            self.emit_and_close(
+                self.selected_journal,
+                self._loaded_route,
+                route_index=settings.General.last_route_index,
+            )
 
     # endregion
 
