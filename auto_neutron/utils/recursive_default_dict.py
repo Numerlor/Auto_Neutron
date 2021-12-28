@@ -3,9 +3,11 @@
 
 from __future__ import annotations
 
-import collections.abc
 import typing as t
 from contextlib import contextmanager
+
+if t.TYPE_CHECKING:
+    import collections.abc
 
 _KT = t.TypeVar("_KT")
 _VT = t.TypeVar("_VT")

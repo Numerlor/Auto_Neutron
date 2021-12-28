@@ -1,6 +1,8 @@
 # This file is part of Auto_Neutron.
 # Copyright (C) 2019  Numerlor
 
+from __future__ import annotations
+
 import contextlib
 import csv
 import json
@@ -20,13 +22,11 @@ from auto_neutron.constants import (
     SPANSH_API_URL,
     get_config_dir,
 )
-from auto_neutron.game_state import Location
 from auto_neutron.hub import GameState
 from auto_neutron.journal import Journal
 from auto_neutron.route_plots import (
     ExactPlotRow,
     NeutronPlotRow,
-    RouteList,
     spansh_exact_callback,
     spansh_neutron_callback,
 )
@@ -39,6 +39,9 @@ from auto_neutron.workers import GameWorker
 from .gui.new_route_window import NewRouteWindowGUI
 from .nearest_window import NearestWindow
 
+if t.TYPE_CHECKING:
+    from auto_neutron.game_state import Location
+    from auto_neutron.route_plots import RouteList
 log = logging.getLogger(__name__)
 
 

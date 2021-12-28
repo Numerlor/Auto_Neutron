@@ -3,7 +3,6 @@
 
 from __future__ import annotations
 
-import collections.abc
 import contextlib
 import json
 import logging
@@ -18,6 +17,8 @@ from __feature__ import snake_case, true_property  # noqa F401
 from auto_neutron.constants import STATUS_PATH
 
 if t.TYPE_CHECKING:
+    import collections.abc
+
     from auto_neutron.game_state import Location
     from auto_neutron.journal import Journal
     from auto_neutron.route_plots import RouteList

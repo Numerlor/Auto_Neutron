@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import abc
 import atexit
-import collections.abc
 import contextlib
 import dataclasses
 import logging
@@ -26,6 +25,9 @@ from auto_neutron.utils.network import (
     json_from_network_req,
     make_network_request,
 )
+
+if t.TYPE_CHECKING:
+    import collections.abc
 
 log = logging.getLogger(__name__)
 

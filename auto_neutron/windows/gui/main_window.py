@@ -1,7 +1,8 @@
 # This file is part of Auto_Neutron.
 # Copyright (C) 2019  Numerlor
 
-import collections.abc
+from __future__ import annotations
+
 import typing as t
 
 from PySide6 import QtCore, QtGui, QtWidgets
@@ -13,6 +14,9 @@ from auto_neutron.windows.gui.delegates import (
     DoubleSpinBoxDelegate,
     SpinBoxDelegate,
 )
+
+if t.TYPE_CHECKING:
+    import collections.abc
 
 
 class MainWindowGUI(QtWidgets.QMainWindow):

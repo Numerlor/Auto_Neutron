@@ -1,12 +1,16 @@
 # This file is part of Auto_Neutron.
 # Copyright (C) 2019  Numerlor
 
+from __future__ import annotations
+
 import ctypes
 import msvcrt
 import os
 import typing as t
 from ctypes import wintypes
-from pathlib import Path
+
+if t.TYPE_CHECKING:
+    from pathlib import Path
 
 GENERIC_WRITE = 0x40000000
 FILE_SHARE_DELETE = 0x00000004

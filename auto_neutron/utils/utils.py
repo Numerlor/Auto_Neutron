@@ -1,18 +1,22 @@
 # This file is part of Auto_Neutron.
 # Copyright (C) 2019  Numerlor
 
-import collections.abc
+from __future__ import annotations
+
 import itertools
 import logging
 import typing as t
 from pathlib import Path
-from types import TracebackType
 
 from PySide6 import QtCore, QtWidgets
 
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa F401
 from auto_neutron.utils.logging import patch_log_module
+
+if t.TYPE_CHECKING:
+    import collections.abc
+    from types import TracebackType
 
 log = logging.getLogger(__name__)
 
