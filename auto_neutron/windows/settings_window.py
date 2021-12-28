@@ -1,6 +1,8 @@
 # This file is part of Auto_Neutron.
 # Copyright (C) 2019  Numerlor
 
+from __future__ import annotations
+
 import logging
 import typing as t
 from operator import attrgetter

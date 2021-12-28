@@ -1,6 +1,8 @@
 # This file is part of Auto_Neutron.
 # Copyright (C) 2019  Numerlor
 
+from __future__ import annotations
+
 import os
 import typing
 from pathlib import Path

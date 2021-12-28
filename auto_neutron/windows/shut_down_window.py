@@ -1,6 +1,8 @@
 # This file is part of Auto_Neutron.
 # Copyright (C) 2019  Numerlor
 
+from __future__ import annotations
+
 from PySide6 import QtCore, QtWidgets
 
 # noinspection PyUnresolvedReferences

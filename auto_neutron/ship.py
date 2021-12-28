@@ -1,6 +1,8 @@
 # This file is part of Auto_Neutron.
 # Copyright (C) 2019  Numerlor
 
+from __future__ import annotations
+
 import typing as t
 
 from auto_neutron.constants import BOOSTER_CONSTANTS, FSD_CONSTANTS, FrameShiftDrive
