@@ -14,7 +14,7 @@ from PySide6 import QtCore, QtWidgets
 from __feature__ import snake_case, true_property  # noqa: F401
 from auto_neutron import settings
 from auto_neutron.constants import AHK_PATH
-from auto_neutron.settings.category_meta import delay_sync
+from auto_neutron.settings import delay_sync
 from auto_neutron.windows.gui.settings_window import SettingsWindowGUI
 
 log = logging.getLogger(__name__)
