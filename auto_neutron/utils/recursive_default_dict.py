@@ -17,7 +17,9 @@ _VT = t.TypeVar("_VT")
 _DEFAULT_SENTINEL = object()
 
 
-class RecursiveDefaultDict(dict[_KT, _VT], t.Generic[_KT, _VT]):
+class RecursiveDefaultDict(
+    dict[_KT, t.Union[_VT, "RecursiveDefaultDict"]], t.Generic[_KT, _VT]
+):
     """
     A recursive default dict.
 
