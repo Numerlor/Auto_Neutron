@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import typing as t
+import warnings
 from contextlib import contextmanager
 
 if t.TYPE_CHECKING:
@@ -47,7 +48,14 @@ class RecursiveDefaultDict(dict[_KT, _VT], t.Generic[_KT, _VT]):
 
                     new_dict = self.__class__(create_missing=None, parent=self)
                     if key in self:
-                        new_dict.update_from_dict_recursive(self[key])
+                        self_value = self[key]
+                        if not isinstance(self_value, dict):
+                            warnings.warn(
+                                f"Overwriting non dict type: {self_value!r} with key: {key!r}.",
+                                RuntimeWarning,
+                            )
+                        else:
+                            new_dict.update_from_dict_recursive(self_value)
                     new_dict.update_from_dict_recursive(value)
                     value = new_dict
 
