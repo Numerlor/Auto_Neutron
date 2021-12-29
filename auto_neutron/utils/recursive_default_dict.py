@@ -52,8 +52,8 @@ class RecursiveDefaultDict(
                         self._check_conflict(self, key, value)
 
                     new_dict = self.__class__(create_missing=None, parent=self)
-                    if key in self:
-                        self_value = self[key]
+                    self_value = self.get(key, _DEFAULT_SENTINEL)
+                    if self_value is not _DEFAULT_SENTINEL:
                         if not isinstance(self_value, RecursiveDefaultDict):
                             warnings.warn(
                                 f"Overwriting non RecursiveDefaultDict type: {self_value!r} with key: {key!r}.",
