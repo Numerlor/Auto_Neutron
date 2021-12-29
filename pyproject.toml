@@ -13,6 +13,7 @@ tomli = "~1.2.3"
 tomli-w = "~1.0.0"
 
 [tool.poetry.dev-dependencies]
+typing-extensions = ">=4.0.1"
 flake8 = "~4.0"
 flake8-annotations = "~2.7"
 flake8-bandit = "~2.1"
