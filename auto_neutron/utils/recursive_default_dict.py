@@ -43,15 +43,17 @@ class RecursiveDefaultDict(dict[_KT, _VT], t.Generic[_KT, _VT]):
             for key, value in dict_.items():
                 if isinstance(value, dict):
                     check_conflict = not ignore_conflicts and key in self
-                    if check_conflict and not isinstance(self[key], dict):
+                    if check_conflict and not isinstance(
+                        self[key], RecursiveDefaultDict
+                    ):
                         self._check_conflict(self, key, value)
 
                     new_dict = self.__class__(create_missing=None, parent=self)
                     if key in self:
                         self_value = self[key]
-                        if not isinstance(self_value, dict):
+                        if not isinstance(self_value, RecursiveDefaultDict):
                             warnings.warn(
-                                f"Overwriting non dict type: {self_value!r} with key: {key!r}.",
+                                f"Overwriting non RecursiveDefaultDict type: {self_value!r} with key: {key!r}.",
                                 RuntimeWarning,
                             )
                         else:
@@ -60,8 +62,10 @@ class RecursiveDefaultDict(dict[_KT, _VT], t.Generic[_KT, _VT]):
                     value = new_dict
 
                     if check_conflict:
-                        for sub_key in new_dict.keys() & self[key].keys():
-                            self._check_conflict(self[key], sub_key, new_dict[sub_key])
+                        self_value = t.cast(RecursiveDefaultDict, self_value)
+
+                        for sub_key in new_dict.keys() & self_value.keys():
+                            self._check_conflict(self_value, sub_key, new_dict[sub_key])
                 else:
                     if not ignore_conflicts:
                         self._check_conflict(self, key, value)
