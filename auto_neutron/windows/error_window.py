@@ -66,9 +66,10 @@ class ErrorWindow(ErrorWindowGUI):
     def _get_log_file_name(self) -> t.Optional[str]:
         """Get the file name of the current active file logger, or None if none are used."""
         handler = next(
-            filter(
-                lambda handler: isinstance(handler, logging.FileHandler),
-                root_logger.handlers,
+            (
+                handler
+                for handler in root_logger.handlers
+                if isinstance(handler, logging.FileHandler)
             ),
             None,
         )
