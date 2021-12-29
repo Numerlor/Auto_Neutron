@@ -315,7 +315,7 @@ class NewRouteWindow(NewRouteWindowGUI):
     def _route_from_csv(self, path: Path) -> t.Optional[RouteList]:
         try:
             with path.open(encoding="utf8") as csv_file:
-                reader = csv.reader(csv_file)
+                reader = csv.reader(csv_file, strict=True)
                 header = next(reader)
                 if len(header) == 5:
                     row_type = NeutronPlotRow
