@@ -10,9 +10,10 @@ from contextlib import contextmanager
 if t.TYPE_CHECKING:
     import collections.abc
 
+    import typing_extensions as te
+
 _KT = t.TypeVar("_KT")
 _VT = t.TypeVar("_VT")
-_S = t.TypeVar("_S", bound="RecursiveDefaultDict")
 _DEFAULT_SENTINEL = object()
 
 
@@ -36,7 +37,7 @@ class RecursiveDefaultDict(dict[_KT, _VT], t.Generic[_KT, _VT]):
         self._create_missing = create_missing
 
     def update_from_dict_recursive(
-        self: _S, dict_: dict[_KT, _VT], *, ignore_conflicts: bool = True
+        self, dict_: dict[_KT, _VT], *, ignore_conflicts: bool = True
     ) -> None:
         """Add the contents from `dict_` and replaces all dictionaries with this type."""
         with self.disable_defaults_for_missing():
@@ -89,7 +90,7 @@ class RecursiveDefaultDict(dict[_KT, _VT], t.Generic[_KT, _VT]):
         """Return whether this dict should create new defaults on missing keys."""
         self._create_missing = create_missing
 
-    def __missing__(self: _S, key: _KT) -> _S:
+    def __missing__(self, key: _KT) -> te.Self:
         if self.create_missing:
             created_dict = self.__class__(create_missing=None, parent=self)
             self[key] = created_dict
