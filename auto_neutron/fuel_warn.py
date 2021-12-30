@@ -34,11 +34,7 @@ class FuelWarn:
 
     def warn(self, status_dict: dict) -> None:
         """Execute alert when in supercruise, on FSD cool down and fuel is below threshold."""
-        if (
-            not status_dict
-            or "Fuel" not in status_dict
-            or self._game_state.ship.fsd is None
-        ):
+        if not status_dict or "Fuel" not in status_dict:
             # Sometimes we get empty JSON,
             # or when the game is shut down it only contains data up to flags.
             return
