@@ -3,9 +3,8 @@
 
 from __future__ import annotations
 
-import typing as t
-
 from auto_neutron.constants import BOOSTER_CONSTANTS, FSD_CONSTANTS, FrameShiftDrive
+from auto_neutron.utils.forbid_uninitialized import ForbidUninitialized
 
 _RATING_TO_CLASS = {"A": 5, "B": 4, "C": 3, "D": 2, "E": 1}
 
@@ -16,13 +15,20 @@ _MASS_MANAGER_MODIFIER = 1.04  # Adds 4% to optimal mass
 class Ship:
     """Hold stats of a ship required for plotting."""
 
+    fsd = ForbidUninitialized()
+    jump_range_boost = ForbidUninitialized()
+    tank_size = ForbidUninitialized()
+    reserve_size = ForbidUninitialized()
+    unladen_mass = ForbidUninitialized()
+    max_cargo = ForbidUninitialized()
+
     def __init__(self):
-        self.fsd: t.Optional[FrameShiftDrive] = None
-        self.jump_range_boost: t.Optional[float] = None
-        self.tank_size: t.Optional[int] = None
-        self.reserve_size: t.Optional[float] = None
-        self.unladen_mass: t.Optional[float] = None
-        self.max_cargo: t.Optional[int] = None
+        self.fsd: FrameShiftDrive = None  # type: ignore
+        self.jump_range_boost: float = None  # type: ignore
+        self.tank_size: int = None  # type: ignore
+        self.reserve_size: float = None  # type: ignore
+        self.unladen_mass: float = None  # type: ignore
+        self.max_cargo: int = None  # type: ignore
 
     def jump_range(self, *, cargo_mass: int) -> float:
         """Calculate the jump range with `cargo_mass` t of cargo."""

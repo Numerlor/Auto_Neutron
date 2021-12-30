@@ -13,6 +13,7 @@ from PySide6 import QtCore
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa: F401
 from auto_neutron.ship import Ship
+from auto_neutron.utils.forbid_uninitialized import ForbidUninitialized
 from auto_neutron.workers import GameWorker
 
 if t.TYPE_CHECKING:
@@ -41,10 +42,10 @@ class GameState:
     """
 
     ship: Ship = Ship()
-    shut_down: t.Optional[bool] = None
-    location: t.Optional[Location] = None
-    last_target: t.Optional[Location] = None
-    current_cargo: t.Optional[int] = None
+    shut_down: bool = ForbidUninitialized()  # type: ignore
+    location: Location = ForbidUninitialized()  # type: ignore
+    last_target: Location = ForbidUninitialized()  # type: ignore
+    current_cargo: int = ForbidUninitialized()  # type: ignore
 
     def connect_journal(self, journal: Journal) -> None:
         """Connect the signals from `journal` to set the appropriate attributes when emitted."""

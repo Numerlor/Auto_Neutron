@@ -31,6 +31,7 @@ from auto_neutron.route_plots import (
     spansh_neutron_callback,
 )
 from auto_neutron.ship import Ship
+from auto_neutron.utils.forbid_uninitialized import ForbidUninitialized
 from auto_neutron.utils.network import make_network_request
 from auto_neutron.utils.signal import ReconnectingSignal
 from auto_neutron.utils.utils import create_request_delay_iterator
@@ -49,12 +50,14 @@ class NewRouteWindow(NewRouteWindowGUI):
     """The UI for plotting a new route, from CSV, Spansh plotters, or the last saved route."""
 
     route_created_signal = QtCore.Signal(Journal, list, int)
+    game_state = ForbidUninitialized()
+    selected_journal = ForbidUninitialized()
 
     def __init__(self, parent: QtWidgets.QWidget):
         super().__init__(parent)
-        self.game_state: t.Optional[GameState] = None
-        self.selected_journal: t.Optional[Journal] = None
-        self._journal_worker: t.Optional[GameWorker] = None
+        self.game_state: GameState = None  # type: ignore
+        self.selected_journal: Journal = None  # type: ignore
+        self._journal_worker: GameWorker = None  # type: ignore
 
         # region spansh tabs init
         self.spansh_neutron_tab.nearest_button.pressed.connect(
