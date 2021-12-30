@@ -89,7 +89,6 @@ class Hub(QtCore.QObject):
         self.fuel_warner = FuelWarn(self.game_state, self.window)
         self.warn_worker = StatusWorker()
         self.warn_worker.status_signal.connect(self.fuel_warner.warn)
-        self.warn_worker.start()
 
         self.new_route_window()
 
@@ -145,6 +144,7 @@ class Hub(QtCore.QObject):
         with self.edit_route_update_connection.temporarily_disconnect():
             self.window.initialize_table(route)
         self.plotter_state.route_index = route_index
+        self.warn_worker.start()
 
     def apply_settings(self) -> None:
         """Update the appearance and plotter with new settings."""
