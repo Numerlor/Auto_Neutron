@@ -39,7 +39,7 @@ class ForbidUninitialized:
         if instance is None:
             return self
 
-        value = getattr(instance, self._private_name)
+        value = getattr(instance, self._private_name, self.uninitialized_value)
         if value is self.uninitialized_value:
             raise RuntimeError(
                 f"Access of uninitialized attribute {self._name!r} from {instance}."
