@@ -17,14 +17,6 @@ from auto_neutron.windows.gui.error_window import ErrorWindowGUI
 root_logger = logging.getLogger()
 
 ISSUES_URL = "https://github.com/Numerlor/Auto_Neutron/issues/new"
-ERROR_TEXT = (
-    _("Please make sure to report the bug at")
-    + "<br>"
-    + f'<a href="{ISSUES_URL}" style="color: #007bff">{ISSUES_URL}</a>,<br>'
-    + _("and include the {file_name} file from")
-    + "<br>"
-    + ' <a href="{log_path}" style="color: #007bff">{log_path}</a>'
-)
 
 
 class ErrorWindow(ErrorWindowGUI):
@@ -39,6 +31,7 @@ class ErrorWindow(ErrorWindowGUI):
         self._num_errors = 0
         super().__init__(parent)
         self.quit_button.pressed.connect(QtWidgets.QApplication.instance().quit)
+        self.error_template = ""
         self.retranslate()
 
     def _set_text(self) -> None:
@@ -47,7 +40,7 @@ class ErrorWindow(ErrorWindowGUI):
             QtCore.QStandardPaths.AppConfigLocation
         )
         file_name = self._get_log_file_name()
-        self.text_browser.html = ERROR_TEXT.format(
+        self.text_browser.html = self.error_template.format(
             log_path=log_path, file_name=file_name
         )
 
@@ -88,3 +81,12 @@ class ErrorWindow(ErrorWindowGUI):
         self.info_label.text = _(
             "Multiple unexpected errors have occurred (x{})"
         ).format(self._num_errors)
+        self.error_template = (
+            _("Please make sure to report the bug at")
+            + "<br>"
+            + f'<a href="{ISSUES_URL}" style="color: #007bff">{ISSUES_URL}</a>,<br>'
+            + _("and include the {file_name} file from")
+            + "<br>"
+            + ' <a href="{log_path}" style="color: #007bff">{log_path}</a>'
+        )
+        self._set_text()
