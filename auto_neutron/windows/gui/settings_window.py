@@ -197,8 +197,9 @@ class SettingsWindowGUI(QtWidgets.QDialog):
         self.visual_alert_checkbox.text = _("Taskbar fuel alert")
         self.audio_alert_checkbox.text = _("Sound fuel alert")
         self.alert_path_label.text = _("Custom sound alert file:")
+        # Escape % for translation
         self.alert_threshold_label.text = _(
-            "% of maximum fuel usage left in tank before triggering alert"
+            "%% of maximum fuel usage left in tank before triggering alert"
         )
 
         self.window_title = _("Settings")
