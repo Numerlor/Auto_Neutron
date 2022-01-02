@@ -22,6 +22,12 @@ else:
     debug = True
 delete_dlls.main()
 
+compiled_process = subprocess.run(  # noqa: S603, S607
+    ["poetry", "run", "task", "i18n-compile"]
+)
+if compiled_process.returncode != 0:
+    raise Exception("Failed to compile translation files.")
+
 for spec_file in spec_files:
     PyInstaller.__main__.run(
         [
