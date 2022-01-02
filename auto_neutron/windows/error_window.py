@@ -18,10 +18,12 @@ root_logger = logging.getLogger()
 
 ISSUES_URL = "https://github.com/Numerlor/Auto_Neutron/issues/new"
 ERROR_TEXT = (
-    "Please make sure to report the bug at <br>"
-    f'<a href="{ISSUES_URL}" style="color: #007bff">{ISSUES_URL}</a>,<br>'
-    "and include the {file_name} file from<br>"
-    ' <a href="{log_path}" style="color: #007bff">{log_path}</a>'
+    _("Please make sure to report the bug at")
+    + "<br>"
+    + f'<a href="{ISSUES_URL}" style="color: #007bff">{ISSUES_URL}</a>,<br>'
+    + _("and include the {file_name} file from")
+    + "<br>"
+    + ' <a href="{log_path}" style="color: #007bff">{log_path}</a>'
 )
 
 
@@ -37,6 +39,7 @@ class ErrorWindow(ErrorWindowGUI):
         self._num_errors = 0
         super().__init__(parent)
         self.quit_button.pressed.connect(QtWidgets.QApplication.instance().quit)
+        self.retranslate()
 
     def _set_text(self) -> None:
         """Set the help text to point the user to the current log file."""
@@ -53,11 +56,9 @@ class ErrorWindow(ErrorWindowGUI):
         self._set_text()
         self._num_errors += 1
         if self._num_errors > 1:
-            self.info_label.text = (
-                "Multiple unexpected errors have occurred (x{})".format(
-                    self._num_errors
-                )
-            )
+            self.info_label.text = _(
+                "Multiple unexpected errors have occurred (x{})"
+            ).format(self._num_errors)
         else:
             super().show()
 
@@ -80,3 +81,10 @@ class ErrorWindow(ErrorWindowGUI):
             return Path(get_file_name(handler.stream)).name
         else:
             return None
+
+    def retranslate(self) -> None:
+        """Retranslate text that is always on display."""
+        super().retranslate()
+        self.info_label.text = _(
+            "Multiple unexpected errors have occurred (x{})"
+        ).format(self._num_errors)

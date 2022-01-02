@@ -48,14 +48,10 @@ class TabBase(QtWidgets.QWidget):
         journal_submit_layout = QtWidgets.QHBoxLayout()
 
         journal_combo = QtWidgets.QComboBox(widget_parent)
-        journal_combo.size_policy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
-        )
-        journal_combo.add_items(["Last journal", "Second to last", "Third to last"])
 
-        submit_button = QtWidgets.QPushButton("Submit", widget_parent)
+        submit_button = QtWidgets.QPushButton(widget_parent)
         submit_button.size_policy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
+            QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Maximum
         )
 
         journal_submit_layout.add_widget(
@@ -80,10 +76,7 @@ class TabBase(QtWidgets.QWidget):
         source_system_edit = QtWidgets.QLineEdit(parent)
         target_system_edit = QtWidgets.QLineEdit(parent)
 
-        source_system_edit.placeholder_text = "Source system"
-        target_system_edit.placeholder_text = "Destination system"
-
-        cargo_label = QtWidgets.QLabel("Cargo", parent)
+        cargo_label = QtWidgets.QLabel(parent)
         cargo_slider = TooltipSlider(QtCore.Qt.Orientation.Horizontal, parent)
 
         layout.add_widget(source_system_edit)
@@ -94,6 +87,20 @@ class TabBase(QtWidgets.QWidget):
 
         return layout, source_system_edit, target_system_edit, cargo_label, cargo_slider
 
+    def retranslate(self) -> None:
+        """Retranslate text that is always on display."""
+        if self.has_cargo:
+            self.source_edit.placeholder_text = _("Source system")
+            self.target_edit.placeholder_text = _("Destination system")
+
+            self.cargo_label.text = _("Cargo")
+
+        self.submit_button.text = _("Submit")
+        self.journal_combo.clear()
+        self.journal_combo.add_items(
+            [_("Last journal"), _("Second to last"), _("Third to last")]
+        )
+
 
 class NeutronTab(TabBase):
     """The neutron plotter tab."""
@@ -101,14 +108,14 @@ class NeutronTab(TabBase):
     def __init__(self, parent: QtWidgets.QWidget):
         super().__init__(parent, create_cargo=True)
 
-        self.range_label = QtWidgets.QLabel("Range", self)
+        self.range_label = QtWidgets.QLabel(self)
         self.range_spin = QtWidgets.QDoubleSpinBox(self)
         self.range_spin.accelerated = True
         self.range_spin.size_policy = QtWidgets.QSizePolicy(
             QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
         )
 
-        self.efficiency_label = QtWidgets.QLabel("Efficiency", self)
+        self.efficiency_label = QtWidgets.QLabel(self)
         self.efficiency_spin = QtWidgets.QSpinBox(self)
         self.efficiency_spin.maximum = 100
         self.efficiency_spin.suffix = "%"
@@ -118,7 +125,7 @@ class NeutronTab(TabBase):
         )
 
         self.eff_nearest_layout = QtWidgets.QHBoxLayout()
-        self.nearest_button = QtWidgets.QPushButton("Nearest", self)
+        self.nearest_button = QtWidgets.QPushButton(self)
         self.nearest_button.size_policy = QtWidgets.QSizePolicy(
             QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
         )
@@ -139,6 +146,13 @@ class NeutronTab(TabBase):
         self.main_layout.add_layout(self.eff_nearest_layout)
         self.main_layout.add_layout(self.journal_submit_layout)
 
+    def retranslate(self) -> None:
+        """Retranslate text that is always on display."""
+        super().retranslate()
+        self.range_label.text = _("Range")
+        self.efficiency_label.text = _("Efficiency")
+        self.nearest_button.text = _("Nearest")
+
 
 class ExactTab(TabBase):
     """The exact plotter tab."""
@@ -149,21 +163,15 @@ class ExactTab(TabBase):
             999  # static value because ship may come from outside source
         )
 
-        self.is_supercharged_checkbox = QtWidgets.QCheckBox(
-            "Already Supercharged", self
-        )
-        self.supercarge_checkbox = QtWidgets.QCheckBox("Use Supercharge", self)
-        self.fsd_injections_checkbox = QtWidgets.QCheckBox("Use FSD injections", self)
-        self.exclude_secondary_checkbox = QtWidgets.QCheckBox(
-            "Exclude secondary stars", self
-        )
+        self.is_supercharged_checkbox = QtWidgets.QCheckBox(self)
+        self.supercarge_checkbox = QtWidgets.QCheckBox(self)
+        self.fsd_injections_checkbox = QtWidgets.QCheckBox(self)
+        self.exclude_secondary_checkbox = QtWidgets.QCheckBox(self)
 
         self.use_clipboard_and_nearest_layout = QtWidgets.QHBoxLayout()
 
-        self.use_clipboard_checkbox = QtWidgets.QCheckBox(
-            "Use ship from clipboard", self
-        )
-        self.nearest_button = QtWidgets.QPushButton("Nearest", self)
+        self.use_clipboard_checkbox = QtWidgets.QCheckBox(self)
+        self.nearest_button = QtWidgets.QPushButton(self)
         self.nearest_button.size_policy = QtWidgets.QSizePolicy(
             QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
         )
@@ -185,6 +193,16 @@ class ExactTab(TabBase):
         self.main_layout.add_layout(self.use_clipboard_and_nearest_layout)
         self.main_layout.add_layout(self.journal_submit_layout)
 
+    def retranslate(self) -> None:
+        """Retranslate text that is always on display."""
+        super().retranslate()
+        self.is_supercharged_checkbox.text = _("Already supercharged")
+        self.supercarge_checkbox.text = _("Use supercharge")
+        self.fsd_injections_checkbox.text = _("Use FSD injections")
+        self.exclude_secondary_checkbox.text = _("Exclude secondary stars")
+        self.use_clipboard_checkbox.text = _("Use ship from clipboard")
+        self.nearest_button.text = _("Nearest")
+
 
 class CSVTab(TabBase):
     """The CSV plotter tab."""
@@ -195,7 +213,6 @@ class CSVTab(TabBase):
         self.path_layout = QtWidgets.QHBoxLayout()
 
         self.path_edit = QtWidgets.QLineEdit(self)
-        self.path_edit.placeholder_text = "CSV path"
 
         self.path_popup_button = QtWidgets.QPushButton("...", self)
         self.path_popup_button.maximum_width = 24
@@ -210,6 +227,11 @@ class CSVTab(TabBase):
             )
         )
         self.main_layout.add_layout(self.journal_submit_layout)
+
+    def retranslate(self) -> None:
+        """Retranslate text that is always on display."""
+        super().retranslate()
+        self.path_edit.placeholder_text = "CSV path"
 
 
 class LastTab(TabBase):
@@ -253,10 +275,10 @@ class NewRouteWindowGUI(QtWidgets.QDialog):
         self.spansh_exact_tab = ExactTab(self.tab_widget)
         self.last_route_tab = LastTab(self.tab_widget)
 
-        self.tab_widget.add_tab(self.csv_tab, "CSV")
-        self.tab_widget.add_tab(self.spansh_neutron_tab, "Neutron plotter")
-        self.tab_widget.add_tab(self.spansh_exact_tab, "Galaxy plotter")
-        self.tab_widget.add_tab(self.last_route_tab, "Saved route")
+        self.tab_widget.add_tab(self.csv_tab, "")
+        self.tab_widget.add_tab(self.spansh_neutron_tab, "")
+        self.tab_widget.add_tab(self.spansh_exact_tab, "")
+        self.tab_widget.add_tab(self.last_route_tab, "")
 
         self.status_bar = QtWidgets.QStatusBar(self)
 
@@ -266,4 +288,15 @@ class NewRouteWindowGUI(QtWidgets.QDialog):
         for button in self.find_children(QtWidgets.QPushButton):
             button.auto_default = False
 
-        self.show()
+        self.csv_tab.journal_combo.adjust_size()
+
+    def retranslate(self) -> None:
+        """Retranslate text that is always on display."""
+        self.csv_tab.retranslate()
+        self.spansh_neutron_tab.retranslate()
+        self.spansh_exact_tab.retranslate()
+        self.last_route_tab.retranslate()
+        self.tab_widget.set_tab_text(0, _("CSV"))
+        self.tab_widget.set_tab_text(1, _("Neutron plotter"))
+        self.tab_widget.set_tab_text(2, _("Galaxy plotter"))
+        self.tab_widget.set_tab_text(3, _("Saved route"))

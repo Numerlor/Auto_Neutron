@@ -17,14 +17,12 @@ class MissingJournalWindowGUI(QtWidgets.QDialog):
         self.set_attribute(QtCore.Qt.WidgetAttribute.WA_DeleteOnClose)
         self.set_modal(True)
 
-        self.info_label = QtWidgets.QLabel(
-            "Journal folder not found or missing files.", self
-        )
+        self.info_label = QtWidgets.QLabel(self)
         font = QtGui.QFont()
         font.set_point_size(18)
         self.info_label.font = font
 
-        self.quit_button = QtWidgets.QPushButton("Quit", self)
+        self.quit_button = QtWidgets.QPushButton(self)
 
         self.main_layout = QtWidgets.QVBoxLayout(self)
         self.main_layout.add_widget(
@@ -36,3 +34,8 @@ class MissingJournalWindowGUI(QtWidgets.QDialog):
 
         self.set_window_flag(QtCore.Qt.WindowCloseButtonHint, False)
         self.show()
+
+    def retranslate(self) -> None:
+        """Retranslate text that is always on display."""
+        self.info_label.text = _("Journal folder not found or missing files.")
+        self.quit_button.text = _("Quit")

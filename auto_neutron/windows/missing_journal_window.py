@@ -17,3 +17,4 @@ class MissingJournalWindow(MissingJournalWindowGUI):
         super().__init__(parent)
 
         self.quit_button.pressed.connect(QtWidgets.QApplication.instance().quit)
+        self.retranslate()

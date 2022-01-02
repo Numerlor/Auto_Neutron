@@ -54,12 +54,13 @@ class SettingsWindow(SettingsWindowGUI):
         self.ok_button.pressed.connect(self.settings_applied)
         self.ok_button.pressed.connect(self.save_settings)
         self.ok_button.pressed.connect(self.close)
+        self.retranslate()
 
     def get_ahk_path(self) -> None:
         """Ask the user for the AHK executable file path and save it to the setting."""
-        path, _ = QtWidgets.QFileDialog.get_open_file_name(
+        path, __ = QtWidgets.QFileDialog.get_open_file_name(
             self,
-            "Select AHK executable",
+            _("Select AHK executable"),
             str(AHK_PATH),
             filter="Executable files (*.exe)",
         )
@@ -70,9 +71,9 @@ class SettingsWindow(SettingsWindowGUI):
 
     def get_sound_path(self) -> None:
         """Ask the user for the alert file path and save it to the line edit."""
-        path, _ = QtWidgets.QFileDialog.get_open_file_name(
+        path, __ = QtWidgets.QFileDialog.get_open_file_name(
             self,
-            "Select alert file",
+            _("Select alert file"),
             "",
             filter="Audio files (*.wav *.mp3);;All types (*.*)",
         )

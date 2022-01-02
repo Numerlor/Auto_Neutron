@@ -41,9 +41,11 @@ class MainWindow(MainWindowGUI):
         self._current_route_type: t.Optional[
             t.Union[type[ExactPlotRow], type[NeutronPlotRow]]
         ] = None
+        self._last_index = None
 
         atexit.register(self.save_window)
         self.restore_window()
+        self.retranslate()
 
     def copy_table_item_text(self) -> None:
         """Copy the text of the selected table item into the clipboard."""
@@ -71,21 +73,17 @@ class MainWindow(MainWindowGUI):
         self._current_route_type = type(route[0])
 
         self._create_base_headers()
-
+        self._set_header_text()
         self.mass_insert(dataclasses.astuple(row) for row in route)
 
         if self._current_route_type is ExactPlotRow:
             self.table.set_item_delegate_for_column(3, self._checkbox_delegate)
-            self.table.horizontal_header_item(3).set_text("Scoopable")
-            self.table.horizontal_header_item(4).set_text("Neutron")
-
             self.table.resize_column_to_contents(3)
             self.table.resize_column_to_contents(4)
 
         elif self._current_route_type is NeutronPlotRow:
             self.table.column_count = 4  # reset column count to 4 to hide last col
             self.table.set_item_delegate_for_column(3, self._spinbox_delegate)
-            self.table.horizontal_header_item(3).set_text("Jumps")
             self.table.resize_column_to_contents(3)
 
     def set_current_row(self, index: int) -> None:
@@ -109,7 +107,8 @@ class MainWindow(MainWindowGUI):
         with self.resize_connection.temporarily_disconnect():
             if self._current_route_type is ExactPlotRow:
                 self.table.horizontal_header_item(0).set_text(
-                    "System name ({}/{})".format(index + 1, self.table.row_count)
+                    # NOTE: made jumps/ total
+                    _("System name ({}/{})").format(index + 1, self.table.row_count)
                 )
             else:
                 total_jumps = sum(
@@ -121,10 +120,12 @@ class MainWindow(MainWindowGUI):
                     for row in range(index, self.table.row_count)
                 )
                 self.table.horizontal_header_item(3).set_text(
-                    "Jumps {}/{}".format(remaining_jumps, total_jumps)
+                    # NOTE: made jumps/ total
+                    _("Jumps {}/{}").format(remaining_jumps, total_jumps)
                 )
         self.table.resize_column_to_contents(0)
         self.table.resize_column_to_contents(3)
+        self._last_index = index
 
     def manage_item_changed(self, table_item: QtWidgets.QTableWidgetItem) -> None:
         """Update the column sizes and information when an item is changed."""
@@ -140,3 +141,23 @@ class MainWindow(MainWindowGUI):
     def save_window(self) -> None:
         """Save size and position to settings."""
         settings.Window.geometry = self.save_geometry()
+
+    def retranslate(self) -> None:
+        """Retranslate text that is always on display."""
+        super().retranslate()
+        self._set_header_text()
+
+        if self._last_index is not None:
+            self.update_remaining_count(self._last_index)
+
+    def _set_header_text(self) -> None:
+        """Set the text for the headers."""
+        super()._set_header_text()
+        if self._current_route_type is ExactPlotRow:
+            if (header := self.table.horizontal_header_item(3)) is not None:
+                header.set_text(_("Scoopable"))
+            if (header := self.table.horizontal_header_item(4)) is not None:
+                header.set_text(_("Neutron"))
+        else:
+            if (header := self.table.horizontal_header_item(3)) is not None:
+                header.set_text(_("Jumps"))

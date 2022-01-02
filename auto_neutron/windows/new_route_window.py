@@ -124,8 +124,9 @@ class NewRouteWindow(NewRouteWindowGUI):
         self.tab_widget.currentChanged.connect(self._display_saved_route)
         self._route_displayed = False
         self._loaded_route: t.Optional[list[NeutronPlotRow]] = None
-
+        self.retranslate()
         self._change_journal(0)
+        self.show()
 
     # region spansh plotters
     def _submit_neutron(self) -> None:
@@ -293,8 +294,8 @@ class NewRouteWindow(NewRouteWindowGUI):
             start_path = str(settings.Paths.csv.parent)
         else:
             start_path = ""
-        path, _ = QtWidgets.QFileDialog.get_open_file_name(
-            self, "Select CSV file", start_path, "CSV (*.csv);;All types (*.*)"
+        path, __ = QtWidgets.QFileDialog.get_open_file_name(
+            self, _("Select CSV file"), start_path, "CSV (*.csv);;All types (*.*)"
         )
         if path:
             self.csv_tab.path_edit.text = str(Path(path))
@@ -323,20 +324,20 @@ class NewRouteWindow(NewRouteWindowGUI):
                 elif len(header) == 7:
                     row_type = ExactPlotRow
                 else:
-                    self.status_bar.show_message("Invalid CSV file.", 5_000)
+                    self.status_bar.show_message(_("Invalid CSV file."), 5_000)
                     return
                 log.info(f"Parsing csv file of type {row_type.__name__} at {path}.")
                 return [row_type.from_csv_row(row) for row in reader]
         except FileNotFoundError:
-            self.status_bar.show_message("CSV file doesn't exist.", 5_000)
+            self.status_bar.show_message(_("CSV file doesn't exist."), 5_000)
         except csv.Error as error:
-            self.status_bar.show_message("Invalid CSV file: " + str(error), 5_000)
+            self.status_bar.show_message(_("Invalid CSV file: ") + str(error), 5_000)
         except IndexError:
-            self.status_bar.show_message("Truncated data in CSV file.", 5_000)
+            self.status_bar.show_message(_("Truncated data in CSV file."), 5_000)
         except ValueError:
-            self.status_bar.show_message("Invalid data in CSV file.", 5_000)
+            self.status_bar.show_message(_("Invalid data in CSV file."), 5_000)
         except OSError:
-            self.status_bar.show_message("Invalid path.", 5_000)
+            self.status_bar.show_message(_("Invalid path."), 5_000)
 
     # endregion
 
@@ -347,17 +348,7 @@ class NewRouteWindow(NewRouteWindowGUI):
             self._loaded_route = self._route_from_csv(
                 get_config_dir() / ROUTE_FILE_NAME
             )
-            if self._loaded_route is not None:
-                self.last_route_tab.source_label.text = "Source: {}".format(
-                    self._loaded_route[0].system
-                )
-                self.last_route_tab.location_label.text = (
-                    "Saved location: "
-                    + self._loaded_route[settings.General.last_route_index].system
-                )
-                self.last_route_tab.destination_label.text = "Destination: {}".format(
-                    self._loaded_route[-1].system
-                )
+            self._update_saved_route_text()
 
     def _last_route_submit(self) -> None:
         log.info("Submitting last route.")
@@ -406,7 +397,7 @@ class NewRouteWindow(NewRouteWindowGUI):
         self.selected_journal = journal
         if shut_down:
             self.status_bar.show_message(
-                "Selected journal ended with a shut down event.", 10_000
+                _("Selected journal ended with a shut down event."), 10_000
             )
             self.csv_tab.submit_button.enabled = False
             self._set_neutron_submit()
@@ -439,3 +430,27 @@ class NewRouteWindow(NewRouteWindowGUI):
         """Emit a new route and close the window."""
         self.route_created_signal.emit(journal, route, route_index)
         self.close()
+
+    def retranslate(self) -> None:
+        """Retranslate text that is always on display."""
+        exit_stack = contextlib.ExitStack()
+        with exit_stack:
+            for signal in self.combo_signals:
+                exit_stack.enter_context(signal.temporarily_disconnect())
+            super().retranslate()
+            self._update_saved_route_text()
+
+    def _update_saved_route_text(self) -> None:
+        """Update the saved route information from the currently loaded route."""
+        if self._loaded_route is not None:
+            # NOTE: Source system
+            self.last_route_tab.source_label.text = _("Source: {}").format(
+                self._loaded_route[0].system
+            )
+            self.last_route_tab.location_label.text = _("Saved location: {}").format(
+                self._loaded_route[settings.General.last_route_index].system
+            )
+            # NOTE: destination system
+            self.last_route_tab.destination_label.text = _("Destination: {}").format(
+                self._loaded_route[-1].system
+            )

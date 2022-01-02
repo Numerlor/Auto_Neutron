@@ -16,7 +16,7 @@ class ErrorWindowGUI(QtWidgets.QDialog):
         super().__init__(parent)
         self.main_layout = QtWidgets.QVBoxLayout(self)
 
-        self.info_label = QtWidgets.QLabel("An unexpected error has occurred")
+        self.info_label = QtWidgets.QLabel()
         font = QtGui.QFont()
         font.set_point_size(15)
         self.info_label.font = font
@@ -25,8 +25,8 @@ class ErrorWindowGUI(QtWidgets.QDialog):
         self.text_browser.open_external_links = True
 
         self.button_layout = QtWidgets.QHBoxLayout()
-        self.quit_button = QtWidgets.QPushButton("Quit")
-        self.save_button = QtWidgets.QPushButton("Save route")
+        self.quit_button = QtWidgets.QPushButton()
+        self.save_button = QtWidgets.QPushButton()
         self.quit_button.size_policy = QtWidgets.QSizePolicy(
             QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
         )
@@ -41,3 +41,9 @@ class ErrorWindowGUI(QtWidgets.QDialog):
         self.main_layout.add_widget(self.text_browser)
         self.main_layout.add_layout(self.button_layout)
         self.set_modal(True)
+
+    def retranslate(self) -> None:
+        """Retranslate text that is always on display."""
+        self.info_label.text = _("An unexpected error has occurred")
+        self.quit_button.text = _("Quit")
+        self.save_button.text = _("Save route")

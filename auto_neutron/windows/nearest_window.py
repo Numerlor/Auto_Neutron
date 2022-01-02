@@ -28,6 +28,7 @@ class NearestWindow(NearestWindowGUI):
         super().__init__(parent)
         self.set_input_values_from_location(start_location)
         self.search_button.pressed.connect(self._make_nearest_request)
+        self.retranslate()
 
     def set_input_values_from_location(self, location: t.Optional[Location]) -> None:
         """Set the input spinboxes to x, y, z."""
