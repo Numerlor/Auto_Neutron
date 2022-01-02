@@ -66,7 +66,7 @@ class Hub(QtCore.QObject):
         self.window.table.doubleClicked.connect(self.get_index_row)
         self.game_state = GameState()
 
-        self.plotter_state = PlotterState(self.game_state)
+        self.plotter_state = PlotterState(self, self.game_state)
         self.plotter_state.new_system_signal.connect(self.new_system_callback)
         self.plotter_state.shut_down_signal.connect(self.display_shut_down_window)
 
@@ -86,8 +86,8 @@ class Hub(QtCore.QObject):
             MissingJournalWindow(self.window).show()
             return
 
-        self.fuel_warner = FuelWarn(self.game_state, self.window)
-        self.warn_worker = StatusWorker()
+        self.fuel_warner = FuelWarn(self, self.game_state, self.window)
+        self.warn_worker = StatusWorker(self)
         self.warn_worker.status_signal.connect(self.fuel_warner.warn)
 
         self.new_route_window()

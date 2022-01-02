@@ -32,10 +32,10 @@ class GameWorker(QtCore.QObject):
     new_system_index_sig = QtCore.Signal(int)
     route_end_sig = QtCore.Signal()
 
-    def __init__(self, route: RouteList, journal: Journal):
-        super().__init__()
+    def __init__(self, parent: QtCore.QObject, route: RouteList, journal: Journal):
+        super().__init__(parent)
         self._generator = journal.tail()
-        self._timer = QtCore.QTimer()
+        self._timer = QtCore.QTimer(self)
         self._timer.interval = 250
         self._timer.timeout.connect(partial(next, self._generator))
         self._stopped = False
@@ -68,10 +68,10 @@ class StatusWorker(QtCore.QObject):
 
     status_signal = QtCore.Signal(dict)
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, parent: QtCore.QObject):
+        super().__init__(parent)
         self._generator = self.read_status()
-        self._timer = QtCore.QTimer()
+        self._timer = QtCore.QTimer(self)
         self._timer.timeout.connect(partial(next, self._generator))
         self._timer.interval = 250
 

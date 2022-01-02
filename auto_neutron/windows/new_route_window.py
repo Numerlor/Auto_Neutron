@@ -411,7 +411,7 @@ class NewRouteWindow(NewRouteWindowGUI):
         self.game_state.connect_journal(journal)
         if self._journal_worker is not None:
             self._journal_worker.stop()
-        self._journal_worker = GameWorker([], journal)
+        self._journal_worker = GameWorker(self, [], journal)
         self._journal_worker.start()
 
         if loadout is not None and location is not None and cargo_mass is not None:

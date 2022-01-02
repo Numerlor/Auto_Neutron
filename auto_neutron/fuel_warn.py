@@ -20,17 +20,22 @@ log = logging.getLogger(__name__)
 IN_SUPERCRUISE_FLAG = 1 << 4
 FSD_COOLDOWN_FLAG = 1 << 18
 
-player = QtMultimedia.QMediaPlayer()
-player.audio_output = audio_output = QtMultimedia.QAudioOutput()
 
-
-class FuelWarn:
+class FuelWarn(QtCore.QObject):
     """Warn visually through the task bar and through audio when fuel is below set threshold."""
 
-    def __init__(self, game_state: GameState, alert_widget: QtWidgets.QWidget):
+    def __init__(
+        self,
+        parent: QtCore.QObject,
+        game_state: GameState,
+        alert_widget: QtWidgets.QWidget,
+    ):
+        super().__init__(parent)
         self._warned = False
         self._alert_widget = alert_widget
         self._game_state = game_state
+        self.player = QtMultimedia.QMediaPlayer(self)
+        self.player.audio_output = self.audio_output = QtMultimedia.QAudioOutput(self)
 
     def warn(self, status_dict: dict) -> None:
         """Execute alert when in supercruise, on FSD cool down and fuel is below threshold."""
@@ -72,10 +77,10 @@ class FuelWarn:
         if settings.Alerts.audio:
             if settings.Paths.alert_sound:
                 new_url = QtCore.QUrl.from_local_file(str(settings.Paths.alert_sound))
-                if new_url != player.source:
-                    player.source = new_url
+                if new_url != self.player.source:
+                    self.player.source = new_url
                 log.info(f"Playing file {settings.Paths.alert_sound} for alert.")
-                player.play()
+                self.player.play()
 
             else:
                 QtWidgets.QApplication.instance().beep()

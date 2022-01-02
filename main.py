@@ -70,7 +70,7 @@ if __debug__:
     stream_handler = logging.StreamHandler(stream=sys.stdout)
     stream_handler.setFormatter(log_format)
     root_logger.addHandler(stream_handler)
-    qt_interrupt_timer = create_interrupt_timer()
+    qt_interrupt_timer = create_interrupt_timer(app)
 
     logger_path = Path("logs/log.log")
     logger_path.parent.mkdir(exist_ok=True)

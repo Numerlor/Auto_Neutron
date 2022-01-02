@@ -58,9 +58,9 @@ class ExceptionHandler(QtCore.QObject):
         self.triggered.emit()
 
 
-def create_interrupt_timer() -> QtCore.QTimer:
+def create_interrupt_timer(parent: QtCore.QObject) -> QtCore.QTimer:
     """Interrupt the Qt event loop regularly to let python process signals."""
-    timer = QtCore.QTimer()
+    timer = QtCore.QTimer(parent)
     timer.interval = 50
     timer.timeout.connect(lambda: None)
     timer.start()

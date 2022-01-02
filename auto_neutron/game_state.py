@@ -62,8 +62,8 @@ class PlotterState(QtCore.QObject):
     new_system_signal = QtCore.Signal(str, int)
     shut_down_signal = QtCore.Signal()
 
-    def __init__(self, game_state: GameState):
-        super().__init__()
+    def __init__(self, parent: QtCore.QObject, game_state: GameState):
+        super().__init__(parent)
         self._game_state = game_state
 
         self._route_index = 0
@@ -80,7 +80,7 @@ class PlotterState(QtCore.QObject):
         """
         assert self.journal is not None, "Journal must be set first."
         if self.tail_worker is None:
-            self.tail_worker = GameWorker(route, self.journal)
+            self.tail_worker = GameWorker(self, route, self.journal)
             if self.plotter is not None:
                 self.tail_worker.new_system_index_sig.connect(
                     partial(setattr, self, "route_index")
@@ -163,7 +163,7 @@ class PlotterState(QtCore.QObject):
 
             if self._plotter is not None:
                 self.tail_worker.stop()
-                self.tail_worker = GameWorker(self.route, self.journal)
+                self.tail_worker = GameWorker(self, self.route, self.journal)
                 self.tail_worker.start()
                 self.tail_worker.new_system_index_sig.connect(
                     partial(setattr, self, "route_index")

@@ -24,7 +24,7 @@ class MainWindowGUI(QtWidgets.QMainWindow):
 
     def __init__(self):
         super().__init__()
-        self.table = QtWidgets.QTableWidget()
+        self.table = QtWidgets.QTableWidget(self)
         self._double_spinbox_delegate = DoubleSpinBoxDelegate()
         self._spinbox_delegate = SpinBoxDelegate()
         self._checkbox_delegate = CheckBoxDelegate()

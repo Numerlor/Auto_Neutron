@@ -16,17 +16,17 @@ class ErrorWindowGUI(QtWidgets.QDialog):
         super().__init__(parent)
         self.main_layout = QtWidgets.QVBoxLayout(self)
 
-        self.info_label = QtWidgets.QLabel()
+        self.info_label = QtWidgets.QLabel(self)
         font = QtGui.QFont()
         font.set_point_size(15)
         self.info_label.font = font
 
-        self.text_browser = QtWidgets.QTextBrowser()
+        self.text_browser = QtWidgets.QTextBrowser(self)
         self.text_browser.open_external_links = True
 
         self.button_layout = QtWidgets.QHBoxLayout()
-        self.quit_button = QtWidgets.QPushButton()
-        self.save_button = QtWidgets.QPushButton()
+        self.quit_button = QtWidgets.QPushButton(self)
+        self.save_button = QtWidgets.QPushButton(self)
         self.quit_button.size_policy = QtWidgets.QSizePolicy(
             QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
         )
