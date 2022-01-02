@@ -31,7 +31,6 @@ class LicenseWindow(QtWidgets.QDialog):
         self.set_layout(self.main_layout)
 
         self.retranslate()
-        self.show()
 
     def retranslate(self) -> None:
         """Retranslate text that is always on display."""

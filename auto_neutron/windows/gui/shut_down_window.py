@@ -62,8 +62,6 @@ class ShutDownWindowGUI(QtWidgets.QDialog):
         )
         self.main_layout.add_layout(self.button_layout)
 
-        self.show()
-
     def retranslate(self) -> None:
         """Retranslate text that is always on display."""
         self.info_label.text = _("Game shut down")

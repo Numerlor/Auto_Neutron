@@ -126,7 +126,6 @@ class NewRouteWindow(NewRouteWindowGUI):
         self._loaded_route: t.Optional[list[NeutronPlotRow]] = None
         self.retranslate()
         self._change_journal(0)
-        self.show()
 
     # region spansh plotters
     def _submit_neutron(self) -> None:
@@ -276,6 +275,7 @@ class NewRouteWindow(NewRouteWindowGUI):
         window.from_location_button.pressed.connect(
             lambda: window.set_input_values_from_location(self.game_state.location)
         )
+        window.show()
 
     def _set_line_edits_from_nearest(
         self, *line_edits: QtWidgets.QLineEdit, window: NearestWindow

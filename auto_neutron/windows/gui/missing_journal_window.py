@@ -33,7 +33,6 @@ class MissingJournalWindowGUI(QtWidgets.QDialog):
         )
 
         self.set_window_flag(QtCore.Qt.WindowCloseButtonHint, False)
-        self.show()
 
     def retranslate(self) -> None:
         """Retranslate text that is always on display."""

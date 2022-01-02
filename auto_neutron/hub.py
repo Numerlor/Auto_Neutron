@@ -59,7 +59,7 @@ class Hub(QtCore.QObject):
 
         self.window.show()
 
-        self.window.about_action.triggered.connect(partial(LicenseWindow, self.window))
+        self.window.about_action.triggered.connect(self.display_license_window)
         self.window.new_route_action.triggered.connect(self.new_route_window)
         self.window.settings_action.triggered.connect(self.display_settings)
         self.window.save_action.triggered.connect(self.save_route)
@@ -83,7 +83,7 @@ class Hub(QtCore.QObject):
             or not (JOURNAL_PATH / "Status.json").exists()
         ):
             # If the journal folder is missing, force the user to quit
-            MissingJournalWindow(self.window)
+            MissingJournalWindow(self.window).show()
             return
 
         self.fuel_warner = FuelWarn(self.game_state, self.window)
@@ -99,6 +99,7 @@ class Hub(QtCore.QObject):
         logging.info("Displaying new route window.")
         route_window = NewRouteWindow(self.window)
         route_window.route_created_signal.connect(self.new_route)
+        route_window.show()
 
     def update_route_from_edit(self, table_item: QtWidgets.QTableWidgetItem) -> None:
         """Edit the plotter's route with the new data in `table_item`."""
@@ -174,6 +175,7 @@ class Hub(QtCore.QObject):
         log.info("Displaying settings window.")
         window = SettingsWindow(self.window)
         window.settings_applied.connect(self.apply_settings)
+        window.show()
 
     def display_shut_down_window(self) -> None:
         """Display the shut down window and connect it to create a new route and save the current one."""
@@ -181,6 +183,13 @@ class Hub(QtCore.QObject):
         window = ShutDownWindow(self.window)
         window.new_journal_signal.connect(self.new_route)
         window.save_route_button.pressed.connect(partial(self.save_route, force=True))
+        window.show()
+
+    def display_license_window(self) -> None:
+        """Display the license window."""
+        log.info("Displaying license window.")
+        window = LicenseWindow(self.window)
+        window.show()
 
     def set_theme_from_os(self, dark: bool) -> None:
         """Set the current theme to the OS' theme, if the theme setting is set to follow the OS."""

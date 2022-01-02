@@ -174,8 +174,6 @@ class SettingsWindowGUI(QtWidgets.QDialog):
         for button in self.find_children(QtWidgets.QPushButton):
             button.auto_default = False
 
-        self.show()
-
     def retranslate(self) -> None:
         """Retranslate text that is always on display."""
         self.ok_button.text = _("Ok")
