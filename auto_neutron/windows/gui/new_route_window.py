@@ -9,6 +9,7 @@ from PySide6 import QtCore, QtWidgets
 
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa F401
+from auto_neutron.utils.forbid_uninitialized import ForbidUninitialized
 
 from .tooltip_slider import TooltipSlider
 
@@ -16,9 +17,29 @@ from .tooltip_slider import TooltipSlider
 class TabBase(QtWidgets.QWidget):
     """Provide the base for a tab with convenience methods."""
 
-    def __init__(self, parent: QtWidgets.QWidget):
+    system_cargo_layout = ForbidUninitialized()
+    source_edit = ForbidUninitialized()
+    target_edit = ForbidUninitialized()
+    cargo_label = ForbidUninitialized()
+    cargo_slider = ForbidUninitialized()
+
+    def __init__(self, parent: QtWidgets.QWidget, *, create_cargo: bool):
         super().__init__(parent)
         self.main_layout = QtWidgets.QVBoxLayout(self)
+        self.has_cargo = create_cargo
+        if create_cargo:
+            (
+                self.system_cargo_layout,
+                self.source_edit,
+                self.target_edit,
+                self.cargo_label,
+                self.cargo_slider,
+            ) = self.create_system_and_cargo_layout(self)
+        (
+            self.journal_submit_layout,
+            self.journal_combo,
+            self.submit_button,
+        ) = self.create_journal_and_submit_layout(self)
 
     def create_journal_and_submit_layout(
         self, widget_parent: QtWidgets.QWidget
@@ -78,14 +99,7 @@ class NeutronTab(TabBase):
     """The neutron plotter tab."""
 
     def __init__(self, parent: QtWidgets.QWidget):
-        super().__init__(parent)
-        (
-            self.system_cargo_layout,
-            self.source_edit,
-            self.target_edit,
-            self.cargo_label,
-            self.cargo_slider,
-        ) = self.create_system_and_cargo_layout(self)
+        super().__init__(parent, create_cargo=True)
 
         self.range_label = QtWidgets.QLabel("Range", self)
         self.range_spin = QtWidgets.QDoubleSpinBox(self)
@@ -113,12 +127,6 @@ class NeutronTab(TabBase):
         )
         self.eff_nearest_layout.add_widget(self.nearest_button)
 
-        (
-            self.journal_submit_layout,
-            self.journal_combo,
-            self.submit_button,
-        ) = self.create_journal_and_submit_layout(self)
-
         self.main_layout.add_layout(self.system_cargo_layout)
         self.main_layout.add_spacer_item(
             QtWidgets.QSpacerItem(
@@ -136,15 +144,7 @@ class ExactTab(TabBase):
     """The exact plotter tab."""
 
     def __init__(self, parent: QtWidgets.QWidget):
-        super().__init__(parent)
-        (
-            self.system_cargo_layout,
-            self.source_edit,
-            self.target_edit,
-            self.cargo_label,
-            self.cargo_slider,
-        ) = self.create_system_and_cargo_layout(self)
-
+        super().__init__(parent, create_cargo=True)
         self.cargo_slider.maximum = (
             999  # static value because ship may come from outside source
         )
@@ -172,12 +172,6 @@ class ExactTab(TabBase):
         )
         self.use_clipboard_and_nearest_layout.add_widget(self.nearest_button)
 
-        (
-            self.journal_submit_layout,
-            self.journal_combo,
-            self.submit_button,
-        ) = self.create_journal_and_submit_layout(self)
-
         self.main_layout.add_layout(self.system_cargo_layout)
         self.main_layout.add_spacer_item(
             QtWidgets.QSpacerItem(
@@ -196,7 +190,7 @@ class CSVTab(TabBase):
     """The CSV plotter tab."""
 
     def __init__(self, parent: QtWidgets.QWidget):
-        super().__init__(parent)
+        super().__init__(parent, create_cargo=False)
 
         self.path_layout = QtWidgets.QHBoxLayout()
 
@@ -208,12 +202,6 @@ class CSVTab(TabBase):
 
         self.path_layout.add_widget(self.path_edit)
         self.path_layout.add_widget(self.path_popup_button)
-
-        (
-            self.journal_submit_layout,
-            self.journal_combo,
-            self.submit_button,
-        ) = self.create_journal_and_submit_layout(self)
 
         self.main_layout.add_layout(self.path_layout)
         self.main_layout.add_spacer_item(
@@ -228,13 +216,7 @@ class LastTab(TabBase):
     """The last route plot tab."""
 
     def __init__(self, parent: QtWidgets.QWidget):
-        super().__init__(parent)
-
-        (
-            self.journal_submit_layout,
-            self.journal_combo,
-            self.submit_button,
-        ) = self.create_journal_and_submit_layout(self)
+        super().__init__(parent, create_cargo=False)
 
         self.source_label = QtWidgets.QLabel(self)
         self.location_label = QtWidgets.QLabel(self)
