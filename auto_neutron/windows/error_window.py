@@ -54,7 +54,9 @@ class ErrorWindow(ErrorWindowGUI):
         self._num_errors += 1
         if self._num_errors > 1:
             self.info_label.text = (
-                f"Multiple unexpected errors have occurred (x{self._num_errors})"
+                "Multiple unexpected errors have occurred (x{})".format(
+                    self._num_errors
+                )
             )
         else:
             super().show()

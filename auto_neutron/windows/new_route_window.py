@@ -348,15 +348,15 @@ class NewRouteWindow(NewRouteWindowGUI):
                 get_config_dir() / ROUTE_FILE_NAME
             )
             if self._loaded_route is not None:
-                self.last_route_tab.source_label.text = (
-                    f"Source: {self._loaded_route[0].system}"
+                self.last_route_tab.source_label.text = "Source: {}".format(
+                    self._loaded_route[0].system
                 )
                 self.last_route_tab.location_label.text = (
-                    f"Saved location: "
-                    f"{self._loaded_route[settings.General.last_route_index].system}"
+                    "Saved location: "
+                    + self._loaded_route[settings.General.last_route_index].system
                 )
-                self.last_route_tab.destination_label.text = (
-                    f"Destination: {self._loaded_route[-1].system}"
+                self.last_route_tab.destination_label.text = "Destination: {}".format(
+                    self._loaded_route[-1].system
                 )
 
     def _last_route_submit(self) -> None:

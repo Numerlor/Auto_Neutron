@@ -109,7 +109,7 @@ class MainWindow(MainWindowGUI):
         with self.resize_connection.temporarily_disconnect():
             if self._current_route_type is ExactPlotRow:
                 self.table.horizontal_header_item(0).set_text(
-                    f"System name ({index+1}/{self.table.row_count})"
+                    "System name ({}/{})".format(index + 1, self.table.row_count)
                 )
             else:
                 total_jumps = sum(
@@ -121,7 +121,7 @@ class MainWindow(MainWindowGUI):
                     for row in range(index, self.table.row_count)
                 )
                 self.table.horizontal_header_item(3).set_text(
-                    f"Jumps {remaining_jumps}/{total_jumps}"
+                    "Jumps {}/{}".format(remaining_jumps, total_jumps)
                 )
         self.table.resize_column_to_contents(0)
         self.table.resize_column_to_contents(3)
