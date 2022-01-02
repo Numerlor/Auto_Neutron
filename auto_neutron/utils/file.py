@@ -6,11 +6,10 @@ from __future__ import annotations
 import ctypes
 import msvcrt
 import os
+import sys
 import typing as t
 from ctypes import wintypes
-
-if t.TYPE_CHECKING:
-    from pathlib import Path
+from pathlib import Path
 
 GENERIC_WRITE = 0x40000000
 FILE_SHARE_DELETE = 0x00000004
@@ -81,3 +80,8 @@ def get_file_name(file: t.IO) -> str:
         raise ctypes.WinError()
 
     return buffer.value.removeprefix("\\\\?\\")
+
+
+def base_path() -> Path:
+    """Get the script's base path, using pyinstaller's temp directory when built, the project root otherwise."""
+    return Path(getattr(sys, "_MEIPASS", Path(sys.argv[0]).parent))

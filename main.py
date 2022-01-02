@@ -32,6 +32,7 @@ from auto_neutron import hub, win_theme_change_listener
 from auto_neutron.constants import APP, APPID, ORG, VERSION, get_config_dir
 from auto_neutron.settings import set_settings
 from auto_neutron.settings.toml_settings import TOMLSettings
+from auto_neutron.utils.file import base_path
 from auto_neutron.utils.logging import (
     SessionBackupHandler,
     UsernameFormatter,
@@ -39,16 +40,9 @@ from auto_neutron.utils.logging import (
 )
 from auto_neutron.utils.utils import ExceptionHandler, create_interrupt_timer
 
-
-def resource_path(relative_path: Path) -> str:
-    """Get absolute path to resource, using pyinstaller's temp directory when built."""
-    base_path = getattr(sys, "_MEIPASS", Path(__file__).parent / "resources")
-    return str(base_path / relative_path)
-
-
 ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(APPID)
 app = QtWidgets.QApplication(sys.argv)
-app.window_icon = QtGui.QIcon(resource_path(Path("icons_library.ico")))
+app.window_icon = QtGui.QIcon(str(base_path() / "resources/icons_library.ico"))
 app.application_name = APP
 app.organization_name = ORG
 app.set_style("Fusion")
