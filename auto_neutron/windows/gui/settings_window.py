@@ -200,7 +200,7 @@ class SettingsWindowGUI(QtWidgets.QDialog):
         # Escape % for translation
         self.alert_threshold_label.text = _(
             "%% of maximum fuel usage left in tank before triggering alert"
-        )
+        ).replace("%%", "%")
 
         self.window_title = _("Settings")
         self.ahk_bind_edit.tool_tip = _(
