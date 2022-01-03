@@ -29,7 +29,7 @@ def set_active_locale(locale: babel.Locale) -> None:
 
 def code_from_locale(locale: babel.Locale) -> str:
     """Get the language code of `locale`."""
-    return "".join(
+    return "_".join(
         filter(
             None,
             (locale.language, locale.territory, locale.script, locale.variant),
