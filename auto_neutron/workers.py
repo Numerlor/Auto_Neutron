@@ -40,10 +40,10 @@ class GameWorker(QtCore.QObject):
         self._timer.timeout.connect(partial(next, self._generator))
         self._stopped = False
         self.route = route
-        journal.system_sig.connect(self._emit_next_system)
+        journal.system_sig.connect(self.emit_next_system)
 
-    def _emit_next_system(self, location: Location) -> None:
-        """Emit the next system in the route and its index, or end of route."""
+    def emit_next_system(self, location: Location) -> None:
+        """Emit the next system in the route and its index if location is in the route, or the end of route signal."""
         with contextlib.suppress(ValueError):
             new_index = self.route.index(location.name) + 1
             if new_index < len(self.route):
