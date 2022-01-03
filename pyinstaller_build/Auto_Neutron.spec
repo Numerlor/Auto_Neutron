@@ -8,6 +8,7 @@ a = Analysis(
     binaries=[],
     datas=[
         ("../resources/icons_library.ico", "./resources"),
+        ("../locale", "./locale"),
     ],
     hiddenimports=[],
     hookspath=[],
