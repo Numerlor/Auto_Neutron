@@ -36,9 +36,6 @@ class ShutDownWindow(ShutDownWindowGUI):
         self.quit_button.pressed.connect(QtWidgets.QApplication.instance().quit)
 
         self._change_journal(0)
-        rect = self.geometry
-        rect.adjust(-5, -18, 17, 5)  # expand the window a bit to give it breathing room
-        self.geometry = rect
 
     def _change_journal(self, index: int) -> None:
         """Change the selected journal, enable/disable the button depending on its shut down state."""
