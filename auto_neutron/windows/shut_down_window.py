@@ -36,6 +36,7 @@ class ShutDownWindow(ShutDownWindowGUI):
         self.quit_button.pressed.connect(QtWidgets.QApplication.instance().quit)
 
         self._change_journal(0)
+        self.retranslate()
 
     def _change_journal(self, index: int) -> None:
         """Change the selected journal, enable/disable the button depending on its shut down state."""
