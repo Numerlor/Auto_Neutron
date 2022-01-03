@@ -128,3 +128,8 @@ class SettingsWindow(SettingsWindowGUI):
             font.set_point_size(self.font_size_chooser.value)
             font.set_bold(self.font_bold_checkbox.checked)
             settings.Window.font = font
+
+    def change_event(self, event: QtCore.QEvent) -> None:
+        """Retranslate the GUI when a language change occurs."""
+        if event.type() == QtCore.QEvent.LanguageChange:
+            self.retranslate()

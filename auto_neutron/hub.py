@@ -9,7 +9,10 @@ import logging
 import typing as t
 from functools import partial
 
+import babel
 from PySide6 import QtCore, QtGui, QtWidgets
+
+import auto_neutron.locale
 
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa: F401
@@ -169,6 +172,13 @@ class Hub(QtCore.QObject):
                 self.plotter_state.plotter, AhkPlotter
             ):
                 self.plotter_state.plotter = AhkPlotter(start_system=current_sys.system)
+
+        new_locale = babel.Locale.parse(settings.General.locale)
+        if new_locale != auto_neutron.locale.get_active_locale():
+            auto_neutron.locale.set_active_locale(new_locale)
+            auto_neutron.locale.install_translation(settings.General.locale)
+            app = QtWidgets.QApplication.instance()
+            app.post_event(app, QtCore.QEvent(QtCore.QEvent.LanguageChange))
 
     def display_settings(self) -> None:
         """Display the settings window and connect the applied signal to refresh appearance."""

@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from PySide6 import QtWidgets
+from PySide6 import QtCore, QtWidgets
 
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa: F401
@@ -18,3 +18,8 @@ class MissingJournalWindow(MissingJournalWindowGUI):
 
         self.quit_button.pressed.connect(QtWidgets.QApplication.instance().quit)
         self.retranslate()
+
+    def change_event(self, event: QtCore.QEvent) -> None:
+        """Retranslate the GUI when a language change occurs."""
+        if event.type() == QtCore.QEvent.LanguageChange:
+            self.retranslate()

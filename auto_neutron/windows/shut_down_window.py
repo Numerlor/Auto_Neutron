@@ -48,3 +48,8 @@ class ShutDownWindow(ShutDownWindowGUI):
         *_, shut_down = journal.get_static_state()
         self.new_journal_button.enabled = not shut_down
         self._selected_journal = journal
+
+    def change_event(self, event: QtCore.QEvent) -> None:
+        """Retranslate the GUI when a language change occurs."""
+        if event.type() == QtCore.QEvent.LanguageChange:
+            self.retranslate()

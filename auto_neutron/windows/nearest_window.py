@@ -6,7 +6,7 @@ from __future__ import annotations
 import logging
 import typing as t
 
-from PySide6 import QtNetwork, QtWidgets
+from PySide6 import QtCore, QtNetwork, QtWidgets
 
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa F401
@@ -68,3 +68,8 @@ class NearestWindow(NearestWindowGUI):
         self.z_result_label.text = (
             format(data["system"]["z"], ".2f").rstrip("0").rstrip(".")
         )
+
+    def change_event(self, event: QtCore.QEvent) -> None:
+        """Retranslate the GUI when a language change occurs."""
+        if event.type() == QtCore.QEvent.LanguageChange:
+            self.retranslate()

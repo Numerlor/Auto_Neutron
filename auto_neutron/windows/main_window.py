@@ -142,6 +142,11 @@ class MainWindow(MainWindowGUI):
         """Save size and position to settings."""
         settings.Window.geometry = self.save_geometry()
 
+    def change_event(self, event: QtCore.QEvent) -> None:
+        """Retranslate the GUI when a language change occurs."""
+        if event.type() == QtCore.QEvent.LanguageChange:
+            self.retranslate()
+
     def retranslate(self) -> None:
         """Retranslate text that is always on display."""
         super().retranslate()
