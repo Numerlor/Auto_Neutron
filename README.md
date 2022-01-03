@@ -42,7 +42,8 @@ In case you want to plot with Spansh, but the source or target systems are not f
 ## Settings
 ### Appearance
 * The font dropdown, size chooser and bold checkmark let you control the font used in the main window.
-* The dark mode checkmark modifies the app's theme
+* The dark mode checkmark modifies the app's theme, in the "partially checked" (box) state, the current Windows theme will be used.
+* A different language can be chosen from the available translations.
 
 ### Behaviour
 * The "Save route on window close" checkmark changes where the current route and its position are saved to be reused later when the window is closed
