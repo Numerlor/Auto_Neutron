@@ -1,12 +1,12 @@
 # This file is part of Auto_Neutron.
-# Copyright (C) 2021  Numerlor
+# Copyright (C) 2019  Numerlor
 
 from __future__ import annotations
 
 import logging
 import typing as t
 
-from PySide6 import QtNetwork, QtWidgets
+from PySide6 import QtCore, QtNetwork, QtWidgets
 
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa F401
@@ -28,6 +28,7 @@ class NearestWindow(NearestWindowGUI):
         super().__init__(parent)
         self.set_input_values_from_location(start_location)
         self.search_button.pressed.connect(self._make_nearest_request)
+        self.retranslate()
 
     def set_input_values_from_location(self, location: t.Optional[Location]) -> None:
         """Set the input spinboxes to x, y, z."""
@@ -67,3 +68,8 @@ class NearestWindow(NearestWindowGUI):
         self.z_result_label.text = (
             format(data["system"]["z"], ".2f").rstrip("0").rstrip(".")
         )
+
+    def change_event(self, event: QtCore.QEvent) -> None:
+        """Retranslate the GUI when a language change occurs."""
+        if event.type() == QtCore.QEvent.LanguageChange:
+            self.retranslate()

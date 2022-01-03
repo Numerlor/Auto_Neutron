@@ -1,5 +1,7 @@
 # This file is part of Auto_Neutron.
-# Copyright (C) 2021  Numerlor
+# Copyright (C) 2019  Numerlor
+
+from __future__ import annotations
 
 from PySide6 import QtGui, QtWidgets
 
@@ -14,17 +16,17 @@ class ErrorWindowGUI(QtWidgets.QDialog):
         super().__init__(parent)
         self.main_layout = QtWidgets.QVBoxLayout(self)
 
-        self.info_label = QtWidgets.QLabel("An unexpected error has occurred")
+        self.info_label = QtWidgets.QLabel(self)
         font = QtGui.QFont()
         font.set_point_size(15)
         self.info_label.font = font
 
-        self.text_browser = QtWidgets.QTextBrowser()
+        self.text_browser = QtWidgets.QTextBrowser(self)
         self.text_browser.open_external_links = True
 
         self.button_layout = QtWidgets.QHBoxLayout()
-        self.quit_button = QtWidgets.QPushButton("Quit")
-        self.save_button = QtWidgets.QPushButton("Save route")
+        self.quit_button = QtWidgets.QPushButton(self)
+        self.save_button = QtWidgets.QPushButton(self)
         self.quit_button.size_policy = QtWidgets.QSizePolicy(
             QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
         )
@@ -39,3 +41,9 @@ class ErrorWindowGUI(QtWidgets.QDialog):
         self.main_layout.add_widget(self.text_browser)
         self.main_layout.add_layout(self.button_layout)
         self.set_modal(True)
+
+    def retranslate(self) -> None:
+        """Retranslate text that is always on display."""
+        self.info_label.text = _("An unexpected error has occurred")
+        self.quit_button.text = _("Quit")
+        self.save_button.text = _("Save route")

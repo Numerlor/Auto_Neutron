@@ -1,9 +1,12 @@
 # This file is part of Auto_Neutron.
-# Copyright (C) 2021  Numerlor
+# Copyright (C) 2019  Numerlor
+
+from __future__ import annotations
 
 import ctypes
 import msvcrt
 import os
+import sys
 import typing as t
 from ctypes import wintypes
 from pathlib import Path
@@ -77,3 +80,8 @@ def get_file_name(file: t.IO) -> str:
         raise ctypes.WinError()
 
     return buffer.value.removeprefix("\\\\?\\")
+
+
+def base_path() -> Path:
+    """Get the script's base path, using pyinstaller's temp directory when built, the project root otherwise."""
+    return Path(getattr(sys, "_MEIPASS", Path(sys.argv[0]).parent))

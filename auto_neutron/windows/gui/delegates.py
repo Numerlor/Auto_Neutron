@@ -1,6 +1,8 @@
 # This file is part of Auto_Neutron.
 # Copyright (C) 2019  Numerlor
 
+from __future__ import annotations
+
 from typing import Union
 
 from PySide6 import QtCore, QtGui, QtWidgets
@@ -77,7 +79,6 @@ class CheckBoxDelegate(QtWidgets.QStyledItemDelegate):
         index: Union[QtCore.QModelIndex, QtCore.QPersistentModelIndex],
     ) -> None:
         """Pain the checkbox in the center."""
-        # TODO Handle color set by the table item's color brushes
         check_box_style_option = QtWidgets.QStyleOptionButton()
 
         if index.data():  # checked
@@ -98,6 +99,13 @@ class CheckBoxDelegate(QtWidgets.QStyledItemDelegate):
             check_box_style_option.palette.set_color(
                 QtGui.QPalette.Text, foreground_brush.color()
             )
+
+        check_box_style_option.palette.set_color(
+            QtGui.QPalette.Window, QtGui.QColor(100, 100, 0, 0)
+        )
+        check_box_style_option.palette.set_color(
+            QtGui.QPalette.Base, QtGui.QColor(100, 100, 0, 0)
+        )
 
         QtWidgets.QApplication.style().draw_control(
             QtWidgets.QStyle.CE_CheckBox, check_box_style_option, painter

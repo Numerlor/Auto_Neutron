@@ -1,5 +1,7 @@
 # This file is part of Auto_Neutron.
-# Copyright (C) 2021  Numerlor
+# Copyright (C) 2019  Numerlor
+
+from __future__ import annotations
 
 import contextlib
 import csv
@@ -20,17 +22,16 @@ from auto_neutron.constants import (
     SPANSH_API_URL,
     get_config_dir,
 )
-from auto_neutron.game_state import Location
 from auto_neutron.hub import GameState
 from auto_neutron.journal import Journal
 from auto_neutron.route_plots import (
     ExactPlotRow,
     NeutronPlotRow,
-    RouteList,
     spansh_exact_callback,
     spansh_neutron_callback,
 )
 from auto_neutron.ship import Ship
+from auto_neutron.utils.forbid_uninitialized import ForbidUninitialized
 from auto_neutron.utils.network import make_network_request
 from auto_neutron.utils.signal import ReconnectingSignal
 from auto_neutron.utils.utils import create_request_delay_iterator
@@ -39,6 +40,9 @@ from auto_neutron.workers import GameWorker
 from .gui.new_route_window import NewRouteWindowGUI
 from .nearest_window import NearestWindow
 
+if t.TYPE_CHECKING:
+    from auto_neutron.game_state import Location
+    from auto_neutron.route_plots import RouteList
 log = logging.getLogger(__name__)
 
 
@@ -46,12 +50,14 @@ class NewRouteWindow(NewRouteWindowGUI):
     """The UI for plotting a new route, from CSV, Spansh plotters, or the last saved route."""
 
     route_created_signal = QtCore.Signal(Journal, list, int)
+    game_state = ForbidUninitialized()
+    selected_journal = ForbidUninitialized()
 
     def __init__(self, parent: QtWidgets.QWidget):
         super().__init__(parent)
-        self.game_state: t.Optional[GameState] = None
-        self.selected_journal: t.Optional[Journal] = None
-        self._journal_worker: t.Optional[GameWorker] = None
+        self.game_state: GameState = None  # type: ignore
+        self.selected_journal: Journal = None  # type: ignore
+        self._journal_worker: GameWorker = None  # type: ignore
 
         # region spansh tabs init
         self.spansh_neutron_tab.nearest_button.pressed.connect(
@@ -115,6 +121,10 @@ class NewRouteWindow(NewRouteWindowGUI):
         for signal in self.combo_signals:
             signal.connect()
 
+        self.tab_widget.currentChanged.connect(self._display_saved_route)
+        self._route_displayed = False
+        self._loaded_route: t.Optional[list[NeutronPlotRow]] = None
+        self.retranslate()
         self._change_journal(0)
 
     # region spansh plotters
@@ -206,17 +216,15 @@ class NewRouteWindow(NewRouteWindowGUI):
 
         self.spansh_exact_tab.cargo_slider.value = current_cargo
 
-        if self.game_state.ship.fsd is not None:
-            self.spansh_neutron_tab.range_spin.value = ship.jump_range(
-                cargo_mass=current_cargo
-            )
+        self.spansh_neutron_tab.range_spin.value = ship.jump_range(
+            cargo_mass=current_cargo
+        )
 
     def _recalculate_range(self, cargo_mass: int) -> None:
         """Recalculate jump range with the new cargo_mass."""
-        if self.game_state.ship.fsd is not None:
-            self.spansh_neutron_tab.range_spin.value = self.game_state.ship.jump_range(
-                cargo_mass=cargo_mass
-            )
+        self.spansh_neutron_tab.range_spin.value = self.game_state.ship.jump_range(
+            cargo_mass=cargo_mass
+        )
 
     def _set_neutron_submit(self) -> None:
         """Enable the neutron submit button if both inputs are filled, disable otherwise."""
@@ -267,6 +275,7 @@ class NewRouteWindow(NewRouteWindowGUI):
         window.from_location_button.pressed.connect(
             lambda: window.set_input_values_from_location(self.game_state.location)
         )
+        window.show()
 
     def _set_line_edits_from_nearest(
         self, *line_edits: QtWidgets.QLineEdit, window: NearestWindow
@@ -285,8 +294,8 @@ class NewRouteWindow(NewRouteWindowGUI):
             start_path = str(settings.Paths.csv.parent)
         else:
             start_path = ""
-        path, _ = QtWidgets.QFileDialog.get_open_file_name(
-            self, "Select CSV file", start_path, "CSV (*.csv);;All types (*.*)"
+        path, __ = QtWidgets.QFileDialog.get_open_file_name(
+            self, _("Select CSV file"), start_path, "CSV (*.csv);;All types (*.*)"
         )
         if path:
             self.csv_tab.path_edit.text = str(Path(path))
@@ -305,40 +314,50 @@ class NewRouteWindow(NewRouteWindowGUI):
         log.info(f"Set saved csv {path=}")
         settings.Paths.csv = path
 
-    def _last_route_submit(self) -> None:
-        log.info("Submitting last route.")
-        route = self._route_from_csv(get_config_dir() / ROUTE_FILE_NAME)
-        if route is not None:
-            self.emit_and_close(
-                self.selected_journal,
-                route,
-                route_index=settings.General.last_route_index,
-            )
-
     def _route_from_csv(self, path: Path) -> t.Optional[RouteList]:
         try:
             with path.open(encoding="utf8") as csv_file:
-                reader = csv.reader(csv_file)
+                reader = csv.reader(csv_file, strict=True)
                 header = next(reader)
                 if len(header) == 5:
                     row_type = NeutronPlotRow
                 elif len(header) == 7:
                     row_type = ExactPlotRow
                 else:
-                    self.status_bar.show_message("Invalid CSV file.", 5_000)
+                    self.status_bar.show_message(_("Invalid CSV file."), 5_000)
                     return
                 log.info(f"Parsing csv file of type {row_type.__name__} at {path}.")
                 return [row_type.from_csv_row(row) for row in reader]
         except FileNotFoundError:
-            self.status_bar.show_message("CSV file doesn't exist.", 5_000)
+            self.status_bar.show_message(_("CSV file doesn't exist."), 5_000)
         except csv.Error as error:
-            self.status_bar.show_message("Invalid CSV file: " + str(error), 5_000)
+            self.status_bar.show_message(_("Invalid CSV file: ") + str(error), 5_000)
         except IndexError:
-            self.status_bar.show_message("Truncated data in CSV file.", 5_000)
+            self.status_bar.show_message(_("Truncated data in CSV file."), 5_000)
         except ValueError:
-            self.status_bar.show_message("Invalid data in CSV file.", 5_000)
+            self.status_bar.show_message(_("Invalid data in CSV file."), 5_000)
         except OSError:
-            self.status_bar.show_message("Invalid path.", 5_000)
+            self.status_bar.show_message(_("Invalid path."), 5_000)
+
+    # endregion
+
+    # region last_route
+    def _display_saved_route(self, index: int) -> None:
+        """Display saved route info if user switched to that tab for the first time."""
+        if not self._route_displayed and index == 3:
+            self._loaded_route = self._route_from_csv(
+                get_config_dir() / ROUTE_FILE_NAME
+            )
+            self._update_saved_route_text()
+
+    def _last_route_submit(self) -> None:
+        log.info("Submitting last route.")
+        if self._loaded_route is not None:
+            self.emit_and_close(
+                self.selected_journal,
+                self._loaded_route,
+                route_index=settings.General.last_route_index,
+            )
 
     # endregion
 
@@ -378,7 +397,7 @@ class NewRouteWindow(NewRouteWindowGUI):
         self.selected_journal = journal
         if shut_down:
             self.status_bar.show_message(
-                "Selected journal ended with a shut down event.", 10_000
+                _("Selected journal ended with a shut down event."), 10_000
             )
             self.csv_tab.submit_button.enabled = False
             self._set_neutron_submit()
@@ -392,7 +411,7 @@ class NewRouteWindow(NewRouteWindowGUI):
         self.game_state.connect_journal(journal)
         if self._journal_worker is not None:
             self._journal_worker.stop()
-        self._journal_worker = GameWorker([], journal)
+        self._journal_worker = GameWorker(self, [], journal)
         self._journal_worker.start()
 
         if loadout is not None and location is not None and cargo_mass is not None:
@@ -411,3 +430,32 @@ class NewRouteWindow(NewRouteWindowGUI):
         """Emit a new route and close the window."""
         self.route_created_signal.emit(journal, route, route_index)
         self.close()
+
+    def change_event(self, event: QtCore.QEvent) -> None:
+        """Retranslate the GUI when a language change occurs."""
+        if event.type() == QtCore.QEvent.LanguageChange:
+            self.retranslate()
+
+    def retranslate(self) -> None:
+        """Retranslate text that is always on display."""
+        exit_stack = contextlib.ExitStack()
+        with exit_stack:
+            for signal in self.combo_signals:
+                exit_stack.enter_context(signal.temporarily_disconnect())
+            super().retranslate()
+            self._update_saved_route_text()
+
+    def _update_saved_route_text(self) -> None:
+        """Update the saved route information from the currently loaded route."""
+        if self._loaded_route is not None:
+            # NOTE: Source system
+            self.last_route_tab.source_label.text = _("Source: {}").format(
+                self._loaded_route[0].system
+            )
+            self.last_route_tab.location_label.text = _("Saved location: {}").format(
+                self._loaded_route[settings.General.last_route_index].system
+            )
+            # NOTE: destination system
+            self.last_route_tab.destination_label.text = _("Destination: {}").format(
+                self._loaded_route[-1].system
+            )

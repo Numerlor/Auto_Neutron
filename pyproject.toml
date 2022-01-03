@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "Auto_Neutron"
-version = "2.0.2"
+version = "2.0.3"
 description = "An automatic neutron route plotter for Elite Dangerous"
 authors = ["Numerlor <numerlor@users.noreply.github.com>"]
 license = "GPL-3.0-or-later"
@@ -9,11 +9,13 @@ license = "GPL-3.0-or-later"
 python = "3.9.*"
 
 PySide6 = "~6.2.0"
+tomli = "~1.2.3"
+tomli-w = "~1.0.0"
+babel = "~2.9.1"
 
 [tool.poetry.dev-dependencies]
-# Base tools
+typing-extensions = ">=4.0.1"
 flake8 = "~4.0"
-
 flake8-annotations = "~2.7"
 flake8-bandit = "~2.1"
 flake8-bugbear = "21.11.29"
@@ -26,8 +28,6 @@ pre-commit = "~2.16"
 pyinstaller = "~4.7"
 taskipy = "~1.9"
 python-dotenv = "~0.19.2"
-tomli = "~1.2.2"
-tomli-w = "~1.0.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -51,3 +51,8 @@ lint = "pre-commit run --all-files"
 pyside-pyi = "pyside6-genpyi all --feature snake_case true_property"
 build = "python -OO pyinstaller_build/build.py"
 build_debug = "python pyinstaller_build/build.py"
+
+i18n-init = "pybabel init -i .\\locale\\auto_neutron.pot -d .\\locale -D auto_neutron -l"
+i18n-compile = "pybabel compile -d locale -D auto_neutron"
+i18n-update = "pybabel update -i .\\locale\\auto_neutron.pot -d .\\locale -D auto_neutron"
+i18n-extract = "pybabel extract auto_neutron -o locale/auto_neutron.pot -c NOTE"

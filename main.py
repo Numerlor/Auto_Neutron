@@ -14,22 +14,26 @@
 # You should have received a copy of the GNU General Public License
 # along with Auto_Neutron.  If not, see <https://www.gnu.org/licenses/>.
 
+from __future__ import annotations
+
 import ctypes
 import logging
 import sys
 from logging import handlers
 from pathlib import Path
 
+import babel
 from PySide6 import QtGui, QtNetwork, QtWidgets
 
-import auto_neutron
+import auto_neutron.locale
 
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa F401
-from auto_neutron import hub
+from auto_neutron import hub, win_theme_change_listener
 from auto_neutron.constants import APP, APPID, ORG, VERSION, get_config_dir
-from auto_neutron.settings import set_settings
+from auto_neutron.settings import General, set_settings
 from auto_neutron.settings.toml_settings import TOMLSettings
+from auto_neutron.utils.file import base_path
 from auto_neutron.utils.logging import (
     SessionBackupHandler,
     UsernameFormatter,
@@ -37,27 +41,20 @@ from auto_neutron.utils.logging import (
 )
 from auto_neutron.utils.utils import ExceptionHandler, create_interrupt_timer
 
-
-def resource_path(relative_path: Path) -> str:
-    """Get absolute path to resource, using pyinstaller's temp directory when built."""
-    base_path = getattr(sys, "_MEIPASS", Path(__file__).parent / "resources")
-    return str(base_path / relative_path)
-
-
 ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(APPID)
 app = QtWidgets.QApplication(sys.argv)
-app.window_icon = QtGui.QIcon(resource_path(Path("icons_library.ico")))
+app.window_icon = QtGui.QIcon(str(base_path() / "resources/icons_library.ico"))
 app.application_name = APP
 app.organization_name = ORG
 app.set_style("Fusion")
 
-auto_neutron.network_mgr = mgr = QtNetwork.QNetworkAccessManager()
+auto_neutron.network_mgr = QtNetwork.QNetworkAccessManager()
 
 # create org and app folders
 get_config_dir().mkdir(parents=True, exist_ok=True)
 
 root_logger = logging.getLogger()
-logging.getLogger("ahk").setLevel(logging.WARNING)
+
 log_format = UsernameFormatter(
     "{asctime} | {module:>16} | {levelname:>7} | {message}",
     datefmt="%H:%M:%S",
@@ -68,7 +65,7 @@ if __debug__:
     stream_handler = logging.StreamHandler(stream=sys.stdout)
     stream_handler.setFormatter(log_format)
     root_logger.addHandler(stream_handler)
-    qt_interrupt_timer = create_interrupt_timer()
+    qt_interrupt_timer = create_interrupt_timer(app)
 
     logger_path = Path("logs/log.log")
     logger_path.parent.mkdir(exist_ok=True)
@@ -88,6 +85,8 @@ ex_handler = ExceptionHandler()
 sys.excepthook = ex_handler.handler
 
 set_settings(TOMLSettings((get_config_dir() / "config.toml")))
+auto_neutron.locale.set_active_locale(babel.Locale.parse(General.locale))
 root_logger.info(f"Starting Auto_Neutron ver {VERSION}")
-hub = hub.Hub(ex_handler)
-sys.exit(app.exec())
+with win_theme_change_listener.create_listener() as listener:
+    hub = hub.Hub(ex_handler, listener)
+    sys.exit(app.exec())

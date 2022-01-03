@@ -1,134 +1,45 @@
 # This file is part of Auto_Neutron.
-# Copyright (C) 2021  Numerlor
+# Copyright (C) 2019  Numerlor
+
+from __future__ import annotations
 
 import typing as t
 
-from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6 import QtCore, QtWidgets
 
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa F401
+from auto_neutron.utils.forbid_uninitialized import ForbidUninitialized
 
-
-class LabeledSlider(QtWidgets.QSlider):
-    """Slider that shows current value in a boxed label above the handle."""
-
-    def __init__(
-        self, orientation: QtCore.Qt.OtherFocusReason, parent: QtWidgets.QWidget
-    ):
-        super().__init__(orientation, parent)
-        self._value_label = QtWidgets.QLabel(parent)
-        self._value_label.frame_shape = QtWidgets.QFrame.StyledPanel
-        self._value_label.frame_shadow = QtWidgets.QFrame.Raised
-        self._value_label.size_policy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
-        )
-        self._value_label.auto_fill_background = True
-        self._value_label.hide()
-
-        self._label_hide_timer = QtCore.QTimer(self)
-        self._label_hide_timer.single_shot_ = True
-        self._label_hide_timer.timeout.connect(self._hide_value_label_if_not_hover)
-
-        self.sliderPressed.connect(self._on_press)
-        self.sliderReleased.connect(self._on_release)
-
-        self.mouse_tracking = True
-        self._mouse_on_handle = False
-
-    def slider_change(self, change: QtWidgets.QAbstractSlider.SliderChange) -> None:
-        """Show the label above the slider's handle. If the user is not holding the slider, hide it in 1 second."""
-        super().slider_change(change)
-        if change == QtWidgets.QAbstractSlider.SliderChange.SliderValueChange:
-            self._display_value_tooltip(start_hide_timer=True)
-
-    def _display_value_tooltip(self, *, start_hide_timer: bool) -> None:
-        """Display a value tooltip on top of the slider's handle."""
-        option = QtWidgets.QStyleOptionSlider()
-        self.init_style_option(option)
-
-        handle_rect = self.style().sub_control_rect(
-            QtWidgets.QStyle.CC_Slider,
-            option,
-            QtWidgets.QStyle.SC_SliderHandle,
-            self,
-        )
-        self._value_label.text = str(self.value)
-        self._value_label.adjust_size()
-        new_rect = QtCore.QRect(
-            self.map_to_parent(
-                QtCore.QPoint(
-                    handle_rect.left()
-                    - (self._value_label.rect.width() - handle_rect.width()) / 2,
-                    handle_rect.top() - self._value_label.rect.height(),
-                )
-            ),
-            self.map_to_parent(
-                QtCore.QPoint(
-                    handle_rect.right()
-                    + (self._value_label.rect.width() - handle_rect.width()) / 2,
-                    handle_rect.top(),
-                )
-            ),
-        )
-        self._value_label.geometry = new_rect
-        self._value_label.show()
-        if start_hide_timer:
-            self._label_hide_timer.interval = 1000
-            self._label_hide_timer.start()
-
-    def _on_press(self) -> None:
-        """Set the slider as being pressed and stop the hide timer."""
-        self._label_hide_timer.stop()
-        self._display_value_tooltip(start_hide_timer=False)
-
-    def _on_release(self) -> None:
-        """Set the slider as being released and start the timer to hide the label in 500ms."""
-        self._label_hide_timer.interval = 500
-        self._label_hide_timer.start()
-
-    def mouse_move_event(self, event: QtGui.QMouseEvent) -> None:
-        """Show the value tooltip on hover."""
-        super().mouse_move_event(event)
-        option = QtWidgets.QStyleOptionSlider()
-        self.init_style_option(option)
-
-        handle_rect = self.style().sub_control_rect(
-            QtWidgets.QStyle.CC_Slider,
-            option,
-            QtWidgets.QStyle.SC_SliderHandle,
-            self,
-        )
-
-        on_handle = handle_rect.contains(event.pos())
-
-        if on_handle and not self._mouse_on_handle:
-            self._mouse_on_handle = True
-            self._display_value_tooltip(start_hide_timer=False)
-        elif not on_handle and self._mouse_on_handle:
-            self._mouse_on_handle = False
-            if not self._label_hide_timer.active:
-                self._value_label.hide()
-
-    def leave_event(self, event: QtCore.QEvent) -> None:
-        """Hide the value label if the user was hovering over it and the hide timer is not active."""
-        super().leave_event(event)
-        if self._mouse_on_handle:
-            self._mouse_on_handle = False
-            if not self._label_hide_timer.active:
-                self._value_label.hide()
-
-    def _hide_value_label_if_not_hover(self) -> None:
-        """Hide the value label if the cursor is not hovering over the handle."""
-        if not self._mouse_on_handle:
-            self._value_label.hide()
+from .tooltip_slider import TooltipSlider
 
 
 class TabBase(QtWidgets.QWidget):
     """Provide the base for a tab with convenience methods."""
 
-    def __init__(self, parent: QtWidgets.QWidget):
+    system_cargo_layout = ForbidUninitialized()
+    source_edit = ForbidUninitialized()
+    target_edit = ForbidUninitialized()
+    cargo_label = ForbidUninitialized()
+    cargo_slider = ForbidUninitialized()
+
+    def __init__(self, parent: QtWidgets.QWidget, *, create_cargo: bool):
         super().__init__(parent)
         self.main_layout = QtWidgets.QVBoxLayout(self)
+        self.has_cargo = create_cargo
+        if create_cargo:
+            (
+                self.system_cargo_layout,
+                self.source_edit,
+                self.target_edit,
+                self.cargo_label,
+                self.cargo_slider,
+            ) = self.create_system_and_cargo_layout(self)
+        (
+            self.journal_submit_layout,
+            self.journal_combo,
+            self.submit_button,
+        ) = self.create_journal_and_submit_layout(self)
 
     def create_journal_and_submit_layout(
         self, widget_parent: QtWidgets.QWidget
@@ -137,14 +48,10 @@ class TabBase(QtWidgets.QWidget):
         journal_submit_layout = QtWidgets.QHBoxLayout()
 
         journal_combo = QtWidgets.QComboBox(widget_parent)
-        journal_combo.size_policy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
-        )
-        journal_combo.add_items(["Last journal", "Second to last", "Third to last"])
 
-        submit_button = QtWidgets.QPushButton("Submit", widget_parent)
+        submit_button = QtWidgets.QPushButton(widget_parent)
         submit_button.size_policy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
+            QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Maximum
         )
 
         journal_submit_layout.add_widget(
@@ -161,7 +68,7 @@ class TabBase(QtWidgets.QWidget):
         QtWidgets.QLineEdit,
         QtWidgets.QLineEdit,
         QtWidgets.QLabel,
-        LabeledSlider,
+        TooltipSlider,
     ]:
         """Create a layout that holds the top system text edits and cargo slider."""
         layout = QtWidgets.QVBoxLayout()
@@ -169,11 +76,8 @@ class TabBase(QtWidgets.QWidget):
         source_system_edit = QtWidgets.QLineEdit(parent)
         target_system_edit = QtWidgets.QLineEdit(parent)
 
-        source_system_edit.placeholder_text = "Source system"
-        target_system_edit.placeholder_text = "Destination system"
-
-        cargo_label = QtWidgets.QLabel("Cargo", parent)
-        cargo_slider = LabeledSlider(QtCore.Qt.Orientation.Horizontal, parent)
+        cargo_label = QtWidgets.QLabel(parent)
+        cargo_slider = TooltipSlider(QtCore.Qt.Orientation.Horizontal, parent)
 
         layout.add_widget(source_system_edit)
         layout.add_widget(target_system_edit)
@@ -183,28 +87,37 @@ class TabBase(QtWidgets.QWidget):
 
         return layout, source_system_edit, target_system_edit, cargo_label, cargo_slider
 
+    def retranslate(self) -> None:
+        """Retranslate text that is always on display."""
+        if self.has_cargo:
+            self.source_edit.placeholder_text = _("Source system")
+            self.target_edit.placeholder_text = _("Destination system")
+
+            self.cargo_label.text = _("Cargo")
+
+        self.submit_button.text = _("Submit")
+        index = self.journal_combo.current_index
+        self.journal_combo.clear()
+        self.journal_combo.add_items(
+            [_("Last journal"), _("Second to last"), _("Third to last")]
+        )
+        self.journal_combo.current_index = index if index != -1 else 0
+
 
 class NeutronTab(TabBase):
     """The neutron plotter tab."""
 
     def __init__(self, parent: QtWidgets.QWidget):
-        super().__init__(parent)
-        (
-            self.system_cargo_layout,
-            self.source_edit,
-            self.target_edit,
-            self.cargo_label,
-            self.cargo_slider,
-        ) = self.create_system_and_cargo_layout(self)
+        super().__init__(parent, create_cargo=True)
 
-        self.range_label = QtWidgets.QLabel("Range", self)
+        self.range_label = QtWidgets.QLabel(self)
         self.range_spin = QtWidgets.QDoubleSpinBox(self)
         self.range_spin.accelerated = True
         self.range_spin.size_policy = QtWidgets.QSizePolicy(
             QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
         )
 
-        self.efficiency_label = QtWidgets.QLabel("Efficiency", self)
+        self.efficiency_label = QtWidgets.QLabel(self)
         self.efficiency_spin = QtWidgets.QSpinBox(self)
         self.efficiency_spin.maximum = 100
         self.efficiency_spin.suffix = "%"
@@ -214,7 +127,7 @@ class NeutronTab(TabBase):
         )
 
         self.eff_nearest_layout = QtWidgets.QHBoxLayout()
-        self.nearest_button = QtWidgets.QPushButton("Nearest", self)
+        self.nearest_button = QtWidgets.QPushButton(self)
         self.nearest_button.size_policy = QtWidgets.QSizePolicy(
             QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
         )
@@ -222,12 +135,6 @@ class NeutronTab(TabBase):
             self.efficiency_spin, alignment=QtCore.Qt.AlignmentFlag.AlignLeft
         )
         self.eff_nearest_layout.add_widget(self.nearest_button)
-
-        (
-            self.journal_submit_layout,
-            self.journal_combo,
-            self.submit_button,
-        ) = self.create_journal_and_submit_layout(self)
 
         self.main_layout.add_layout(self.system_cargo_layout)
         self.main_layout.add_spacer_item(
@@ -241,39 +148,32 @@ class NeutronTab(TabBase):
         self.main_layout.add_layout(self.eff_nearest_layout)
         self.main_layout.add_layout(self.journal_submit_layout)
 
+    def retranslate(self) -> None:
+        """Retranslate text that is always on display."""
+        super().retranslate()
+        self.range_label.text = _("Range")
+        self.efficiency_label.text = _("Efficiency")
+        self.nearest_button.text = _("Nearest")
+
 
 class ExactTab(TabBase):
     """The exact plotter tab."""
 
     def __init__(self, parent: QtWidgets.QWidget):
-        super().__init__(parent)
-        (
-            self.system_cargo_layout,
-            self.source_edit,
-            self.target_edit,
-            self.cargo_label,
-            self.cargo_slider,
-        ) = self.create_system_and_cargo_layout(self)
-
+        super().__init__(parent, create_cargo=True)
         self.cargo_slider.maximum = (
-            1000  # static value because ship may come from outside source
+            999  # static value because ship may come from outside source
         )
 
-        self.is_supercharged_checkbox = QtWidgets.QCheckBox(
-            "Already Supercharged", self
-        )
-        self.supercarge_checkbox = QtWidgets.QCheckBox("Use Supercharge", self)
-        self.fsd_injections_checkbox = QtWidgets.QCheckBox("Use FSD injections", self)
-        self.exclude_secondary_checkbox = QtWidgets.QCheckBox(
-            "Exclude secondary stars", self
-        )
+        self.is_supercharged_checkbox = QtWidgets.QCheckBox(self)
+        self.supercarge_checkbox = QtWidgets.QCheckBox(self)
+        self.fsd_injections_checkbox = QtWidgets.QCheckBox(self)
+        self.exclude_secondary_checkbox = QtWidgets.QCheckBox(self)
 
         self.use_clipboard_and_nearest_layout = QtWidgets.QHBoxLayout()
 
-        self.use_clipboard_checkbox = QtWidgets.QCheckBox(
-            "Use ship from clipboard", self
-        )
-        self.nearest_button = QtWidgets.QPushButton("Nearest", self)
+        self.use_clipboard_checkbox = QtWidgets.QCheckBox(self)
+        self.nearest_button = QtWidgets.QPushButton(self)
         self.nearest_button.size_policy = QtWidgets.QSizePolicy(
             QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
         )
@@ -281,12 +181,6 @@ class ExactTab(TabBase):
             self.use_clipboard_checkbox, QtCore.Qt.AlignmentFlag.AlignLeft
         )
         self.use_clipboard_and_nearest_layout.add_widget(self.nearest_button)
-
-        (
-            self.journal_submit_layout,
-            self.journal_combo,
-            self.submit_button,
-        ) = self.create_journal_and_submit_layout(self)
 
         self.main_layout.add_layout(self.system_cargo_layout)
         self.main_layout.add_spacer_item(
@@ -301,29 +195,32 @@ class ExactTab(TabBase):
         self.main_layout.add_layout(self.use_clipboard_and_nearest_layout)
         self.main_layout.add_layout(self.journal_submit_layout)
 
+    def retranslate(self) -> None:
+        """Retranslate text that is always on display."""
+        super().retranslate()
+        self.is_supercharged_checkbox.text = _("Already supercharged")
+        self.supercarge_checkbox.text = _("Use supercharge")
+        self.fsd_injections_checkbox.text = _("Use FSD injections")
+        self.exclude_secondary_checkbox.text = _("Exclude secondary stars")
+        self.use_clipboard_checkbox.text = _("Use ship from clipboard")
+        self.nearest_button.text = _("Nearest")
+
 
 class CSVTab(TabBase):
     """The CSV plotter tab."""
 
     def __init__(self, parent: QtWidgets.QWidget):
-        super().__init__(parent)
+        super().__init__(parent, create_cargo=False)
 
         self.path_layout = QtWidgets.QHBoxLayout()
 
         self.path_edit = QtWidgets.QLineEdit(self)
-        self.path_edit.placeholder_text = "CSV path"
 
         self.path_popup_button = QtWidgets.QPushButton("...", self)
         self.path_popup_button.maximum_width = 24
 
         self.path_layout.add_widget(self.path_edit)
         self.path_layout.add_widget(self.path_popup_button)
-
-        (
-            self.journal_submit_layout,
-            self.journal_combo,
-            self.submit_button,
-        ) = self.create_journal_and_submit_layout(self)
 
         self.main_layout.add_layout(self.path_layout)
         self.main_layout.add_spacer_item(
@@ -333,18 +230,25 @@ class CSVTab(TabBase):
         )
         self.main_layout.add_layout(self.journal_submit_layout)
 
+    def retranslate(self) -> None:
+        """Retranslate text that is always on display."""
+        super().retranslate()
+        self.path_edit.placeholder_text = "CSV path"
+
 
 class LastTab(TabBase):
     """The last route plot tab."""
 
     def __init__(self, parent: QtWidgets.QWidget):
-        super().__init__(parent)
+        super().__init__(parent, create_cargo=False)
 
-        (
-            self.journal_submit_layout,
-            self.journal_combo,
-            self.submit_button,
-        ) = self.create_journal_and_submit_layout(self)
+        self.source_label = QtWidgets.QLabel(self)
+        self.location_label = QtWidgets.QLabel(self)
+        self.destination_label = QtWidgets.QLabel(self)
+
+        self.main_layout.add_widget(self.source_label)
+        self.main_layout.add_widget(self.location_label)
+        self.main_layout.add_widget(self.destination_label)
 
         self.main_layout.add_spacer_item(
             QtWidgets.QSpacerItem(
@@ -360,6 +264,7 @@ class NewRouteWindowGUI(QtWidgets.QDialog):
     def __init__(self, parent: t.Optional[QtWidgets.QWidget]):
         super().__init__(parent)
         self.set_attribute(QtCore.Qt.WidgetAttribute.WA_DeleteOnClose)
+        self.focus_policy = QtCore.Qt.FocusPolicy.ClickFocus
 
         self.main_layout = QtWidgets.QVBoxLayout(self)
         self.main_layout.set_spacing(0)
@@ -372,14 +277,28 @@ class NewRouteWindowGUI(QtWidgets.QDialog):
         self.spansh_exact_tab = ExactTab(self.tab_widget)
         self.last_route_tab = LastTab(self.tab_widget)
 
-        self.tab_widget.add_tab(self.csv_tab, "CSV")
-        self.tab_widget.add_tab(self.spansh_neutron_tab, "Neutron plotter")
-        self.tab_widget.add_tab(self.spansh_exact_tab, "Galaxy plotter")
-        self.tab_widget.add_tab(self.last_route_tab, "Saved route")
+        self.tab_widget.add_tab(self.csv_tab, "")
+        self.tab_widget.add_tab(self.spansh_neutron_tab, "")
+        self.tab_widget.add_tab(self.spansh_exact_tab, "")
+        self.tab_widget.add_tab(self.last_route_tab, "")
 
         self.status_bar = QtWidgets.QStatusBar(self)
 
         self.main_layout.add_widget(self.tab_widget)
         self.main_layout.add_widget(self.status_bar)
 
-        self.show()
+        for button in self.find_children(QtWidgets.QPushButton):
+            button.auto_default = False
+
+        self.csv_tab.journal_combo.adjust_size()
+
+    def retranslate(self) -> None:
+        """Retranslate text that is always on display."""
+        self.csv_tab.retranslate()
+        self.spansh_neutron_tab.retranslate()
+        self.spansh_exact_tab.retranslate()
+        self.last_route_tab.retranslate()
+        self.tab_widget.set_tab_text(0, _("CSV"))
+        self.tab_widget.set_tab_text(1, _("Neutron plotter"))
+        self.tab_widget.set_tab_text(2, _("Galaxy plotter"))
+        self.tab_widget.set_tab_text(3, _("Saved route"))

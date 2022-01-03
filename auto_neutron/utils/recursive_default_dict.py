@@ -1,19 +1,25 @@
 # This file is part of Auto_Neutron.
-# Copyright (C) 2021  Numerlor
+# Copyright (C) 2019  Numerlor
 
 from __future__ import annotations
 
-import collections.abc
 import typing as t
+import warnings
 from contextlib import contextmanager
+
+if t.TYPE_CHECKING:
+    import collections.abc
+
+    import typing_extensions as te
 
 _KT = t.TypeVar("_KT")
 _VT = t.TypeVar("_VT")
-_S = t.TypeVar("_S", bound="RecursiveDefaultDict")
 _DEFAULT_SENTINEL = object()
 
 
-class RecursiveDefaultDict(dict[_KT, _VT], t.Generic[_KT, _VT]):
+class RecursiveDefaultDict(
+    dict[_KT, t.Union[_VT, "RecursiveDefaultDict"]], t.Generic[_KT, _VT]
+):
     """
     A recursive default dict.
 
@@ -33,25 +39,36 @@ class RecursiveDefaultDict(dict[_KT, _VT], t.Generic[_KT, _VT]):
         self._create_missing = create_missing
 
     def update_from_dict_recursive(
-        self: _S, dict_: dict[_KT, _VT], *, ignore_conflicts: bool = True
+        self, dict_: dict[_KT, _VT], *, ignore_conflicts: bool = True
     ) -> None:
         """Add the contents from `dict_` and replaces all dictionaries with this type."""
         with self.disable_defaults_for_missing():
             for key, value in dict_.items():
                 if isinstance(value, dict):
                     check_conflict = not ignore_conflicts and key in self
-                    if check_conflict and not isinstance(self[key], dict):
+                    if check_conflict and not isinstance(
+                        self[key], RecursiveDefaultDict
+                    ):
                         self._check_conflict(self, key, value)
 
                     new_dict = self.__class__(create_missing=None, parent=self)
-                    if key in self:
-                        new_dict.update_from_dict_recursive(self[key])
+                    self_value = self.get(key, _DEFAULT_SENTINEL)
+                    if self_value is not _DEFAULT_SENTINEL:
+                        if not isinstance(self_value, RecursiveDefaultDict):
+                            warnings.warn(
+                                f"Overwriting non RecursiveDefaultDict type: {self_value!r} with key: {key!r}.",
+                                RuntimeWarning,
+                            )
+                        else:
+                            new_dict.update_from_dict_recursive(self_value)
                     new_dict.update_from_dict_recursive(value)
                     value = new_dict
 
                     if check_conflict:
-                        for sub_key in new_dict.keys() & self[key].keys():
-                            self._check_conflict(self[key], sub_key, new_dict[sub_key])
+                        self_value = t.cast(RecursiveDefaultDict, self_value)
+
+                        for sub_key in new_dict.keys() & self_value.keys():
+                            self._check_conflict(self_value, sub_key, new_dict[sub_key])
                 else:
                     if not ignore_conflicts:
                         self._check_conflict(self, key, value)
@@ -75,7 +92,7 @@ class RecursiveDefaultDict(dict[_KT, _VT], t.Generic[_KT, _VT]):
         """Return whether this dict should create new defaults on missing keys."""
         self._create_missing = create_missing
 
-    def __missing__(self: _S, key: _KT) -> _S:
+    def __missing__(self, key: _KT) -> te.Self:
         if self.create_missing:
             created_dict = self.__class__(create_missing=None, parent=self)
             self[key] = created_dict

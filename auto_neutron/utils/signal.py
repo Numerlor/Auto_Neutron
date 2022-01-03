@@ -1,13 +1,18 @@
 # This file is part of Auto_Neutron.
-# Copyright (C) 2021  Numerlor
+# Copyright (C) 2019  Numerlor
 
-import collections.abc
+from __future__ import annotations
+
+import typing as t
 from contextlib import contextmanager
 
 from PySide6 import QtCore
 
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa: F401
+
+if t.TYPE_CHECKING:
+    import collections.abc
 
 
 class ReconnectingSignal:

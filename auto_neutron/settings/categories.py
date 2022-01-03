@@ -10,6 +10,7 @@ from PySide6.QtGui import QFont
 
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa F401
+from auto_neutron import Theme
 
 from .category_meta import SettingsCategory, SettingsParams
 
@@ -43,6 +44,7 @@ class General(metaclass=SettingsCategory):  # noqa D101
     ]
     copy_mode: t.Annotated[bool, SettingsParams(True)]
     last_route_index: t.Annotated[int, SettingsParams(0)]
+    locale: t.Annotated[str, SettingsParams("en")]
 
 
 def _path_serializer(path: t.Union[None, Path, str]) -> str:
@@ -85,7 +87,7 @@ class Window(metaclass=SettingsCategory):  # noqa D101
             lambda val: QByteArray(b64decode(val.encode())),
         ),
     ]
-    dark_mode: t.Annotated[bool, SettingsParams(True)]
+    dark_mode: t.Annotated[Theme, SettingsParams(True, None, Theme)]
     autoscroll: t.Annotated[bool, SettingsParams(True)]
     font: t.Annotated[
         QFont,

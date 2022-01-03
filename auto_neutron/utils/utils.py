@@ -1,18 +1,22 @@
 # This file is part of Auto_Neutron.
-# Copyright (C) 2021  Numerlor
+# Copyright (C) 2019  Numerlor
 
-import collections.abc
+from __future__ import annotations
+
 import itertools
 import logging
 import typing as t
 from pathlib import Path
-from types import TracebackType
 
 from PySide6 import QtCore, QtWidgets
 
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa F401
 from auto_neutron.utils.logging import patch_log_module
+
+if t.TYPE_CHECKING:
+    import collections.abc
+    from types import TracebackType
 
 log = logging.getLogger(__name__)
 
@@ -54,9 +58,9 @@ class ExceptionHandler(QtCore.QObject):
         self.triggered.emit()
 
 
-def create_interrupt_timer() -> QtCore.QTimer:
+def create_interrupt_timer(parent: QtCore.QObject) -> QtCore.QTimer:
     """Interrupt the Qt event loop regularly to let python process signals."""
-    timer = QtCore.QTimer()
+    timer = QtCore.QTimer(parent)
     timer.interval = 50
     timer.timeout.connect(lambda: None)
     timer.start()

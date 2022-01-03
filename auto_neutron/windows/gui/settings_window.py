@@ -1,5 +1,7 @@
 # This file is part of Auto_Neutron.
-# Copyright (C) 2021  Numerlor
+# Copyright (C) 2019  Numerlor
+
+from __future__ import annotations
 
 import typing as t
 from functools import partial
@@ -8,6 +10,22 @@ from PySide6 import QtCore, QtWidgets
 
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa: F401
+
+
+class _ReorderedCheckBox(QtWidgets.QCheckBox):
+    """Checkbox with check states reordered so the partial state appears after both unchecked and checked."""
+
+    _CHECK_STATES = [
+        QtCore.Qt.CheckState.Unchecked,
+        QtCore.Qt.CheckState.Checked,
+        QtCore.Qt.CheckState.PartiallyChecked,
+    ]
+
+    def next_check_state(self) -> None:
+        """Set the next state."""
+        self.set_check_state(
+            self._CHECK_STATES[(self._CHECK_STATES.index(self.check_state()) + 1) % 3]
+        )
 
 
 class SettingsWindowGUI(QtWidgets.QDialog):
@@ -36,8 +54,8 @@ class SettingsWindowGUI(QtWidgets.QDialog):
         # region main view
         self.group_selector = QtWidgets.QListWidget(self)
         self.widget_selector = QtWidgets.QStackedWidget(self)
-        self.ok_button = QtWidgets.QPushButton("Ok", self)
-        self.apply_button = QtWidgets.QPushButton("Apply", self)
+        self.ok_button = QtWidgets.QPushButton(self)
+        self.apply_button = QtWidgets.QPushButton(self)
         self.error_label = QtWidgets.QLabel(self)
         # region main layout init
         self.main_bottom_layout.add_widget(self.error_label)
@@ -59,14 +77,8 @@ class SettingsWindowGUI(QtWidgets.QDialog):
         self.widget_selector.add_widget(self.alerts_widget)
         self.widget_selector.add_widget(self.script_widget)
 
-        self.group_selector.add_items(
-            ("Appearance", "Behaviour", "Alerts", "AHK script")
-        )
         self.group_selector.horizontal_scroll_bar_policy = (
             QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff
-        )
-        self.group_selector.set_fixed_width(
-            self.group_selector.size_hint_for_column(0) + 5
         )
 
         self.ok_button.maximum_width = 75
@@ -75,15 +87,25 @@ class SettingsWindowGUI(QtWidgets.QDialog):
         # region appearance group
         self.font_chooser = QtWidgets.QFontComboBox(self.appearance_widget)
         self.font_size_chooser = QtWidgets.QSpinBox(self.appearance_widget)
-        self.font_bold_checkbox = QtWidgets.QCheckBox("Bold", self.appearance_widget)
-        self.dark_mode_checkbox = QtWidgets.QCheckBox(
-            "Dark mode", self.appearance_widget
+        self.font_bold_checkbox = QtWidgets.QCheckBox(self.appearance_widget)
+
+        self.language_label = QtWidgets.QLabel(self)
+        self.language_combo = QtWidgets.QComboBox(self)
+        self.language_combo.size_adjust_policy = (
+            QtWidgets.QComboBox.SizeAdjustPolicy.AdjustToContents
         )
+
+        self.dark_mode_checkbox = _ReorderedCheckBox(self.appearance_widget)
+        self.dark_mode_checkbox.tristate = True
 
         self.font_layout = QtWidgets.QHBoxLayout()
         self.font_layout.add_widget(self.font_chooser)
         self.font_layout.add_widget(self.font_size_chooser)
+        self.language_layout = QtWidgets.QHBoxLayout()
+        self.language_layout.add_widget(self.language_label)
+        self.language_layout.add_widget(self.language_combo)
         self.appearance_layout.add_layout(self.font_layout)
+        self.appearance_layout.add_layout(self.language_layout)
         self.appearance_layout.add_widget(self.font_bold_checkbox)
         self.appearance_layout.add_widget(self.dark_mode_checkbox)
         self.appearance_layout.add_spacer_item(self.get_spacer())
@@ -93,16 +115,10 @@ class SettingsWindowGUI(QtWidgets.QDialog):
         # region behaviour group
         self.plotter_options_layout = QtWidgets.QHBoxLayout()
 
-        self.save_on_quit_checkbox = QtWidgets.QCheckBox(
-            "Save route on window close", self.behaviour_widget
-        )
-        self.copy_mode_checkbox = QtWidgets.QCheckBox(
-            "Copy mode", self.behaviour_widget
-        )
-        self.ahk_path_button = QtWidgets.QPushButton("AHK Path", self.behaviour_widget)
-        self.auto_scroll_checkbox = QtWidgets.QCheckBox(
-            "Auto scroll", self.behaviour_widget
-        )
+        self.save_on_quit_checkbox = QtWidgets.QCheckBox(self.behaviour_widget)
+        self.copy_mode_checkbox = QtWidgets.QCheckBox(self.behaviour_widget)
+        self.ahk_path_button = QtWidgets.QPushButton(self.behaviour_widget)
+        self.auto_scroll_checkbox = QtWidgets.QCheckBox(self.behaviour_widget)
 
         self.plotter_options_layout.add_widget(self.copy_mode_checkbox)
         self.plotter_options_layout.add_widget(self.ahk_path_button)
@@ -118,21 +134,14 @@ class SettingsWindowGUI(QtWidgets.QDialog):
         self.alert_path_layout = QtWidgets.QHBoxLayout()
         self.alert_threshold_layout = QtWidgets.QHBoxLayout()
 
-        self.visual_alert_checkbox = QtWidgets.QCheckBox(
-            "Taskbar fuel alert", self.alerts_widget
-        )
-        self.audio_alert_checkbox = QtWidgets.QCheckBox(
-            "Sound fuel alert", self.alerts_widget
-        )
+        self.visual_alert_checkbox = QtWidgets.QCheckBox(self.alerts_widget)
+        self.audio_alert_checkbox = QtWidgets.QCheckBox(self.alerts_widget)
 
-        self.alert_path_label = QtWidgets.QLabel(
-            "Custom sound alert file:", self.alerts_widget
-        )
+        self.alert_path_label = QtWidgets.QLabel(self.alerts_widget)
         self.alert_path_line_edit = QtWidgets.QLineEdit(self.alerts_widget)
         self.alert_path_button = QtWidgets.QPushButton("...", self.alerts_widget)
 
         self.alert_threshold_label = QtWidgets.QLabel(
-            "% of maximum fuel usage left in tank before triggering alert",
             self.alerts_widget,
         )
         self.alert_threshold_spinbox = QtWidgets.QSpinBox(self.alerts_widget)
@@ -162,7 +171,6 @@ class SettingsWindowGUI(QtWidgets.QDialog):
         self.script_layout.add_widget(self.ahk_script_edit)
 
         self.ahk_bind_edit.maximum_width = 100
-        self.ahk_bind_edit.tool_tip = "Bind to trigger the script, # for win key, ! for alt, ^ for control, + for shift"
         self.alert_threshold_spinbox.maximum = 300
         self.alert_threshold_spinbox.accelerated = True
         self.alert_threshold_spinbox.maximum_width = 75
@@ -170,11 +178,48 @@ class SettingsWindowGUI(QtWidgets.QDialog):
         self.alert_threshold_label.word_wrap = True
 
         # endregion
-        self.window_title = "Settings"
         self.group_selector.currentRowChanged.connect(
             partial(setattr, self.widget_selector, "current_index")
         )
-        self.show()
+
+        for button in self.find_children(QtWidgets.QPushButton):
+            button.auto_default = False
+
+    def retranslate(self) -> None:
+        """Retranslate text that is always on display."""
+        self.ok_button.text = _("Ok")
+        self.apply_button.text = _("Apply")
+        index = self.group_selector.current_index()
+        self.group_selector.clear()
+        self.group_selector.add_items(
+            (_("Appearance"), _("Behaviour"), _("Alerts"), _("AHK script"))
+        )
+        self.group_selector.set_current_index(index)
+        self.group_selector.set_fixed_width(
+            self.group_selector.size_hint_for_column(0) + 5
+        )
+
+        self.font_bold_checkbox.text = _("Bold")
+        self.language_label.text = _("Language")
+        self.dark_mode_checkbox.text = _("Dark mode")
+
+        self.save_on_quit_checkbox.text = _("Save route on window close")
+        self.copy_mode_checkbox.text = _("Copy Mode")
+        self.ahk_path_button.text = _("AHK Path")
+        self.auto_scroll_checkbox.text = _("Auto scroll")
+
+        self.visual_alert_checkbox.text = _("Taskbar fuel alert")
+        self.audio_alert_checkbox.text = _("Sound fuel alert")
+        self.alert_path_label.text = _("Custom sound alert file:")
+        # Escape % for translation
+        self.alert_threshold_label.text = _(
+            "%% of maximum fuel usage left in tank before triggering alert"
+        ).replace("%%", "%")
+
+        self.window_title = _("Settings")
+        self.ahk_bind_edit.tool_tip = _(
+            "Bind to trigger the script, # for win key, ! for alt, ^ for control, + for shift"
+        )
 
     def get_spacer(self) -> QtWidgets.QSpacerItem:
         """Get an expanding spacer item."""

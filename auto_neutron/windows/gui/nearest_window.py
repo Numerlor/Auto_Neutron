@@ -1,5 +1,7 @@
 # This file is part of Auto_Neutron.
-# Copyright (C) 2021  Numerlor
+# Copyright (C) 2019  Numerlor
+
+from __future__ import annotations
 
 from PySide6 import QtCore, QtWidgets
 
@@ -21,7 +23,7 @@ class NearestWindowGUI(QtWidgets.QDialog):
         self.main_layout = QtWidgets.QVBoxLayout(self)
         self.io_grid_layout = QtWidgets.QGridLayout()
 
-        self.system_name_label = QtWidgets.QLabel("System name", self)
+        self.system_name_label = QtWidgets.QLabel(self)
         self.system_name_label.size_policy = QtWidgets.QSizePolicy(
             QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
         )
@@ -31,28 +33,31 @@ class NearestWindowGUI(QtWidgets.QDialog):
         )
         self.system_name_result_label.cursor = QtCore.Qt.CursorShape.IBeamCursor
 
-        self.distance_label = QtWidgets.QLabel("Distance", self)
+        self.distance_label = QtWidgets.QLabel(self)
         self.distance_label.size_policy = QtWidgets.QSizePolicy(
             QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
         )
         self.distance_result_label = QtWidgets.QLabel(self)
 
         self.x_spinbox = QtWidgets.QDoubleSpinBox(self)
-        self.x_label = QtWidgets.QLabel("X", self)
+        # NOTE: Coordinate
+        self.x_label = QtWidgets.QLabel(self)
         self.x_label.size_policy = QtWidgets.QSizePolicy(
             QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
         )
         self.x_result_label = QtWidgets.QLabel(self)
 
         self.y_spinbox = QtWidgets.QDoubleSpinBox(self)
-        self.y_label = QtWidgets.QLabel("Y", self)
+        # NOTE: Coordinate
+        self.y_label = QtWidgets.QLabel(self)
         self.y_label.size_policy = QtWidgets.QSizePolicy(
             QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
         )
         self.y_result_label = QtWidgets.QLabel(self)
 
         self.z_spinbox = QtWidgets.QDoubleSpinBox(self)
-        self.z_label = QtWidgets.QLabel("Z", self)
+        # NOTE: Coordinate
+        self.z_label = QtWidgets.QLabel(self)
         self.z_label.size_policy = QtWidgets.QSizePolicy(
             QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
         )
@@ -66,27 +71,12 @@ class NearestWindowGUI(QtWidgets.QDialog):
                 QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
             )
 
-        self.from_location_button = QtWidgets.QPushButton("From location", self)
-        self.from_location_button.tool_tip = (
-            "Copy coordinates from the current location"
-        )
+        self.from_location_button = QtWidgets.QPushButton(self)
+        self.from_target_button = QtWidgets.QPushButton(self)
+        self.copy_to_source_button = QtWidgets.QPushButton(self)
+        self.copy_to_destination_button = QtWidgets.QPushButton(self)
 
-        self.from_target_button = QtWidgets.QPushButton("From target", self)
-        self.from_target_button.tool_tip = (
-            "Copy approximate coordinates from the current target"
-        )
-
-        self.copy_to_source_button = QtWidgets.QPushButton("To source", self)
-        self.copy_to_source_button.tool_tip = (
-            "Copy searched system name to the source input"
-        )
-
-        self.copy_to_destination_button = QtWidgets.QPushButton("To destination", self)
-        self.copy_to_source_button.tool_tip = (
-            "Copy searched system name to the destination input"
-        )
-
-        self.search_button = QtWidgets.QPushButton("Search", self)
+        self.search_button = QtWidgets.QPushButton(self)
 
         self.io_grid_layout.add_widget(self.system_name_label, 0, 0)
         self.io_grid_layout.add_widget(self.system_name_result_label, 0, 2)
@@ -133,4 +123,35 @@ class NearestWindowGUI(QtWidgets.QDialog):
         self.main_layout.add_layout(self.io_grid_layout)
         self.main_layout.add_layout(self.button_layout)
 
-        self.show()
+        for button in self.find_children(QtWidgets.QPushButton):
+            button.auto_default = False
+
+    def retranslate(self) -> None:
+        """Retranslate text that is always on display."""
+        self.system_name_label.text = _("System name")
+        self.distance_label.text = _("Distance")
+        # NOTE: Coordinate
+        self.x_label.text = _("X")
+        # NOTE: Coordinate
+        self.z_label.text = _("Y")
+        # NOTE: Coordinate
+        self.z_label.text = _("Z")
+
+        self.from_location_button.text = _("From location")
+        self.from_location_button.tool_tip = _(
+            "Copy coordinates from the current location"
+        )
+        self.from_target_button.text = _("From target")
+        self.from_target_button.tool_tip = _(
+            "Copy approximate coordinates from the current target"
+        )
+        self.copy_to_source_button.text = _("To source")
+        self.copy_to_source_button.tool_tip = _(
+            "Copy searched system name to the source input"
+        )
+        self.copy_to_destination_button.text = _("To destination")
+        self.copy_to_destination_button.tool_tip = _(
+            "Copy searched system name to the destination input"
+        )
+
+        self.search_button.text = _("Search")

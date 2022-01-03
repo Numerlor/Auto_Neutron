@@ -1,13 +1,11 @@
 # This file is part of Auto_Neutron.
-# Copyright (C) 2021  Numerlor
+# Copyright (C) 2019  Numerlor
 
 from __future__ import annotations
 
-import collections.abc
 import json
 import logging
 import typing as t
-from pathlib import Path
 
 from PySide6 import QtCore
 
@@ -15,6 +13,10 @@ from PySide6 import QtCore
 from __feature__ import snake_case, true_property  # noqa: F401
 from auto_neutron.game_state import Location
 from auto_neutron.utils.utils import get_sector_midpoint
+
+if t.TYPE_CHECKING:
+    import collections.abc
+    from pathlib import Path
 
 log = logging.getLogger(__name__)
 

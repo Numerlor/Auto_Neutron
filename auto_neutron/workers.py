@@ -3,7 +3,6 @@
 
 from __future__ import annotations
 
-import collections.abc
 import contextlib
 import json
 import logging
@@ -18,6 +17,8 @@ from __feature__ import snake_case, true_property  # noqa F401
 from auto_neutron.constants import STATUS_PATH
 
 if t.TYPE_CHECKING:
+    import collections.abc
+
     from auto_neutron.game_state import Location
     from auto_neutron.journal import Journal
     from auto_neutron.route_plots import RouteList
@@ -31,18 +32,18 @@ class GameWorker(QtCore.QObject):
     new_system_index_sig = QtCore.Signal(int)
     route_end_sig = QtCore.Signal()
 
-    def __init__(self, route: RouteList, journal: Journal):
-        super().__init__()
+    def __init__(self, parent: QtCore.QObject, route: RouteList, journal: Journal):
+        super().__init__(parent)
         self._generator = journal.tail()
-        self._timer = QtCore.QTimer()
+        self._timer = QtCore.QTimer(self)
         self._timer.interval = 250
         self._timer.timeout.connect(partial(next, self._generator))
         self._stopped = False
         self.route = route
-        journal.system_sig.connect(self._emit_next_system)
+        journal.system_sig.connect(self.emit_next_system)
 
-    def _emit_next_system(self, location: Location) -> None:
-        """Emit the next system in the route and its index, or end of route."""
+    def emit_next_system(self, location: Location) -> None:
+        """Emit the next system in the route and its index if location is in the route, or the end of route signal."""
         with contextlib.suppress(ValueError):
             new_index = self.route.index(location.name) + 1
             if new_index < len(self.route):
@@ -53,8 +54,6 @@ class GameWorker(QtCore.QObject):
     def start(self) -> None:
         """Start the worker to tail the journal file."""
         log.debug("Starting GameWorker.")
-        if self._stopped:
-            raise RuntimeError("Can't restart a stopped worker.")
         self._timer.start()
 
     def stop(self) -> None:
@@ -62,7 +61,6 @@ class GameWorker(QtCore.QObject):
         log.debug("Stopping GameWorker.")
         self._timer.stop()
         self._generator.close()
-        self._stopped = True
 
 
 class StatusWorker(QtCore.QObject):
@@ -70,20 +68,16 @@ class StatusWorker(QtCore.QObject):
 
     status_signal = QtCore.Signal(dict)
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, parent: QtCore.QObject):
+        super().__init__(parent)
         self._generator = self.read_status()
-        self._timer = QtCore.QTimer()
+        self._timer = QtCore.QTimer(self)
         self._timer.timeout.connect(partial(next, self._generator))
         self._timer.interval = 250
-        self._running = False
 
     def start(self) -> None:
         """Start the worker to follow the status file."""
         log.debug("Starting StatusWorker.")
-        if self._running:
-            raise RuntimeError("Worker already started")
-        self._running = True
         self._timer.start()
 
     def stop(self) -> None:
@@ -91,7 +85,6 @@ class StatusWorker(QtCore.QObject):
         log.debug("Stopping StatusWorker.")
         self._timer.stop()
         self._generator.close()
-        self._running = False
 
     def read_status(self) -> collections.abc.Generator[None, None, None]:
         """Emit status_signal with the status dict on every status file change."""

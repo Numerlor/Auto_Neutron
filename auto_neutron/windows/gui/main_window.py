@@ -1,18 +1,22 @@
 # This file is part of Auto_Neutron.
-# Copyright (C) 2021  Numerlor
+# Copyright (C) 2019  Numerlor
 
-import collections.abc
+from __future__ import annotations
+
 import typing as t
 
 from PySide6 import QtCore, QtGui, QtWidgets
 
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa: F401
-from auto_neutron.delegates import (
+from auto_neutron.windows.gui.delegates import (
     CheckBoxDelegate,
     DoubleSpinBoxDelegate,
     SpinBoxDelegate,
 )
+
+if t.TYPE_CHECKING:
+    import collections.abc
 
 
 class MainWindowGUI(QtWidgets.QMainWindow):
@@ -20,7 +24,7 @@ class MainWindowGUI(QtWidgets.QMainWindow):
 
     def __init__(self):
         super().__init__()
-        self.table = QtWidgets.QTableWidget()
+        self.table = QtWidgets.QTableWidget(self)
         self._double_spinbox_delegate = DoubleSpinBoxDelegate()
         self._spinbox_delegate = SpinBoxDelegate()
         self._checkbox_delegate = CheckBoxDelegate()
@@ -28,12 +32,12 @@ class MainWindowGUI(QtWidgets.QMainWindow):
 
         self._setup_table()
 
-        self.change_action = QtGui.QAction("Edit", self)
-        self.save_action = QtGui.QAction("Save route", self)
-        self.copy_action = QtGui.QAction("Copy", self)
-        self.new_route_action = QtGui.QAction("Start a new route", self)
-        self.settings_action = QtGui.QAction("Settings", self)
-        self.about_action = QtGui.QAction("About", self)
+        self.change_action = QtGui.QAction(self)
+        self.save_action = QtGui.QAction(self)
+        self.copy_action = QtGui.QAction(self)
+        self.new_route_action = QtGui.QAction(self)
+        self.settings_action = QtGui.QAction(self)
+        self.about_action = QtGui.QAction(self)
 
         self.context_menu_policy = QtCore.Qt.ContextMenuPolicy.CustomContextMenu
         self.table.context_menu_policy = QtCore.Qt.ContextMenuPolicy.CustomContextMenu
@@ -72,10 +76,6 @@ class MainWindowGUI(QtWidgets.QMainWindow):
         self.table.set_item_delegate_for_column(2, self._double_spinbox_delegate)
         # 3rd column delegate is variable and set by the subclass
         self.table.set_item_delegate_for_column(4, self._checkbox_delegate)
-
-        self.table.horizontal_header_item(0).set_text("System name")
-        self.table.horizontal_header_item(1).set_text("Distance")
-        self.table.horizontal_header_item(2).set_text("Remaining")
 
     def inactivate_before_index(self, index: int) -> None:
         """Make all the items before `index` grey, and after, the default color."""
@@ -120,3 +120,22 @@ class MainWindowGUI(QtWidgets.QMainWindow):
             item.set_data(QtCore.Qt.ItemDataRole.DisplayRole, data_item)
             item.set_text_alignment(QtCore.Qt.AlignmentFlag.AlignCenter)
             self.table.set_item(row_pos, column, item)
+
+    def retranslate(self) -> None:
+        """Retranslate text that is always on display."""
+        self._set_header_text()
+        self.change_action.text = _("Edit")
+        self.save_action.text = _("Save route")
+        self.copy_action.text = _("Copy")
+        self.new_route_action.text = _("Start a new route")
+        self.settings_action.text = _("Settings")
+        self.about_action.text = _("About")
+
+    def _set_header_text(self) -> None:
+        """Set header text on existing headers."""
+        if (header := self.table.horizontal_header_item(0)) is not None:
+            header.set_text(_("System name"))
+        if (header := self.table.horizontal_header_item(1)) is not None:
+            header.set_text(_("Distance"))
+        if (header := self.table.horizontal_header_item(3)) is not None:
+            header.set_text(_("Remaining"))

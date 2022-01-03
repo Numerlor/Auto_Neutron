@@ -1,11 +1,10 @@
 # This file is part of Auto_Neutron.
-# Copyright (C) 2021  Numerlor
+# Copyright (C) 2019  Numerlor
 
 from __future__ import annotations
 
 import abc
 import atexit
-import collections.abc
 import contextlib
 import dataclasses
 import logging
@@ -26,6 +25,9 @@ from auto_neutron.utils.network import (
     json_from_network_req,
     make_network_request,
 )
+
+if t.TYPE_CHECKING:
+    import collections.abc
 
 log = logging.getLogger(__name__)
 
@@ -124,11 +126,14 @@ class Plotter(abc.ABC):
             self.update_system(start_system)
 
     @abc.abstractmethod
-    def update_system(self, system: str, system_index: t.Optional[int] = None) -> t.Any:
+    def update_system(self, system: str, system_index: t.Optional[int] = None) -> None:
         """Update the plotter with the given system."""
         ...
 
-    def stop(self) -> t.Any:
+    def refresh_settings(self) -> None:
+        """Refresh the settings."""
+
+    def stop(self) -> None:
         """Stop the plotter."""
         ...
 
@@ -185,12 +190,6 @@ class AhkPlotter(Plotter):
 
     def update_system(self, system: str, system_index: t.Optional[int] = None) -> None:
         """Update the ahk script with `system`."""
-        if (
-            settings.Paths.ahk != self._used_ahk_path
-            or settings.General.script != self._used_script
-            or settings.General.bind != self._used_hotkey
-        ):
-            self.stop()
         if self.process is None or self.process.poll() is not None:
             self._start_ahk()
         self._last_system = system
@@ -200,6 +199,16 @@ class AhkPlotter(Plotter):
         self.ahk_infile.flush()
         self.ahk_infile.seek(0)
         log.debug(f"Wrote {system!r} to AHK.")
+
+    def refresh_settings(self) -> None:
+        """Restart AHK on setting change."""
+        if (
+            settings.Paths.ahk != self._used_ahk_path
+            or settings.General.script != self._used_script
+            or settings.General.bind != self._used_hotkey
+        ):
+            self._start_ahk()
+            self.update_system(self._last_system)
 
     def stop(self) -> None:
         """Terminate the active process, if any."""

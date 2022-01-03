@@ -147,7 +147,7 @@ class SettingsCategory(type):
         """Try to find a `SettingsParams` object in a `typing.Annotated` `annotation`."""
         annotation_args = t.get_args(annotation)
         return next(
-            filter(lambda ann: isinstance(ann, SettingsParams), annotation_args), None
+            (ann for ann in annotation_args if isinstance(ann, SettingsParams)), None
         )
 
 

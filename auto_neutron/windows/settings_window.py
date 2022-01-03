@@ -1,5 +1,7 @@
 # This file is part of Auto_Neutron.
-# Copyright (C) 2021  Numerlor
+# Copyright (C) 2019  Numerlor
+
+from __future__ import annotations
 
 import logging
 import typing as t
@@ -12,7 +14,8 @@ from PySide6 import QtCore, QtWidgets
 from __feature__ import snake_case, true_property  # noqa: F401
 from auto_neutron import settings
 from auto_neutron.constants import AHK_PATH
-from auto_neutron.settings.category_meta import delay_sync
+from auto_neutron.locale import code_from_locale, get_available_locales
+from auto_neutron.settings import delay_sync
 from auto_neutron.windows.gui.settings_window import SettingsWindowGUI
 
 log = logging.getLogger(__name__)
@@ -52,12 +55,13 @@ class SettingsWindow(SettingsWindowGUI):
         self.ok_button.pressed.connect(self.settings_applied)
         self.ok_button.pressed.connect(self.save_settings)
         self.ok_button.pressed.connect(self.close)
+        self.retranslate()
 
     def get_ahk_path(self) -> None:
         """Ask the user for the AHK executable file path and save it to the setting."""
-        path, _ = QtWidgets.QFileDialog.get_open_file_name(
+        path, __ = QtWidgets.QFileDialog.get_open_file_name(
             self,
-            "Select AHK executable",
+            _("Select AHK executable"),
             str(AHK_PATH),
             filter="Executable files (*.exe)",
         )
@@ -68,9 +72,9 @@ class SettingsWindow(SettingsWindowGUI):
 
     def get_sound_path(self) -> None:
         """Ask the user for the alert file path and save it to the line edit."""
-        path, _ = QtWidgets.QFileDialog.get_open_file_name(
+        path, __ = QtWidgets.QFileDialog.get_open_file_name(
             self,
-            "Select alert file",
+            _("Select alert file"),
             "",
             filter="Audio files (*.wav *.mp3);;All types (*.*)",
         )
@@ -83,7 +87,10 @@ class SettingsWindow(SettingsWindowGUI):
         for widget, (setting_group, setting_name) in self.settings_pairs:
             setting_value = attrgetter(f"{setting_group}.{setting_name}")(settings)
             if isinstance(widget, QtWidgets.QCheckBox):
-                widget.checked = setting_value
+                if not widget.tristate and setting_value:
+                    # We're saving bools but Qt has PartiallyChecked for 1 in the enum
+                    setting_value = QtCore.Qt.CheckState.Checked
+                widget.set_check_state(QtCore.Qt.CheckState(setting_value))
             elif isinstance(widget, QtWidgets.QLineEdit):
                 widget.text = (
                     str(setting_value) if setting_value is not None else ""
@@ -104,7 +111,13 @@ class SettingsWindow(SettingsWindowGUI):
             for widget, (setting_group, setting_name) in self.settings_pairs:
                 settings_category = getattr(settings, setting_group)
                 if isinstance(widget, QtWidgets.QCheckBox):
-                    setattr(settings_category, setting_name, widget.checked)
+                    if widget.tristate:
+                        converter = int
+                    else:
+                        converter = bool
+                    setattr(
+                        settings_category, setting_name, converter(widget.check_state())
+                    )
                 elif isinstance(widget, QtWidgets.QLineEdit):
                     setattr(settings_category, setting_name, widget.text)
                 elif isinstance(widget, QtWidgets.QTextEdit):
@@ -116,3 +129,23 @@ class SettingsWindow(SettingsWindowGUI):
             font.set_point_size(self.font_size_chooser.value)
             font.set_bold(self.font_bold_checkbox.checked)
             settings.Window.font = font
+
+            settings.General.locale = code_from_locale(
+                get_available_locales()[self.language_combo.current_index]
+            )
+
+    def retranslate(self) -> None:
+        """Retranslate text that is always on display."""
+        super().retranslate()
+        self.language_combo.clear()
+        locales = get_available_locales()
+        language_codes = [code_from_locale(locale) for locale in locales]
+        self.language_combo.add_items([locale.get_display_name() for locale in locales])
+        self.language_combo.current_index = language_codes.index(
+            settings.General.locale
+        )
+
+    def change_event(self, event: QtCore.QEvent) -> None:
+        """Retranslate the GUI when a language change occurs."""
+        if event.type() == QtCore.QEvent.LanguageChange:
+            self.retranslate()

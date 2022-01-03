@@ -47,3 +47,5 @@ venv.bak/
 .idea/
 
 logs/
+
+*.mo
