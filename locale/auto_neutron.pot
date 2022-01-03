@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Auto Neutron 2.0.3\n"
 "Report-Msgid-Bugs-To: Numerlor@gmail.com\n"
-"POT-Creation-Date: 2022-01-02 23:57+0100\n"
+"POT-Creation-Date: 2022-01-03 02:17+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,17 +17,17 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.9.1\n"
 
-#: auto_neutron/windows/error_window.py:21
+#: auto_neutron/windows/error_window.py:52
+#: auto_neutron/windows/error_window.py:86
+msgid "Multiple unexpected errors have occurred (x{})"
+msgstr ""
+
+#: auto_neutron/windows/error_window.py:90
 msgid "Please make sure to report the bug at"
 msgstr ""
 
-#: auto_neutron/windows/error_window.py:24
+#: auto_neutron/windows/error_window.py:93
 msgid "and include the {file_name} file from"
-msgstr ""
-
-#: auto_neutron/windows/error_window.py:59
-#: auto_neutron/windows/error_window.py:88
-msgid "Multiple unexpected errors have occurred (x{})"
 msgstr ""
 
 #. NOTE: made jumps/ total
@@ -40,15 +40,15 @@ msgstr ""
 msgid "Jumps {}/{}"
 msgstr ""
 
-#: auto_neutron/windows/main_window.py:158
+#: auto_neutron/windows/main_window.py:163
 msgid "Scoopable"
 msgstr ""
 
-#: auto_neutron/windows/main_window.py:160
+#: auto_neutron/windows/main_window.py:165
 msgid "Neutron"
 msgstr ""
 
-#: auto_neutron/windows/main_window.py:163
+#: auto_neutron/windows/main_window.py:168
 msgid "Jumps"
 msgstr ""
 
@@ -85,24 +85,24 @@ msgid "Selected journal ended with a shut down event."
 msgstr ""
 
 #. NOTE: Source system
-#: auto_neutron/windows/new_route_window.py:447
+#: auto_neutron/windows/new_route_window.py:452
 msgid "Source: {}"
 msgstr ""
 
-#: auto_neutron/windows/new_route_window.py:450
+#: auto_neutron/windows/new_route_window.py:455
 msgid "Saved location: {}"
 msgstr ""
 
 #. NOTE: destination system
-#: auto_neutron/windows/new_route_window.py:454
+#: auto_neutron/windows/new_route_window.py:459
 msgid "Destination: {}"
 msgstr ""
 
-#: auto_neutron/windows/settings_window.py:63
+#: auto_neutron/windows/settings_window.py:64
 msgid "Select AHK executable"
 msgstr ""
 
-#: auto_neutron/windows/settings_window.py:76
+#: auto_neutron/windows/settings_window.py:77
 msgid "Select alert file"
 msgstr ""
 
@@ -112,13 +112,13 @@ msgstr ""
 
 #: auto_neutron/windows/gui/error_window.py:48
 #: auto_neutron/windows/gui/missing_journal_window.py:40
-#: auto_neutron/windows/gui/shut_down_window.py:74
+#: auto_neutron/windows/gui/shut_down_window.py:76
 msgid "Quit"
 msgstr ""
 
 #: auto_neutron/windows/gui/error_window.py:49
 #: auto_neutron/windows/gui/main_window.py:128
-#: auto_neutron/windows/gui/shut_down_window.py:73
+#: auto_neutron/windows/gui/shut_down_window.py:75
 msgid "Save route"
 msgstr ""
 
@@ -153,7 +153,7 @@ msgid "Start a new route"
 msgstr ""
 
 #: auto_neutron/windows/gui/main_window.py:131
-#: auto_neutron/windows/gui/settings_window.py:205
+#: auto_neutron/windows/gui/settings_window.py:219
 msgid "Settings"
 msgstr ""
 
@@ -246,136 +246,140 @@ msgstr ""
 msgid "Submit"
 msgstr ""
 
-#: auto_neutron/windows/gui/new_route_window.py:101
-#: auto_neutron/windows/gui/shut_down_window.py:70
+#: auto_neutron/windows/gui/new_route_window.py:102
+#: auto_neutron/windows/gui/shut_down_window.py:71
 msgid "Last journal"
 msgstr ""
 
-#: auto_neutron/windows/gui/new_route_window.py:101
-#: auto_neutron/windows/gui/shut_down_window.py:70
+#: auto_neutron/windows/gui/new_route_window.py:102
+#: auto_neutron/windows/gui/shut_down_window.py:71
 msgid "Second to last"
 msgstr ""
 
-#: auto_neutron/windows/gui/new_route_window.py:101
-#: auto_neutron/windows/gui/shut_down_window.py:70
+#: auto_neutron/windows/gui/new_route_window.py:102
+#: auto_neutron/windows/gui/shut_down_window.py:71
 msgid "Third to last"
 msgstr ""
 
-#: auto_neutron/windows/gui/new_route_window.py:152
+#: auto_neutron/windows/gui/new_route_window.py:154
 msgid "Range"
 msgstr ""
 
-#: auto_neutron/windows/gui/new_route_window.py:153
+#: auto_neutron/windows/gui/new_route_window.py:155
 msgid "Efficiency"
 msgstr ""
 
-#: auto_neutron/windows/gui/new_route_window.py:154
-#: auto_neutron/windows/gui/new_route_window.py:204
+#: auto_neutron/windows/gui/new_route_window.py:156
+#: auto_neutron/windows/gui/new_route_window.py:206
 msgid "Nearest"
 msgstr ""
 
-#: auto_neutron/windows/gui/new_route_window.py:199
+#: auto_neutron/windows/gui/new_route_window.py:201
 msgid "Already supercharged"
 msgstr ""
 
-#: auto_neutron/windows/gui/new_route_window.py:200
+#: auto_neutron/windows/gui/new_route_window.py:202
 msgid "Use supercharge"
 msgstr ""
 
-#: auto_neutron/windows/gui/new_route_window.py:201
+#: auto_neutron/windows/gui/new_route_window.py:203
 msgid "Use FSD injections"
 msgstr ""
 
-#: auto_neutron/windows/gui/new_route_window.py:202
+#: auto_neutron/windows/gui/new_route_window.py:204
 msgid "Exclude secondary stars"
 msgstr ""
 
-#: auto_neutron/windows/gui/new_route_window.py:203
+#: auto_neutron/windows/gui/new_route_window.py:205
 msgid "Use ship from clipboard"
 msgstr ""
 
-#: auto_neutron/windows/gui/new_route_window.py:299
+#: auto_neutron/windows/gui/new_route_window.py:301
 msgid "CSV"
 msgstr ""
 
-#: auto_neutron/windows/gui/new_route_window.py:300
+#: auto_neutron/windows/gui/new_route_window.py:302
 msgid "Neutron plotter"
 msgstr ""
 
-#: auto_neutron/windows/gui/new_route_window.py:301
+#: auto_neutron/windows/gui/new_route_window.py:303
 msgid "Galaxy plotter"
 msgstr ""
 
-#: auto_neutron/windows/gui/new_route_window.py:302
+#: auto_neutron/windows/gui/new_route_window.py:304
 msgid "Saved route"
 msgstr ""
 
-#: auto_neutron/windows/gui/settings_window.py:179
+#: auto_neutron/windows/gui/settings_window.py:190
 msgid "Ok"
 msgstr ""
 
-#: auto_neutron/windows/gui/settings_window.py:180
+#: auto_neutron/windows/gui/settings_window.py:191
 msgid "Apply"
 msgstr ""
 
-#: auto_neutron/windows/gui/settings_window.py:183
+#: auto_neutron/windows/gui/settings_window.py:195
 msgid "Appearance"
 msgstr ""
 
-#: auto_neutron/windows/gui/settings_window.py:183
+#: auto_neutron/windows/gui/settings_window.py:195
 msgid "Behaviour"
 msgstr ""
 
-#: auto_neutron/windows/gui/settings_window.py:183
+#: auto_neutron/windows/gui/settings_window.py:195
 msgid "Alerts"
 msgstr ""
 
-#: auto_neutron/windows/gui/settings_window.py:183
+#: auto_neutron/windows/gui/settings_window.py:195
 msgid "AHK script"
 msgstr ""
 
-#: auto_neutron/windows/gui/settings_window.py:189
+#: auto_neutron/windows/gui/settings_window.py:202
 msgid "Bold"
 msgstr ""
 
-#: auto_neutron/windows/gui/settings_window.py:190
+#: auto_neutron/windows/gui/settings_window.py:203
+msgid "Language"
+msgstr ""
+
+#: auto_neutron/windows/gui/settings_window.py:204
 msgid "Dark mode"
 msgstr ""
 
-#: auto_neutron/windows/gui/settings_window.py:192
+#: auto_neutron/windows/gui/settings_window.py:206
 msgid "Save route on window close"
 msgstr ""
 
-#: auto_neutron/windows/gui/settings_window.py:193
+#: auto_neutron/windows/gui/settings_window.py:207
 msgid "Copy Mode"
 msgstr ""
 
-#: auto_neutron/windows/gui/settings_window.py:194
+#: auto_neutron/windows/gui/settings_window.py:208
 msgid "AHK Path"
 msgstr ""
 
-#: auto_neutron/windows/gui/settings_window.py:195
+#: auto_neutron/windows/gui/settings_window.py:209
 msgid "Auto scroll"
 msgstr ""
 
-#: auto_neutron/windows/gui/settings_window.py:197
+#: auto_neutron/windows/gui/settings_window.py:211
 msgid "Taskbar fuel alert"
 msgstr ""
 
-#: auto_neutron/windows/gui/settings_window.py:198
+#: auto_neutron/windows/gui/settings_window.py:212
 msgid "Sound fuel alert"
 msgstr ""
 
-#: auto_neutron/windows/gui/settings_window.py:199
+#: auto_neutron/windows/gui/settings_window.py:213
 msgid "Custom sound alert file:"
 msgstr ""
 
-#: auto_neutron/windows/gui/settings_window.py:201
+#: auto_neutron/windows/gui/settings_window.py:215
 #, python-format
 msgid "%% of maximum fuel usage left in tank before triggering alert"
 msgstr ""
 
-#: auto_neutron/windows/gui/settings_window.py:206
+#: auto_neutron/windows/gui/settings_window.py:220
 msgid ""
 "Bind to trigger the script, # for win key, ! for alt, ^ for control, + "
 "for shift"
@@ -385,6 +389,6 @@ msgstr ""
 msgid "Game shut down"
 msgstr ""
 
-#: auto_neutron/windows/gui/shut_down_window.py:72
+#: auto_neutron/windows/gui/shut_down_window.py:74
 msgid "New journal"
 msgstr ""
