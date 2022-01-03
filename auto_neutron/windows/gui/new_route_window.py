@@ -101,7 +101,7 @@ class TabBase(QtWidgets.QWidget):
         self.journal_combo.add_items(
             [_("Last journal"), _("Second to last"), _("Third to last")]
         )
-        self.journal_combo.current_index = index
+        self.journal_combo.current_index = index if index != -1 else 0
 
 
 class NeutronTab(TabBase):
