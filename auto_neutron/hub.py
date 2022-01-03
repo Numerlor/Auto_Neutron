@@ -148,6 +148,7 @@ class Hub(QtCore.QObject):
         with self.edit_route_update_connection.temporarily_disconnect():
             self.window.initialize_table(route)
         self.plotter_state.route_index = route_index
+        self.plotter_state.tail_worker.emit_next_system(self.game_state.location)
         self.warn_worker.start()
 
     def apply_settings(self) -> None:
