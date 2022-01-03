@@ -8,7 +8,7 @@ a = Analysis(
     pathex=["."],
     binaries=[],
     datas=[
-        ("../resources/icons_library.ico", "."),
+        ("../resources/icons_library.ico", "./resources"),
     ],
     hiddenimports=[],
     hookspath=[],
