@@ -88,13 +88,24 @@ class SettingsWindowGUI(QtWidgets.QDialog):
         self.font_chooser = QtWidgets.QFontComboBox(self.appearance_widget)
         self.font_size_chooser = QtWidgets.QSpinBox(self.appearance_widget)
         self.font_bold_checkbox = QtWidgets.QCheckBox(self.appearance_widget)
+
+        self.language_label = QtWidgets.QLabel(self)
+        self.language_combo = QtWidgets.QComboBox(self)
+        self.language_combo.size_adjust_policy = (
+            QtWidgets.QComboBox.SizeAdjustPolicy.AdjustToContents
+        )
+
         self.dark_mode_checkbox = _ReorderedCheckBox(self.appearance_widget)
         self.dark_mode_checkbox.tristate = True
 
         self.font_layout = QtWidgets.QHBoxLayout()
         self.font_layout.add_widget(self.font_chooser)
         self.font_layout.add_widget(self.font_size_chooser)
+        self.language_layout = QtWidgets.QHBoxLayout()
+        self.language_layout.add_widget(self.language_label)
+        self.language_layout.add_widget(self.language_combo)
         self.appearance_layout.add_layout(self.font_layout)
+        self.appearance_layout.add_layout(self.language_layout)
         self.appearance_layout.add_widget(self.font_bold_checkbox)
         self.appearance_layout.add_widget(self.dark_mode_checkbox)
         self.appearance_layout.add_spacer_item(self.get_spacer())
@@ -187,6 +198,7 @@ class SettingsWindowGUI(QtWidgets.QDialog):
         )
 
         self.font_bold_checkbox.text = _("Bold")
+        self.language_label.text = _("Language")
         self.dark_mode_checkbox.text = _("Dark mode")
 
         self.save_on_quit_checkbox.text = _("Save route on window close")

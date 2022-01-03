@@ -14,6 +14,7 @@ from PySide6 import QtCore, QtWidgets
 from __feature__ import snake_case, true_property  # noqa: F401
 from auto_neutron import settings
 from auto_neutron.constants import AHK_PATH
+from auto_neutron.locale import code_from_locale, get_available_locales
 from auto_neutron.settings import delay_sync
 from auto_neutron.windows.gui.settings_window import SettingsWindowGUI
 
@@ -128,6 +129,21 @@ class SettingsWindow(SettingsWindowGUI):
             font.set_point_size(self.font_size_chooser.value)
             font.set_bold(self.font_bold_checkbox.checked)
             settings.Window.font = font
+
+            settings.General.locale = code_from_locale(
+                get_available_locales()[self.language_combo.current_index]
+            )
+
+    def retranslate(self) -> None:
+        """Retranslate text that is always on display."""
+        super().retranslate()
+        self.language_combo.clear()
+        locales = get_available_locales()
+        language_codes = [code_from_locale(locale) for locale in locales]
+        self.language_combo.add_items([locale.get_display_name() for locale in locales])
+        self.language_combo.current_index = language_codes.index(
+            settings.General.locale
+        )
 
     def change_event(self, event: QtCore.QEvent) -> None:
         """Retranslate the GUI when a language change occurs."""
