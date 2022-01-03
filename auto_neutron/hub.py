@@ -172,6 +172,8 @@ class Hub(QtCore.QObject):
                 self.plotter_state.plotter, AhkPlotter
             ):
                 self.plotter_state.plotter = AhkPlotter(start_system=current_sys.system)
+            else:
+                self.plotter_state.plotter.refresh_settings()
 
         new_locale = babel.Locale.parse(settings.General.locale)
         if new_locale != auto_neutron.locale.get_active_locale():
