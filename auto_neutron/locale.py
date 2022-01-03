@@ -20,12 +20,17 @@ def set_active_locale(locale: babel.Locale) -> None:
     """Set the current active locale."""
     global _active_locale
     _active_locale = locale
-
-
-def install_translation(language: str) -> None:
-    """Install the translations for `language`."""
     gettext.translation(
-        "auto_neutron", localedir=LOCALE_DIR, languages=[language]
+        "auto_neutron",
+        localedir=LOCALE_DIR,
+        languages=[
+            "".join(
+                filter(
+                    None,
+                    (locale.language, locale.territory, locale.script, locale.variant),
+                )
+            )
+        ],
     ).install()
 
 

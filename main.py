@@ -86,7 +86,6 @@ sys.excepthook = ex_handler.handler
 
 set_settings(TOMLSettings((get_config_dir() / "config.toml")))
 auto_neutron.locale.set_active_locale(babel.Locale.parse(General.locale))
-auto_neutron.locale.install_translation(General.locale)
 root_logger.info(f"Starting Auto_Neutron ver {VERSION}")
 with win_theme_change_listener.create_listener() as listener:
     hub = hub.Hub(ex_handler, listener)

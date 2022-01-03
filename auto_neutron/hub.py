@@ -176,7 +176,6 @@ class Hub(QtCore.QObject):
         new_locale = babel.Locale.parse(settings.General.locale)
         if new_locale != auto_neutron.locale.get_active_locale():
             auto_neutron.locale.set_active_locale(new_locale)
-            auto_neutron.locale.install_translation(settings.General.locale)
             app = QtWidgets.QApplication.instance()
             app.post_event(app, QtCore.QEvent(QtCore.QEvent.LanguageChange))
 
