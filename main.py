@@ -22,15 +22,16 @@ import sys
 from logging import handlers
 from pathlib import Path
 
+import babel
 from PySide6 import QtGui, QtNetwork, QtWidgets
 
-import auto_neutron
+import auto_neutron.locale
 
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa F401
 from auto_neutron import hub, win_theme_change_listener
 from auto_neutron.constants import APP, APPID, ORG, VERSION, get_config_dir
-from auto_neutron.settings import set_settings
+from auto_neutron.settings import General, set_settings
 from auto_neutron.settings.toml_settings import TOMLSettings
 from auto_neutron.utils.file import base_path
 from auto_neutron.utils.logging import (
@@ -84,6 +85,8 @@ ex_handler = ExceptionHandler()
 sys.excepthook = ex_handler.handler
 
 set_settings(TOMLSettings((get_config_dir() / "config.toml")))
+auto_neutron.locale.set_active_locale(babel.Locale.parse(General.locale))
+auto_neutron.locale.install_translation(General.locale)
 root_logger.info(f"Starting Auto_Neutron ver {VERSION}")
 with win_theme_change_listener.create_listener() as listener:
     hub = hub.Hub(ex_handler, listener)
