@@ -65,10 +65,12 @@ class ShutDownWindowGUI(QtWidgets.QDialog):
     def retranslate(self) -> None:
         """Retranslate text that is always on display."""
         self.info_label.text = _("Game shut down")
+        index = self.journal_combo.current_index
         self.journal_combo.clear()
         self.journal_combo.add_items(
             [_("Last journal"), _("Second to last"), _("Third to last")]
         )
+        self.journal_combo.current_index = index
         self.new_journal_button.text = _("New journal")
         self.save_route_button.text = _("Save route")
         self.quit_button.text = _("Quit")

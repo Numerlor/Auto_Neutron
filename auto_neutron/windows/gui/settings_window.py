@@ -189,10 +189,12 @@ class SettingsWindowGUI(QtWidgets.QDialog):
         """Retranslate text that is always on display."""
         self.ok_button.text = _("Ok")
         self.apply_button.text = _("Apply")
+        index = self.group_selector.current_index()
         self.group_selector.clear()
         self.group_selector.add_items(
             (_("Appearance"), _("Behaviour"), _("Alerts"), _("AHK script"))
         )
+        self.group_selector.set_current_index(index)
         self.group_selector.set_fixed_width(
             self.group_selector.size_hint_for_column(0) + 5
         )

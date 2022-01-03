@@ -96,10 +96,12 @@ class TabBase(QtWidgets.QWidget):
             self.cargo_label.text = _("Cargo")
 
         self.submit_button.text = _("Submit")
+        index = self.journal_combo.current_index
         self.journal_combo.clear()
         self.journal_combo.add_items(
             [_("Last journal"), _("Second to last"), _("Third to last")]
         )
+        self.journal_combo.current_index = index
 
 
 class NeutronTab(TabBase):
