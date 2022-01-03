@@ -23,15 +23,18 @@ def set_active_locale(locale: babel.Locale) -> None:
     gettext.translation(
         "auto_neutron",
         localedir=LOCALE_DIR,
-        languages=[
-            "".join(
-                filter(
-                    None,
-                    (locale.language, locale.territory, locale.script, locale.variant),
-                )
-            )
-        ],
+        languages=[code_from_locale(locale)],
     ).install()
+
+
+def code_from_locale(locale: babel.Locale) -> str:
+    """Get the language code of `locale`."""
+    return "".join(
+        filter(
+            None,
+            (locale.language, locale.territory, locale.script, locale.variant),
+        )
+    )
 
 
 @functools.cache
