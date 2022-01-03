@@ -35,10 +35,10 @@ def set_active_locale(locale: babel.Locale) -> None:
 
 
 @functools.cache
-def get_available_languages() -> list[str]:
-    """Get the languages translations are available for."""
+def get_available_locales() -> list[babel.Locale]:
+    """Get the locales translations are available for."""
     return [
-        path.name
+        babel.Locale.parse(path.name)
         for path in LOCALE_DIR.glob("*")
         if path.is_dir() and (path / "LC_MESSAGES" / "auto_neutron.mo").exists()
     ]
