@@ -4,6 +4,7 @@ import subprocess  # noqa S404
 import sys
 from pathlib import Path
 
+import delete_babel_dat
 import dotenv
 import PyInstaller.__main__
 
@@ -21,7 +22,7 @@ else:
     spec_files = ["pyinstaller_build/Auto_Neutron_debug.spec"]
     debug = True
 delete_dlls.main()
-
+delete_babel_dat.main()
 compiled_process = subprocess.run(  # noqa: S603, S607
     ["poetry", "run", "task", "i18n-compile"]
 )
