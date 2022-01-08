@@ -123,6 +123,12 @@ class MainWindowGUI(QtWidgets.QMainWindow):
             item.set_text_alignment(QtCore.Qt.AlignmentFlag.AlignCenter)
             self.table.set_item(row_pos, column, item)
 
+    def scroll_to_index(self, index: int) -> None:
+        """Scroll the table to position the row with `index` at the top."""
+        self.table.scroll_to_item(
+            self.table.item(index, 0), QtWidgets.QAbstractItemView.PositionAtTop
+        )
+
     def retranslate(self) -> None:
         """Retranslate text that is always on display."""
         self._set_header_text()

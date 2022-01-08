@@ -47,6 +47,8 @@ class MainWindow(MainWindowGUI):
         self.restore_window()
         self.retranslate()
 
+        self._current_row_index = 0
+
     def copy_table_item_text(self) -> None:
         """Copy the text of the selected table item into the clipboard."""
         if (item := self.table.current_item()) is not None:
@@ -92,10 +94,10 @@ class MainWindow(MainWindowGUI):
             super().inactivate_before_index(index)
             self.update_remaining_count(index)
         top_item = self.table.item_at(QtCore.QPoint(1, 1))
-        if settings.Window.autoscroll and top_item.row() == index - 1:
-            self.table.scroll_to_item(
-                self.table.item(index, 0), QtWidgets.QAbstractItemView.PositionAtTop
-            )
+        if settings.Window.autoscroll and top_item.row() == self._current_row_index:
+            self.scroll_to_index(index)
+
+        self._current_row_index = index
 
     def update_remaining_count(self, index: int) -> None:
         """
