@@ -277,10 +277,10 @@ def _spansh_job_callback(
             log.debug("Received finished neutron job.")
             result_callback(result_decode_func(job_response["result"]))
         else:
-            error_callback("Received invalid response from Spansh.")
+            error_callback(_("Received invalid response from Spansh."))
     except NetworkError as e:
         if e.spansh_error is not None:
-            error_callback(f"Received error from Spansh: {e.spansh_error}")
+            error_callback(_("Received error from Spansh: {}").format(e.spansh_error))
         else:
             error_callback(
                 e.error_message

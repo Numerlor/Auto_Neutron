@@ -69,7 +69,7 @@ class NearestWindow(NearestWindowGUI):
             data = json_from_network_req(reply)
         except NetworkError as e:
             if e.spansh_error is not None:
-                message = _(f"Received error from Spansh: {e.spansh_error}")
+                message = _("Received error from Spansh: {}").format(e.spansh_error)
             else:
                 # Fall back to Qt error message if spansh didn't respond
                 message = e.error_message
