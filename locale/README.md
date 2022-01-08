@@ -2,7 +2,7 @@
 
 Translations can be contributed as PRs containing the .po files to this repository.
 
-To create translations, you can use tools like [POEdit](https://poedit.net/), or manually translate in the files.
+To create translations, you can use tools like [POEdit](https://poedit.net/), or manually translate into a .po file from the .pot template.
 
 Each directory under this directory represents a single language code, where the LC_MESSAGES sub dir contains the translations of the messages.
 
