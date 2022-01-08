@@ -80,12 +80,14 @@ class MainWindowGUI(QtWidgets.QMainWindow):
     def inactivate_before_index(self, index: int) -> None:
         """Make all the items before `index` grey, and after, the default color."""
         assert index < self.table.row_count, f"Index {index} out of range."
+        grey_color = QtGui.QColor(150, 150, 150)
         for row in range(0, index):
             for column in range(0, self.table.column_count):
-                self.table.item(row, column).set_foreground(QtGui.QColor(150, 150, 150))
+                self.table.item(row, column).set_foreground(grey_color)
+        default_brush = QtGui.QBrush()
         for row in range(index, self.table.row_count):
             for column in range(0, self.table.column_count):
-                self.table.item(row, column).set_foreground(QtGui.QBrush())
+                self.table.item(row, column).set_foreground(default_brush)
 
     def _main_context(self, location: QtCore.QPoint) -> None:
         """Provide the context menu displayed on the window."""
