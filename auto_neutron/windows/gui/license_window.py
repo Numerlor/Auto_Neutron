@@ -12,7 +12,7 @@ from __feature__ import snake_case, true_property  # noqa: F401
 from auto_neutron.constants import VERSION
 
 
-class LicenseWindow(QtWidgets.QDialog):
+class LicenseWindowGUI(QtWidgets.QDialog):
     """Window for license information."""
 
     def __init__(self, parent: t.Optional[QtWidgets.QWidget] = None):
@@ -22,12 +22,20 @@ class LicenseWindow(QtWidgets.QDialog):
         self.set_attribute(QtCore.Qt.WidgetAttribute.WA_DeleteOnClose, True)
         self.window_title = "Auto_Neutron " + VERSION
 
+        self.about_qt_button = QtWidgets.QPushButton(self)
+        self.about_qt_button.size_policy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
+        )
+
         self.text = QtWidgets.QTextBrowser(self)
         self.text.open_external_links = True
 
         self.main_layout = QtWidgets.QVBoxLayout(self)
         self.main_layout.contents_margins = QtCore.QMargins(0, 0, 0, 0)
         self.main_layout.add_widget(self.text)
+        self.main_layout.add_widget(
+            self.about_qt_button, alignment=QtCore.Qt.AlignmentFlag.AlignCenter
+        )
         self.set_layout(self.main_layout)
 
         self.retranslate()
@@ -35,6 +43,7 @@ class LicenseWindow(QtWidgets.QDialog):
     def retranslate(self) -> None:
         """Retranslate text that is always on display."""
         self.text.clear()
+        self.about_qt_button.text = _("About Qt")
         # fmt: off
         self.text.insert_html(
             _("This program uses PySide6:<br>")

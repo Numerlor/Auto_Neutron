@@ -23,7 +23,7 @@ from auto_neutron.game_state import GameState, PlotterState
 from auto_neutron.route_plots import AhkPlotter, CopyPlotter, NeutronPlotRow
 from auto_neutron.utils.signal import ReconnectingSignal
 from auto_neutron.windows.error_window import ErrorWindow
-from auto_neutron.windows.gui.license_window import LicenseWindow
+from auto_neutron.windows.license_window import LicenseWindow
 from auto_neutron.windows.main_window import MainWindow
 from auto_neutron.windows.missing_journal_window import MissingJournalWindow
 from auto_neutron.windows.new_route_window import NewRouteWindow
