@@ -11,7 +11,7 @@ import typing as t
 from functools import partial
 from pathlib import Path
 
-from PySide6 import QtCore, QtWidgets
+from PySide6 import QtCore, QtGui, QtWidgets
 
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa F401
@@ -138,13 +138,14 @@ class NewRouteWindow(NewRouteWindowGUI):
             },
             reply_callback=partial(
                 spansh_neutron_callback,
-                error_callback=partial(self.status_bar.show_message, timeout=10_000),
+                error_callback=self._spansh_error_callback,
                 delay_iterator=create_request_delay_iterator(),
                 result_callback=partial(
                     self.emit_and_close, self.selected_journal, route_index=1
                 ),
             ),
         )
+        self.cursor = QtGui.QCursor(QtCore.Qt.CursorShape.BusyCursor)
 
     def _submit_exact(self) -> None:
         """Submit an exact plotter request to spansh."""
@@ -185,13 +186,14 @@ class NewRouteWindow(NewRouteWindowGUI):
             },
             reply_callback=partial(
                 spansh_exact_callback,
-                error_callback=partial(self.status_bar.show_message, timeout=10_000),
+                error_callback=self._spansh_error_callback,
                 delay_iterator=create_request_delay_iterator(),
                 result_callback=partial(
                     self.emit_and_close, self.selected_journal, route_index=1
                 ),
             ),
         )
+        self.cursor = QtGui.QCursor(QtCore.Qt.CursorShape.BusyCursor)
 
     def _set_widget_values(
         self, location: Location, ship: Ship, current_cargo: int
@@ -281,6 +283,11 @@ class NewRouteWindow(NewRouteWindowGUI):
         """Update the line edits with `system_name_result_label` contents from `window`."""
         for line_edit in line_edits:
             line_edit.text = window.system_name_result_label.text
+
+    def _spansh_error_callback(self, error_message: str) -> None:
+        """Reset the cursor shape and display `error_message` in the status bar."""
+        self.cursor = QtGui.QCursor(QtCore.Qt.CursorShape.ArrowCursor)
+        self.status_bar.show_message(error_message, 10_000)
 
     # endregion
 
