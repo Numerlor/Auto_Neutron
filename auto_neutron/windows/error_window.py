@@ -91,7 +91,9 @@ class ErrorWindow(ErrorWindowGUI):
             _("Please make sure to report the bug at")
             + "<br>"
             + f'<a href="{ISSUES_URL}" style="color: #007bff">{ISSUES_URL}</a>,<br>'
-            + _("and include the {file_name} file from")
+            + _("and include the ")
+            + "<font color=#007bff>{file_name}</font>"
+            + _(" file from")
             + "<br>"
             + ' <a href="{log_path}" style="color: #007bff">{log_path}</a><br>'
             + _(
