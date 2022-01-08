@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Auto Neutron 2.0.4\n"
 "Report-Msgid-Bugs-To: Numerlor@gmail\n"
-"POT-Creation-Date: 2022-01-08 21:10+0100\n"
+"POT-Creation-Date: 2022-01-08 21:36+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -137,61 +137,69 @@ msgid "Quit"
 msgstr ""
 
 #: auto_neutron/windows/gui/error_window.py:49
-#: auto_neutron/windows/gui/main_window.py:137
+#: auto_neutron/windows/gui/main_window.py:136
 #: auto_neutron/windows/gui/shut_down_window.py:75
 msgid "Save route"
 msgstr ""
 
-#: auto_neutron/windows/gui/license_window.py:40
+#: auto_neutron/windows/gui/license_window.py:46
+msgid "About Qt"
+msgstr ""
+
+#: auto_neutron/windows/gui/license_window.py:49
+msgid "This program uses PySide6:<br>"
+msgstr ""
+
+#: auto_neutron/windows/gui/license_window.py:50
 msgid "PySide6 Copyright (C) 2015 The Qt Company Ltd."
 msgstr ""
 
-#: auto_neutron/windows/gui/license_window.py:41
+#: auto_neutron/windows/gui/license_window.py:51
 msgid "Auto_Neutron Copyright (C) 2019 Numerlor"
 msgstr ""
 
-#: auto_neutron/windows/gui/license_window.py:42
+#: auto_neutron/windows/gui/license_window.py:52
 msgid "Auto_Neutron comes with ABSOLUTELY NO WARRANTY)."
 msgstr ""
 
-#: auto_neutron/windows/gui/license_window.py:43
+#: auto_neutron/windows/gui/license_window.py:53
 msgid ""
 "This is free software, and you are welcome to redistribute it under "
 "certain conditions; "
 msgstr ""
 
-#: auto_neutron/windows/gui/main_window.py:136
+#: auto_neutron/windows/gui/main_window.py:135
 msgid "Edit"
 msgstr ""
 
-#: auto_neutron/windows/gui/main_window.py:138
+#: auto_neutron/windows/gui/main_window.py:137
 msgid "Copy"
 msgstr ""
 
-#: auto_neutron/windows/gui/main_window.py:139
+#: auto_neutron/windows/gui/main_window.py:138
 msgid "Start a new route"
 msgstr ""
 
-#: auto_neutron/windows/gui/main_window.py:140
+#: auto_neutron/windows/gui/main_window.py:139
 #: auto_neutron/windows/gui/settings_window.py:219
 msgid "Settings"
 msgstr ""
 
-#: auto_neutron/windows/gui/main_window.py:141
+#: auto_neutron/windows/gui/main_window.py:140
 msgid "About"
 msgstr ""
 
-#: auto_neutron/windows/gui/main_window.py:146
+#: auto_neutron/windows/gui/main_window.py:145
 #: auto_neutron/windows/gui/nearest_window.py:131
 msgid "System name"
 msgstr ""
 
-#: auto_neutron/windows/gui/main_window.py:148
+#: auto_neutron/windows/gui/main_window.py:147
 #: auto_neutron/windows/gui/nearest_window.py:132
 msgid "Distance"
 msgstr ""
 
-#: auto_neutron/windows/gui/main_window.py:150
+#: auto_neutron/windows/gui/main_window.py:149
 msgid "Remaining"
 msgstr ""
 
