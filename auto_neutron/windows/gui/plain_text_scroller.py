@@ -16,6 +16,8 @@ class PlainTextScroller(QtWidgets.QWidget):
     A plain text display widget, which scrolls horizontally on hover if the entire text cannot fit into its size.
 
     The `fade_width` argument can be used to control the width of the fade-in and fade-out gradients.
+    `scroll_step` defines how much the text moves for each scroll interval.
+    `scroll_interval` controls the scroll interval, in ms.
     """
 
     def __init__(
@@ -24,10 +26,14 @@ class PlainTextScroller(QtWidgets.QWidget):
         *,
         text: str = "",
         fade_width: int = 30,
+        scroll_step: float = 1 / 4,
+        scroll_interval: int = 4,
     ):
         super().__init__(parent)
         self._fade_width = fade_width
         self._scroll_pos = 0
+        self.scroll_step = scroll_step
+        self._scroll_interval = scroll_interval
 
         self._static_text = QtGui.QStaticText(text)
         self._static_text.set_text_format(QtCore.Qt.PlainText)
@@ -35,7 +41,7 @@ class PlainTextScroller(QtWidgets.QWidget):
         self._fade_in_image, self._fade_out_image = self._create_fade_images()
 
         self._scroll_timer = QtCore.QTimer(self)
-        self._scroll_timer.set_interval(4)
+        self._scroll_timer.set_interval(scroll_interval)
         self._scroll_timer.set_timer_type(QtCore.Qt.TimerType.PreciseTimer)
         self._scroll_timer.timeout.connect(self._reposition)
 
@@ -84,6 +90,17 @@ class PlainTextScroller(QtWidgets.QWidget):
         self._fade_width = width
         self._fade_in_image, self._fade_out_image = self._create_fade_images()
 
+    @property
+    def scroll_interval(self) -> int:
+        """Return the current scroll interval."""
+        return self._scroll_interval
+
+    @scroll_interval.setter
+    def scroll_interval(self, interval: int) -> None:
+        """Set a new scroll interval."""
+        self._scroll_timer.set_interval(interval)
+        self._scroll_interval = interval
+
     def size_hint(self) -> QtCore.QSize:
         """
         Return the size hint.
@@ -128,7 +145,7 @@ class PlainTextScroller(QtWidgets.QWidget):
             self._scroll_timer.stop()
             self._reset_timer.start()
         else:
-            self._scroll_pos += 1 / 4
+            self._scroll_pos += self.scroll_step
         self.update()
 
     def _reset_pos(self) -> None:
