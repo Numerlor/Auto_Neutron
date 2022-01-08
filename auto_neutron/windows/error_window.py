@@ -93,6 +93,10 @@ class ErrorWindow(ErrorWindowGUI):
             + f'<a href="{ISSUES_URL}" style="color: #007bff">{ISSUES_URL}</a>,<br>'
             + _("and include the {file_name} file from")
             + "<br>"
-            + ' <a href="{log_path}" style="color: #007bff">{log_path}</a>'
+            + ' <a href="{log_path}" style="color: #007bff">{log_path}</a><br>'
+            + _(
+                "You may close this window, but the program may not be fully functional, "
+            )
+            + _("or it may produce erroneous behaviour.")
         )
         self._set_text()
