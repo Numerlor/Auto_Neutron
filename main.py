@@ -73,7 +73,9 @@ if __debug__:
         logger_path, maxBytes=1024 * 1024 // 4, backupCount=3, encoding="utf8"
     )
 else:
-    file_handler = SessionBackupHandler(get_config_dir() / "log.log", backup_count=2)
+    file_handler = SessionBackupHandler(
+        get_config_dir() / "Auto_Neutron.log", backup_count=2
+    )
 
 init_qt_logging()
 
