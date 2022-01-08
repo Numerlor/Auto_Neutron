@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import inspect
+import logging
 import shutil
 import typing as t
 from contextlib import suppress
@@ -39,19 +40,17 @@ _overload_dummy = t.overload
 if not t.TYPE_CHECKING:
     t.overload = lambda x: x
 
+log = logging.getLogger(__name__)
+
 
 class TOMLSettings:
     """Provide an interface to a TOML settings file."""
 
+    _settings_dict: RecursiveDefaultDict[str, t.Any]
+
     def __init__(self, file_path: Path):
         self.path = file_path
-
-        self._settings_dict: RecursiveDefaultDict[str, t.Any] = RecursiveDefaultDict()
-        with suppress(FileNotFoundError):
-            with self.path.open("rb") as settings_file:
-                self._settings_dict.update_from_dict_recursive(
-                    tomli.load(settings_file)
-                )
+        self.load_from_file()
 
     # region value
     @t.overload
@@ -233,6 +232,7 @@ class TOMLSettings:
         If `atomic` is True, the contents are written to a temporary file and then moved to the target path;
         otherwise if it is set to False, the contents are written directly to the file.
         """
+        log.info(f"Syncing settings to {self.path}.")
         file_settings: RecursiveDefaultDict[str, t.Any] = RecursiveDefaultDict()
         with suppress(FileNotFoundError):
             with self.path.open("rb") as settings_file:
@@ -254,6 +254,7 @@ class TOMLSettings:
 
     def load_from_file(self) -> None:
         """Load new settings from the file path of the settings object."""
+        log.info(f"Loading new settings from {self.path}.")
         file_settings: RecursiveDefaultDict[str, t.Any] = RecursiveDefaultDict()
         with self.path.open("rb") as settings_file:
             file_settings.update_from_dict_recursive(tomli.load(settings_file))
