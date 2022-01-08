@@ -31,7 +31,10 @@ from auto_neutron.route_plots import (
     spansh_neutron_callback,
 )
 from auto_neutron.ship import Ship
-from auto_neutron.utils.forbid_uninitialized import ForbidUninitialized
+from auto_neutron.utils.forbid_uninitialized import (
+    ForbidUninitialized,
+    ignore_uninitialized,
+)
 from auto_neutron.utils.network import make_network_request
 from auto_neutron.utils.signal import ReconnectingSignal
 from auto_neutron.utils.utils import create_request_delay_iterator
@@ -222,7 +225,7 @@ class NewRouteWindow(NewRouteWindowGUI):
 
     def _recalculate_range(self, cargo_mass: int) -> None:
         """Recalculate jump range with the new cargo_mass."""
-        with contextlib.suppress(RuntimeError):  # Ship may not be available yet
+        with ignore_uninitialized():  # Ship may not be available yet
             self.spansh_neutron_tab.range_spin.value = self.game_state.ship.jump_range(
                 cargo_mass=cargo_mass
             )

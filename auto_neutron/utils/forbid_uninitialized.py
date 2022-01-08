@@ -3,7 +3,10 @@
 
 from __future__ import annotations
 
+import collections.abc
+import contextlib
 import typing as t
+from functools import partial
 
 if t.TYPE_CHECKING:
     from typing_extensions import Self
@@ -55,3 +58,11 @@ class ForbidUninitialized:
         if value is self:
             return
         setattr(instance, self._private_name, value)
+
+
+ignore_uninitialized: collections.abc.Callable[
+    [], contextlib.AbstractContextManager[None]
+] = partial(contextlib.suppress, UninitializedAccessError)
+ignore_uninitialized.__doc__ = (
+    "Ignore `UninitializedAccessError`s, exiting the context manager if one is raised."
+)
