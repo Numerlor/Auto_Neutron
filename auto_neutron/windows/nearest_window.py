@@ -11,7 +11,11 @@ from PySide6 import QtCore, QtNetwork, QtWidgets
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa F401
 from auto_neutron.constants import SPANSH_API_URL
-from auto_neutron.utils.network import json_from_network_req, make_network_request
+from auto_neutron.utils.network import (
+    NetworkError,
+    json_from_network_req,
+    make_network_request,
+)
 from auto_neutron.windows.gui.nearest_window import NearestWindowGUI
 
 if t.TYPE_CHECKING:
@@ -24,10 +28,16 @@ log = logging.getLogger(__name__)
 class NearestWindow(NearestWindowGUI):
     """Provide a UI to Spansh's nearest API and let the user get the result through the provided buttons."""
 
-    def __init__(self, parent: QtWidgets.QWidget, start_location: Location):
+    def __init__(
+        self,
+        parent: QtWidgets.QWidget,
+        start_location: Location,
+        status_bar: QtWidgets.QStatusBar,
+    ):
         super().__init__(parent)
         self.set_input_values_from_location(start_location)
         self.search_button.pressed.connect(self._make_nearest_request)
+        self._parent_status_bar = status_bar
         self.retranslate()
 
     def set_input_values_from_location(self, location: t.Optional[Location]) -> None:
@@ -52,22 +62,31 @@ class NearestWindow(NearestWindowGUI):
 
     def _assign_from_reply(self, reply: QtNetwork.QNetworkReply) -> None:
         """Decode the spansh JSON reply and display the data to the user."""
-        data = json_from_network_req(reply)
+        try:
+            data = json_from_network_req(reply)
+        except NetworkError as e:
+            if e.spansh_error is not None:
+                message = _(f"Received error from Spansh: {e.spansh_error}")
+            else:
+                # Fall back to Qt error message if spansh didn't respond
+                message = e.error_message
+            self._parent_status_bar.show_message(message, 10_000)
+        else:
+            self.system_name_result_label.text = data["system"]["name"]
+            self.distance_result_label.text = (
+                format(data["system"]["distance"], ".2f").rstrip("0").rstrip(".")
+                + " Ly"
+            )
 
-        self.system_name_result_label.text = data["system"]["name"]
-        self.distance_result_label.text = (
-            format(data["system"]["distance"], ".2f").rstrip("0").rstrip(".") + " Ly"
-        )
-
-        self.x_result_label.text = (
-            format(data["system"]["x"], ".2f").rstrip("0").rstrip(".")
-        )
-        self.y_result_label.text = (
-            format(data["system"]["y"], ".2f").rstrip("0").rstrip(".")
-        )
-        self.z_result_label.text = (
-            format(data["system"]["z"], ".2f").rstrip("0").rstrip(".")
-        )
+            self.x_result_label.text = (
+                format(data["system"]["x"], ".2f").rstrip("0").rstrip(".")
+            )
+            self.y_result_label.text = (
+                format(data["system"]["y"], ".2f").rstrip("0").rstrip(".")
+            )
+            self.z_result_label.text = (
+                format(data["system"]["z"], ".2f").rstrip("0").rstrip(".")
+            )
 
     def change_event(self, event: QtCore.QEvent) -> None:
         """Retranslate the GUI when a language change occurs."""
