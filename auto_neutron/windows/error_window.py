@@ -83,9 +83,10 @@ class ErrorWindow(ErrorWindowGUI):
     def retranslate(self) -> None:
         """Retranslate text that is always on display."""
         super().retranslate()
-        self.info_label.text = _(
-            "Multiple unexpected errors have occurred (x{})"
-        ).format(self._num_errors)
+        if self._num_errors > 1:
+            self.info_label.text = _(
+                "Multiple unexpected errors have occurred (x{})"
+            ).format(self._num_errors)
         self.error_template = (
             _("Please make sure to report the bug at")
             + "<br>"
