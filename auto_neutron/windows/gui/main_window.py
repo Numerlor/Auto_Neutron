@@ -145,5 +145,5 @@ class MainWindowGUI(QtWidgets.QMainWindow):
             header.set_text(_("System name"))
         if (header := self.table.horizontal_header_item(1)) is not None:
             header.set_text(_("Distance"))
-        if (header := self.table.horizontal_header_item(3)) is not None:
+        if (header := self.table.horizontal_header_item(2)) is not None:
             header.set_text(_("Remaining"))
