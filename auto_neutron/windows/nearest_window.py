@@ -6,7 +6,7 @@ from __future__ import annotations
 import logging
 import typing as t
 
-from PySide6 import QtCore, QtNetwork, QtWidgets
+from PySide6 import QtCore, QtGui, QtNetwork, QtWidgets
 
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa F401
@@ -59,9 +59,12 @@ class NearestWindow(NearestWindowGUI):
             },
             reply_callback=self._assign_from_reply,
         )
+        self.cursor = QtGui.QCursor(QtCore.Qt.CursorShape.BusyCursor)
 
     def _assign_from_reply(self, reply: QtNetwork.QNetworkReply) -> None:
         """Decode the spansh JSON reply and display the data to the user."""
+        self.cursor = QtGui.QCursor(QtCore.Qt.CursorShape.BusyCursor)
+
         try:
             data = json_from_network_req(reply)
         except NetworkError as e:
