@@ -9,6 +9,10 @@ if t.TYPE_CHECKING:
     from typing_extensions import Self
 
 
+class UninitializedAccessError(Exception):
+    """Raised on access of uninitialized values from the ForbidUninitialized descriptor."""
+
+
 class ForbidUninitialized:
     """
     Descriptor that raises on access of initialized attributes.
@@ -41,7 +45,7 @@ class ForbidUninitialized:
 
         value = getattr(instance, self._private_name, self.uninitialized_value)
         if value is self.uninitialized_value:
-            raise RuntimeError(
+            raise UninitializedAccessError(
                 f"Access of uninitialized attribute {self._name!r} from {owner.__qualname__!r} object at {hex(id(instance))}."
             )
         return value
