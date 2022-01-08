@@ -64,7 +64,6 @@ class PlainTextScroller(QtWidgets.QWidget):
     def text(self, text: str) -> None:
         """Set widget's text to `text`."""
         self._static_text.set_text(text)
-        self._refresh_fade_images()
         self.update_geometry()
         self.update()
 
