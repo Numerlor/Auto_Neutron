@@ -80,12 +80,14 @@ class MainWindowGUI(QtWidgets.QMainWindow):
     def inactivate_before_index(self, index: int) -> None:
         """Make all the items before `index` grey, and after, the default color."""
         assert index < self.table.row_count, f"Index {index} out of range."
+        grey_color = QtGui.QColor(150, 150, 150)
         for row in range(0, index):
             for column in range(0, self.table.column_count):
-                self.table.item(row, column).set_foreground(QtGui.QColor(150, 150, 150))
+                self.table.item(row, column).set_foreground(grey_color)
+        default_brush = QtGui.QBrush()
         for row in range(index, self.table.row_count):
             for column in range(0, self.table.column_count):
-                self.table.item(row, column).set_foreground(QtGui.QBrush())
+                self.table.item(row, column).set_foreground(default_brush)
 
     def _main_context(self, location: QtCore.QPoint) -> None:
         """Provide the context menu displayed on the window."""
@@ -121,6 +123,12 @@ class MainWindowGUI(QtWidgets.QMainWindow):
             item.set_text_alignment(QtCore.Qt.AlignmentFlag.AlignCenter)
             self.table.set_item(row_pos, column, item)
 
+    def scroll_to_index(self, index: int) -> None:
+        """Scroll the table to position the row with `index` at the top."""
+        self.table.scroll_to_item(
+            self.table.item(index, 0), QtWidgets.QAbstractItemView.PositionAtTop
+        )
+
     def retranslate(self) -> None:
         """Retranslate text that is always on display."""
         self._set_header_text()
@@ -137,5 +145,5 @@ class MainWindowGUI(QtWidgets.QMainWindow):
             header.set_text(_("System name"))
         if (header := self.table.horizontal_header_item(1)) is not None:
             header.set_text(_("Distance"))
-        if (header := self.table.horizontal_header_item(3)) is not None:
+        if (header := self.table.horizontal_header_item(2)) is not None:
             header.set_text(_("Remaining"))

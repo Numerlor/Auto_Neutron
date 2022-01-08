@@ -65,7 +65,7 @@ class Hub(QtCore.QObject):
         self.window.about_action.triggered.connect(self.display_license_window)
         self.window.new_route_action.triggered.connect(self.new_route_window)
         self.window.settings_action.triggered.connect(self.display_settings)
-        self.window.save_action.triggered.connect(self.save_route)
+        self.window.save_action.triggered.connect(partial(self.save_route, True))
         self.window.table.doubleClicked.connect(self.get_index_row)
         self.game_state = GameState()
 
@@ -147,8 +147,11 @@ class Hub(QtCore.QObject):
                 self.plotter_state.plotter = AhkPlotter()
         with self.edit_route_update_connection.temporarily_disconnect():
             self.window.initialize_table(route)
+
         self.plotter_state.route_index = route_index
-        self.plotter_state.tail_worker.emit_next_system(self.game_state.location)
+        self.window.scroll_to_index(route_index)
+        if self.game_state.location is not None:  # may not have a location yet
+            self.plotter_state.tail_worker.emit_next_system(self.game_state.location)
         self.warn_worker.start()
 
     def apply_settings(self) -> None:

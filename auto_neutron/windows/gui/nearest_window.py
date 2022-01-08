@@ -133,7 +133,7 @@ class NearestWindowGUI(QtWidgets.QDialog):
         # NOTE: Coordinate
         self.x_label.text = _("X")
         # NOTE: Coordinate
-        self.z_label.text = _("Y")
+        self.y_label.text = _("Y")
         # NOTE: Coordinate
         self.z_label.text = _("Z")
 

@@ -11,7 +11,7 @@ import typing as t
 from functools import partial
 from pathlib import Path
 
-from PySide6 import QtCore, QtWidgets
+from PySide6 import QtCore, QtGui, QtWidgets
 
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa F401
@@ -31,7 +31,6 @@ from auto_neutron.route_plots import (
     spansh_neutron_callback,
 )
 from auto_neutron.ship import Ship
-from auto_neutron.utils.forbid_uninitialized import ForbidUninitialized
 from auto_neutron.utils.network import make_network_request
 from auto_neutron.utils.signal import ReconnectingSignal
 from auto_neutron.utils.utils import create_request_delay_iterator
@@ -50,8 +49,6 @@ class NewRouteWindow(NewRouteWindowGUI):
     """The UI for plotting a new route, from CSV, Spansh plotters, or the last saved route."""
 
     route_created_signal = QtCore.Signal(Journal, list, int)
-    game_state = ForbidUninitialized()
-    selected_journal = ForbidUninitialized()
 
     def __init__(self, parent: QtWidgets.QWidget):
         super().__init__(parent)
@@ -81,6 +78,7 @@ class NewRouteWindow(NewRouteWindowGUI):
         self.spansh_exact_tab.source_edit.textChanged.connect(self._set_exact_submit)
         self.spansh_exact_tab.target_edit.textChanged.connect(self._set_exact_submit)
 
+        self.spansh_neutron_tab.range_spin.value = 50  # default to 80% efficiency
         self.spansh_neutron_tab.efficiency_spin.value = 80  # default to 80% efficiency
 
         self.spansh_neutron_tab.cargo_slider.valueChanged.connect(
@@ -141,13 +139,14 @@ class NewRouteWindow(NewRouteWindowGUI):
             },
             reply_callback=partial(
                 spansh_neutron_callback,
-                error_callback=partial(self.status_bar.show_message, timeout=10_000),
+                error_callback=self._spansh_error_callback,
                 delay_iterator=create_request_delay_iterator(),
                 result_callback=partial(
                     self.emit_and_close, self.selected_journal, route_index=1
                 ),
             ),
         )
+        self.cursor = QtGui.QCursor(QtCore.Qt.CursorShape.BusyCursor)
 
     def _submit_exact(self) -> None:
         """Submit an exact plotter request to spansh."""
@@ -188,13 +187,14 @@ class NewRouteWindow(NewRouteWindowGUI):
             },
             reply_callback=partial(
                 spansh_exact_callback,
-                error_callback=partial(self.status_bar.show_message, timeout=10_000),
+                error_callback=self._spansh_error_callback,
                 delay_iterator=create_request_delay_iterator(),
                 result_callback=partial(
                     self.emit_and_close, self.selected_journal, route_index=1
                 ),
             ),
         )
+        self.cursor = QtGui.QCursor(QtCore.Qt.CursorShape.BusyCursor)
 
     def _set_widget_values(
         self, location: Location, ship: Ship, current_cargo: int
@@ -222,9 +222,10 @@ class NewRouteWindow(NewRouteWindowGUI):
 
     def _recalculate_range(self, cargo_mass: int) -> None:
         """Recalculate jump range with the new cargo_mass."""
-        self.spansh_neutron_tab.range_spin.value = self.game_state.ship.jump_range(
-            cargo_mass=cargo_mass
-        )
+        if self.game_state.ship.fsd is not None:  # Ship may not be available yet
+            self.spansh_neutron_tab.range_spin.value = self.game_state.ship.jump_range(
+                cargo_mass=cargo_mass
+            )
 
     def _set_neutron_submit(self) -> None:
         """Enable the neutron submit button if both inputs are filled, disable otherwise."""
@@ -245,7 +246,7 @@ class NewRouteWindow(NewRouteWindowGUI):
     def _display_nearest_window(self) -> None:
         """Display the nearest system finder window and link its signals."""
         log.info("Displaying nearest window.")
-        window = NearestWindow(self, self.game_state.location)
+        window = NearestWindow(self, self.game_state.location, self.status_bar)
         window.copy_to_source_button.pressed.connect(
             partial(
                 self._set_line_edits_from_nearest,
@@ -283,6 +284,11 @@ class NewRouteWindow(NewRouteWindowGUI):
         """Update the line edits with `system_name_result_label` contents from `window`."""
         for line_edit in line_edits:
             line_edit.text = window.system_name_result_label.text
+
+    def _spansh_error_callback(self, error_message: str) -> None:
+        """Reset the cursor shape and display `error_message` in the status bar."""
+        self.cursor = QtGui.QCursor(QtCore.Qt.CursorShape.ArrowCursor)
+        self.status_bar.show_message(error_message, 10_000)
 
     # endregion
 

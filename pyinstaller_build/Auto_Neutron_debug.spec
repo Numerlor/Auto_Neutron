@@ -11,7 +11,7 @@ a = Analysis(
         ("../resources/icons_library.ico", "./resources"),
         ("../locale", "./locale"),
     ],
-    hiddenimports=[],
+    hiddenimports=["babel.numbers"],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],

@@ -83,15 +83,22 @@ class ErrorWindow(ErrorWindowGUI):
     def retranslate(self) -> None:
         """Retranslate text that is always on display."""
         super().retranslate()
-        self.info_label.text = _(
-            "Multiple unexpected errors have occurred (x{})"
-        ).format(self._num_errors)
+        if self._num_errors > 1:
+            self.info_label.text = _(
+                "Multiple unexpected errors have occurred (x{})"
+            ).format(self._num_errors)
         self.error_template = (
             _("Please make sure to report the bug at")
             + "<br>"
             + f'<a href="{ISSUES_URL}" style="color: #007bff">{ISSUES_URL}</a>,<br>'
-            + _("and include the {file_name} file from")
+            + _("and include the ")
+            + "<font color=#007bff>{file_name}</font>"
+            + _(" file from")
             + "<br>"
-            + ' <a href="{log_path}" style="color: #007bff">{log_path}</a>'
+            + ' <a href="{log_path}" style="color: #007bff">{log_path}</a><br>'
+            + _(
+                "You may close this window, but the program may not be fully functional, "
+            )
+            + _("or it may produce erroneous behaviour.")
         )
         self._set_text()

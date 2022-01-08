@@ -22,11 +22,13 @@ class ReconnectingSignal:
         self.signal = signal
         self.slot = slot
         self._disconnected = False
+        self._depth = 0
 
     def connect(self) -> None:
         """Connect the signal to the slot."""
-        self.signal.connect(self.slot)
-        self._disconnected = False
+        if self._depth == 0:
+            self.signal.connect(self.slot)
+            self._disconnected = False
 
     def disconnect(self) -> None:
         """Disconnect the signal from the slot."""
@@ -38,5 +40,7 @@ class ReconnectingSignal:
     def temporarily_disconnect(self) -> collections.abc.Iterator[None]:
         """Disconnect the signal for the duration of the context manager, then reconnect it."""
         self.disconnect()
+        self._depth += 1
         yield
+        self._depth -= 1
         self.connect()

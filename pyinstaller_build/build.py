@@ -1,3 +1,6 @@
+# This file uses the MIT license.
+# Copyright (C) 2021  Numerlor
+
 import os
 import shutil
 import subprocess  # noqa S404

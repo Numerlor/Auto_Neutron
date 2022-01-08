@@ -9,19 +9,12 @@ from PySide6 import QtCore, QtWidgets
 
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa F401
-from auto_neutron.utils.forbid_uninitialized import ForbidUninitialized
 
 from .tooltip_slider import TooltipSlider
 
 
 class TabBase(QtWidgets.QWidget):
     """Provide the base for a tab with convenience methods."""
-
-    system_cargo_layout = ForbidUninitialized()
-    source_edit = ForbidUninitialized()
-    target_edit = ForbidUninitialized()
-    cargo_label = ForbidUninitialized()
-    cargo_slider = ForbidUninitialized()
 
     def __init__(self, parent: QtWidgets.QWidget, *, create_cargo: bool):
         super().__init__(parent)
