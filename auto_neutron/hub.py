@@ -149,6 +149,7 @@ class Hub(QtCore.QObject):
             self.window.initialize_table(route)
 
         self.plotter_state.route_index = route_index
+        self.window.scroll_to_index(route_index)
         if self.game_state.location is not None:  # may not have a location yet
             self.plotter_state.tail_worker.emit_next_system(self.game_state.location)
         self.warn_worker.start()
