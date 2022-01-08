@@ -37,7 +37,8 @@ class LicenseWindow(QtWidgets.QDialog):
         self.text.clear()
         # fmt: off
         self.text.insert_html(
-            _("PySide6 Copyright (C) 2015 The Qt Company Ltd.") + "<br><br>"
+            _("This program uses PySide6:<br>")
+            + _("PySide6 Copyright (C) 2015 The Qt Company Ltd.") + "<br><br>"
             + _("Auto_Neutron Copyright (C) 2019 Numerlor") + "<br>"
             + _("Auto_Neutron comes with ABSOLUTELY NO WARRANTY).") + "<br>"
             + _("This is free software, and you are welcome to redistribute it under certain conditions; ")
