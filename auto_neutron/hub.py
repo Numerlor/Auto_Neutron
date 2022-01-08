@@ -21,6 +21,7 @@ from auto_neutron.constants import JOURNAL_PATH, ROUTE_FILE_NAME, get_config_dir
 from auto_neutron.fuel_warn import FuelWarn
 from auto_neutron.game_state import GameState, PlotterState
 from auto_neutron.route_plots import AhkPlotter, CopyPlotter, NeutronPlotRow
+from auto_neutron.utils.forbid_uninitialized import ignore_uninitialized
 from auto_neutron.utils.signal import ReconnectingSignal
 from auto_neutron.windows.error_window import ErrorWindow
 from auto_neutron.windows.gui.license_window import LicenseWindow
@@ -147,8 +148,10 @@ class Hub(QtCore.QObject):
                 self.plotter_state.plotter = AhkPlotter()
         with self.edit_route_update_connection.temporarily_disconnect():
             self.window.initialize_table(route)
+
         self.plotter_state.route_index = route_index
-        self.plotter_state.tail_worker.emit_next_system(self.game_state.location)
+        with ignore_uninitialized():  # may not have a location yet
+            self.plotter_state.tail_worker.emit_next_system(self.game_state.location)
         self.warn_worker.start()
 
     def apply_settings(self) -> None:
