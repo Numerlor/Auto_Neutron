@@ -255,7 +255,7 @@ def _spansh_job_callback(
     where `delay` is the next value from the `delay_iterator`
     """
     try:
-        job_response = json_from_network_req(reply)
+        job_response = json_from_network_req(reply, json_error_key="error")
         if job_response.get("status") == "queued":
             sec_delay = next(delay_iterator)
             log.debug(f"Re-requesting queued job result in {sec_delay} seconds.")

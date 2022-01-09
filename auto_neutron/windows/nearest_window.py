@@ -66,7 +66,7 @@ class NearestWindow(NearestWindowGUI):
         self.cursor = QtGui.QCursor(QtCore.Qt.CursorShape.BusyCursor)
 
         try:
-            data = json_from_network_req(reply)
+            data = json_from_network_req(reply, json_error_key="error")
         except NetworkError as e:
             if e.spansh_error is not None:
                 message = _("Received error from Spansh: {}").format(e.spansh_error)
