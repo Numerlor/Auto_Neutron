@@ -22,7 +22,7 @@ Example of AHK script in action, with no user keyboard input apart from the hotk
 
 ## Installation
 
-To install, download the [latest](https://github.com/Numerlor/Auto_Neutron/releases/latest) release of Auto_Neutron, or [run it directly](#running-directly).
+To install, download either of the [latest](https://github.com/Numerlor/Auto_Neutron/releases/latest) releases of Auto_Neutron, or [run it directly with python](#running-directly).
 You can choose either the self-contained executable file, or the zip archive which contains the application in a directory which is a bit faster to launch.
 
 On the initial launch, Windows will warn you about this being an untrusted application because it doesn't contain a known signed certificate, to ignore this warning, press on `More info` and then click `Run anyway`.
@@ -38,6 +38,8 @@ In case you want to skip to a system, you can double-click its entry.
 Further interactions like editing the system entries, starting a new route, changing [settings](#settings), or saving the current route and its position are available in the right-click context menu of the main window.
 
 In case you want to plot with Spansh, but the source or target systems are not found, you can use the [nearest window](#nearest-window) to find the nearest known system around given coordinates.
+
+To use the AHK feature, you will first need to configure the AHK executable path in the settings and disable the copy mode in the Behaviour settings
 
 ## Settings
 ### Appearance
