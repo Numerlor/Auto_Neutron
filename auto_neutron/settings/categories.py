@@ -45,6 +45,7 @@ class General(metaclass=SettingsCategory):  # noqa D101
     copy_mode: t.Annotated[bool, SettingsParams(True)]
     last_route_index: t.Annotated[int, SettingsParams(0)]
     locale: t.Annotated[str, SettingsParams("en")]
+    last_checked_release: t.Annotated[str, SettingsParams("")]
 
 
 def _path_serializer(path: t.Union[None, Path, str]) -> str:

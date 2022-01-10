@@ -3,21 +3,20 @@
 
 from __future__ import annotations
 
-import typing as t
-
 from PySide6 import QtCore, QtWidgets
 
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa: F401
-from auto_neutron.windows.gui.license_window import LicenseWindowGUI
+from auto_neutron.windows.gui.update_error_window import UpdateErrorWindowGUI
 
 
-class LicenseWindow(LicenseWindowGUI):
-    """License window displaying the project's and Qt's copyright."""
+class UpdateErrorWindow(UpdateErrorWindowGUI):
+    """Display `error_text` to the user in a simple window."""
 
-    def __init__(self, parent: t.Optional[QtWidgets.QWidget] = None):
+    def __init__(self, parent: QtWidgets.QWidget, error_text: str):
         super().__init__(parent)
-        self.about_qt_button.pressed.connect(QtWidgets.QApplication.instance().about_qt)
+        self.retranslate()
+        self._error_label.text = error_text
 
     def change_event(self, event: QtCore.QEvent) -> None:
         """Retranslate the GUI when a language change occurs."""

@@ -255,7 +255,7 @@ def _spansh_job_callback(
     where `delay` is the next value from the `delay_iterator`
     """
     try:
-        job_response = json_from_network_req(reply)
+        job_response = json_from_network_req(reply, json_error_key="error")
         if job_response.get("status") == "queued":
             sec_delay = next(delay_iterator)
             log.debug(f"Re-requesting queued job result in {sec_delay} seconds.")
@@ -264,7 +264,7 @@ def _spansh_job_callback(
                 partial(
                     make_network_request,
                     SPANSH_API_URL + "/results/" + job_response["job"],
-                    reply_callback=partial(
+                    finished_callback=partial(
                         _spansh_job_callback,
                         result_callback=result_callback,
                         error_callback=error_callback,
@@ -279,8 +279,8 @@ def _spansh_job_callback(
         else:
             error_callback(_("Received invalid response from Spansh."))
     except NetworkError as e:
-        if e.spansh_error is not None:
-            error_callback(_("Received error from Spansh: {}").format(e.spansh_error))
+        if e.reply_error is not None:
+            error_callback(_("Received error from Spansh: {}").format(e.reply_error))
         else:
             error_callback(
                 e.error_message

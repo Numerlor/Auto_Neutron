@@ -25,18 +25,18 @@ log = logging.getLogger(__name__)
 class NetworkError(Exception):
     """Raised for Qt network errors."""
 
-    def __init__(self, qt_error: str, spansh_response: t.Optional[None]):
+    def __init__(self, qt_error: str, reply_error: t.Optional[str]):
         self.error_message = qt_error
-        self.spansh_error = spansh_response
-        super().__init__(qt_error, spansh_response)
+        self.reply_error = reply_error
+        super().__init__(qt_error, reply_error)
 
 
 def make_network_request(
     url: str,
     *,
     params: dict = {},  # noqa B006
-    reply_callback: collections.abc.Callable[[QtNetwork.QNetworkReply], t.Any],
-) -> None:
+    finished_callback: collections.abc.Callable[[QtNetwork.QNetworkReply], t.Any],
+) -> QtNetwork.QNetworkReply:
     """Make a network request to `url` with a `params` query and connect its reply to `callback`."""
     log.debug(f"Sending request to {url} with {params=}")
     if params:
@@ -44,10 +44,14 @@ def make_network_request(
     qurl = QtCore.QUrl(url)
     request = QtNetwork.QNetworkRequest(qurl)
     reply = auto_neutron.network_mgr.get(request)
-    reply.finished.connect(partial(reply_callback, reply))
+    reply.finished.connect(partial(finished_callback, reply))
+
+    return reply
 
 
-def json_from_network_req(reply: QtNetwork.QNetworkReply) -> dict:
+def json_from_network_req(
+    reply: QtNetwork.QNetworkReply, *, json_error_key: str
+) -> dict:
     """Decode bytes from the `QNetworkReply` object or raise an error on failed requests."""
     try:
         if reply.error() is QtNetwork.QNetworkReply.NetworkError.NoError:
@@ -55,9 +59,9 @@ def json_from_network_req(reply: QtNetwork.QNetworkReply) -> dict:
         else:
             text_response = reply.read_all().data()
             if text_response:
-                spansh_error = json.loads(text_response)["error"]
+                reply_error = json.loads(text_response)[json_error_key]
             else:
-                spansh_error = None
-            raise NetworkError(reply.error_string(), spansh_error)
+                reply_error = None
+            raise NetworkError(reply.error_string(), reply_error)
     finally:
         reply.delete_later()

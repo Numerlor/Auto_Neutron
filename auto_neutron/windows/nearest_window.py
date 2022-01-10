@@ -57,7 +57,7 @@ class NearestWindow(NearestWindowGUI):
                 "y": self.y_spinbox.value,
                 "z": self.z_spinbox.value,
             },
-            reply_callback=self._assign_from_reply,
+            finished_callback=self._assign_from_reply,
         )
         self.cursor = QtGui.QCursor(QtCore.Qt.CursorShape.BusyCursor)
 
@@ -66,10 +66,10 @@ class NearestWindow(NearestWindowGUI):
         self.cursor = QtGui.QCursor(QtCore.Qt.CursorShape.BusyCursor)
 
         try:
-            data = json_from_network_req(reply)
+            data = json_from_network_req(reply, json_error_key="error")
         except NetworkError as e:
-            if e.spansh_error is not None:
-                message = _("Received error from Spansh: {}").format(e.spansh_error)
+            if e.reply_error is not None:
+                message = _("Received error from Spansh: {}").format(e.reply_error)
             else:
                 # Fall back to Qt error message if spansh didn't respond
                 message = e.error_message

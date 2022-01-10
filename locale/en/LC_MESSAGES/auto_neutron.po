@@ -26,6 +26,22 @@ msgstr "Received invalid response from Spansh."
 msgid "Received error from Spansh: {}"
 msgstr "Received error from Spansh: {}"
 
+#: auto_neutron/self_updater.py:91
+msgid "Downloading new release"
+msgstr "Downloading new release"
+
+#: auto_neutron/self_updater.py:134
+msgid "Unable to find appropriate new release."
+msgstr "Unable to find appropriate new release."
+
+#: auto_neutron/self_updater.py:171
+msgid "Unable to create new executable: "
+msgstr "Unable to create new executable: "
+
+#: auto_neutron/windows/download_confirm_dialog.py:46
+msgid "A new release is available: {} -> {}"
+msgstr "A new release is available: {} -> {}"
+
 #: auto_neutron/windows/error_window.py:52
 #: auto_neutron/windows/error_window.py:87
 msgid "Multiple unexpected errors have occurred (x{})"
@@ -126,6 +142,18 @@ msgstr "Select AHK executable"
 #: auto_neutron/windows/settings_window.py:77
 msgid "Select alert file"
 msgstr "Select alert file"
+
+#: auto_neutron/windows/gui/download_confirm_dialog.py:53
+msgid "Changelog"
+msgstr "Changelog"
+
+#: auto_neutron/windows/gui/download_confirm_dialog.py:54
+msgid "Download"
+msgstr "Download"
+
+#: auto_neutron/windows/gui/download_confirm_dialog.py:55
+msgid "Skip"
+msgstr "Skip"
 
 #: auto_neutron/windows/gui/error_window.py:47
 msgid "An unexpected error has occurred"
@@ -426,3 +454,11 @@ msgstr "Game shut down"
 #: auto_neutron/windows/gui/shut_down_window.py:74
 msgid "New journal"
 msgstr "New journal"
+
+#: auto_neutron/windows/gui/update_error_window.py:44
+msgid "An error has occurred while handling the new release:"
+msgstr "An error has occurred while handling the new release:"
+
+#: auto_neutron/windows/gui/update_error_window.py:47
+msgid "Close this window to retry or continue."
+msgstr "Close this window to retry or continue."

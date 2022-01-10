@@ -137,7 +137,7 @@ class NewRouteWindow(NewRouteWindowGUI):
                 "from": self.spansh_neutron_tab.source_edit.text,
                 "to": self.spansh_neutron_tab.target_edit.text,
             },
-            reply_callback=partial(
+            finished_callback=partial(
                 spansh_neutron_callback,
                 error_callback=self._spansh_error_callback,
                 delay_iterator=create_request_delay_iterator(),
@@ -185,7 +185,7 @@ class NewRouteWindow(NewRouteWindowGUI):
                 "range_boost": ship.jump_range_boost,
                 "cargo": self.spansh_exact_tab.cargo_slider.value,
             },
-            reply_callback=partial(
+            finished_callback=partial(
                 spansh_exact_callback,
                 error_callback=self._spansh_error_callback,
                 delay_iterator=create_request_delay_iterator(),
