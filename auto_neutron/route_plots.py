@@ -279,8 +279,8 @@ def _spansh_job_callback(
         else:
             error_callback(_("Received invalid response from Spansh."))
     except NetworkError as e:
-        if e.spansh_error is not None:
-            error_callback(_("Received error from Spansh: {}").format(e.spansh_error))
+        if e.reply_error is not None:
+            error_callback(_("Received error from Spansh: {}").format(e.reply_error))
         else:
             error_callback(
                 e.error_message

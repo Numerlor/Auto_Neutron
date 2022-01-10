@@ -25,10 +25,10 @@ log = logging.getLogger(__name__)
 class NetworkError(Exception):
     """Raised for Qt network errors."""
 
-    def __init__(self, qt_error: str, spansh_response: t.Optional[None]):
+    def __init__(self, qt_error: str, reply_error: t.Optional[None]):
         self.error_message = qt_error
-        self.spansh_error = spansh_response
-        super().__init__(qt_error, spansh_response)
+        self.reply_error = reply_error
+        super().__init__(qt_error, reply_error)
 
 
 def make_network_request(
@@ -57,9 +57,9 @@ def json_from_network_req(
         else:
             text_response = reply.read_all().data()
             if text_response:
-                spansh_error = json.loads(text_response)[json_error_key]
+                reply_error = json.loads(text_response)[json_error_key]
             else:
-                spansh_error = None
-            raise NetworkError(reply.error_string(), spansh_error)
+                reply_error = None
+            raise NetworkError(reply.error_string(), reply_error)
     finally:
         reply.delete_later()
