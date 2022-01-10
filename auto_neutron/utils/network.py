@@ -36,7 +36,7 @@ def make_network_request(
     *,
     params: dict = {},  # noqa B006
     finished_callback: collections.abc.Callable[[QtNetwork.QNetworkReply], t.Any],
-) -> None:
+) -> QtNetwork.QNetworkReply:
     """Make a network request to `url` with a `params` query and connect its reply to `callback`."""
     log.debug(f"Sending request to {url} with {params=}")
     if params:
@@ -45,6 +45,8 @@ def make_network_request(
     request = QtNetwork.QNetworkRequest(qurl)
     reply = auto_neutron.network_mgr.get(request)
     reply.finished.connect(partial(finished_callback, reply))
+
+    return reply
 
 
 def json_from_network_req(
