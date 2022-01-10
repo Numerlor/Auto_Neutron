@@ -26,17 +26,25 @@ msgstr "Received invalid response from Spansh."
 msgid "Received error from Spansh: {}"
 msgstr "Received error from Spansh: {}"
 
-#: auto_neutron/self_updater.py:91
+#: auto_neutron/self_updater.py:100
 msgid "Downloading new release"
 msgstr "Downloading new release"
 
-#: auto_neutron/self_updater.py:134
+#: auto_neutron/self_updater.py:139
 msgid "Unable to find appropriate new release."
 msgstr "Unable to find appropriate new release."
 
-#: auto_neutron/self_updater.py:171
+#: auto_neutron/self_updater.py:178
+msgid "Unable to rename executable: "
+msgstr "Unable to rename executable: "
+
+#: auto_neutron/self_updater.py:183
 msgid "Unable to create new executable: "
 msgstr "Unable to create new executable: "
+
+#: auto_neutron/self_updater.py:193
+msgid "Unable to extract new directory: "
+msgstr "Unable to extract new directory: "
 
 #: auto_neutron/windows/download_confirm_dialog.py:46
 msgid "A new release is available: {} -> {}"
