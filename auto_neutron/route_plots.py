@@ -264,7 +264,7 @@ def _spansh_job_callback(
                 partial(
                     make_network_request,
                     SPANSH_API_URL + "/results/" + job_response["job"],
-                    reply_callback=partial(
+                    finished_callback=partial(
                         _spansh_job_callback,
                         result_callback=result_callback,
                         error_callback=error_callback,

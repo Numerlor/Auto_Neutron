@@ -57,7 +57,7 @@ class NearestWindow(NearestWindowGUI):
                 "y": self.y_spinbox.value,
                 "z": self.z_spinbox.value,
             },
-            reply_callback=self._assign_from_reply,
+            finished_callback=self._assign_from_reply,
         )
         self.cursor = QtGui.QCursor(QtCore.Qt.CursorShape.BusyCursor)
 
