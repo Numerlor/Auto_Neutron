@@ -54,8 +54,3 @@ class LicenseWindowGUI(QtWidgets.QDialog):
             + '<a href="https://www.gnu.org/licenses/" style="color: #007bff">click here</a> for details.'
         )
         # fmt: on
-
-    def change_event(self, event: QtCore.QEvent) -> None:
-        """Retranslate the GUI when a language change occurs."""
-        if event.type() == QtCore.QEvent.LanguageChange:
-            self.retranslate()
