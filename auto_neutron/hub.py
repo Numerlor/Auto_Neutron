@@ -21,6 +21,7 @@ from auto_neutron.constants import JOURNAL_PATH, ROUTE_FILE_NAME, get_config_dir
 from auto_neutron.fuel_warn import FuelWarn
 from auto_neutron.game_state import GameState, PlotterState
 from auto_neutron.route_plots import AhkPlotter, CopyPlotter, NeutronPlotRow
+from auto_neutron.self_updater import Updater
 from auto_neutron.utils.signal import ReconnectingSignal
 from auto_neutron.windows.error_window import ErrorWindow
 from auto_neutron.windows.license_window import LicenseWindow
@@ -52,6 +53,7 @@ class Hub(QtCore.QObject):
         self.window = MainWindow()
         self.error_window = ErrorWindow(self.window)
         self.error_window.save_button.pressed.connect(partial(self.save_route, True))
+        Updater(self.window).check_update()
 
         exception_handler.triggered.connect(self.error_window.show)
         exception_handler.set_parent(self)
