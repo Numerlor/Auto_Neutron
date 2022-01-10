@@ -172,7 +172,11 @@ class Updater(QtCore.QObject):
 
         if IS_ONEFILE:
             temp_path = EXECUTABLE_PATH.with_stem(TEMP_NAME)
-            EXECUTABLE_PATH.rename(temp_path)
+            try:
+                EXECUTABLE_PATH.rename(temp_path)
+            except OSError as e:
+                self._show_error_window(_("Unable to rename executable: ") + str(e))
+                return
             try:
                 Path(EXECUTABLE_PATH).write_bytes(download_bytes)
             except OSError as e:
@@ -183,7 +187,11 @@ class Updater(QtCore.QObject):
         else:
             dir_path = EXECUTABLE_PATH.parent
             temp_path = dir_path.with_name(TEMP_NAME)
-            ZipFile(io.BytesIO(download_bytes)).extractall(path=temp_path)
+            try:
+                ZipFile(io.BytesIO(download_bytes)).extractall(path=temp_path)
+            except OSError as e:
+                self._show_error_window(_("Unable to extract new directory: ") + str(e))
+                return
             subprocess.Popen(  # noqa S603, S607
                 [
                     "powershell.exe",
