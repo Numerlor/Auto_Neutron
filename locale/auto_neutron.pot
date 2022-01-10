@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Auto Neutron 2.0.4\n"
 "Report-Msgid-Bugs-To: Numerlor@gmail\n"
-"POT-Creation-Date: 2022-01-08 21:36+0100\n"
+"POT-Creation-Date: 2022-01-10 16:57+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -23,6 +23,22 @@ msgstr ""
 
 #: auto_neutron/route_plots.py:283 auto_neutron/windows/nearest_window.py:72
 msgid "Received error from Spansh: {}"
+msgstr ""
+
+#: auto_neutron/self_updater.py:91
+msgid "Downloading new release"
+msgstr ""
+
+#: auto_neutron/self_updater.py:134
+msgid "Unable to find appropriate new release."
+msgstr ""
+
+#: auto_neutron/self_updater.py:171
+msgid "Unable to create new executable: "
+msgstr ""
+
+#: auto_neutron/windows/download_confirm_dialog.py:46
+msgid "A new release is available: {} -> {}"
 msgstr ""
 
 #: auto_neutron/windows/error_window.py:52
@@ -124,6 +140,18 @@ msgstr ""
 
 #: auto_neutron/windows/settings_window.py:77
 msgid "Select alert file"
+msgstr ""
+
+#: auto_neutron/windows/gui/download_confirm_dialog.py:53
+msgid "Changelog"
+msgstr ""
+
+#: auto_neutron/windows/gui/download_confirm_dialog.py:54
+msgid "Download"
+msgstr ""
+
+#: auto_neutron/windows/gui/download_confirm_dialog.py:55
+msgid "Skip"
 msgstr ""
 
 #: auto_neutron/windows/gui/error_window.py:47
@@ -419,4 +447,12 @@ msgstr ""
 
 #: auto_neutron/windows/gui/shut_down_window.py:74
 msgid "New journal"
+msgstr ""
+
+#: auto_neutron/windows/gui/update_error_window.py:44
+msgid "An error has occurred while handling the new release:"
+msgstr ""
+
+#: auto_neutron/windows/gui/update_error_window.py:47
+msgid "Close this window to retry or continue."
 msgstr ""
