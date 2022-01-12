@@ -247,7 +247,7 @@ class PlainTextScroller(QtWidgets.QWidget):
     def change_event(self, event: QtCore.QEvent) -> None:
         """Update the fade images if the palette changed."""
         if event.type() == QtCore.QEvent.PaletteChange:
-            self._fade_out_image, self._fade_in_image = self._create_fade_images()
+            self._fade_in_image, self._fade_out_image = self._create_fade_images()
         super().change_event(event)
 
     @property
