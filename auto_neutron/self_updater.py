@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import io
 import logging
-import os
+import shutil
 import subprocess  # noqa S404
 import sys
 import typing as t
@@ -37,14 +37,6 @@ IS_ONEFILE = Path(getattr(sys, "_MEIPASS", "")) != Path(sys.executable).parent
 TEMP_NAME = "temp_auto_neutron"
 EXECUTABLE_PATH = Path(sys.argv[0])
 
-MOVE_DIRECTORY_SCRIPT = r"""
-Start-Sleep -Milliseconds 200
-Remove-Item -Recurse "{target_path}"
-Move-Item "{temp_path}" "{target_path}"
-Start-Process -FilePath "{target_path}\Auto_Neutron.exe" -WorkingDirectory "{target_path}"
-Exit
-"""
-
 
 class Updater(QtCore.QObject):
     """Check for a new release, and prompt the user for download if one is found and not skipped."""
@@ -72,6 +64,13 @@ class Updater(QtCore.QObject):
                 )  # Try to delete old executable
             except OSError as e:
                 log.warning("Unable to delete temp executable.", exc_info=e)
+            temp_dir = EXECUTABLE_PATH.parent.with_name(TEMP_NAME)
+
+            if temp_dir.exists():
+                try:
+                    shutil.rmtree(temp_dir)
+                except OSError as e:
+                    log.warning("Unable to delete temp directory files.", exc_info=e)
 
     def _show_ask_dialog(self, release_json: dict[str, t.Any]) -> None:
         """Show the download confirmation dialog."""
@@ -150,11 +149,13 @@ class Updater(QtCore.QObject):
         """
         Create the new executable/directory from the reply data and start it.
 
-        In the one dir mode, the directory is downloaded into a temp dir and a powershell script
-        that deletes the old one, moves the new one into its place and starts the new executable is used.
+        In the one directory move, the current contents of this directory are moved to the `TEMP_NAME` directory next
+        to it, and the new contents are unpacked into the original.
 
-        For one file, the current executable is renamed to the `TEMP_NAME` name and a new one is created in its place,
-        no deletion is done in this case and is left up to the new process.
+        For one file, the current executable is renamed to the `TEMP_NAME` name and a new one is created in its place.
+
+        After a successful download and moving, the app immediately exits
+        and any temp cleanup is left to the new process.
         """
         try:
             if reply.error() is QtNetwork.QNetworkReply.NetworkError.NoError:
@@ -183,28 +184,34 @@ class Updater(QtCore.QObject):
                 self._show_error_window(_("Unable to create new executable: ") + str(e))
                 return
 
-            subprocess.Popen(str(EXECUTABLE_PATH))  # noqa S603
         else:
             dir_path = EXECUTABLE_PATH.parent
             temp_path = dir_path.with_name(TEMP_NAME)
-            try:
-                ZipFile(io.BytesIO(download_bytes)).extractall(path=temp_path)
-            except OSError as e:
-                self._show_error_window(_("Unable to extract new directory: ") + str(e))
-                return
-            subprocess.Popen(  # noqa S603, S607
-                [
-                    "powershell.exe",
-                    "-NonInteractive",
-                    "-NoExit",
-                    "-WindowStyle",
-                    "Normal",
-                    "-c",
-                    MOVE_DIRECTORY_SCRIPT.format(
-                        target_path=dir_path, temp_path=temp_path
-                    ),
-                ],
-                cwd=os.environ["USERPROFILE"],
-            )
 
+            try:
+                temp_path.mkdir(exist_ok=True)
+            except OSError as e:
+                self._show_error_window(
+                    _("Unable to create temporary directory: ") + str(e)
+                )
+                return
+
+            for file in dir_path.glob("*"):
+                try:
+                    shutil.move(file, temp_path)
+                except OSError as e:
+                    self._show_error_window(
+                        _("Unable to move files into temporary directory: ") + str(e)
+                    )
+                    return
+
+            try:
+                ZipFile(io.BytesIO(download_bytes)).extractall(path=dir_path)
+            except OSError as e:
+                self._show_error_window(
+                    _("Unable to extract new release files: ") + str(e)
+                )
+                return
+
+        subprocess.Popen(str(EXECUTABLE_PATH))  # noqa S603
         QtWidgets.QApplication.instance().exit()
