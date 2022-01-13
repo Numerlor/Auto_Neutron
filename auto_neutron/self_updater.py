@@ -64,7 +64,7 @@ class Updater(QtCore.QObject):
                 )  # Try to delete old executable
             except OSError as e:
                 log.warning("Unable to delete temp executable.", exc_info=e)
-            temp_dir = EXECUTABLE_PATH.parent.with_name(TEMP_NAME)
+            temp_dir = EXECUTABLE_PATH.parent / TEMP_NAME
 
             if temp_dir.exists():
                 try:
@@ -186,7 +186,7 @@ class Updater(QtCore.QObject):
 
         else:
             dir_path = EXECUTABLE_PATH.parent
-            temp_path = dir_path.with_name(TEMP_NAME)
+            temp_path = dir_path / TEMP_NAME
 
             try:
                 temp_path.mkdir(exist_ok=True)
