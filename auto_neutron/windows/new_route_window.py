@@ -301,7 +301,7 @@ class NewRouteWindow(NewRouteWindowGUI):
         else:
             start_path = ""
         path, __ = QtWidgets.QFileDialog.get_open_file_name(
-            self, _("Select CSV file"), start_path, "CSV (*.csv);;All types (*.*)"
+            self, _("Select CSV file"), start_path, _("CSV (*.csv);;All types (*.*)")
         )
         if path:
             self.csv_tab.path_edit.text = str(Path(path))
