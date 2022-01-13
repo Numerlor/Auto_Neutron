@@ -50,7 +50,9 @@ class TOMLSettings:
 
     def __init__(self, file_path: Path):
         self.path = file_path
-        self.load_from_file()
+        self._settings_dict = RecursiveDefaultDict()
+        with suppress(FileNotFoundError):
+            self.load_from_file()
 
     # region value
     @t.overload
