@@ -222,7 +222,7 @@ class NewRouteWindow(NewRouteWindowGUI):
 
     def _recalculate_range(self, cargo_mass: int) -> None:
         """Recalculate jump range with the new cargo_mass."""
-        if self.game_state.ship.fsd is not None:  # Ship may not be available yet
+        if self.game_state.ship.initialized:  # Ship may not be available yet
             self.spansh_neutron_tab.range_spin.value = self.game_state.ship.jump_range(
                 cargo_mass=cargo_mass
             )
