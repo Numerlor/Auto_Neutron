@@ -52,9 +52,9 @@ class NewRouteWindow(NewRouteWindowGUI):
 
     def __init__(self, parent: QtWidgets.QWidget):
         super().__init__(parent)
-        self.game_state: GameState = None  # type: ignore
-        self.selected_journal: Journal = None  # type: ignore
-        self._journal_worker: GameWorker = None  # type: ignore
+        self.game_state: t.Optional[GameState] = None
+        self.selected_journal: t.Optional[Journal] = None
+        self._journal_worker: t.Optional[GameWorker] = None
 
         # region spansh tabs init
         self.spansh_neutron_tab.nearest_button.pressed.connect(
