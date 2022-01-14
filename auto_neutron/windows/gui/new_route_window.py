@@ -10,6 +10,7 @@ from PySide6 import QtCore, QtWidgets
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa F401
 
+from .plain_text_scroller import PlainTextScroller
 from .tooltip_slider import TooltipSlider
 
 
@@ -275,10 +276,18 @@ class NewRouteWindowGUI(QtWidgets.QDialog):
         self.tab_widget.add_tab(self.spansh_exact_tab, "")
         self.tab_widget.add_tab(self.last_route_tab, "")
 
-        self.status_bar = QtWidgets.QStatusBar(self)
+        self.status_layout = QtWidgets.QHBoxLayout()
+        self.status_widget = PlainTextScroller(self)
+        # FIXME: layout with spacer won't be necessary after PySide6 is fixed to properly call the widget's size hint
+        self.status_layout.add_widget(self.status_widget)
+        self.status_layout.add_spacer_item(
+            QtWidgets.QSpacerItem(
+                0, 16, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
+            )
+        )
 
         self.main_layout.add_widget(self.tab_widget)
-        self.main_layout.add_widget(self.status_bar)
+        self.main_layout.add_layout(self.status_layout)
 
         for button in self.find_children(QtWidgets.QPushButton):
             button.auto_default = False

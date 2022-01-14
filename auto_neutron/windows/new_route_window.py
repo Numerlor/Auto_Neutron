@@ -55,6 +55,11 @@ class NewRouteWindow(NewRouteWindowGUI):
         self.game_state: t.Optional[GameState] = None
         self.selected_journal: t.Optional[Journal] = None
         self._journal_worker: t.Optional[GameWorker] = None
+        self._status_hide_timer = QtCore.QTimer(self)
+        self._status_hide_timer.single_shot_ = True
+        self._status_hide_timer.timeout.connect(
+            partial(setattr, self.status_widget, "text", "")
+        )
 
         # region spansh tabs init
         self.spansh_neutron_tab.nearest_button.pressed.connect(
@@ -160,9 +165,7 @@ class NewRouteWindow(NewRouteWindowGUI):
                     json.loads(QtWidgets.QApplication.instance().clipboard().text())
                 )
             except (json.JSONDecodeError, KeyError):
-                self.status_bar.show_message(
-                    _("Invalid ship data in clipboard."), 5_000
-                )
+                self._show_status_message(_("Invalid ship data in clipboard."), 5_000)
                 return
         else:
             ship = self.game_state.ship
@@ -301,7 +304,7 @@ class NewRouteWindow(NewRouteWindowGUI):
     def _spansh_error_callback(self, error_message: str) -> None:
         """Reset the cursor shape and display `error_message` in the status bar."""
         self.cursor = QtGui.QCursor(QtCore.Qt.CursorShape.ArrowCursor)
-        self.status_bar.show_message(error_message, 10_000)
+        self._show_status_message(error_message, 10_000)
 
     # endregion
 
@@ -343,20 +346,20 @@ class NewRouteWindow(NewRouteWindowGUI):
                 elif len(header) == 7:
                     row_type = ExactPlotRow
                 else:
-                    self.status_bar.show_message(_("Invalid CSV file."), 5_000)
+                    self._show_status_message(_("Invalid CSV file."), 5_000)
                     return
                 log.info(f"Parsing csv file of type {row_type.__name__} at {path}.")
                 return [row_type.from_csv_row(row) for row in reader]
         except FileNotFoundError:
-            self.status_bar.show_message(_("CSV file doesn't exist."), 5_000)
+            self._show_status_message(_("CSV file doesn't exist."), 5_000)
         except csv.Error as error:
-            self.status_bar.show_message(_("Invalid CSV file: ") + str(error), 5_000)
+            self._show_status_message(_("Invalid CSV file: ") + str(error), 5_000)
         except IndexError:
-            self.status_bar.show_message(_("Truncated data in CSV file."), 5_000)
+            self._show_status_message(_("Truncated data in CSV file."), 5_000)
         except ValueError:
-            self.status_bar.show_message(_("Invalid data in CSV file."), 5_000)
+            self._show_status_message(_("Invalid data in CSV file."), 5_000)
         except OSError:
-            self.status_bar.show_message(_("Invalid path."), 5_000)
+            self._show_status_message(_("Invalid path."), 5_000)
 
     # endregion
 
@@ -415,7 +418,7 @@ class NewRouteWindow(NewRouteWindowGUI):
         )
         self.selected_journal = journal
         if shut_down:
-            self.status_bar.show_message(
+            self._show_status_message(
                 _("Selected journal ended with a shut down event."), 10_000
             )
             self.csv_tab.submit_button.enabled = False
@@ -437,7 +440,7 @@ class NewRouteWindow(NewRouteWindowGUI):
             self.game_state.ship.update_from_loadout(loadout)
             self._set_widget_values(location, self.game_state.ship, cargo_mass)
 
-        self.status_bar.clear_message()
+        self.status_widget.text = ""
         self.csv_tab.submit_button.enabled = True
         self._set_neutron_submit()
         self._set_exact_submit()
@@ -449,6 +452,19 @@ class NewRouteWindow(NewRouteWindowGUI):
         """Emit a new route and close the window."""
         self.route_created_signal.emit(journal, route, route_index)
         self.close()
+
+    def _show_status_message(self, message: str, timeout: int = 0) -> None:
+        """
+        Show `message` in the status widget.
+
+        If `timeout` is provided and non-zero, the text is hidden in `timeout` ms.
+        """
+        self._status_hide_timer.stop()
+        if timeout:
+            self._status_hide_timer.interval = timeout
+            self._status_hide_timer.start()
+
+        self.status_widget.text = message
 
     def change_event(self, event: QtCore.QEvent) -> None:
         """Retranslate the GUI when a language change occurs."""
