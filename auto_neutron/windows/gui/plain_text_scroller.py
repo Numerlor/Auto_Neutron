@@ -128,7 +128,7 @@ class PlainTextScroller(QtWidgets.QWidget):
             self._delay_scroll_start_timer.interval = 500
             self._delay_scroll_start_timer.start()
 
-    def leave_event(self, event: QtGui.QEnterEvent) -> None:
+    def leave_event(self, event: QtCore.QEvent) -> None:
         """Cancel any scrolling on leave."""
         super().leave_event(event)
         self._scroll_pos = 0
