@@ -155,9 +155,15 @@ class NewRouteWindow(NewRouteWindowGUI):
         """Submit an exact plotter request to spansh."""
         log.info("Submitting exact job.")
         if self.spansh_exact_tab.use_clipboard_checkbox.checked:
-            ship = Ship.from_coriolis(
-                json.loads(QtWidgets.QApplication.instance().clipboard().text())
-            )
+            try:
+                ship = Ship.from_coriolis(
+                    json.loads(QtWidgets.QApplication.instance().clipboard().text())
+                )
+            except (json.JSONDecodeError, KeyError):
+                self.status_bar.show_message(
+                    _("Invalid ship data in clipboard."), 5_000
+                )
+                return
         else:
             ship = self.game_state.ship
 
