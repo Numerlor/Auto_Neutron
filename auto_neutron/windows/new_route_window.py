@@ -57,9 +57,10 @@ class NewRouteWindow(NewRouteWindowGUI):
         self._journal_worker: t.Optional[GameWorker] = None
         self._status_hide_timer = QtCore.QTimer(self)
         self._status_hide_timer.single_shot_ = True
-        self._status_hide_timer.timeout.connect(
-            partial(setattr, self.status_widget, "text", "")
-        )
+        self._status_hide_timer.timeout.connect(self._reset_status_text)
+        self._status_has_hover = False
+        self._status_scheduled_reset = False
+        self._setup_status_widget()
 
         # region spansh tabs init
         self.spansh_neutron_tab.nearest_button.pressed.connect(
@@ -465,6 +466,36 @@ class NewRouteWindow(NewRouteWindowGUI):
             self._status_hide_timer.start()
 
         self.status_widget.text = message
+
+    def _setup_status_widget(self) -> None:
+        """Patch the status widget's methods to intercept hover events."""
+        original_enter_event = self.status_widget.enter_event
+
+        def patched_enter_event(event: QtGui.QEnterEvent) -> None:
+            """Set the status hover attribute."""
+            original_enter_event(event)
+            self._status_has_hover = True
+
+        self.status_widget.enter_event = patched_enter_event
+
+        original_leave_event = self.status_widget.leave_event
+
+        def patched_leave_event(event: QtCore.QEvent) -> None:
+            """Reset text if the user leaves and the text was supposed to be hidden during that."""
+            original_leave_event(event)
+            self._status_has_hover = False
+            if self._status_scheduled_reset:
+                self.status_widget.text = ""
+                self._status_scheduled_reset = False
+
+        self.status_widget.leave_event = patched_leave_event
+
+    def _reset_status_text(self) -> None:
+        """Reset the status text, or set the scheduled attribute if the status widget is currently hovered."""
+        if not self._status_has_hover:
+            self.status_widget.text = ""
+        else:
+            self._status_scheduled_reset = True
 
     def change_event(self, event: QtCore.QEvent) -> None:
         """Retranslate the GUI when a language change occurs."""
