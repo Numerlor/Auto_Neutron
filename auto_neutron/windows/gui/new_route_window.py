@@ -261,8 +261,8 @@ class NewRouteWindowGUI(QtWidgets.QDialog):
         self.focus_policy = QtCore.Qt.FocusPolicy.ClickFocus
 
         self.main_layout = QtWidgets.QVBoxLayout(self)
-        self.main_layout.set_spacing(0)
-        self.main_layout.contents_margins = QtCore.QMargins(4, 6, 2, 2)
+        self.main_layout.set_spacing(1)
+        self.main_layout.contents_margins = QtCore.QMargins(4, 6, 2, 3)
 
         self.tab_widget = QtWidgets.QTabWidget(self)
 
