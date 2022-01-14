@@ -7,10 +7,8 @@ import typing as t
 
 from PySide6 import QtCore, QtGui, QtWidgets
 
-# no true_property because Qt doesn't pick them up for overriding in subclasses
-# TODO: add when fixed
 # noinspection PyUnresolvedReferences
-from __feature__ import snake_case  # noqa F401
+from __feature__ import snake_case, true_property  # noqa F401
 
 
 class PlainTextScroller(QtWidgets.QWidget):
@@ -43,18 +41,18 @@ class PlainTextScroller(QtWidgets.QWidget):
         self._fade_in_image, self._fade_out_image = self._create_fade_images()
 
         self._scroll_timer = QtCore.QTimer(self)
-        self._scroll_timer.set_interval(scroll_interval)
-        self._scroll_timer.set_timer_type(QtCore.Qt.TimerType.PreciseTimer)
+        self._scroll_timer.interval = scroll_interval
+        self._scroll_timer.timer_type = QtCore.Qt.TimerType.PreciseTimer
         self._scroll_timer.timeout.connect(self._reposition)
 
         self._reset_timer = QtCore.QTimer(self)
-        self._reset_timer.set_interval(2000)
-        self._reset_timer.set_single_shot(True)
+        self._reset_timer.interval = 2000
+        self._reset_timer.single_shot_ = True
         self._reset_timer.timeout.connect(self._reset_pos)
 
         self._delay_scroll_start_timer = QtCore.QTimer(self)
-        self._delay_scroll_start_timer.set_interval(750)
-        self._delay_scroll_start_timer.set_single_shot(True)
+        self._delay_scroll_start_timer.interval = 750
+        self._delay_scroll_start_timer.single_shot_ = True
         self._delay_scroll_start_timer.timeout.connect(self._scroll_timer.start)
 
     @property
@@ -77,7 +75,7 @@ class PlainTextScroller(QtWidgets.QWidget):
     @font.setter
     def font(self, font: QtGui.QFont) -> None:
         """Set the widget's font."""
-        super().set_font(font)  # TODO
+        super(self.__class__, self.__class__).font.__set__(self, font)
         self._fade_in_image, self._fade_out_image = self._create_fade_images()
 
     @property
@@ -99,9 +97,10 @@ class PlainTextScroller(QtWidgets.QWidget):
     @scroll_interval.setter
     def scroll_interval(self, interval: int) -> None:
         """Set a new scroll interval."""
-        self._scroll_timer.set_interval(interval)
+        self._scroll_timer.interval = interval
         self._scroll_interval = interval
 
+    @property
     def size_hint(self) -> QtCore.QSize:
         """
         Return the size hint.
@@ -110,6 +109,7 @@ class PlainTextScroller(QtWidgets.QWidget):
         """
         return self._text_size
 
+    @property
     def minimum_size_hint(self) -> QtCore.QSize:
         """
         Return the minimum size hint.
@@ -122,8 +122,8 @@ class PlainTextScroller(QtWidgets.QWidget):
     def enter_event(self, event: QtGui.QEnterEvent) -> None:
         """Start scrolling if text doesn't fit on entry."""
         super().enter_event(event)
-        if self._text_size.width() > self.size().width():
-            self._delay_scroll_start_timer.set_interval(500)
+        if self._text_size.width() > self.size.width():
+            self._delay_scroll_start_timer.interval = 500
             self._delay_scroll_start_timer.start()
 
     def leave_event(self, event: QtGui.QEnterEvent) -> None:
@@ -141,7 +141,7 @@ class PlainTextScroller(QtWidgets.QWidget):
 
         If the text is not at the end, move the text to the left, otherwise stop moving and start the reset timer.
         """
-        if self._text_size.width() - self._scroll_pos < self.width():
+        if self._text_size.width() - self._scroll_pos < self.width:
             # Reached end of text.
             self._scroll_timer.stop()
             self._reset_timer.start()
@@ -153,12 +153,12 @@ class PlainTextScroller(QtWidgets.QWidget):
         """Reset the text to its initial position, and start the scroll timer which will start scrolling in 750ms."""
         self._scroll_pos = 0
         self.update()
-        self._delay_scroll_start_timer.set_interval(750)
+        self._delay_scroll_start_timer.interval = 750
         self._delay_scroll_start_timer.start()
 
     def paint_event(self, paint_event: QtGui.QPaintEvent) -> None:
         """Paint the text at its current scroll position with the fade-out gradients on both sides."""
-        text_y = (self.height() - self._text_size.height()) // 2
+        text_y = (self.height - self._text_size.height()) // 2
 
         painter = QtGui.QPainter(self)
 
@@ -187,12 +187,12 @@ class PlainTextScroller(QtWidgets.QWidget):
             self._fade_in_image,
         )
 
-        fade_out_width = self._text_size.width() - self.width() - self._scroll_pos
+        fade_out_width = self._text_size.width() - self.width - self._scroll_pos
         if fade_out_width > 0:
             fade_out_width = min(self.fade_width, fade_out_width + self.fade_width // 2)
 
         painter.draw_image(
-            self.width() - fade_out_width,
+            self.width - fade_out_width,
             text_y,
             self._fade_out_image,
         )
@@ -215,7 +215,7 @@ class PlainTextScroller(QtWidgets.QWidget):
             raise MemoryError("Unable to allocate QImage.")
 
         # FIXME: use actual transparency instead of using the background color
-        background_color = self.palette().window().color().get_rgb()[:-1]
+        background_color = self.palette.window().color().get_rgb()[:-1]
         opaque_color = QtGui.QColor(*background_color, 255)
 
         fade_in_image.fill(QtCore.Qt.transparent)
