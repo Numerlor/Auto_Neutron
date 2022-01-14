@@ -18,6 +18,8 @@ class PlainTextScroller(QtWidgets.QWidget):
     The `fade_width` argument can be used to control the width of the fade-in and fade-out gradients.
     `scroll_step` defines how much the text moves for each scroll interval.
     `scroll_interval` controls the scroll interval, in ms.
+
+    The widget's palette's Window color role is used as the color for the fade-out gradients.
     """
 
     def __init__(
