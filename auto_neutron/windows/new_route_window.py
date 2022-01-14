@@ -77,6 +77,9 @@ class NewRouteWindow(NewRouteWindowGUI):
 
         self.spansh_exact_tab.source_edit.textChanged.connect(self._set_exact_submit)
         self.spansh_exact_tab.target_edit.textChanged.connect(self._set_exact_submit)
+        self.spansh_exact_tab.use_clipboard_checkbox.stateChanged.connect(
+            self._set_exact_submit
+        )
 
         self.spansh_neutron_tab.range_spin.value = 50  # default to 80% efficiency
         self.spansh_neutron_tab.efficiency_spin.value = 80  # default to 80% efficiency
@@ -241,6 +244,10 @@ class NewRouteWindow(NewRouteWindowGUI):
             self.spansh_exact_tab.source_edit.text
             and self.spansh_exact_tab.target_edit.text
             and not self.game_state.shut_down
+            and (
+                self.game_state.ship.initialized
+                or self.spansh_exact_tab.use_clipboard_checkbox.checked
+            )
         )
 
     def _display_nearest_window(self) -> None:
