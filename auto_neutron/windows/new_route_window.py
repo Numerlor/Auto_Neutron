@@ -87,7 +87,7 @@ class NewRouteWindow(NewRouteWindowGUI):
             self._set_exact_submit
         )
 
-        self.spansh_neutron_tab.range_spin.value = 50  # default to 80% efficiency
+        self.spansh_neutron_tab.range_spin.value = 50
         self.spansh_neutron_tab.efficiency_spin.value = 80  # default to 80% efficiency
 
         self.spansh_neutron_tab.cargo_slider.valueChanged.connect(
