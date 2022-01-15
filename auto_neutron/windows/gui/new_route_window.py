@@ -128,7 +128,9 @@ class NeutronTab(TabBase):
         self.eff_nearest_layout.add_widget(
             self.efficiency_spin, alignment=QtCore.Qt.AlignmentFlag.AlignLeft
         )
-        self.eff_nearest_layout.add_widget(self.nearest_button)
+        self.eff_nearest_layout.add_widget(
+            self.nearest_button, alignment=QtCore.Qt.AlignmentFlag.AlignBottom
+        )
 
         self.main_layout.add_layout(self.system_cargo_layout)
         self.main_layout.add_spacer_item(
