@@ -372,6 +372,7 @@ class NewRouteWindow(NewRouteWindowGUI):
                 get_config_dir() / ROUTE_FILE_NAME
             )
             self._update_saved_route_text()
+            self._route_displayed = True
 
     def _last_route_submit(self) -> None:
         log.info("Submitting last route.")
