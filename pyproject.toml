@@ -50,7 +50,7 @@ start = "python main.py"
 lint = "pre-commit run --all-files"
 pyside-pyi = "pyside6-genpyi all --feature snake_case true_property"
 build = "python -OO pyinstaller_build/build.py"
-build_debug = "python pyinstaller_build/build.py"
+build-debug = "python pyinstaller_build/build.py"
 
 i18n-init = "pybabel init -i .\\locale\\auto_neutron.pot -d .\\locale -D auto_neutron -l"
 i18n-compile = "pybabel compile -d locale -D auto_neutron"
