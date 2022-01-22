@@ -16,6 +16,8 @@ if t.TYPE_CHECKING:
 
 _created_categories: weakref.WeakSet[SettingsCategory] = weakref.WeakSet()
 
+_MISSING = object()
+
 
 class SettingsParams(t.NamedTuple):
     """
@@ -24,11 +26,13 @@ class SettingsParams(t.NamedTuple):
     `default` is the default value of the setting
     `on_save` is a callable that's applied before an user given value is saved
     `on_load` is a callable that's applied before a value from settings is returned to the user
+    `fallback_paths` is a container of full paths to settings to be checked in case the initial look-up fails.
     """
 
     default: t.Any
     on_save: t.Optional[collections.abc.Callable[[t.Any], t.Any]] = None
     on_load: t.Optional[collections.abc.Callable[[t.Any], t.Any]] = None
+    fallback_paths: t.Optional[tuple[str]] = None
 
 
 class SettingsCategory(type):
@@ -107,8 +111,19 @@ class SettingsCategory(type):
             settings_val = cls._settings_getter().value(
                 (*cls._prefix_categories, cls.__name__, *cls._suffix_categories),
                 key,
-                default=params.default,
+                default=_MISSING,
             )
+            if settings_val is _MISSING:
+                # Couldn't find the value with the settings defined by its class, try fallbacks if any.
+                for setting_path in params.fallback_paths:
+                    settings_val = cls._settings_getter().value(
+                        setting_path,
+                        default=_MISSING,
+                    )
+                    if settings_val is not _MISSING:
+                        break
+                else:
+                    settings_val = params.default
             if params.on_load is not None:
                 return params.on_load(settings_val)
             return settings_val
