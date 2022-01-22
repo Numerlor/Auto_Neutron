@@ -19,7 +19,7 @@ from PySide6 import QtCore, QtNetwork, QtWidgets
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa F401
 from auto_neutron import settings
-from auto_neutron.constants import AHK_TEMPLATE, SPANSH_API_URL, get_config_dir
+from auto_neutron.constants import AHK_TEMPLATE, SPANSH_API_URL
 from auto_neutron.utils.network import (
     NetworkError,
     json_from_network_req,
@@ -166,7 +166,6 @@ class AhkPlotter(Plotter):
         """
         self.stop()
         with self._create_temp_script_file() as script_path:
-            self.ahk_infile = open(get_config_dir() / "ahk_stdin", "wb+")
             log.info(
                 f"Spawning AHK subprocess with {settings.Paths.ahk=} {script_path=}"
             )
@@ -175,7 +174,7 @@ class AhkPlotter(Plotter):
                 return
             self.process = subprocess.Popen(  # noqa S603
                 [settings.Paths.ahk, script_path],
-                stdin=self.ahk_infile,
+                stdin=subprocess.PIPE,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
             )
@@ -193,11 +192,8 @@ class AhkPlotter(Plotter):
         if self.process is None or self.process.poll() is not None:
             self._start_ahk()
         self._last_system = system
-        self.ahk_infile.seek(0)
-        self.ahk_infile.write(system.encode() + b"\n")
-        self.ahk_infile.truncate(len(system.encode()) + 1)
-        self.ahk_infile.flush()
-        self.ahk_infile.seek(0)
+        self.process.stdin.write(system.encode() + b"\n")
+        self.process.stdin.flush()
         log.debug(f"Wrote {system!r} to AHK.")
 
     def refresh_settings(self) -> None:
@@ -215,7 +211,6 @@ class AhkPlotter(Plotter):
         if self.process is not None:
             log.debug("Terminating AHK subprocess.")
             self.process.terminate()
-            self.ahk_infile.close()
             atexit.unregister(self.process.terminate)
             self.process = None
 
