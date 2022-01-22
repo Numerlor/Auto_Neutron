@@ -59,7 +59,10 @@ mypy-extensions = ">=0.4.3"
 pathspec = ">=0.9.0,<1"
 platformdirs = ">=2"
 tomli = ">=0.2.6,<2.0.0"
-typing-extensions = ">=3.10.0.0"
+typing-extensions = [
+    {version = ">=3.10.0.0", markers = "python_version < \"3.10\""},
+    {version = "!=3.10.0.1", markers = "python_version >= \"3.10\""},
+]
 
 [package.extras]
 colorama = ["colorama (>=0.4.3)"]
@@ -249,7 +252,6 @@ python-versions = ">=3.7"
 
 [package.dependencies]
 gitdb = ">=4.0.1,<5"
-typing-extensions = {version = ">=3.7.4.3", markers = "python_version < \"3.10\""}
 
 [[package]]
 name = "identify"
@@ -610,8 +612,8 @@ testing = ["coverage (>=4)", "coverage-enable-subprocess (>=1)", "flaky (>=3)", 
 
 [metadata]
 lock-version = "1.1"
-python-versions = "3.9.*"
-content-hash = "158dfff8dbba67a2b3e7b8fd2a29fc54cf0da36c30e1015566804c9c6f3ead53"
+python-versions = "3.10.*"
+content-hash = "b4c185186a71f94be37ffc0ee57bf18487ba9f5ff38e4adbbe9c424f181fa6be"
 
 [metadata.files]
 altgraph = [
