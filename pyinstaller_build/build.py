@@ -64,15 +64,14 @@ for spec_file in spec_files:
     )
 
 if not debug:
-    if Path(f"{BASE_PATH}/dist/Auto_Neutron").exists():
-        archive_path = shutil.make_archive(
-            f"{BASE_PATH}/dist/Auto_Neutron",
-            "zip",
-            f"{BASE_PATH}/dist/Auto_Neutron",
-        )
-        Path(archive_path + ".signature.txt").write_text(
-            sha256sum(Path(archive_path)) + "\n"
-        )
+    archive_path = shutil.make_archive(
+        f"{BASE_PATH}/dist/Auto_Neutron",
+        "zip",
+        f"{BASE_PATH}/dist/Auto_Neutron",
+    )
+    Path(archive_path + ".signature.txt").write_text(
+        sha256sum(Path(archive_path)) + "\n"
+    )
 
 Path(f"{BASE_PATH}/dist/Auto_Neutron.exe.signature.txt").write_text(
     sha256sum(Path(f"{BASE_PATH}/dist/Auto_Neutron.exe")) + "\n"
