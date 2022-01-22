@@ -17,6 +17,9 @@ import delete_dlls
 dotenv.load_dotenv()
 
 
+BASE_PATH = Path("pyinstaller_build")
+
+
 def sha256sum(file: Path) -> str:
     """Get the SHA256 checksum of `file`."""
     hash_ = hashlib.sha256()
@@ -32,12 +35,14 @@ def sha256sum(file: Path) -> str:
 
 if sys.flags.optimize:
     spec_files = [
-        "pyinstaller_build/Auto_Neutron.spec",
-        "pyinstaller_build/Auto_Neutron_dir.spec",
+        BASE_PATH / "Auto_Neutron.spec",
+        BASE_PATH / "Auto_Neutron_dir.spec",
     ]
     debug = False
 else:
-    spec_files = ["pyinstaller_build/Auto_Neutron_debug.spec"]
+    spec_files = [
+        BASE_PATH / "Auto_Neutron_debug.spec",
+    ]
     debug = True
 delete_dlls.main()
 delete_babel_dat.main()
@@ -50,25 +55,25 @@ if compiled_process.returncode != 0:
 for spec_file in spec_files:
     PyInstaller.__main__.run(
         [
-            spec_file,
+            str(spec_file),
             f"--upx-dir={os.environ['UPX_DIR']}",
             "-y",
-            "--workpath=pyinstaller_build/build",
-            "--distpath=pyinstaller_build/dist",
+            f"--workpath={BASE_PATH}/build",
+            f"--distpath={BASE_PATH}/dist",
         ]
     )
 
 if not debug:
-    if Path("pyinstaller_build/dist/Auto_Neutron").exists():
+    if Path(f"{BASE_PATH}/dist/Auto_Neutron").exists():
         archive_path = shutil.make_archive(
-            "pyinstaller_build/dist/Auto_Neutron",
+            f"{BASE_PATH}/dist/Auto_Neutron",
             "zip",
-            "pyinstaller_build/dist/Auto_Neutron",
+            f"{BASE_PATH}/dist/Auto_Neutron",
         )
         Path(archive_path + ".signature.txt").write_text(
             sha256sum(Path(archive_path)) + "\n"
         )
 
-Path("pyinstaller_build/dist/Auto_Neutron.exe.signature.txt").write_text(
-    sha256sum(Path("pyinstaller_build/dist/Auto_Neutron.exe")) + "\n"
+Path(f"{BASE_PATH}/dist/Auto_Neutron.exe.signature.txt").write_text(
+    sha256sum(Path(f"{BASE_PATH}/dist/Auto_Neutron.exe")) + "\n"
 )
