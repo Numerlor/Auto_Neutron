@@ -92,18 +92,18 @@ class SettingsCategory(type):
         _created_categories.add(obj)
         return obj
 
-    def __getattribute__(cls, key: str):
+    def __getattr__(cls, key: str):
         """
         If the attribute is an annotated setting, fetch its value from the class' settings instead of the class itself.
 
         If the SettingsParams object of the setting defines an `on_load` callable, the callable is applied to `value`
         before it's returned to the caller.
         """
-        annotations_dict = super().__getattribute__("__annotations__")
+        annotations_dict = cls.__annotations__
         if (annotation := annotations_dict.get(key)) is not None:
             params = cls._get_params_from_annotation(annotation)
             if params is None:
-                return super().__getattribute__(key)
+                raise AttributeError
             settings_val = cls._settings_getter().value(
                 (*cls._prefix_categories, cls.__name__, *cls._suffix_categories),
                 key,
@@ -112,7 +112,7 @@ class SettingsCategory(type):
             if params.on_load is not None:
                 return params.on_load(settings_val)
             return settings_val
-        return super().__getattribute__(key)
+        raise AttributeError
 
     def __setattr__(cls, key: str, value: t.Any):
         """
