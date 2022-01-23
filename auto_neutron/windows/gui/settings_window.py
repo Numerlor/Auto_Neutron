@@ -163,6 +163,9 @@ class ScriptWidget(QtWidgets.QWidget):
         self.switch_widget = QtWidgets.QStackedWidget(self)
 
         self.simple_mode_checkbox = QtWidgets.QCheckBox(self)
+        self.simple_mode_checkbox.stateChanged.connect(
+            self.set_mode_widget_from_checkbox
+        )
 
         self.ahk_bind_edit = QtWidgets.QLineEdit(self)
         self.ahk_bind_edit.maximum_width = 100
@@ -173,6 +176,17 @@ class ScriptWidget(QtWidgets.QWidget):
         self.main_layout.add_widget(self.simple_mode_checkbox)
         self.main_layout.add_widget(self.ahk_bind_edit)
         self.main_layout.add_widget(self.switch_widget)
+
+    def set_mode_widget_from_checkbox(self, state: int) -> None:
+        """
+        Set the current index of the switch widget from the checkbox's state.
+
+        If the checkbox is not checked, set the index to 0, otherwise set it to 1.
+        """
+        if state == 2:
+            # checked
+            state = 1
+        self.switch_widget.current_index = state
 
     def retranslate(self) -> None:
         """Retranslate text that is always on display."""
