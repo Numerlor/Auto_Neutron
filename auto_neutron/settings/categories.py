@@ -31,6 +31,7 @@ class General(metaclass=SettingsCategory):  # noqa D101
 
 
 class AHK(metaclass=SettingsCategory):  # noqa D101
+    simple_mode: t.Annotated[bool, SettingsParams(True)]
     bind: t.Annotated[str, SettingsParams("F5", fallback_paths=("General.bind",))]
     user_script: t.Annotated[
         str,
