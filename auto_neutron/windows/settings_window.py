@@ -38,6 +38,27 @@ class SettingsWindow(SettingsWindowGUI):
             (self.alerts_widget.alert_path_line_edit, ("Paths", "alert_sound")),
             (self.script_widget.ahk_bind_edit, ("AHK", "bind")),
             (self.script_widget.ahk_script_edit, ("AHK", "user_script")),
+            (self.script_widget.simple_mode_checkbox, ("AHK", "simple_mode")),
+            (
+                self.script_widget.simple_mode_widget.map_open_key_edit,
+                ("AHK", "map_open_key"),
+            ),
+            (
+                self.script_widget.simple_mode_widget.map_open_wait_spinbox,
+                ("AHK", "map_open_wait_delay"),
+            ),
+            (
+                self.script_widget.simple_mode_widget.navigate_right_key_edit,
+                ("AHK", "navigate_right_key"),
+            ),
+            (
+                self.script_widget.simple_mode_widget.focus_key_edit,
+                ("AHK", "focus_key"),
+            ),
+            (
+                self.script_widget.simple_mode_widget.submit_key_edit,
+                ("AHK", "submit_key"),
+            ),
             (self.behaviour_widget.save_on_quit_checkbox, ("General", "save_on_quit")),
             (self.behaviour_widget.copy_mode_checkbox, ("General", "copy_mode")),
         )
