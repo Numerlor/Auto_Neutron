@@ -43,7 +43,7 @@ use_parentheses = true
 known_first_party = ["auto_neutron", "__feature__", "delete_dlls"]
 
 [tool.black]
-target-version = ["py39"]
+target-version = ["py310"]
 
 [tool.taskipy.tasks]
 start = "python main.py"
