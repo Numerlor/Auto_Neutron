@@ -36,7 +36,6 @@ class LicenseWindowGUI(QtWidgets.QDialog):
         self.text.open_external_links = True
 
         self.main_layout = QtWidgets.QVBoxLayout(self)
-        self.main_layout.contents_margins = QtCore.QMargins(0, 0, 0, 0)
         self.main_layout.add_widget(self.text)
 
         self.bottom_layout = QtWidgets.QHBoxLayout()
