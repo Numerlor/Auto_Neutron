@@ -17,7 +17,7 @@ class LicenseWindowGUI(QtWidgets.QDialog):
 
     def __init__(self, parent: t.Optional[QtWidgets.QWidget] = None):
         super().__init__(parent)
-        self.set_fixed_size(350, 175)
+        self.set_fixed_size(600, 500)
         self.set_window_flag(QtCore.Qt.WindowContextHelpButtonHint, False)
         self.set_attribute(QtCore.Qt.WidgetAttribute.WA_DeleteOnClose, True)
         self.window_title = "Auto_Neutron " + VERSION
@@ -37,20 +37,9 @@ class LicenseWindowGUI(QtWidgets.QDialog):
             self.about_qt_button, alignment=QtCore.Qt.AlignmentFlag.AlignCenter
         )
         self.set_layout(self.main_layout)
-
         self.retranslate()
 
     def retranslate(self) -> None:
         """Retranslate text that is always on display."""
         self.text.clear()
         self.about_qt_button.text = _("About Qt")
-        # fmt: off
-        self.text.insert_html(
-            _("This program uses PySide6:<br>")
-            + _("PySide6 Copyright (C) 2015 The Qt Company Ltd.") + "<br><br>"
-            + _("Auto_Neutron Copyright (C) 2019 Numerlor") + "<br>"
-            + _("Auto_Neutron comes with ABSOLUTELY NO WARRANTY).") + "<br>"
-            + _("This is free software, and you are welcome to redistribute it under certain conditions; ")
-            + '<a href="https://www.gnu.org/licenses/" style="color: #007bff">click here</a> for details.'
-        )
-        # fmt: on
