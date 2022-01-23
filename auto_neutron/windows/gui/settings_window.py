@@ -189,7 +189,7 @@ class ScriptWidget(QtWidgets.QWidget):
         self.simple_mode_checkbox.text = _("Simple mode")
         self.simple_mode_checkbox.tool_tip = _(
             "With Simple mode enabled, a default script filled with the specified settings is used,"
-            "if simple mode is enabled, the script can be fully customized."
+            "if simple mode is not enabled, the script can be fully customized."
         )
 
 
