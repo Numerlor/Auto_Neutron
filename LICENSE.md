@@ -9,8 +9,9 @@ The Qt Toolkit is Copyright (C) 2015 The Qt Company Ltd.
  GNU Lesser General Public License version 3. That license references
  the General Public License version 3, that is displayed below. Other
  portions of the Qt Toolkit may be licensed directly under this license.
+
 -------------------------------------------------------------------------------
-Applies to Auto_Neutron:
+Applies to Auto_Neutron, and PySide6:
 -------------------------------------------------------------------------------
                     GNU GENERAL PUBLIC LICENSE
                        Version 3, 29 June 2007
