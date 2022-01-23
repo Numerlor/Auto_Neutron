@@ -43,6 +43,10 @@ class AHK(metaclass=SettingsCategory):  # noqa D101
             fallback_paths=("General.script",),
         ),
     ]
+    map_open_key: t.Annotated[str, SettingsParams(AHK_DEFAULT_GALAXY_KEY)]
+    navigate_right_key: t.Annotated[str, SettingsParams(AHK_DEFAULT_NAVIGATE_RIGHT_KEY)]
+    focus_key: t.Annotated[str, SettingsParams(AHK_DEFAULT_FOCUS_KEY)]
+    submit_key: t.Annotated[str, SettingsParams(AHK_DEFAULT_SUBMIT_KEY)]
 
 
 def _path_serializer(path: t.Union[None, Path, str]) -> str:
