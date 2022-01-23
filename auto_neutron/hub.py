@@ -73,6 +73,9 @@ class Hub(QtCore.QObject):
 
         self.plotter_state = PlotterState(self, self.game_state)
         self.plotter_state.new_system_signal.connect(self.new_system_callback)
+        self.plotter_state.route_end_signal.connect(
+            partial(self.new_system_callback, None)
+        )
         self.plotter_state.shut_down_signal.connect(self.display_shut_down_window)
 
         self.apply_settings()

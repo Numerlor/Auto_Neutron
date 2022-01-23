@@ -59,6 +59,7 @@ class PlotterState(QtCore.QObject):
     """Hold the state required for a plotter to function."""
 
     new_system_signal = QtCore.Signal(str, int)
+    route_end_signal = QtCore.Signal(int)
     shut_down_signal = QtCore.Signal()
 
     def __init__(self, parent: QtCore.QObject, game_state: GameState):
@@ -84,6 +85,7 @@ class PlotterState(QtCore.QObject):
                 self.tail_worker.new_system_index_sig.connect(
                     partial(setattr, self, "route_index")
                 )
+                self.tail_worker.route_end_sig.connect(self.route_end_signal.emit)
         else:
             self.tail_worker.route = route
         self._active_route = route
@@ -138,6 +140,7 @@ class PlotterState(QtCore.QObject):
             self.tail_worker.new_system_index_sig.connect(
                 partial(setattr, self, "route_index")
             )
+            self.tail_worker.route_end_sig.connect(self.route_end_signal.emit)
 
     @property
     def journal(self) -> t.Optional[Journal]:
@@ -167,6 +170,7 @@ class PlotterState(QtCore.QObject):
                 self.tail_worker.new_system_index_sig.connect(
                     partial(setattr, self, "route_index")
                 )
+                self.tail_worker.route_end_sig.connect(self.route_end_signal.emit)
         else:
             if self.tail_worker is not None:
                 self.tail_worker.stop()

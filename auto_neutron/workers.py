@@ -30,7 +30,7 @@ class GameWorker(QtCore.QObject):
     """Handle dispatching route signals from the journal's tailer."""
 
     new_system_index_sig = QtCore.Signal(int)
-    route_end_sig = QtCore.Signal()
+    route_end_sig = QtCore.Signal(int)
 
     def __init__(self, parent: QtCore.QObject, route: RouteList, journal: Journal):
         super().__init__(parent)
@@ -49,7 +49,7 @@ class GameWorker(QtCore.QObject):
             if new_index < len(self.route):
                 self.new_system_index_sig.emit(new_index)
             else:
-                self.route_end_sig.emit()
+                self.route_end_sig.emit(new_index)
 
     def start(self) -> None:
         """Start the worker to tail the journal file."""
