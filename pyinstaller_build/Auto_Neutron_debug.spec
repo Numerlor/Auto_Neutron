@@ -10,6 +10,8 @@ a = Analysis(
     datas=[
         ("../resources/icons_library.ico", "./resources"),
         ("../locale", "./locale"),
+        ("../LICENSE.md", "."),
+        ("../LICENSE_PYTHON.md", "."),
     ],
     hiddenimports=["babel.numbers"],
     hookspath=[],
