@@ -28,6 +28,153 @@ class _ReorderedCheckBox(QtWidgets.QCheckBox):
         )
 
 
+class AppearanceWidget(QtWidgets.QWidget):
+    """Widget containing options for configuring the appearance of the app."""
+
+    def __init__(self, parent: t.Optional[QtWidgets.QWidget]):
+        super().__init__(parent)
+        self.main_layout = QtWidgets.QVBoxLayout(self)
+        self.font_chooser = QtWidgets.QFontComboBox(self)
+        self.font_size_chooser = QtWidgets.QSpinBox(self)
+        self.font_bold_checkbox = QtWidgets.QCheckBox(self)
+
+        self.language_label = QtWidgets.QLabel(self)
+        self.language_combo = QtWidgets.QComboBox(self)
+        self.language_combo.size_adjust_policy = (
+            QtWidgets.QComboBox.SizeAdjustPolicy.AdjustToContents
+        )
+
+        self.dark_mode_checkbox = _ReorderedCheckBox(self)
+        self.dark_mode_checkbox.tristate = True
+
+        self.font_layout = QtWidgets.QHBoxLayout()
+        self.font_layout.add_widget(self.font_chooser)
+        self.font_layout.add_widget(self.font_size_chooser)
+        self.language_layout = QtWidgets.QHBoxLayout()
+        self.language_layout.add_widget(self.language_label)
+        self.language_layout.add_widget(self.language_combo)
+        self.main_layout.add_layout(self.font_layout)
+        self.main_layout.add_layout(self.language_layout)
+        self.main_layout.add_widget(self.font_bold_checkbox)
+        self.main_layout.add_widget(self.dark_mode_checkbox)
+        self.main_layout.add_spacer_item(get_spacer())
+
+        self.font_size_chooser.maximum_width = 50
+
+    def retranslate(self) -> None:
+        """Retranslate text that is always on display."""
+        self.font_bold_checkbox.text = _("Bold")
+        self.language_label.text = _("Language")
+        self.dark_mode_checkbox.text = _("Dark mode")
+
+
+class BehaviourWidget(QtWidgets.QWidget):
+    """Widget containing options for configuring the behaviour of the app."""
+
+    def __init__(self, parent: t.Optional[QtWidgets.QWidget]):
+        super().__init__(parent)
+        self.main_layout = QtWidgets.QVBoxLayout(self)
+        self.plotter_options_layout = QtWidgets.QHBoxLayout()
+
+        self.save_on_quit_checkbox = QtWidgets.QCheckBox(self)
+        self.copy_mode_checkbox = QtWidgets.QCheckBox(self)
+        self.ahk_path_button = QtWidgets.QPushButton(self)
+        self.auto_scroll_checkbox = QtWidgets.QCheckBox(self)
+
+        self.plotter_options_layout.add_widget(self.copy_mode_checkbox)
+        self.plotter_options_layout.add_widget(self.ahk_path_button)
+
+        self.main_layout.add_widget(self.save_on_quit_checkbox)
+        self.main_layout.add_layout(self.plotter_options_layout)
+        self.main_layout.add_widget(self.auto_scroll_checkbox)
+        self.main_layout.add_spacer_item(get_spacer())
+        self.ahk_path_button.maximum_width = 75
+
+    def retranslate(self) -> None:
+        """Retranslate text that is always on display."""
+        self.save_on_quit_checkbox.text = _("Save route on window close")
+        self.copy_mode_checkbox.text = _("Copy Mode")
+        self.ahk_path_button.text = _("AHK Path")
+        self.auto_scroll_checkbox.text = _("Auto scroll")
+
+
+class AlertsWidget(QtWidgets.QWidget):
+    """Widget containing options for configuring the alert system."""
+
+    def __init__(self, parent: t.Optional[QtWidgets.QWidget]):
+        super().__init__(parent)
+        self.main_layout = QtWidgets.QVBoxLayout(self)
+        self.alert_checkbox_layout = QtWidgets.QHBoxLayout()
+        self.alert_path_layout = QtWidgets.QHBoxLayout()
+        self.alert_threshold_layout = QtWidgets.QHBoxLayout()
+
+        self.visual_alert_checkbox = QtWidgets.QCheckBox(self)
+        self.audio_alert_checkbox = QtWidgets.QCheckBox(self)
+
+        self.alert_path_label = QtWidgets.QLabel(self)
+        self.alert_path_line_edit = QtWidgets.QLineEdit(self)
+        self.alert_path_button = QtWidgets.QPushButton("...", self)
+
+        self.alert_threshold_label = QtWidgets.QLabel(
+            self,
+        )
+        self.alert_threshold_label.word_wrap = True
+
+        self.alert_threshold_spinbox = QtWidgets.QSpinBox(self)
+        self.alert_threshold_spinbox.maximum = 300
+        self.alert_threshold_spinbox.accelerated = True
+        self.alert_threshold_spinbox.maximum_width = 75
+        self.alert_threshold_spinbox.suffix = "%"
+
+        self.alert_checkbox_layout.add_widget(self.visual_alert_checkbox)
+        self.alert_checkbox_layout.add_widget(self.audio_alert_checkbox)
+
+        self.alert_path_layout.add_widget(self.alert_path_line_edit)
+        self.alert_path_layout.add_widget(self.alert_path_button)
+
+        self.alert_threshold_layout.add_widget(self.alert_threshold_spinbox)
+        self.alert_threshold_layout.add_widget(self.alert_threshold_label)
+
+        self.main_layout.add_layout(self.alert_checkbox_layout)
+        self.main_layout.add_widget(self.alert_path_label)
+        self.main_layout.add_layout(self.alert_path_layout)
+        self.main_layout.add_layout(self.alert_threshold_layout)
+        self.main_layout.add_spacer_item(get_spacer())
+
+        self.alert_path_button.set_fixed_size(QtCore.QSize(24, 23))
+
+    def retranslate(self) -> None:
+        """Retranslate text that is always on display."""
+        self.visual_alert_checkbox.text = _("Taskbar fuel alert")
+        self.audio_alert_checkbox.text = _("Sound fuel alert")
+        self.alert_path_label.text = _("Custom sound alert file:")
+        # Escape % for translation
+        self.alert_threshold_label.text = _(
+            "%% of maximum fuel usage left in tank before triggering alert"
+        ).replace("%%", "%")
+
+
+class ScriptWidget(QtWidgets.QWidget):
+    """Widget containing options for configuring the AHK script."""
+
+    def __init__(self, parent: t.Optional[QtWidgets.QWidget]):
+        super().__init__(parent)
+        self.main_layout = QtWidgets.QVBoxLayout(self)
+        self.ahk_bind_edit = QtWidgets.QLineEdit(self)
+        self.ahk_script_edit = QtWidgets.QTextEdit(self)
+
+        self.main_layout.add_widget(self.ahk_bind_edit)
+        self.main_layout.add_widget(self.ahk_script_edit)
+
+        self.ahk_bind_edit.maximum_width = 100
+
+    def retranslate(self) -> None:
+        """Retranslate text that is always on display."""
+        self.ahk_bind_edit.tool_tip = _(
+            "Bind to trigger the script, # for win key, ! for alt, ^ for control, + for shift"
+        )
+
+
 class SettingsWindowGUI(QtWidgets.QDialog):
     """Implement the basic settings GUI with multiple settings categories from the settings module."""
 
@@ -35,17 +182,10 @@ class SettingsWindowGUI(QtWidgets.QDialog):
         super().__init__(parent)
         self.set_attribute(QtCore.Qt.WidgetAttribute.WA_DeleteOnClose)
         # region layout/widget init
-        self.appearance_widget = QtWidgets.QWidget(self)
-        self.appearance_layout = QtWidgets.QVBoxLayout(self.appearance_widget)
-
-        self.behaviour_widget = QtWidgets.QWidget(self)
-        self.behaviour_layout = QtWidgets.QVBoxLayout(self.behaviour_widget)
-
-        self.alerts_widget = QtWidgets.QWidget(self)
-        self.alerts_layout = QtWidgets.QVBoxLayout(self.alerts_widget)
-
-        self.script_widget = QtWidgets.QWidget(self)
-        self.script_layout = QtWidgets.QVBoxLayout(self.script_widget)
+        self.appearance_widget = AppearanceWidget(self)
+        self.behaviour_widget = BehaviourWidget(self)
+        self.alerts_widget = AlertsWidget(self)
+        self.script_widget = ScriptWidget(self)
 
         self.main_layout = QtWidgets.QHBoxLayout(self)
         self.main_c_layout = QtWidgets.QVBoxLayout()
@@ -84,100 +224,6 @@ class SettingsWindowGUI(QtWidgets.QDialog):
         self.ok_button.maximum_width = 75
         self.apply_button.maximum_width = 75
         # endregion
-        # region appearance group
-        self.font_chooser = QtWidgets.QFontComboBox(self.appearance_widget)
-        self.font_size_chooser = QtWidgets.QSpinBox(self.appearance_widget)
-        self.font_bold_checkbox = QtWidgets.QCheckBox(self.appearance_widget)
-
-        self.language_label = QtWidgets.QLabel(self)
-        self.language_combo = QtWidgets.QComboBox(self)
-        self.language_combo.size_adjust_policy = (
-            QtWidgets.QComboBox.SizeAdjustPolicy.AdjustToContents
-        )
-
-        self.dark_mode_checkbox = _ReorderedCheckBox(self.appearance_widget)
-        self.dark_mode_checkbox.tristate = True
-
-        self.font_layout = QtWidgets.QHBoxLayout()
-        self.font_layout.add_widget(self.font_chooser)
-        self.font_layout.add_widget(self.font_size_chooser)
-        self.language_layout = QtWidgets.QHBoxLayout()
-        self.language_layout.add_widget(self.language_label)
-        self.language_layout.add_widget(self.language_combo)
-        self.appearance_layout.add_layout(self.font_layout)
-        self.appearance_layout.add_layout(self.language_layout)
-        self.appearance_layout.add_widget(self.font_bold_checkbox)
-        self.appearance_layout.add_widget(self.dark_mode_checkbox)
-        self.appearance_layout.add_spacer_item(self.get_spacer())
-
-        self.font_size_chooser.maximum_width = 50
-        # endregion
-        # region behaviour group
-        self.plotter_options_layout = QtWidgets.QHBoxLayout()
-
-        self.save_on_quit_checkbox = QtWidgets.QCheckBox(self.behaviour_widget)
-        self.copy_mode_checkbox = QtWidgets.QCheckBox(self.behaviour_widget)
-        self.ahk_path_button = QtWidgets.QPushButton(self.behaviour_widget)
-        self.auto_scroll_checkbox = QtWidgets.QCheckBox(self.behaviour_widget)
-
-        self.plotter_options_layout.add_widget(self.copy_mode_checkbox)
-        self.plotter_options_layout.add_widget(self.ahk_path_button)
-
-        self.behaviour_layout.add_widget(self.save_on_quit_checkbox)
-        self.behaviour_layout.add_layout(self.plotter_options_layout)
-        self.behaviour_layout.add_widget(self.auto_scroll_checkbox)
-        self.behaviour_layout.add_spacer_item(self.get_spacer())
-        self.ahk_path_button.maximum_width = 75
-        # endregion
-        # region alert group
-        self.alert_checkbox_layout = QtWidgets.QHBoxLayout()
-        self.alert_path_layout = QtWidgets.QHBoxLayout()
-        self.alert_threshold_layout = QtWidgets.QHBoxLayout()
-
-        self.visual_alert_checkbox = QtWidgets.QCheckBox(self.alerts_widget)
-        self.audio_alert_checkbox = QtWidgets.QCheckBox(self.alerts_widget)
-
-        self.alert_path_label = QtWidgets.QLabel(self.alerts_widget)
-        self.alert_path_line_edit = QtWidgets.QLineEdit(self.alerts_widget)
-        self.alert_path_button = QtWidgets.QPushButton("...", self.alerts_widget)
-
-        self.alert_threshold_label = QtWidgets.QLabel(
-            self.alerts_widget,
-        )
-        self.alert_threshold_spinbox = QtWidgets.QSpinBox(self.alerts_widget)
-
-        self.alert_checkbox_layout.add_widget(self.visual_alert_checkbox)
-        self.alert_checkbox_layout.add_widget(self.audio_alert_checkbox)
-
-        self.alert_path_layout.add_widget(self.alert_path_line_edit)
-        self.alert_path_layout.add_widget(self.alert_path_button)
-
-        self.alert_threshold_layout.add_widget(self.alert_threshold_spinbox)
-        self.alert_threshold_layout.add_widget(self.alert_threshold_label)
-
-        self.alerts_layout.add_layout(self.alert_checkbox_layout)
-        self.alerts_layout.add_widget(self.alert_path_label)
-        self.alerts_layout.add_layout(self.alert_path_layout)
-        self.alerts_layout.add_layout(self.alert_threshold_layout)
-        self.alerts_layout.add_spacer_item(self.get_spacer())
-
-        self.alert_path_button.set_fixed_size(QtCore.QSize(24, 23))
-        # endregion
-        # region script group
-        self.ahk_bind_edit = QtWidgets.QLineEdit(self.script_widget)
-        self.ahk_script_edit = QtWidgets.QTextEdit(self.script_widget)
-
-        self.script_layout.add_widget(self.ahk_bind_edit)
-        self.script_layout.add_widget(self.ahk_script_edit)
-
-        self.ahk_bind_edit.maximum_width = 100
-        self.alert_threshold_spinbox.maximum = 300
-        self.alert_threshold_spinbox.accelerated = True
-        self.alert_threshold_spinbox.maximum_width = 75
-        self.alert_threshold_spinbox.suffix = "%"
-        self.alert_threshold_label.word_wrap = True
-
-        # endregion
         self.group_selector.currentRowChanged.connect(
             partial(setattr, self.widget_selector, "current_index")
         )
@@ -187,6 +233,10 @@ class SettingsWindowGUI(QtWidgets.QDialog):
 
     def retranslate(self) -> None:
         """Retranslate text that is always on display."""
+        self.appearance_widget.retranslate()
+        self.behaviour_widget.retranslate()
+        self.alerts_widget.retranslate()
+
         self.ok_button.text = _("Ok")
         self.apply_button.text = _("Apply")
         index = self.group_selector.current_index()
@@ -198,31 +248,11 @@ class SettingsWindowGUI(QtWidgets.QDialog):
         self.group_selector.set_fixed_width(
             self.group_selector.size_hint_for_column(0) + 5
         )
-
-        self.font_bold_checkbox.text = _("Bold")
-        self.language_label.text = _("Language")
-        self.dark_mode_checkbox.text = _("Dark mode")
-
-        self.save_on_quit_checkbox.text = _("Save route on window close")
-        self.copy_mode_checkbox.text = _("Copy Mode")
-        self.ahk_path_button.text = _("AHK Path")
-        self.auto_scroll_checkbox.text = _("Auto scroll")
-
-        self.visual_alert_checkbox.text = _("Taskbar fuel alert")
-        self.audio_alert_checkbox.text = _("Sound fuel alert")
-        self.alert_path_label.text = _("Custom sound alert file:")
-        # Escape % for translation
-        self.alert_threshold_label.text = _(
-            "%% of maximum fuel usage left in tank before triggering alert"
-        ).replace("%%", "%")
-
         self.window_title = _("Settings")
-        self.ahk_bind_edit.tool_tip = _(
-            "Bind to trigger the script, # for win key, ! for alt, ^ for control, + for shift"
-        )
 
-    def get_spacer(self) -> QtWidgets.QSpacerItem:
-        """Get an expanding spacer item."""
-        return QtWidgets.QSpacerItem(
-            1, 1, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding
-        )
+
+def get_spacer() -> QtWidgets.QSpacerItem:
+    """Get an expanding spacer item."""
+    return QtWidgets.QSpacerItem(
+        1, 1, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding
+    )

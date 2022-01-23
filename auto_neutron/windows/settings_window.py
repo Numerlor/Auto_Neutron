@@ -30,16 +30,16 @@ class SettingsWindow(SettingsWindowGUI):
         super().__init__(parent)
         # pairs of widgets that we can assign directly to settings and the relevant settings
         self.settings_pairs = (
-            (self.dark_mode_checkbox, ("Window", "dark_mode")),
-            (self.auto_scroll_checkbox, ("Window", "autoscroll")),
-            (self.alert_threshold_spinbox, ("Alerts", "threshold")),
-            (self.visual_alert_checkbox, ("Alerts", "visual")),
-            (self.audio_alert_checkbox, ("Alerts", "audio")),
-            (self.alert_path_line_edit, ("Paths", "alert_sound")),
-            (self.ahk_bind_edit, ("AHK", "bind")),
-            (self.ahk_script_edit, ("AHK", "user_script")),
-            (self.save_on_quit_checkbox, ("General", "save_on_quit")),
-            (self.copy_mode_checkbox, ("General", "copy_mode")),
+            (self.appearance_widget.dark_mode_checkbox, ("Window", "dark_mode")),
+            (self.behaviour_widget.auto_scroll_checkbox, ("Window", "autoscroll")),
+            (self.alerts_widget.alert_threshold_spinbox, ("Alerts", "threshold")),
+            (self.alerts_widget.visual_alert_checkbox, ("Alerts", "visual")),
+            (self.alerts_widget.audio_alert_checkbox, ("Alerts", "audio")),
+            (self.alerts_widget.alert_path_line_edit, ("Paths", "alert_sound")),
+            (self.script_widget.ahk_bind_edit, ("AHK", "bind")),
+            (self.script_widget.ahk_script_edit, ("AHK", "user_script")),
+            (self.behaviour_widget.save_on_quit_checkbox, ("General", "save_on_quit")),
+            (self.behaviour_widget.copy_mode_checkbox, ("General", "copy_mode")),
         )
         self.refresh_widgets()
 
@@ -47,8 +47,8 @@ class SettingsWindow(SettingsWindowGUI):
             self.copy_mode_checkbox.enabled = False
             self.copy_mode_checkbox.checked = True
 
-        self.ahk_path_button.pressed.connect(self.get_ahk_path)
-        self.alert_path_button.pressed.connect(self.get_sound_path)
+        self.behaviour_widget.ahk_path_button.pressed.connect(self.get_ahk_path)
+        self.alerts_widget.alert_path_button.pressed.connect(self.get_sound_path)
 
         self.apply_button.pressed.connect(self.save_settings)
         self.apply_button.pressed.connect(self.settings_applied)
@@ -68,7 +68,7 @@ class SettingsWindow(SettingsWindowGUI):
         if path:
             settings.Paths.ahk = Path(path)
             log.info("Setting ahk path to {path}")
-            self.copy_mode_checkbox.enabled = True
+            self.behaviour_widget.copy_mode_checkbox.enabled = True
 
     def get_sound_path(self) -> None:
         """Ask the user for the alert file path and save it to the line edit."""
@@ -79,7 +79,7 @@ class SettingsWindow(SettingsWindowGUI):
             filter=_("Audio files (*.wav *.mp3);;All types (*.*)"),
         )
         if path:
-            self.alert_path_line_edit.text = str(Path(path))
+            self.alerts_widget.alert_path_line_edit.text = str(Path(path))
             settings.Paths.alert_sound = Path(path)
 
     def refresh_widgets(self) -> None:
@@ -101,9 +101,9 @@ class SettingsWindow(SettingsWindowGUI):
                 widget.value = setting_value
 
         font = settings.Window.font
-        self.font_bold_checkbox.checked = font.bold()
-        self.font_size_chooser.value = font.point_size()
-        self.font_chooser.current_font = font
+        self.appearance_widget.font_bold_checkbox.checked = font.bold()
+        self.appearance_widget.font_size_chooser.value = font.point_size()
+        self.appearance_widget.font_chooser.current_font = font
 
     def save_settings(self) -> None:
         """Save the settings from the widgets."""
@@ -125,23 +125,27 @@ class SettingsWindow(SettingsWindowGUI):
                 else:
                     setattr(settings_category, setting_name, widget.value)
 
-            font = self.font_chooser.current_font
-            font.set_point_size(self.font_size_chooser.value)
-            font.set_bold(self.font_bold_checkbox.checked)
+            font = self.appearance_widget.font_chooser.current_font
+            font.set_point_size(self.appearance_widget.font_size_chooser.value)
+            font.set_bold(self.appearance_widget.font_bold_checkbox.checked)
             settings.Window.font = font
 
             settings.General.locale = code_from_locale(
-                get_available_locales()[self.language_combo.current_index]
+                get_available_locales()[
+                    self.appearance_widget.language_combo.current_index
+                ]
             )
 
     def retranslate(self) -> None:
         """Retranslate text that is always on display."""
         super().retranslate()
-        self.language_combo.clear()
+        self.appearance_widget.language_combo.clear()
         locales = get_available_locales()
         language_codes = [code_from_locale(locale) for locale in locales]
-        self.language_combo.add_items([locale.get_display_name() for locale in locales])
-        self.language_combo.current_index = language_codes.index(
+        self.appearance_widget.language_combo.add_items(
+            [locale.get_display_name() for locale in locales]
+        )
+        self.appearance_widget.language_combo.current_index = language_codes.index(
             settings.General.locale
         )
 
