@@ -254,6 +254,7 @@ class SettingsWindowGUI(QtWidgets.QDialog):
         self.appearance_widget.retranslate()
         self.behaviour_widget.retranslate()
         self.alerts_widget.retranslate()
+        self.script_widget.retranslate()
 
         self.ok_button.text = _("Ok")
         self.apply_button.text = _("Apply")
