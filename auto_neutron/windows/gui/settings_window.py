@@ -164,21 +164,14 @@ class ScriptWidget(QtWidgets.QWidget):
 
         self.simple_mode_checkbox = QtWidgets.QCheckBox(self)
 
-        self.custom_script_widget = QtWidgets.QWidget(self)
-        self.edit_layout = QtWidgets.QVBoxLayout(self.custom_script_widget)
-        self.edit_layout.contents_margins = QtCore.QMargins(0, 0, 0, 0)
-
-        self.ahk_bind_edit = QtWidgets.QLineEdit(self.custom_script_widget)
+        self.ahk_bind_edit = QtWidgets.QLineEdit(self)
         self.ahk_bind_edit.maximum_width = 100
 
-        self.ahk_script_edit = QtWidgets.QTextEdit(self.custom_script_widget)
-
-        self.edit_layout.add_widget(self.ahk_bind_edit)
-        self.edit_layout.add_widget(self.ahk_script_edit)
-
-        self.switch_widget.add_widget(self.custom_script_widget)
+        self.ahk_script_edit = QtWidgets.QTextEdit(self.switch_widget)
+        self.switch_widget.add_widget(self.ahk_script_edit)
 
         self.main_layout.add_widget(self.simple_mode_checkbox)
+        self.main_layout.add_widget(self.ahk_bind_edit)
         self.main_layout.add_widget(self.switch_widget)
 
     def retranslate(self) -> None:
