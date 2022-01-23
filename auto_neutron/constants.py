@@ -108,3 +108,23 @@ ${hotkey}::
     ${user_script}
 """
 )
+
+AHK_USER_SCRIPT_TEMPLATE = """\
+SetKeyDelay, 50, 50
+;bind to open map
+send, {map_open_key}
+; wait for map to open
+sleep, 850
+;navigate to second map tab and focus on search field
+send, {navigate_right_key}
+send, {focus_key}
+ClipOld := ClipboardAll
+;system is the variable with the injected system
+Clipboard := system
+sleep, 100
+Send, ^v
+Clipboard := ClipOld
+ClipOld =
+SetKeyDelay, 1, 2
+send, {submit_key}
+"""

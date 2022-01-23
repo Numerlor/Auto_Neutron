@@ -11,41 +11,38 @@ from PySide6.QtGui import QFont
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa F401
 from auto_neutron import Theme
+from auto_neutron.constants import AHK_USER_SCRIPT_TEMPLATE
 
 from .category_meta import SettingsCategory, SettingsParams
+
+AHK_DEFAULT_GALAXY_KEY = "{Numpad7}"
+AHK_DEFAULT_NAVIGATE_RIGHT_KEY = "e"
+AHK_DEFAULT_FOCUS_KEY = "{Space}"
+AHK_DEFAULT_SUBMIT_KEY = "{enter}"
 
 
 class General(metaclass=SettingsCategory):  # noqa D101
     save_on_quit: t.Annotated[bool, SettingsParams(True)]
-    bind: t.Annotated[str, SettingsParams("F5")]
-    script: t.Annotated[
-        str,
-        SettingsParams(
-            (
-                "SetKeyDelay, 50, 50\n"
-                ";bind to open map\n"
-                "send, {Numpad7}\n"
-                "; wait for map to open\n"
-                "sleep, 850\n"
-                ";navigate to second map tab and focus on search field\n"
-                "send, e\n"
-                "send, {Space}\n"
-                "ClipOld := ClipboardAll\n"
-                ";system is the variable with the injected system\n"
-                "Clipboard := system\n"
-                "sleep, 100\n"
-                "Send, ^v\n"
-                "Clipboard := ClipOld\n"
-                "ClipOld =\n"
-                "SetKeyDelay, 1, 2\n"
-                "send, {enter}\n"
-            ),
-        ),
-    ]
     copy_mode: t.Annotated[bool, SettingsParams(True)]
     last_route_index: t.Annotated[int, SettingsParams(0)]
     locale: t.Annotated[str, SettingsParams("en")]
     last_checked_release: t.Annotated[str, SettingsParams("")]
+
+
+class AHK(metaclass=SettingsCategory):  # noqa D101
+    bind: t.Annotated[str, SettingsParams("F5", fallback_paths=("General.bind",))]
+    user_script: t.Annotated[
+        str,
+        SettingsParams(
+            AHK_USER_SCRIPT_TEMPLATE.format(
+                map_open_key=AHK_DEFAULT_GALAXY_KEY,
+                navigate_right_key=AHK_DEFAULT_NAVIGATE_RIGHT_KEY,
+                focus_key=AHK_DEFAULT_FOCUS_KEY,
+                submit_key=AHK_DEFAULT_SUBMIT_KEY,
+            ),
+            fallback_paths=("General.script",),
+        ),
+    ]
 
 
 def _path_serializer(path: t.Union[None, Path, str]) -> str:

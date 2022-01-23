@@ -36,8 +36,8 @@ class SettingsWindow(SettingsWindowGUI):
             (self.visual_alert_checkbox, ("Alerts", "visual")),
             (self.audio_alert_checkbox, ("Alerts", "audio")),
             (self.alert_path_line_edit, ("Paths", "alert_sound")),
-            (self.ahk_bind_edit, ("General", "bind")),
-            (self.ahk_script_edit, ("General", "script")),
+            (self.ahk_bind_edit, ("AHK", "bind")),
+            (self.ahk_script_edit, ("AHK", "user_script")),
             (self.save_on_quit_checkbox, ("General", "save_on_quit")),
             (self.copy_mode_checkbox, ("General", "copy_mode")),
         )
