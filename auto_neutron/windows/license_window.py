@@ -46,7 +46,7 @@ class LicenseWindow(LicenseWindowGUI):
             + _("This program uses Python and its associated software:") + "<br>"
             + sys.copyright.replace("\n", "<br>") + "<br><br>"
             + _("Python is licensed under the ") + self.make_hyperlink(_("PSF License Agreement"), python_license_file_url)
-            + _(", see ") + self.make_hyperlink("docs.python.org/license.html", PYTHON_LICENSE_URL) + _(" for more details.<br><br>")
+            + _(", see ") + self.make_hyperlink("docs.python.org/license.html", PYTHON_LICENSE_URL) + _(" for more details.") + "<br><br>"
             + _("Auto_Neutron Copyright (C) 2019 Numerlor") + "<br>"
             + _("Auto_Neutron comes with ABSOLUTELY NO WARRANTY).") + "<br>"
             + _("This is free software, and you are welcome to redistribute it under the conditions of the ")
