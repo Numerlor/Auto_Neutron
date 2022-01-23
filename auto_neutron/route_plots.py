@@ -182,8 +182,8 @@ class AhkPlotter(Plotter):
                 self.process.wait(0.1)
                 raise RuntimeError("AHK failed to start.")
         self._used_ahk_path = settings.Paths.ahk
-        self._used_script = settings.General.script
-        self._used_hotkey = settings.General.bind
+        self._used_script = settings.AHK.get_script()
+        self._used_hotkey = settings.AHK.bind
         atexit.register(self.process.terminate)
         log.debug("Created AHK subprocess.")
 
@@ -200,8 +200,8 @@ class AhkPlotter(Plotter):
         """Restart AHK on setting change."""
         if (
             settings.Paths.ahk != self._used_ahk_path
-            or settings.General.script != self._used_script
-            or settings.General.bind != self._used_hotkey
+            or settings.AHK.get_script() != self._used_script
+            or settings.AHK.bind != self._used_hotkey
         ):
             self._start_ahk()
             self.update_system(self._last_system)
@@ -223,7 +223,7 @@ class AhkPlotter(Plotter):
         try:
             temp_path.write_text(
                 AHK_TEMPLATE.substitute(
-                    hotkey=settings.General.bind, user_script=settings.General.script
+                    hotkey=settings.AHK.bind, user_script=settings.AHK.get_script()
                 )
             )
             yield temp_path

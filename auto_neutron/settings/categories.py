@@ -52,6 +52,24 @@ class AHK(metaclass=SettingsCategory):  # noqa D101
     submit_key: t.Annotated[str, SettingsParams(AHK_DEFAULT_SUBMIT_KEY)]
     map_open_wait_delay: t.Annotated[int, SettingsParams(AHK_DEFAULT_MAP_WAIT_DELAY)]
 
+    @classmethod
+    def get_script(cls) -> str:
+        """
+        Return the current AHK script.
+
+        If simple mode is enabled, return the filled template, otherwise return the user script.
+        """
+        if cls.simple_mode:
+            return AHK_USER_SCRIPT_TEMPLATE.format(
+                map_open_key=cls.map_open_key,
+                navigate_right_key=cls.navigate_right_key,
+                focus_key=cls.focus_key,
+                submit_key=cls.submit_key,
+                map_open_wait_delay=cls.map_open_wait_delay,
+            )
+        else:
+            return cls.user_script
+
 
 def _path_serializer(path: t.Union[None, Path, str]) -> str:
     if path is None:
