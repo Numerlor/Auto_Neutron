@@ -52,9 +52,15 @@ class NewRouteWindow(NewRouteWindowGUI):
 
     def __init__(self, parent: QtWidgets.QWidget):
         super().__init__(parent)
-        self.game_state: GameState = None  # type: ignore
-        self.selected_journal: Journal = None  # type: ignore
-        self._journal_worker: GameWorker = None  # type: ignore
+        self.game_state: t.Optional[GameState] = None
+        self.selected_journal: t.Optional[Journal] = None
+        self._journal_worker: t.Optional[GameWorker] = None
+        self._status_hide_timer = QtCore.QTimer(self)
+        self._status_hide_timer.single_shot_ = True
+        self._status_hide_timer.timeout.connect(self._reset_status_text)
+        self._status_has_hover = False
+        self._status_scheduled_reset = False
+        self._setup_status_widget()
 
         # region spansh tabs init
         self.spansh_neutron_tab.nearest_button.pressed.connect(
@@ -77,8 +83,11 @@ class NewRouteWindow(NewRouteWindowGUI):
 
         self.spansh_exact_tab.source_edit.textChanged.connect(self._set_exact_submit)
         self.spansh_exact_tab.target_edit.textChanged.connect(self._set_exact_submit)
+        self.spansh_exact_tab.use_clipboard_checkbox.stateChanged.connect(
+            self._set_exact_submit
+        )
 
-        self.spansh_neutron_tab.range_spin.value = 50  # default to 80% efficiency
+        self.spansh_neutron_tab.range_spin.value = 50
         self.spansh_neutron_tab.efficiency_spin.value = 80  # default to 80% efficiency
 
         self.spansh_neutron_tab.cargo_slider.valueChanged.connect(
@@ -152,9 +161,13 @@ class NewRouteWindow(NewRouteWindowGUI):
         """Submit an exact plotter request to spansh."""
         log.info("Submitting exact job.")
         if self.spansh_exact_tab.use_clipboard_checkbox.checked:
-            ship = Ship.from_coriolis(
-                json.loads(QtWidgets.QApplication.instance().clipboard().text())
-            )
+            try:
+                ship = Ship.from_coriolis(
+                    json.loads(QtWidgets.QApplication.instance().clipboard().text())
+                )
+            except (json.JSONDecodeError, KeyError):
+                self._show_status_message(_("Invalid ship data in clipboard."), 5_000)
+                return
         else:
             ship = self.game_state.ship
 
@@ -222,7 +235,7 @@ class NewRouteWindow(NewRouteWindowGUI):
 
     def _recalculate_range(self, cargo_mass: int) -> None:
         """Recalculate jump range with the new cargo_mass."""
-        if self.game_state.ship.fsd is not None:  # Ship may not be available yet
+        if self.game_state.ship.initialized:  # Ship may not be available yet
             self.spansh_neutron_tab.range_spin.value = self.game_state.ship.jump_range(
                 cargo_mass=cargo_mass
             )
@@ -241,6 +254,10 @@ class NewRouteWindow(NewRouteWindowGUI):
             self.spansh_exact_tab.source_edit.text
             and self.spansh_exact_tab.target_edit.text
             and not self.game_state.shut_down
+            and (
+                self.game_state.ship.initialized
+                or self.spansh_exact_tab.use_clipboard_checkbox.checked
+            )
         )
 
     def _display_nearest_window(self) -> None:
@@ -288,7 +305,7 @@ class NewRouteWindow(NewRouteWindowGUI):
     def _spansh_error_callback(self, error_message: str) -> None:
         """Reset the cursor shape and display `error_message` in the status bar."""
         self.cursor = QtGui.QCursor(QtCore.Qt.CursorShape.ArrowCursor)
-        self.status_bar.show_message(error_message, 10_000)
+        self._show_status_message(error_message, 10_000)
 
     # endregion
 
@@ -301,7 +318,7 @@ class NewRouteWindow(NewRouteWindowGUI):
         else:
             start_path = ""
         path, __ = QtWidgets.QFileDialog.get_open_file_name(
-            self, _("Select CSV file"), start_path, "CSV (*.csv);;All types (*.*)"
+            self, _("Select CSV file"), start_path, _("CSV (*.csv);;All types (*.*)")
         )
         if path:
             self.csv_tab.path_edit.text = str(Path(path))
@@ -330,20 +347,20 @@ class NewRouteWindow(NewRouteWindowGUI):
                 elif len(header) == 7:
                     row_type = ExactPlotRow
                 else:
-                    self.status_bar.show_message(_("Invalid CSV file."), 5_000)
+                    self._show_status_message(_("Invalid CSV file."), 5_000)
                     return
                 log.info(f"Parsing csv file of type {row_type.__name__} at {path}.")
                 return [row_type.from_csv_row(row) for row in reader]
         except FileNotFoundError:
-            self.status_bar.show_message(_("CSV file doesn't exist."), 5_000)
+            self._show_status_message(_("CSV file doesn't exist."), 5_000)
         except csv.Error as error:
-            self.status_bar.show_message(_("Invalid CSV file: ") + str(error), 5_000)
+            self._show_status_message(_("Invalid CSV file: ") + str(error), 5_000)
         except IndexError:
-            self.status_bar.show_message(_("Truncated data in CSV file."), 5_000)
+            self._show_status_message(_("Truncated data in CSV file."), 5_000)
         except ValueError:
-            self.status_bar.show_message(_("Invalid data in CSV file."), 5_000)
+            self._show_status_message(_("Invalid data in CSV file."), 5_000)
         except OSError:
-            self.status_bar.show_message(_("Invalid path."), 5_000)
+            self._show_status_message(_("Invalid path."), 5_000)
 
     # endregion
 
@@ -355,6 +372,7 @@ class NewRouteWindow(NewRouteWindowGUI):
                 get_config_dir() / ROUTE_FILE_NAME
             )
             self._update_saved_route_text()
+            self._route_displayed = True
 
     def _last_route_submit(self) -> None:
         log.info("Submitting last route.")
@@ -402,7 +420,7 @@ class NewRouteWindow(NewRouteWindowGUI):
         )
         self.selected_journal = journal
         if shut_down:
-            self.status_bar.show_message(
+            self._show_status_message(
                 _("Selected journal ended with a shut down event."), 10_000
             )
             self.csv_tab.submit_button.enabled = False
@@ -424,7 +442,7 @@ class NewRouteWindow(NewRouteWindowGUI):
             self.game_state.ship.update_from_loadout(loadout)
             self._set_widget_values(location, self.game_state.ship, cargo_mass)
 
-        self.status_bar.clear_message()
+        self.status_widget.text = ""
         self.csv_tab.submit_button.enabled = True
         self._set_neutron_submit()
         self._set_exact_submit()
@@ -436,6 +454,49 @@ class NewRouteWindow(NewRouteWindowGUI):
         """Emit a new route and close the window."""
         self.route_created_signal.emit(journal, route, route_index)
         self.close()
+
+    def _show_status_message(self, message: str, timeout: int = 0) -> None:
+        """
+        Show `message` in the status widget.
+
+        If `timeout` is provided and non-zero, the text is hidden in `timeout` ms.
+        """
+        self._status_hide_timer.stop()
+        if timeout:
+            self._status_hide_timer.interval = timeout
+            self._status_hide_timer.start()
+
+        self.status_widget.text = message
+
+    def _setup_status_widget(self) -> None:
+        """Patch the status widget's methods to intercept hover events."""
+        original_enter_event = self.status_widget.enter_event
+
+        def patched_enter_event(event: QtGui.QEnterEvent) -> None:
+            """Set the status hover attribute."""
+            original_enter_event(event)
+            self._status_has_hover = True
+
+        self.status_widget.enter_event = patched_enter_event
+
+        original_leave_event = self.status_widget.leave_event
+
+        def patched_leave_event(event: QtCore.QEvent) -> None:
+            """Reset text if the user leaves and the text was supposed to be hidden during that."""
+            original_leave_event(event)
+            self._status_has_hover = False
+            if self._status_scheduled_reset:
+                self.status_widget.text = ""
+                self._status_scheduled_reset = False
+
+        self.status_widget.leave_event = patched_leave_event
+
+    def _reset_status_text(self) -> None:
+        """Reset the status text, or set the scheduled attribute if the status widget is currently hovered."""
+        if not self._status_has_hover:
+            self.status_widget.text = ""
+        else:
+            self._status_scheduled_reset = True
 
     def change_event(self, event: QtCore.QEvent) -> None:
         """Retranslate the GUI when a language change occurs."""

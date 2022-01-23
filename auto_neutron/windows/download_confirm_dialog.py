@@ -36,7 +36,6 @@ class VersionDownloadConfirmDialog(VersionDownloadConfirmDialogGUI):
         self._skip_button.pressed.connect(self.close)
 
         self._download_button.pressed.connect(self.confirmed_signal.emit)
-        self._download_button.pressed.connect(self.close)
 
         self.retranslate()
 

@@ -79,7 +79,7 @@ class MainWindowGUI(QtWidgets.QMainWindow):
 
     def inactivate_before_index(self, index: int) -> None:
         """Make all the items before `index` grey, and after, the default color."""
-        assert index < self.table.row_count, f"Index {index} out of range."
+        assert index <= self.table.row_count, f"Index {index} out of range."
         grey_color = QtGui.QColor(150, 150, 150)
         for row in range(0, index):
             for column in range(0, self.table.column_count):

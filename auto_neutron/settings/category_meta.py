@@ -16,6 +16,8 @@ if t.TYPE_CHECKING:
 
 _created_categories: weakref.WeakSet[SettingsCategory] = weakref.WeakSet()
 
+_MISSING = object()
+
 
 class SettingsParams(t.NamedTuple):
     """
@@ -24,11 +26,13 @@ class SettingsParams(t.NamedTuple):
     `default` is the default value of the setting
     `on_save` is a callable that's applied before an user given value is saved
     `on_load` is a callable that's applied before a value from settings is returned to the user
+    `fallback_paths` is a container of full paths to settings to be checked in case the initial look-up fails.
     """
 
     default: t.Any
     on_save: t.Optional[collections.abc.Callable[[t.Any], t.Any]] = None
     on_load: t.Optional[collections.abc.Callable[[t.Any], t.Any]] = None
+    fallback_paths: tuple[str] = ()
 
 
 class SettingsCategory(type):
@@ -92,27 +96,38 @@ class SettingsCategory(type):
         _created_categories.add(obj)
         return obj
 
-    def __getattribute__(cls, key: str):
+    def __getattr__(cls, key: str):
         """
         If the attribute is an annotated setting, fetch its value from the class' settings instead of the class itself.
 
         If the SettingsParams object of the setting defines an `on_load` callable, the callable is applied to `value`
         before it's returned to the caller.
         """
-        annotations_dict = super().__getattribute__("__annotations__")
+        annotations_dict = cls.__annotations__
         if (annotation := annotations_dict.get(key)) is not None:
             params = cls._get_params_from_annotation(annotation)
             if params is None:
-                return super().__getattribute__(key)
+                raise AttributeError
             settings_val = cls._settings_getter().value(
                 (*cls._prefix_categories, cls.__name__, *cls._suffix_categories),
                 key,
-                default=params.default,
+                default=_MISSING,
             )
+            if settings_val is _MISSING:
+                # Couldn't find the value with the settings defined by its class, try fallbacks if any.
+                for setting_path in params.fallback_paths:
+                    settings_val = cls._settings_getter().value(
+                        setting_path,
+                        default=_MISSING,
+                    )
+                    if settings_val is not _MISSING:
+                        break
+                else:
+                    settings_val = params.default
             if params.on_load is not None:
                 return params.on_load(settings_val)
             return settings_val
-        return super().__getattribute__(key)
+        raise AttributeError
 
     def __setattr__(cls, key: str, value: t.Any):
         """

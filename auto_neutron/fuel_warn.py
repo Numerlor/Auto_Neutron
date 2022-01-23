@@ -39,7 +39,11 @@ class FuelWarn(QtCore.QObject):
 
     def warn(self, status_dict: dict) -> None:
         """Execute alert when in supercruise, on FSD cool down and fuel is below threshold."""
-        if not status_dict or "Fuel" not in status_dict:
+        if (
+            not self._game_state.ship.initialized
+            and not status_dict
+            or "Fuel" not in status_dict
+        ):
             # Sometimes we get empty JSON,
             # or when the game is shut down it only contains data up to flags.
             return

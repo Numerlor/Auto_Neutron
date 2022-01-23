@@ -22,6 +22,7 @@ from auto_neutron.fuel_warn import FuelWarn
 from auto_neutron.game_state import GameState, PlotterState
 from auto_neutron.route_plots import AhkPlotter, CopyPlotter, NeutronPlotRow
 from auto_neutron.self_updater import Updater
+from auto_neutron.settings import delay_sync
 from auto_neutron.utils.signal import ReconnectingSignal
 from auto_neutron.windows.error_window import ErrorWindow
 from auto_neutron.windows.license_window import LicenseWindow
@@ -52,7 +53,7 @@ class Hub(QtCore.QObject):
         super().__init__()
         self.window = MainWindow()
         self.error_window = ErrorWindow(self.window)
-        self.error_window.save_button.pressed.connect(partial(self.save_route, True))
+        self.error_window.save_button.pressed.connect(self.save_route)
         Updater(self.window).check_update()
 
         exception_handler.triggered.connect(self.error_window.show)
@@ -67,12 +68,15 @@ class Hub(QtCore.QObject):
         self.window.about_action.triggered.connect(self.display_license_window)
         self.window.new_route_action.triggered.connect(self.new_route_window)
         self.window.settings_action.triggered.connect(self.display_settings)
-        self.window.save_action.triggered.connect(partial(self.save_route, True))
+        self.window.save_action.triggered.connect(self.save_route)
         self.window.table.doubleClicked.connect(self.get_index_row)
         self.game_state = GameState()
 
         self.plotter_state = PlotterState(self, self.game_state)
         self.plotter_state.new_system_signal.connect(self.new_system_callback)
+        self.plotter_state.route_end_signal.connect(
+            partial(self.new_system_callback, None)
+        )
         self.plotter_state.shut_down_signal.connect(self.display_shut_down_window)
 
         self.apply_settings()
@@ -97,7 +101,7 @@ class Hub(QtCore.QObject):
 
         self.new_route_window()
 
-        atexit.register(self.save_route)
+        atexit.register(self.save_on_exit)
 
     def new_route_window(self) -> None:
         """Display the `NewRouteWindow` and connect its signals."""
@@ -199,7 +203,7 @@ class Hub(QtCore.QObject):
         log.info("Displaying shut down window.")
         window = ShutDownWindow(self.window)
         window.new_journal_signal.connect(self.new_route)
-        window.save_route_button.pressed.connect(partial(self.save_route, force=True))
+        window.save_route_button.pressed.connect(self.save_route)
         window.show()
 
     def display_license_window(self) -> None:
@@ -213,11 +217,16 @@ class Hub(QtCore.QObject):
         if settings.Window.dark_mode is Theme.OS_THEME:
             set_theme(dark)
 
-    def save_route(self, force: bool = False) -> None:
+    def save_on_exit(self) -> None:
+        """Save necessary settings when exiting."""
+        with delay_sync():
+            settings.Window.geometry = self.window.save_geometry()
+            if settings.General.save_on_quit:
+                self.save_route()
+
+    def save_route(self) -> None:
         """If route auto saving is enabled, or force is True, save the route to the config directory."""
-        if (
-            force or settings.General.save_on_quit
-        ) and self.plotter_state.route is not None:
+        if self.plotter_state.route is not None:
             log.info("Saving route.")
             with open(
                 get_config_dir() / ROUTE_FILE_NAME, "w", encoding="utf8", newline=""

@@ -60,6 +60,9 @@ class CheckBoxDelegate(QtWidgets.QStyledItemDelegate):
         palette.set_color(
             QtGui.QPalette.Text, option.palette.highlighted_text().color()
         )
+        palette.set_color(
+            QtGui.QPalette.Window, option.palette.highlighted_text().color()
+        )
         editor.palette = palette
         return editor
 

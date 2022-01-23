@@ -2,11 +2,12 @@
 # Copyright (C) 2019  Numerlor
 
 from .default_settings_obj import get_settings, set_settings  # isort:skip
-from .categories import Alerts, General, Paths, Window
+from .categories import AHK, Alerts, General, Paths, Window
 from .category_meta import SettingsCategory, SettingsParams, delay_sync
 
 __all__ = [
     "General",
+    "AHK",
     "Window",
     "Paths",
     "Alerts",

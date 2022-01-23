@@ -13,7 +13,7 @@ from PySide6 import QtCore
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa: F401
 
-VERSION = "2.0.6"
+VERSION = "2.0.7"
 APP = "Auto_Neutron"
 ORG = "Numerlor"
 APPID = f"{ORG}|{APP}|{VERSION}"
@@ -108,3 +108,23 @@ ${hotkey}::
     ${user_script}
 """
 )
+
+AHK_USER_SCRIPT_TEMPLATE = """\
+SetKeyDelay, 50, 50
+;bind to open map
+send, {map_open_key}
+; wait for map to open
+sleep, {map_open_wait_delay}
+;navigate to second map tab and focus on search field
+send, {navigate_right_key}
+send, {focus_key}
+ClipOld := ClipboardAll
+;system is the variable with the injected system
+Clipboard := system
+sleep, 100
+Send, ^v
+Clipboard := ClipOld
+ClipOld =
+SetKeyDelay, 1, 2
+send, {submit_key}
+"""
