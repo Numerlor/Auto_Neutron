@@ -154,6 +154,69 @@ class AlertsWidget(QtWidgets.QWidget):
         ).replace("%%", "%")
 
 
+class SimpleScriptWidget(QtWidgets.QWidget):
+    """Widget containing options used to configured the AHK simple mode."""
+
+    def __init__(self, parent: t.Optional[QtWidgets.QWidget]):
+        super().__init__(parent)
+        self.main_layout = QtWidgets.QVBoxLayout(self)
+        self.main_layout.contents_margins = QtCore.QMargins(0, 0, 0, 0)
+
+        self._reference_label = QtWidgets.QLabel(self)
+        self._reference_label.open_external_links = True
+
+        self._map_open_key_label = QtWidgets.QLabel(self)
+        self.map_open_key_edit = QtWidgets.QLineEdit(self)
+        self.map_open_key_edit.maximum_width = 100
+
+        self._map_open_wait_label = QtWidgets.QLabel(self)
+        self.map_open_wait_spinbox = QtWidgets.QSpinBox(self)
+        self.map_open_wait_spinbox.maximum_width = 100
+        self.map_open_wait_spinbox.maximum = 10_000
+        self.map_open_wait_spinbox.accelerated = True
+
+        self._navigate_right_key_label = QtWidgets.QLabel(self)
+        self.navigate_right_key_edit = QtWidgets.QLineEdit(self)
+        self.navigate_right_key_edit.maximum_width = 100
+
+        self._focus_key_label = QtWidgets.QLabel(self)
+        self.focus_key_edit = QtWidgets.QLineEdit(self)
+        self.focus_key_edit.maximum_width = 100
+
+        self._submit_key_label = QtWidgets.QLabel(self)
+        self.submit_key_edit = QtWidgets.QLineEdit(self)
+        self.submit_key_edit.maximum_width = 100
+
+        self.main_layout.add_widget(self._reference_label)
+        self.main_layout.add_widget(self._map_open_key_label)
+        self.main_layout.add_widget(self.map_open_key_edit)
+        self.main_layout.add_widget(self._map_open_wait_label)
+        self.main_layout.add_widget(self.map_open_wait_spinbox)
+        self.main_layout.add_widget(self._navigate_right_key_label)
+        self.main_layout.add_widget(self.navigate_right_key_edit)
+        self.main_layout.add_widget(self._focus_key_label)
+        self.main_layout.add_widget(self.focus_key_edit)
+        self.main_layout.add_widget(self._submit_key_label)
+        self.main_layout.add_widget(self.submit_key_edit)
+
+    def retranslate(self) -> None:
+        """Retranslate text that is always on display."""
+        self._map_open_key_label.text = _("Galaxy map open key")
+        self._map_open_wait_label.text = _("Time to wait for galaxy map to open")
+        self._navigate_right_key_label.text = _(
+            "Key to use to navigate right in the map"
+        )
+        self._focus_key_label.text = _(
+            "Key to use to focus onto the system input field"
+        )
+        self._submit_key_label.text = _("Key to submit the entered system")
+        self._reference_label.text = (
+            '<a href="https://www.autohotkey.com/docs/commands/Send.htm#Parameters" style="color: #007bff">'
+            + _("AutoHotKey key reference")
+            + "</a>"
+        )
+
+
 class ScriptWidget(QtWidgets.QWidget):
     """Widget containing options for configuring the AHK script."""
 
@@ -173,6 +236,9 @@ class ScriptWidget(QtWidgets.QWidget):
         self.ahk_script_edit = QtWidgets.QTextEdit(self.switch_widget)
         self.switch_widget.add_widget(self.ahk_script_edit)
 
+        self.simple_mode_widget = SimpleScriptWidget(self)
+        self.switch_widget.add_widget(self.simple_mode_widget)
+
         self.main_layout.add_widget(self.simple_mode_checkbox)
         self.main_layout.add_widget(self.ahk_bind_edit)
         self.main_layout.add_widget(self.switch_widget)
@@ -190,6 +256,7 @@ class ScriptWidget(QtWidgets.QWidget):
 
     def retranslate(self) -> None:
         """Retranslate text that is always on display."""
+        self.simple_mode_widget.retranslate()
         self.ahk_bind_edit.tool_tip = _(
             "Bind to trigger the script, # for win key, ! for alt, ^ for control, + for shift"
         )
