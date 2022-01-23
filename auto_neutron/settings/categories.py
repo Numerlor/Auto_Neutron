@@ -19,6 +19,7 @@ AHK_DEFAULT_GALAXY_KEY = "{Numpad7}"
 AHK_DEFAULT_NAVIGATE_RIGHT_KEY = "e"
 AHK_DEFAULT_FOCUS_KEY = "{Space}"
 AHK_DEFAULT_SUBMIT_KEY = "{enter}"
+AHK_DEFAULT_MAP_WAIT_DELAY = 850
 
 
 class General(metaclass=SettingsCategory):  # noqa D101
@@ -39,6 +40,7 @@ class AHK(metaclass=SettingsCategory):  # noqa D101
                 navigate_right_key=AHK_DEFAULT_NAVIGATE_RIGHT_KEY,
                 focus_key=AHK_DEFAULT_FOCUS_KEY,
                 submit_key=AHK_DEFAULT_SUBMIT_KEY,
+                map_open_wait_delay=AHK_DEFAULT_MAP_WAIT_DELAY,
             ),
             fallback_paths=("General.script",),
         ),
@@ -47,6 +49,7 @@ class AHK(metaclass=SettingsCategory):  # noqa D101
     navigate_right_key: t.Annotated[str, SettingsParams(AHK_DEFAULT_NAVIGATE_RIGHT_KEY)]
     focus_key: t.Annotated[str, SettingsParams(AHK_DEFAULT_FOCUS_KEY)]
     submit_key: t.Annotated[str, SettingsParams(AHK_DEFAULT_SUBMIT_KEY)]
+    map_open_wait_delay: t.Annotated[int, SettingsParams(AHK_DEFAULT_MAP_WAIT_DELAY)]
 
 
 def _path_serializer(path: t.Union[None, Path, str]) -> str:

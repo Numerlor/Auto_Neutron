@@ -114,7 +114,7 @@ SetKeyDelay, 50, 50
 ;bind to open map
 send, {map_open_key}
 ; wait for map to open
-sleep, 850
+sleep, {map_open_wait_delay}
 ;navigate to second map tab and focus on search field
 send, {navigate_right_key}
 send, {focus_key}
