@@ -46,7 +46,7 @@ class LicenseWindowGUI(QtWidgets.QDialog):
             self.about_qt_button, alignment=QtCore.Qt.AlignmentFlag.AlignRight
         )
         self.main_layout.add_layout(self.bottom_layout)
-        self.set_layout(self.main_layout)
+
         self.retranslate()
 
     def retranslate(self) -> None:
