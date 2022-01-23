@@ -3,7 +3,6 @@
 
 from __future__ import annotations
 
-import atexit
 import dataclasses
 import typing as t
 
@@ -43,7 +42,6 @@ class MainWindow(MainWindowGUI):
         ] = None
         self._last_index = None
 
-        atexit.register(self.save_window)
         self.restore_window()
         self.retranslate()
 
@@ -139,10 +137,6 @@ class MainWindow(MainWindowGUI):
     def restore_window(self) -> None:
         """Restore the size and position from the settings."""
         self.restore_geometry(settings.Window.geometry)
-
-    def save_window(self) -> None:
-        """Save size and position to settings."""
-        settings.Window.geometry = self.save_geometry()
 
     def change_event(self, event: QtCore.QEvent) -> None:
         """Retranslate the GUI when a language change occurs."""
