@@ -63,7 +63,7 @@ class SettingsWindow(SettingsWindowGUI):
             self,
             _("Select AHK executable"),
             str(AHK_PATH),
-            filter="Executable files (*.exe)",
+            filter=_("Executable files (*.exe)"),
         )
         if path:
             settings.Paths.ahk = Path(path)
@@ -76,7 +76,7 @@ class SettingsWindow(SettingsWindowGUI):
             self,
             _("Select alert file"),
             "",
-            filter="Audio files (*.wav *.mp3);;All types (*.*)",
+            filter=_("Audio files (*.wav *.mp3);;All types (*.*)"),
         )
         if path:
             self.alert_path_line_edit.text = str(Path(path))
