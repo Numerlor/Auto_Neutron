@@ -60,21 +60,15 @@ class Ship:
                 lambda module: module["Slot"] == "FrameShiftDrive", loadout["Modules"]
             )
         )
-        engineered_optimal_mass = None
-        engineered_jump_fuel_cap = None
+        fsd = FSD_CONSTANTS[fsd_dict["Item"]]
+
         engineering = fsd_dict.get("Engineering")
         if engineering is not None:
             for modifier in engineering["Modifiers"]:
                 if modifier["Label"] == "FSDOptimalMass":
-                    engineered_optimal_mass = modifier["Value"]
+                    fsd = fsd._replace(optimal_mass=modifier["Value"])
                 elif modifier["Label"] == "MaxFuelPerJump":
-                    engineered_jump_fuel_cap = modifier["Value"]
-
-        fsd = FSD_CONSTANTS[fsd_dict["Item"]]
-        if engineered_optimal_mass is not None:
-            fsd = fsd._replace(optimal_mass=engineered_optimal_mass)
-        if engineered_jump_fuel_cap is not None:
-            fsd = fsd._replace(max_fuel_usage=engineered_optimal_mass)
+                    fsd = fsd._replace(max_fuel_usage=modifier["Value"])
         return fsd
 
     @staticmethod
