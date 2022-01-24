@@ -233,8 +233,10 @@ class NewRouteWindow(NewRouteWindowGUI):
             cargo_mass=current_cargo
         )
 
-    def _recalculate_range(self, cargo_mass: int) -> None:
+    def _recalculate_range(self, cargo_mass: t.Optional[int] = None) -> None:
         """Recalculate jump range with the new cargo_mass."""
+        if cargo_mass is None:
+            cargo_mass = self.game_state.current_cargo
         if self.game_state.ship.initialized:  # Ship may not be available yet
             self.spansh_neutron_tab.range_spin.value = self.game_state.ship.jump_range(
                 cargo_mass=cargo_mass
@@ -433,6 +435,10 @@ class NewRouteWindow(NewRouteWindowGUI):
         self.selected_journal.shut_down_sig.connect(self._set_neutron_submit)
         self.selected_journal.shut_down_sig.connect(self._set_exact_submit)
         self.game_state.connect_journal(journal)
+
+        self.selected_journal.loadout_sig.connect(lambda: self._recalculate_range())
+        self.selected_journal.loadout_sig.connect(self._set_widget_values)
+
         if self._journal_worker is not None:
             self._journal_worker.stop()
         self._journal_worker = GameWorker(self, [], journal)
