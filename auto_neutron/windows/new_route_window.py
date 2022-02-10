@@ -220,16 +220,22 @@ class NewRouteWindow(NewRouteWindowGUI):
             or not self.spansh_exact_tab.source_edit.text
         ):
             self.spansh_exact_tab.source_edit.text = self.game_state.location.name
-        if (
-            not self.spansh_neutron_tab.target_edit.modified
-            or not self.spansh_neutron_tab.target_edit.text
-        ):
-            self.spansh_neutron_tab.target_edit.text = self.game_state.last_target.name
-        if (
-            not self.spansh_exact_tab.target_edit.modified
-            or not self.spansh_exact_tab.target_edit.text
-        ):
-            self.spansh_exact_tab.target_edit.text = self.game_state.last_target.name
+
+        if self.game_state.last_target is not None:
+            if (
+                not self.spansh_neutron_tab.target_edit.modified
+                or not self.spansh_neutron_tab.target_edit.text
+            ):
+                self.spansh_neutron_tab.target_edit.text = (
+                    self.game_state.last_target.name
+                )
+            if (
+                not self.spansh_exact_tab.target_edit.modified
+                or not self.spansh_exact_tab.target_edit.text
+            ):
+                self.spansh_exact_tab.target_edit.text = (
+                    self.game_state.last_target.name
+                )
 
         self.spansh_neutron_tab.cargo_slider.maximum = self.game_state.ship.max_cargo
         self.spansh_neutron_tab.cargo_slider.value = self.game_state.current_cargo
