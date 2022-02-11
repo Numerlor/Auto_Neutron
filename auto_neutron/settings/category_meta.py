@@ -104,31 +104,34 @@ class SettingsCategory(type):
         If the `SettingsParams` object of the setting defines an `on_load` callable, the callable is applied to `value`
         before it's returned to the caller.
         """
-        annotations_dict = cls.__annotations__
-        if (annotation := annotations_dict.get(key)) is not None:
+        annotation = cls.__annotations__.get(key)
+        if annotation is not None:
             params = cls._get_params_from_annotation(annotation)
-            if params is None:
-                raise AttributeError
-            settings_val = cls._settings_getter().value(
-                (*cls._prefix_categories, cls.__name__, *cls._suffix_categories),
-                key,
-                default=_MISSING,
-            )
-            if settings_val is _MISSING:
-                # Couldn't find the value with the settings defined by its class, try fallbacks if any.
-                for setting_path in params.fallback_paths:
-                    settings_val = cls._settings_getter().value(
-                        setting_path,
-                        default=_MISSING,
-                    )
-                    if settings_val is not _MISSING:
-                        break
-                else:
-                    settings_val = params.default
-            if params.on_load is not None:
-                return params.on_load(settings_val)
-            return settings_val
-        raise AttributeError
+
+        if annotation is None or params is None:
+            raise AttributeError
+
+        settings_val = cls._settings_getter().value(
+            (*cls._prefix_categories, cls.__name__, *cls._suffix_categories),
+            key,
+            default=_MISSING,
+        )
+        if settings_val is _MISSING:
+            # Couldn't find the value with the settings defined by its class, try fallbacks if any.
+            for setting_path in params.fallback_paths:
+                settings_val = cls._settings_getter().value(
+                    setting_path,
+                    default=_MISSING,
+                )
+                if settings_val is not _MISSING:
+                    break
+            else:
+                settings_val = params.default
+
+        if params.on_load is not None:
+            return params.on_load(settings_val)
+
+        return settings_val
 
     def __setattr__(cls, key: str, value: t.Any):
         """
@@ -140,23 +143,24 @@ class SettingsCategory(type):
         If the SettingsParams object of the setting defines an `on_save` callable, the callable is applied to `value`
         before it's saved to the class' settings.
         """
-        if (annotation := cls.__annotations__.get(key)) is not None:
+        annotation = cls.__annotations__.get(key)
+        if annotation is not None:
             params = cls._get_params_from_annotation(annotation)
-            if params is None:
-                super().__setattr__(key, value)
-                return
 
-            if params.on_save is not None:
-                value = params.on_save(value)
-            cls._settings_getter().set_value(
-                (*cls._prefix_categories, cls.__name__, *cls._suffix_categories),
-                key,
-                value,
-            )
-            if cls.auto_sync_:
-                cls._settings_getter().sync()
-        else:
+        if annotation is None or params is None:
             super().__setattr__(key, value)
+            return
+
+        if params.on_save is not None:
+            value = params.on_save(value)
+
+        cls._settings_getter().set_value(
+            (*cls._prefix_categories, cls.__name__, *cls._suffix_categories),
+            key,
+            value,
+        )
+        if cls.auto_sync_:
+            cls._settings_getter().sync()
 
     @staticmethod
     def _get_params_from_annotation(annotation: t.Any) -> t.Optional[SettingsParams]:
