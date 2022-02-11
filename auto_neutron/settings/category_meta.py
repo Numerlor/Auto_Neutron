@@ -70,7 +70,7 @@ class SettingsCategory(type):
     """
 
     auto_sync: bool
-    _settings_getter: collections.abc.Callable[[], TOMLSettings]
+    settings_getter: collections.abc.Callable[[], TOMLSettings]
     _prefix_categories: collections.abc.Iterable[str]
     _suffix_categories: collections.abc.Iterable[str]
 
@@ -90,7 +90,7 @@ class SettingsCategory(type):
     ):
         """Create the category object and set its attributes."""
         obj = super().__new__(metacls, name, bases, namespace, **kwargs)
-        obj._settings_getter = settings_getter
+        obj.settings_getter = settings_getter
         obj._prefix_categories = prefix_categories
         obj._suffix_categories = suffix_categories
         obj.auto_sync_ = auto_sync
@@ -111,7 +111,7 @@ class SettingsCategory(type):
         if annotation is None or params is None:
             raise AttributeError
 
-        settings_val = cls._settings_getter().value(
+        settings_val = cls.settings_getter().value(
             (*cls._prefix_categories, cls.__name__, *cls._suffix_categories),
             key,
             default=_MISSING,
@@ -119,7 +119,7 @@ class SettingsCategory(type):
         if settings_val is _MISSING:
             # Couldn't find the value with the settings defined by its class, try fallbacks if any.
             for setting_path in params.fallback_paths:
-                settings_val = cls._settings_getter().value(
+                settings_val = cls.settings_getter().value(
                     setting_path,
                     default=_MISSING,
                 )
@@ -154,13 +154,13 @@ class SettingsCategory(type):
         if params.on_save is not None:
             value = params.on_save(value)
 
-        cls._settings_getter().set_value(
+        cls.settings_getter().set_value(
             (*cls._prefix_categories, cls.__name__, *cls._suffix_categories),
             key,
             value,
         )
         if cls.auto_sync_:
-            cls._settings_getter().sync()
+            cls.settings_getter().sync()
 
     @staticmethod
     def _get_params_from_annotation(annotation: t.Any) -> t.Optional[SettingsParams]:
@@ -221,7 +221,7 @@ def delay_sync(
     settings_objs: set[TOMLSettings] = set()
     for category in categories:
         category.auto_sync_ = True
-        settings_objs.add(category._settings_getter())
+        settings_objs.add(category.settings_getter())
 
     for settings_obj in settings_objs:
         settings_obj.sync()
