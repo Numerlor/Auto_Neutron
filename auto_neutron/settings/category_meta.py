@@ -37,32 +37,33 @@ class SettingsParams(t.NamedTuple):
 
 class SettingsCategory(type):
     """
-    Create a class representing a category from a QSettings ini file.
+    Create a class representing a category from a settings object.
 
     An example class would look like this:
 
     >>> class Category(metaclass=SettingsCategory):
-    ...     setting1: type = SettingsParams(..., ...)
-    ...     setting2: type = SettingsParams(..., ..., ..., ...)
+    ...     setting1: typing.Annotated[type, SettingsParams(..., ...)]
+    ...     setting2: typing.Annotated[type, SettingsParams(..., ..., ..., ...)]
     ...
 
-    A QSettings object must be set through `set_settings` before any access is attempted.
+    Which would be represented like so in the settings:
+        Category
+        ├── setting1 ( = some value)
+        └── setting2 ( = some other value)
 
-    Each annotated name in the class represents a value in the underlying QSettings category,
-    metadata in its `SettingsParams` value that's used when it's accessed or set on the class.
+    All class attributes annotated with typing.Annotated containing a `SettingsParam`s object in the annotation
+    are proxies to a setting in the settings object.
 
-    On access, if the requested name is a setting, its value is fetched from the category given by the class name,
-    using the `on_load` callable (if present) to modify the value before it's returned to the user.
-
-    On attribtue setting the same behaviour applies but in reverse.
-    The user given value is passed through `on_save` before being passed to the QSettings object.
-    Attribute setting without using the `delay_sync` context manager automatically syncs the settings to the ini file.
+    If `on_save` or `on_load` are given in the `SettingsParam` object, the functions are respectively used to
+    serialize and deserialize the data coming from the setting object.
 
     A `settings_getter` kwarg can be specified when creating a new class to a function which returns the settings
-    object to be used by the class.
+    object to be used by the class, otherwise `settings.get_settings` is used by default.
 
     When `auto_sync_` is True, the settings are synced with the settings object on every value change.
     The initial value for `auto_sync_` can be set through the class' `auto_sync` kwargs.
+
+    The auto sync can be delayed with the `delay_sync` context manager if multiple values are set at once.
 
     If prefix or suffix categories are specified, the settings category is prefixed/suffixed with them
     when looking up a value (e.g. category B with ('A',) prefix_categories becomes the A.B category).
@@ -87,7 +88,7 @@ class SettingsCategory(type):
         suffix_categories: collections.abc.Iterable[str] = (),
         **kwargs,
     ):
-        """Create the category object and set its settings getter and auto sync from the kwargs."""
+        """Create the category object and set its attributes."""
         obj = super().__new__(metacls, name, bases, namespace, **kwargs)
         obj._settings_getter = settings_getter
         obj._prefix_categories = prefix_categories
@@ -100,7 +101,7 @@ class SettingsCategory(type):
         """
         If the attribute is an annotated setting, fetch its value from the class' settings instead of the class itself.
 
-        If the SettingsParams object of the setting defines an `on_load` callable, the callable is applied to `value`
+        If the `SettingsParams` object of the setting defines an `on_load` callable, the callable is applied to `value`
         before it's returned to the caller.
         """
         annotations_dict = cls.__annotations__
