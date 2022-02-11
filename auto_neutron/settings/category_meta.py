@@ -71,8 +71,8 @@ class SettingsCategory(type):
 
     auto_sync_: bool
     settings_getter_: collections.abc.Callable[[], TOMLSettings]
-    _prefix_categories: collections.abc.Iterable[str]
-    _suffix_categories: collections.abc.Iterable[str]
+    __prefix_categories: collections.abc.Iterable[str]
+    __suffix_categories: collections.abc.Iterable[str]
 
     def __new__(
         metacls,
@@ -91,8 +91,8 @@ class SettingsCategory(type):
         """Create the category object and set its attributes."""
         obj = super().__new__(metacls, name, bases, namespace, **kwargs)
         obj.settings_getter_ = settings_getter
-        obj._prefix_categories = prefix_categories
-        obj._suffix_categories = suffix_categories
+        obj.__prefix_categories = prefix_categories
+        obj.__suffix_categories = suffix_categories
         obj.auto_sync_ = auto_sync
         _created_categories.add(obj)
         return obj
@@ -112,7 +112,7 @@ class SettingsCategory(type):
             raise AttributeError
 
         settings_val = cls.settings_getter_().value(
-            (*cls._prefix_categories, cls.__name__, *cls._suffix_categories),
+            (*cls.__prefix_categories, cls.__name__, *cls.__suffix_categories),
             key,
             default=_MISSING,
         )
@@ -155,7 +155,7 @@ class SettingsCategory(type):
             value = params.on_save(value)
 
         cls.settings_getter_().set_value(
-            (*cls._prefix_categories, cls.__name__, *cls._suffix_categories),
+            (*cls.__prefix_categories, cls.__name__, *cls.__suffix_categories),
             key,
             value,
         )
