@@ -86,21 +86,21 @@ def get_sector_midpoint(address: int) -> tuple[int, int, int]:
 
     mid_x = (
         high_x_dir * 1280
-        + low_x_dir * 2 ** layer * 10
+        + low_x_dir * 2**layer * 10
         + X_OFFSET
-        + (10 * (2 ** layer) // 2)
+        + (10 * (2**layer) // 2)
     )
     mid_y = (
         high_y_dir * 1280
-        + low_y_dir * 2 ** layer * 10
+        + low_y_dir * 2**layer * 10
         + Y_OFFSET
-        + (10 * (2 ** layer) // 2)
+        + (10 * (2**layer) // 2)
     )
     mid_z = (
         high_z_dir * 1280
-        + low_z_dir * 2 ** layer * 10
+        + low_z_dir * 2**layer * 10
         + Z_OFFSET
-        + (10 * (2 ** layer) // 2)
+        + (10 * (2**layer) // 2)
     )
 
     return mid_x, mid_y, mid_z
