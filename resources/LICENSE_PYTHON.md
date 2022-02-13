@@ -1,3 +1,5 @@
+Applies to Python:
+
 1. This LICENSE AGREEMENT is between the Python Software Foundation ("PSF"), and
    the Individual or Organization ("Licensee") accessing and otherwise using Python
    3.10.2 software in source or binary form and its associated documentation.

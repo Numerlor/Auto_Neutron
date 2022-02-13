@@ -78,6 +78,15 @@ class SettingsWindow(SettingsWindowGUI):
         self.ok_button.pressed.connect(self.close)
         self.retranslate()
 
+        locales = get_available_locales()
+        active_locale_index = [code_from_locale(locale) for locale in locales].index(
+            settings.General.locale
+        )
+        self.appearance_widget.language_combo.add_items(
+            [locale.get_display_name() for locale in locales]
+        )
+        self.appearance_widget.language_combo.current_index = active_locale_index
+
     def get_ahk_path(self) -> None:
         """Ask the user for the AHK executable file path and save it to the setting."""
         path, __ = QtWidgets.QFileDialog.get_open_file_name(
@@ -156,19 +165,6 @@ class SettingsWindow(SettingsWindowGUI):
                     self.appearance_widget.language_combo.current_index
                 ]
             )
-
-    def retranslate(self) -> None:
-        """Retranslate text that is always on display."""
-        super().retranslate()
-        self.appearance_widget.language_combo.clear()
-        locales = get_available_locales()
-        language_codes = [code_from_locale(locale) for locale in locales]
-        self.appearance_widget.language_combo.add_items(
-            [locale.get_display_name() for locale in locales]
-        )
-        self.appearance_widget.language_combo.current_index = language_codes.index(
-            settings.General.locale
-        )
 
     def change_event(self, event: QtCore.QEvent) -> None:
         """Retranslate the GUI when a language change occurs."""

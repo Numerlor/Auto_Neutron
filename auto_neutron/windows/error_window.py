@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import logging
+import textwrap
 import typing as t
 from pathlib import Path
 
@@ -40,7 +41,7 @@ class ErrorWindow(ErrorWindowGUI):
             QtCore.QStandardPaths.AppConfigLocation
         )
         file_name = self._get_log_file_name()
-        self.text_browser.html = self.error_template.format(
+        self.text_browser.markdown = self.error_template.format(
             log_path=log_path, file_name=file_name
         )
 
@@ -87,18 +88,12 @@ class ErrorWindow(ErrorWindowGUI):
             self.info_label.text = _(
                 "Multiple unexpected errors have occurred (x{})"
             ).format(self._num_errors)
-        self.error_template = (
-            _("Please make sure to report the bug at")
-            + "<br>"
-            + f'<a href="{ISSUES_URL}" style="color: #007bff">{ISSUES_URL}</a>,<br>'
-            + _("and include the ")
-            + "<font color=#007bff>{file_name}</font>"
-            + _(" file from")
-            + "<br>"
-            + ' <a href="{log_path}" style="color: #007bff">{log_path}</a><br>'
-            + _(
-                "You may close this window, but the program may not be fully functional, "
-            )
-            + _("or it may produce erroneous behaviour.")
-        )
+
+        self.error_template = textwrap.dedent(
+            """\
+        Please make sure to report the bug at [Github]({issues_url}),
+        and include the {{file_name}} file from [the log directory]({{log_path}}).\\
+        You may close this window, but the program may not be fully functional, or it may produce erroneous behaviour.
+        """
+        ).format(issues_url=ISSUES_URL)
         self._set_text()

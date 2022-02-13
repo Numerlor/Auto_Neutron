@@ -27,7 +27,7 @@ class VersionDownloadConfirmDialog(VersionDownloadConfirmDialogGUI):
 
     def __init__(self, parent: QtWidgets.QWidget, *, changelog: str, version: str):
         super().__init__(parent)
-        self._changelog_browser.set_text(changelog)
+        self._changelog_browser.markdown = changelog
         self._new_version = version
 
         self._skip_button.pressed.connect(

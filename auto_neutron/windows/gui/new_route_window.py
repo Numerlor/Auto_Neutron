@@ -42,6 +42,9 @@ class TabBase(QtWidgets.QWidget):
         journal_submit_layout = QtWidgets.QHBoxLayout()
 
         journal_combo = QtWidgets.QComboBox(widget_parent)
+        journal_combo.size_adjust_policy = (
+            QtWidgets.QComboBox.SizeAdjustPolicy.AdjustToContents
+        )
 
         submit_button = QtWidgets.QPushButton(widget_parent)
         submit_button.size_policy = QtWidgets.QSizePolicy(
@@ -90,12 +93,13 @@ class TabBase(QtWidgets.QWidget):
             self.cargo_label.text = _("Cargo")
 
         self.submit_button.text = _("Submit")
-        index = self.journal_combo.current_index
-        self.journal_combo.clear()
-        self.journal_combo.add_items(
-            [_("Last journal"), _("Second to last"), _("Third to last")]
-        )
-        self.journal_combo.current_index = index if index != -1 else 0
+
+        combo_items = (_("Last journal"), _("Second to last"), _("Third to last"))
+        if self.journal_combo.count == 0:
+            self.journal_combo.add_items(combo_items)
+        else:
+            for index, item in enumerate(combo_items):
+                self.journal_combo.set_item_text(index, item)
 
 
 class NeutronTab(TabBase):

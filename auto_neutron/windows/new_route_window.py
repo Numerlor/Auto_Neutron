@@ -40,7 +40,6 @@ from .gui.new_route_window import NewRouteWindowGUI
 from .nearest_window import NearestWindow
 
 if t.TYPE_CHECKING:
-    from auto_neutron.game_state import Location
     from auto_neutron.route_plots import RouteList
 log = logging.getLogger(__name__)
 
@@ -209,32 +208,48 @@ class NewRouteWindow(NewRouteWindowGUI):
         )
         self.cursor = QtGui.QCursor(QtCore.Qt.CursorShape.BusyCursor)
 
-    def _set_widget_values(
-        self, location: Location, ship: Ship, current_cargo: int
-    ) -> None:
-        """Update the UI with values from `location`, `ship` and `current_cargo`."""
+    def _set_widget_values(self) -> None:
+        """Update the UI with values from the game state."""
         if (
             not self.spansh_neutron_tab.source_edit.modified
             or not self.spansh_neutron_tab.source_edit.text
         ):
-            self.spansh_neutron_tab.source_edit.text = location.name
+            self.spansh_neutron_tab.source_edit.text = self.game_state.location.name
         if (
             not self.spansh_exact_tab.source_edit.modified
             or not self.spansh_exact_tab.source_edit.text
         ):
-            self.spansh_exact_tab.source_edit.text = location.name
+            self.spansh_exact_tab.source_edit.text = self.game_state.location.name
 
-        self.spansh_neutron_tab.cargo_slider.maximum = ship.max_cargo
-        self.spansh_neutron_tab.cargo_slider.value = current_cargo
+        if self.game_state.last_target is not None:
+            if (
+                not self.spansh_neutron_tab.target_edit.modified
+                or not self.spansh_neutron_tab.target_edit.text
+            ):
+                self.spansh_neutron_tab.target_edit.text = (
+                    self.game_state.last_target.name
+                )
+            if (
+                not self.spansh_exact_tab.target_edit.modified
+                or not self.spansh_exact_tab.target_edit.text
+            ):
+                self.spansh_exact_tab.target_edit.text = (
+                    self.game_state.last_target.name
+                )
 
-        self.spansh_exact_tab.cargo_slider.value = current_cargo
+        self.spansh_neutron_tab.cargo_slider.maximum = self.game_state.ship.max_cargo
+        self.spansh_neutron_tab.cargo_slider.value = self.game_state.current_cargo
 
-        self.spansh_neutron_tab.range_spin.value = ship.jump_range(
-            cargo_mass=current_cargo
+        self.spansh_exact_tab.cargo_slider.value = self.game_state.current_cargo
+
+        self.spansh_neutron_tab.range_spin.value = self.game_state.ship.jump_range(
+            cargo_mass=self.game_state.current_cargo
         )
 
-    def _recalculate_range(self, cargo_mass: int) -> None:
+    def _recalculate_range(self, cargo_mass: t.Optional[int] = None) -> None:
         """Recalculate jump range with the new cargo_mass."""
+        if cargo_mass is None:
+            cargo_mass = self.game_state.current_cargo
         if self.game_state.ship.initialized:  # Ship may not be available yet
             self.spansh_neutron_tab.range_spin.value = self.game_state.ship.jump_range(
                 cargo_mass=cargo_mass
@@ -433,6 +448,12 @@ class NewRouteWindow(NewRouteWindowGUI):
         self.selected_journal.shut_down_sig.connect(self._set_neutron_submit)
         self.selected_journal.shut_down_sig.connect(self._set_exact_submit)
         self.game_state.connect_journal(journal)
+
+        self.selected_journal.loadout_sig.connect(lambda: self._recalculate_range())
+        self.selected_journal.loadout_sig.connect(self._set_widget_values)
+        self.selected_journal.system_sig.connect(self._set_widget_values)
+        self.selected_journal.target_signal.connect(self._set_widget_values)
+
         if self._journal_worker is not None:
             self._journal_worker.stop()
         self._journal_worker = GameWorker(self, [], journal)
@@ -440,7 +461,7 @@ class NewRouteWindow(NewRouteWindowGUI):
 
         if loadout is not None and location is not None and cargo_mass is not None:
             self.game_state.ship.update_from_loadout(loadout)
-            self._set_widget_values(location, self.game_state.ship, cargo_mass)
+            self._set_widget_values()
 
         self.status_widget.text = ""
         self.csv_tab.submit_button.enabled = True

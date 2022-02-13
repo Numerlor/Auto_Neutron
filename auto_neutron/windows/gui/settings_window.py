@@ -211,7 +211,7 @@ class SimpleScriptWidget(QtWidgets.QWidget):
         )
         self._submit_key_label.text = _("Key to submit the entered system")
         self._reference_label.text = (
-            '<a href="https://www.autohotkey.com/docs/commands/Send.htm#Parameters" style="color: #007bff">'
+            '<a href="https://www.autohotkey.com/docs/commands/Send.htm#Parameters">'
             + _("AutoHotKey key reference")
             + "</a>"
         )
