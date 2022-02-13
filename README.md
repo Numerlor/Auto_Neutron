@@ -59,12 +59,16 @@ To use the AHK feature, you will first need to configure the AHK executable path
 
 ### AHK script
 
+#### Simple mode
+In simple mode, a template script which opens the galaxy map, navigates to the search field, and pastes the next system is used. The binds used to do this can be configured with the provided input fields.\
+The top field configures the hotkey used to trigger the script.
+
+#### Custom mode
+
 ![](https://i.imgur.com/RYVthYw.png)
 
-This section defines the AHK script to be used with the AHK mode of the app, standard AHK syntax is used.\
-The top text box defines the hot key, the bottom one defines the script to run with that hotkey.\
-To access the system to plot in the AHK script, you can use the `system` variable.
-
+With this mode, you have complete control of the AHK script to use, the script from the simple mode is used as a default.\
+The custom script is added to a template which exposes the system name to use in the `system` variable.
 
 ## Nearest window
 This window provides an interface to Spansh's [nearest](https://www.spansh.co.uk/nearest) API.
