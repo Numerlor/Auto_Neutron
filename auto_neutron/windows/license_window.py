@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import sys
+import textwrap
 import typing as t
 
 from PySide6 import QtCore, QtWidgets
@@ -33,30 +34,51 @@ class LicenseWindow(LicenseWindowGUI):
     def retranslate(self) -> None:
         """Set the text browser text."""
         super().retranslate()
-        python_license_file_url = QtCore.QUrl.from_local_file(
-            str(base_path() / "LICENSE_PYTHON.md")
-        ).url()
-        gpl_license_file_url = QtCore.QUrl.from_local_file(
-            str(base_path() / "LICENSE.md")
-        ).url()
-        # fmt: off
-        self.text.set_text(
-            "".join(
-                (
-                    _("This program uses PySide6:<br>"),
-                    _("PySide6 Copyright (C) 2015 The Qt Company Ltd."), "<br><br>",
-                    _("This program uses Python and its associated software:"), "<br>",
-                    sys.copyright.replace("\n", "<br>"), "<br><br>",
-                    _("Python is licensed under the "), self.make_hyperlink(_("PSF License Agreement"), python_license_file_url),
-                    _(", see "), self.make_hyperlink("docs.python.org/license.html", PYTHON_LICENSE_URL), _(" for more details."), "<br><br>",
-                    _("Auto_Neutron Copyright (C) 2019 Numerlor"), "<br>",
-                    _("Auto_Neutron comes with ABSOLUTELY NO WARRANTY."), "<br>",
-                    _("This is free software, and you are welcome to redistribute it under the conditions of the "),
-                    self.make_hyperlink(_("GPLv3 License"), gpl_license_file_url), _(", "), self.make_hyperlink(_("click here"), GNU_LICENSES_URL), _(" for more details."),
-                )
+        self.text.markdown = self.get_license_text()
+
+    def get_license_text(self) -> str:
+        """Create the license text to show to the user."""
+        python_license_url = (base_path() / "LICENSE_PYTHON.md").as_uri()
+        mit_license_url = (base_path() / "LICENSE_MIT.md").as_uri()
+        bsd3_license_url = (base_path() / "LICENSE_BSD_3_Clause.md").as_uri()
+        gpl_license_url = (base_path() / "LICENSE.md").as_uri()
+
+        return textwrap.dedent(
+            _(
+                """\
+        Auto_Neutron Copyright (C) 2019 Numerlor\\
+        This program comes with ABSOLUTELY NO WARRANTY.\\
+        This is free software, and you are welcome to redistribute it
+        under conditions of the {gplv3_hyperlink}, see {gnu_licenses_hyperlink} for more details.
+
+
+        Auto_Neutron uses the following software:
+        - PySide6 Copyright (C) 2015 The Qt Company Ltd. under the {gplv3_hyperlink}
+        - tomli, and tomli-w under the {mit_hyperlink}
+        - babel under the {bsd_3_clause_hyperlink}
+        - Python and its associated software:
+
+        {python_copyright_notice}
+          Python is licensed under the {psf_license_agreement_hyperlink}, see {python_licenses_hyperlink} for more details
+        """
             )
+        ).format(
+            gplv3_hyperlink=self.make_hyperlink(_("GPLv3 license"), gpl_license_url),
+            gnu_licenses_hyperlink=self.make_hyperlink(
+                _("gnu.org/licenses"), GNU_LICENSES_URL
+            ),
+            psf_license_agreement_hyperlink=self.make_hyperlink(
+                _("PSF License Agreement"), python_license_url
+            ),
+            python_licenses_hyperlink=self.make_hyperlink(
+                _("docs.python.org/license.html"), PYTHON_LICENSE_URL
+            ),
+            mit_hyperlink=self.make_hyperlink(_("MIT license"), mit_license_url),
+            bsd_3_clause_hyperlink=self.make_hyperlink(
+                _("3-Clause BSD license"), bsd3_license_url
+            ),
+            python_copyright_notice=textwrap.indent(sys.copyright.strip(), " " * 6),
         )
-        # fmt: on
 
     def make_hyperlink(self, text: str, url: str) -> str:
         """Create a blue-styled hyperlink pointing to `url`, with `text`."""
