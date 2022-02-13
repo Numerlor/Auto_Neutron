@@ -38,9 +38,9 @@ class LicenseWindow(LicenseWindowGUI):
 
     def get_license_text(self) -> str:
         """Create the license text to show to the user."""
-        python_license_url = (base_path() / "LICENSE_PYTHON.md").as_uri()
-        mit_license_url = (base_path() / "LICENSE_MIT.md").as_uri()
-        bsd3_license_url = (base_path() / "LICENSE_BSD_3_Clause.md").as_uri()
+        python_license_url = (base_path() / "resources/LICENSE_PYTHON.md").as_uri()
+        mit_license_url = (base_path() / "resources/LICENSE_MIT.md").as_uri()
+        bsd3_license_url = (base_path() / "resources/LICENSE_BSD_3_Clause.md").as_uri()
         gpl_license_url = (base_path() / "LICENSE.md").as_uri()
 
         return textwrap.dedent(
