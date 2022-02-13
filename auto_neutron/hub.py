@@ -274,7 +274,7 @@ def set_theme(dark: bool) -> None:
         p.set_color(QtGui.QPalette.AlternateBase, QtGui.QColor(45, 45, 45))
         p.set_color(QtGui.QPalette.ToolTipText, QtCore.Qt.white)
         p.set_color(QtGui.QPalette.ButtonText, QtCore.Qt.white)
-        p.set_color(QtGui.QPalette.PlaceholderText, QtGui.QColor(110, 110, 100))
+        p.set_color(QtGui.QPalette.Link, QtGui.QColor(0, 123, 255))
         p.set_color(
             QtGui.QPalette.Disabled,
             QtGui.QPalette.Light,
@@ -297,5 +297,6 @@ def set_theme(dark: bool) -> None:
         )
     else:
         p = app.style().standard_palette()
+        p.set_color(QtGui.QPalette.Link, QtGui.QColor(0, 123, 255))
 
     app.set_palette(p)

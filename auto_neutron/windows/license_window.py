@@ -81,5 +81,5 @@ class LicenseWindow(LicenseWindowGUI):
         )
 
     def make_hyperlink(self, text: str, url: str) -> str:
-        """Create a blue-styled hyperlink pointing to `url`, with `text`."""
-        return f'<a href="{url}" style="color: #007bff">{text}</a>'
+        """Create a hyperlink pointing to `url`, with `text`."""
+        return f"[{text}]({url})"

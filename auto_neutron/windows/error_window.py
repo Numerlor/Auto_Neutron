@@ -90,12 +90,12 @@ class ErrorWindow(ErrorWindowGUI):
         self.error_template = (
             _("Please make sure to report the bug at")
             + "<br>"
-            + f'<a href="{ISSUES_URL}" style="color: #007bff">{ISSUES_URL}</a>,<br>'
+            + f'<a href="{ISSUES_URL}">{ISSUES_URL}</a>,<br>'
             + _("and include the ")
             + "<font color=#007bff>{file_name}</font>"
             + _(" file from")
             + "<br>"
-            + ' <a href="{log_path}" style="color: #007bff">{log_path}</a><br>'
+            + ' <a href="{log_path}">{log_path}</a><br>'
             + _(
                 "You may close this window, but the program may not be fully functional, "
             )
