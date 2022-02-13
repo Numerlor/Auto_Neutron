@@ -26,6 +26,9 @@ class ShutDownWindowGUI(QtWidgets.QDialog):
         self.journal_combo.size_policy = QtWidgets.QSizePolicy(
             QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
         )
+        self.journal_combo.size_adjust_policy = (
+            QtWidgets.QComboBox.SizeAdjustPolicy.AdjustToContents
+        )
 
         self.new_journal_button = QtWidgets.QPushButton(self)
         self.new_journal_button.size_policy = QtWidgets.QSizePolicy(

@@ -42,6 +42,9 @@ class TabBase(QtWidgets.QWidget):
         journal_submit_layout = QtWidgets.QHBoxLayout()
 
         journal_combo = QtWidgets.QComboBox(widget_parent)
+        journal_combo.size_adjust_policy = (
+            QtWidgets.QComboBox.SizeAdjustPolicy.AdjustToContents
+        )
 
         submit_button = QtWidgets.QPushButton(widget_parent)
         submit_button.size_policy = QtWidgets.QSizePolicy(
