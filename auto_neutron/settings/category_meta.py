@@ -32,7 +32,7 @@ class SettingsParams(t.NamedTuple):
     default: t.Any
     on_save: t.Optional[collections.abc.Callable[[t.Any], t.Any]] = None
     on_load: t.Optional[collections.abc.Callable[[t.Any], t.Any]] = None
-    fallback_paths: tuple[str] = ()
+    fallback_paths: collections.abc.Iterable[str] = ()
 
 
 class SettingsCategory(type):
