@@ -7,10 +7,9 @@ a = Analysis(
     pathex=["."],
     binaries=[],
     datas=[
-        ("../resources/icons_library.ico", "./resources"),
+        ("../resources/*", "./resources"),
         ("../locale", "./locale"),
         ("../LICENSE.md", "."),
-        ("../LICENSE_PYTHON.md", "."),
     ],
     hiddenimports=["babel.numbers"],
     hookspath=[],
