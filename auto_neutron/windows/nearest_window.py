@@ -40,7 +40,7 @@ class NearestWindow(NearestWindowGUI):
         self._parent_status_bar = status_bar
         self.retranslate()
 
-    def set_input_values_from_location(self, location: t.Optional[Location]) -> None:
+    def set_input_values_from_location(self, location: Location | None) -> None:
         """Set the input spinboxes to x, y, z."""
         if location is not None:
             log.debug(f"Applying spinbox values from {location=}")

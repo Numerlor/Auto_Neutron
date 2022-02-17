@@ -34,7 +34,7 @@ class ExceptionHandler(QtCore.QObject):
         self,
         exctype: type[BaseException],
         value: BaseException,
-        tb: t.Optional[TracebackType],
+        tb: TracebackType | None,
     ) -> None:
         """
         Log exception, mocking the module to the traceback's module and emit `traceback_sig`` with formatted exception.

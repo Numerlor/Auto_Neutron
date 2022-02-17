@@ -3,8 +3,6 @@
 
 from __future__ import annotations
 
-from typing import Union
-
 from PySide6 import QtCore, QtGui, QtWidgets
 
 # noinspection PyUnresolvedReferences
@@ -18,7 +16,7 @@ class SpinBoxDelegate(QtWidgets.QStyledItemDelegate):
         self,
         parent: QtWidgets.QWidget,
         option: QtWidgets.QStyleOptionViewItem,
-        index: Union[QtCore.QModelIndex, QtCore.QPersistentModelIndex],
+        index: QtCore.QModelIndex | QtCore.QPersistentModelIndex,
     ) -> QtWidgets.QWidget:
         editor = QtWidgets.QSpinBox(parent)
         editor.frame = False
@@ -35,7 +33,7 @@ class DoubleSpinBoxDelegate(QtWidgets.QStyledItemDelegate):
         self,
         parent: QtWidgets.QWidget,
         option: QtWidgets.QStyleOptionViewItem,
-        index: Union[QtCore.QModelIndex, QtCore.QPersistentModelIndex],
+        index: QtCore.QModelIndex | QtCore.QPersistentModelIndex,
     ) -> QtWidgets.QWidget:
         editor = QtWidgets.QDoubleSpinBox(parent)
         editor.frame = False
@@ -53,7 +51,7 @@ class CheckBoxDelegate(QtWidgets.QStyledItemDelegate):
         self,
         parent: QtWidgets.QWidget,
         option: QtWidgets.QStyleOptionViewItem,
-        index: Union[QtCore.QModelIndex, QtCore.QPersistentModelIndex],
+        index: QtCore.QModelIndex | QtCore.QPersistentModelIndex,
     ) -> QtWidgets.QWidget:
         editor = QtWidgets.QCheckBox(parent)
         palette = QtGui.QPalette()
@@ -70,7 +68,7 @@ class CheckBoxDelegate(QtWidgets.QStyledItemDelegate):
         self,
         editor: QtWidgets.QWidget,
         option: QtWidgets.QStyleOptionViewItem,
-        index: Union[QtCore.QModelIndex, QtCore.QPersistentModelIndex],
+        index: QtCore.QModelIndex | QtCore.QPersistentModelIndex,
     ) -> None:
         """Move the editor to the middle."""
         editor.geometry = self.get_checkbox_rect(option)
@@ -79,7 +77,7 @@ class CheckBoxDelegate(QtWidgets.QStyledItemDelegate):
         self,
         painter: QtGui.QPainter,
         option: QtWidgets.QStyleOptionViewItem,
-        index: Union[QtCore.QModelIndex, QtCore.QPersistentModelIndex],
+        index: QtCore.QModelIndex | QtCore.QPersistentModelIndex,
     ) -> None:
         """Pain the checkbox in the center."""
         check_box_style_option = QtWidgets.QStyleOptionButton()

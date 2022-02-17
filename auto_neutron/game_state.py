@@ -41,10 +41,10 @@ class GameState:
     """
 
     ship: Ship = Ship()
-    shut_down: t.Optional[bool] = None
-    location: t.Optional[Location] = None
-    last_target: t.Optional[Location] = None
-    current_cargo: t.Optional[int] = None
+    shut_down: bool | None = None
+    location: Location | None = None
+    last_target: Location | None = None
+    current_cargo: int | None = None
 
     def connect_journal(self, journal: Journal) -> None:
         """Connect the signals from `journal` to set the appropriate attributes when emitted."""
@@ -67,10 +67,10 @@ class PlotterState(QtCore.QObject):
         self._game_state = game_state
 
         self._route_index = 0
-        self.tail_worker: t.Optional[GameWorker] = None
-        self._active_journal: t.Optional[Journal] = None
-        self._active_route: t.Optional[list] = None
-        self._plotter: t.Optional[Plotter] = None
+        self.tail_worker: GameWorker | None = None
+        self._active_journal: Journal | None = None
+        self._active_route: list | None = None
+        self._plotter: Plotter | None = None
 
     def create_worker_with_route(self, route: RouteList) -> None:
         """
@@ -103,7 +103,7 @@ class PlotterState(QtCore.QObject):
         self.new_system_signal.emit(self._active_route[index].system, index)
 
     @property
-    def route(self) -> t.Optional[RouteList]:
+    def route(self) -> RouteList | None:
         """Return the active route."""
         return self._active_route
 
@@ -115,7 +115,7 @@ class PlotterState(QtCore.QObject):
         self.tail_worker.route = route
 
     @property
-    def plotter(self) -> t.Optional[Plotter]:
+    def plotter(self) -> Plotter | None:
         """Return the active plotter instance."""
         return self._plotter
 
@@ -143,12 +143,12 @@ class PlotterState(QtCore.QObject):
             self.tail_worker.route_end_sig.connect(self.route_end_signal.emit)
 
     @property
-    def journal(self) -> t.Optional[Journal]:
+    def journal(self) -> Journal | None:
         """Return the active journal instance."""
         return self._active_journal
 
     @journal.setter
-    def journal(self, journal: t.Optional[Journal]) -> None:
+    def journal(self, journal: Journal | None) -> None:
         """
         Set or reset the active journal.
 

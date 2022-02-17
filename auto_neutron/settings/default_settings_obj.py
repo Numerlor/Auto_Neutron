@@ -8,7 +8,7 @@ import typing as t
 if t.TYPE_CHECKING:
     from .toml_settings import TOMLSettings
 
-_settings: t.Optional[TOMLSettings] = None
+_settings: TOMLSettings | None = None
 
 
 def set_settings(settings: TOMLSettings) -> None:

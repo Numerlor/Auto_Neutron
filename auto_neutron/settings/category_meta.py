@@ -30,8 +30,8 @@ class SettingsParams(t.NamedTuple):
     """
 
     default: t.Any
-    on_save: t.Optional[collections.abc.Callable[[t.Any], t.Any]] = None
-    on_load: t.Optional[collections.abc.Callable[[t.Any], t.Any]] = None
+    on_save: collections.abc.Callable[[t.Any], t.Any] | None = None
+    on_load: collections.abc.Callable[[t.Any], t.Any] | None = None
     fallback_paths: collections.abc.Iterable[str] = ()
 
 
@@ -163,7 +163,7 @@ class SettingsCategory(type):
             cls.settings_getter_().sync()
 
     @staticmethod
-    def _get_params_from_annotation(annotation: t.Any) -> t.Optional[SettingsParams]:
+    def _get_params_from_annotation(annotation: t.Any) -> SettingsParams | None:
         """Try to find a `SettingsParams` object in a `typing.Annotated` `annotation`."""
         annotation_args = t.get_args(annotation)
         return next(
@@ -174,10 +174,10 @@ class SettingsCategory(type):
 @contextmanager
 def delay_sync(
     *,
-    categories: t.Optional[collections.abc.Iterable[SettingsCategory]] = None,
+    categories: collections.abc.Iterable[SettingsCategory] | None = None,
     exclude_categories: collections.abc.Iterable[SettingsCategory] = (),
-    module_filter_include: t.Optional[collections.abc.Container[str]] = None,
-    module_filter_exclude: t.Optional[collections.abc.Container[str]] = None,
+    module_filter_include: collections.abc.Container[str] | None = None,
+    module_filter_exclude: collections.abc.Container[str] | None = None,
 ) -> collections.abc.Iterator[None]:
     """
     Delay sync of settings from specified categories until the end of the context manager.

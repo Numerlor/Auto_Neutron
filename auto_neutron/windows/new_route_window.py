@@ -51,9 +51,9 @@ class NewRouteWindow(NewRouteWindowGUI):
 
     def __init__(self, parent: QtWidgets.QWidget):
         super().__init__(parent)
-        self.game_state: t.Optional[GameState] = None
-        self.selected_journal: t.Optional[Journal] = None
-        self._journal_worker: t.Optional[GameWorker] = None
+        self.game_state: GameState | None = None
+        self.selected_journal: Journal | None = None
+        self._journal_worker: GameWorker | None = None
         self._status_hide_timer = QtCore.QTimer(self)
         self._status_hide_timer.single_shot_ = True
         self._status_hide_timer.timeout.connect(self._reset_status_text)
@@ -129,7 +129,7 @@ class NewRouteWindow(NewRouteWindowGUI):
 
         self.tab_widget.currentChanged.connect(self._display_saved_route)
         self._route_displayed = False
-        self._loaded_route: t.Optional[list[NeutronPlotRow]] = None
+        self._loaded_route: list[NeutronPlotRow] | None = None
         self.retranslate()
         self._change_journal(0)
 
@@ -246,7 +246,7 @@ class NewRouteWindow(NewRouteWindowGUI):
             cargo_mass=self.game_state.current_cargo
         )
 
-    def _recalculate_range(self, cargo_mass: t.Optional[int] = None) -> None:
+    def _recalculate_range(self, cargo_mass: int | None = None) -> None:
         """Recalculate jump range with the new cargo_mass."""
         if cargo_mass is None:
             cargo_mass = self.game_state.current_cargo
@@ -352,7 +352,7 @@ class NewRouteWindow(NewRouteWindowGUI):
         log.info(f"Set saved csv {path=}")
         settings.Paths.csv = path
 
-    def _route_from_csv(self, path: Path) -> t.Optional[RouteList]:
+    def _route_from_csv(self, path: Path) -> RouteList | None:
         try:
             with path.open(encoding="utf8") as csv_file:
                 reader = csv.reader(csv_file, strict=True)

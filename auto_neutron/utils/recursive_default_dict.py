@@ -18,7 +18,7 @@ _DEFAULT_SENTINEL = object()
 
 
 class RecursiveDefaultDict(
-    dict[_KT, t.Union[_VT, "RecursiveDefaultDict"]], t.Generic[_KT, _VT]
+    dict[_KT, _VT | "RecursiveDefaultDict"], t.Generic[_KT, _VT]
 ):
     """
     A recursive default dict.
@@ -31,8 +31,8 @@ class RecursiveDefaultDict(
     def __init__(
         self,
         *,
-        create_missing: t.Optional[bool] = True,
-        parent: t.Optional[RecursiveDefaultDict] = None,
+        create_missing: bool | None = True,
+        parent: RecursiveDefaultDict | None = None,
     ):
         super().__init__()
         self.parent = parent

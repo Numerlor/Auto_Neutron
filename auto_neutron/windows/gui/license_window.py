@@ -3,8 +3,6 @@
 
 from __future__ import annotations
 
-import typing as t
-
 from PySide6 import QtCore, QtWidgets
 
 # noinspection PyUnresolvedReferences
@@ -15,7 +13,7 @@ from auto_neutron.constants import VERSION
 class LicenseWindowGUI(QtWidgets.QDialog):
     """Window for license information."""
 
-    def __init__(self, parent: t.Optional[QtWidgets.QWidget] = None):
+    def __init__(self, parent: QtWidgets.QWidget | None = None):
         super().__init__(parent)
         self.set_fixed_size(600, 500)
         self.set_window_flag(QtCore.Qt.WindowContextHelpButtonHint, False)

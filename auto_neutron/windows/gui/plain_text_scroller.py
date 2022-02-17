@@ -3,8 +3,6 @@
 
 from __future__ import annotations
 
-import typing as t
-
 from PySide6 import QtCore, QtGui, QtWidgets
 
 # noinspection PyUnresolvedReferences
@@ -24,7 +22,7 @@ class PlainTextScroller(QtWidgets.QWidget):
 
     def __init__(
         self,
-        parent: t.Optional[QtWidgets.QWidget] = None,
+        parent: QtWidgets.QWidget | None = None,
         *,
         text: str = "",
         fade_width: int = 30,
