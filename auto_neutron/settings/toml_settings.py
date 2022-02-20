@@ -236,9 +236,11 @@ class TOMLSettings:
         """
         log.info(f"Syncing settings to {self.path}.")
         file_settings: RecursiveDefaultDict[str, t.Any] = RecursiveDefaultDict()
+
         with suppress(FileNotFoundError):  # noqa SIM117
             with self.path.open("rb") as settings_file:
                 file_settings.update_from_dict_recursive(tomli.load(settings_file))
+
         file_settings.update_from_dict_recursive(
             self._settings_dict, ignore_conflicts=overwrite_external
         )
