@@ -1,32 +1,27 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.0.1
+    rev: v4.1.0
     hooks:
       - id: end-of-file-fixer
       - id: trailing-whitespace
-  - repo: local
+
+  - repo: https://github.com/psf/black
+    rev: 22.1.0
     hooks:
-
-      - id: isort
-        name: isort
-        description: Run isort with poetry.
-        entry: poetry run isort
-        language: system
-        types: [python]
-        require_serial: true
-
       - id: black
-        name: black
-        description: Run black with poetry.
-        entry: poetry run black
-        language: system
-        types: [python]
-        require_serial: true
 
+  - repo: https://github.com/pycqa/isort
+    rev: 5.10.1
+    hooks:
+      - id: isort
+
+  - repo: https://gitlab.com/pycqa/flake8
+    rev: 4.0.1
+    hooks:
       - id: flake8
-        name: flake8
-        description: Run flake8 with poetry.
-        entry: poetry run flake8
-        language: system
-        types: [python]
-        require_serial: true
+        additional_dependencies:
+          - flake8-annotations ~= 2.7
+          - flake8-bandit ~= 2.1
+          - flake8-bugbear == 22.1.11
+          - flake8-docstrings ~= 1.6
+          - flake8-print ~= 4.0
