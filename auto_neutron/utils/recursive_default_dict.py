@@ -114,10 +114,8 @@ class RecursiveDefaultDict(
         dict_: dict, key: collections.abc.Hashable, new_value: object
     ) -> None:
         """Check if `key`'s value in `dict_` differs from `new_value`, if it does raise a ValueError."""
-        if (
-            current_value := dict_.get(key, _DEFAULT_SENTINEL)
-        ) is not _DEFAULT_SENTINEL:
-            if current_value != new_value:
-                raise ValueError(
-                    f"Value conflict with {key=!r} {current_value=!r} {new_value=!r}."
-                )
+        current_value = dict_.get(key, _DEFAULT_SENTINEL)
+        if current_value is not _DEFAULT_SENTINEL and current_value != new_value:
+            raise ValueError(
+                f"Value conflict with {key=!r} {current_value=!r} {new_value=!r}."
+            )
