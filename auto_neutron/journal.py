@@ -38,6 +38,8 @@ class Journal(QtCore.QObject):
         self.last_target = None
         self.cargo = None
         self.shut_down = False
+        self.is_oddysey = False
+        self.cmdr = None
 
         self._last_file_pos = 0
 
@@ -83,6 +85,12 @@ class Journal(QtCore.QObject):
 
         elif entry["event"] == "Cargo" and entry["Vessel"] == "Ship":
             self.cargo = entry["Count"]
+
+        elif entry["event"] == "Fileheader":
+            self.is_oddysey = entry.get("Odyssey", False)
+
+        elif entry["event"] == "Commander":
+            self.cmdr = entry["Name"]
 
         elif entry["event"] == "Shutdown":
             self.shut_down = True
