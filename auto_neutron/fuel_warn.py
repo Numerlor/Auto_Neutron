@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import logging
 import typing as t
-
+from typing import io, IO, Iterable, Iterator, ItemsView, Union, List, Dict, AsyncIterator
 from PySide6 import QtCore, QtMultimedia, QtWidgets
 
 # noinspection PyUnresolvedReferences
@@ -49,9 +49,7 @@ class FuelWarn(QtCore.QObject):
             return
 
         status_flags = status_dict["Flags"]
-        fuel_threshold = (
-            self._game_state.ship.fsd.max_fuel_usage * settings.Alerts.threshold / 100
-        )
+        fuel_threshold = (self._game_state.ship.fsd.max_fuel_usage * settings.Alerts.threshold / 100)
         if (
             not self._warned
             and status_flags & IN_SUPERCRUISE_FLAG
