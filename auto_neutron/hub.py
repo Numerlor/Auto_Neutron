@@ -89,7 +89,7 @@ class Hub(QtCore.QObject):
 
         if (
             not JOURNAL_PATH.exists()
-            or list(JOURNAL_PATH.glob("Journal.*.log")) == 0
+            or not list(JOURNAL_PATH.glob("Journal.*.log"))
             or not (JOURNAL_PATH / "Status.json").exists()
         ):
             # If the journal folder is missing, force the user to quit
