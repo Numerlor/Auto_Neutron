@@ -33,6 +33,11 @@ class Journal(QtCore.QObject):
     def __init__(self, journal_path: Path):
         super().__init__()
         self.path = journal_path
+        self.loadout = None
+        self.location = None
+        self.last_target = None
+        self.cargo = None
+        self.shut_down = False
 
     def tail(self) -> collections.abc.Generator[None, None, None]:
         """Follow a log file, and emit signals for new systems, loadout changes and game shut down."""
@@ -41,64 +46,38 @@ class Journal(QtCore.QObject):
             journal_file.seek(0, 2)
             while True:
                 if line := journal_file.readline():
-                    entry = json.loads(line)
-                    if entry["event"] == "FSDJump":
-                        self.system_sig.emit(
-                            Location(entry["StarSystem"], *entry["StarPos"])
-                        )
-                    elif entry["event"] == "FSDTarget":
-                        self.target_signal.emit(
-                            Location(
-                                entry["Name"],
-                                *get_sector_midpoint(entry["SystemAddress"]),
-                            )
-                        )
-                    elif entry["event"] == "Loadout":
-                        self.loadout_sig.emit(entry)
-
-                    elif entry["event"] == "Shutdown":
-                        self.shut_down_sig.emit()
+                    self._parse_journal_line(line)
                 else:
                     yield
 
-    def get_static_state(
-        self,
-    ) -> tuple[dict | None, Location | None, Location | None, int | None, bool]:
-        """Parse the whole journal file and return the ship, location, current cargo and game was shut down state."""
+    def parse(self) -> None:
+        """Parse the whole journal file and update the fields that were set."""
         log.info(f"Statically parsing journal file at {self.path}.")
-        loadout = None
-        location = None
-        target = None
-        cargo = None
         with self.path.open(encoding="utf8") as journal_file:
             for line in journal_file:
-                entry = json.loads(line)
-                if entry["event"] == "Loadout":
-                    loadout = entry
-                elif entry["event"] == "Location" or entry["event"] == "FSDJump":
-                    location = Location(entry["StarSystem"], *entry["StarPos"])
-                elif entry["event"] == "FSDTarget":
-                    target = Location(
-                        entry["Name"], *get_sector_midpoint(entry["SystemAddress"])
-                    )
-                elif entry["event"] == "Cargo" and entry["Vessel"] == "Ship":
-                    cargo = entry["Count"]
-                elif entry["event"] == "Shutdown":
-                    return loadout, location, target, cargo, True
+                self._parse_journal_line(line)
 
-        return loadout, location, target, cargo, False
+    def _parse_journal_line(self, line: str) -> None:
+        """Parse a single line from the journal, setting attributes and emitting signals appropriately."""
+        entry = json.loads(line)
+        if entry["event"] == "Loadout":
+            self.loadout = entry
+            self.loadout_sig.emit(entry)
 
-    def reload(self) -> None:
-        """Parse the whole journal file and emit signals with the appropriate data."""
-        loadout, location, target, cargo, shut_down = self.get_static_state()
+        elif entry["event"] == "Location" or entry["event"] == "FSDJump":
+            self.location = Location(entry["StarSystem"], *entry["StarPos"])
+            if entry["event"] == "FSDJump":
+                self.system_sig.emit(Location(entry["StarSystem"], *entry["StarPos"]))
 
-        if shut_down:
+        elif entry["event"] == "FSDTarget":
+            self.last_target = Location(
+                entry["Name"], *get_sector_midpoint(entry["SystemAddress"])
+            )
+            self.target_signal.emit(self.last_target)
+
+        elif entry["event"] == "Cargo" and entry["Vessel"] == "Ship":
+            self.cargo = entry["Count"]
+
+        elif entry["event"] == "Shutdown":
+            self.shut_down = True
             self.shut_down_sig.emit()
-        if location is not None:
-            self.system_sig.emit(location)
-        if target is not None:
-            self.target_signal.emit(target)
-        if loadout is not None:
-            self.loadout_sig.emit(loadout)
-        if cargo is not None:
-            self.cargo_sig.emit(cargo)

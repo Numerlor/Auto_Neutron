@@ -422,19 +422,13 @@ class NewRouteWindow(NewRouteWindowGUI):
         journal_path = journals[min(index, len(journals) - 1)]
         log.info(f"Changing selected journal to {journal_path}.")
         journal = Journal(journal_path)
-        (
-            loadout,
-            location,
-            last_target,
-            cargo_mass,
-            shut_down,
-        ) = journal.get_static_state()
+        journal.parse()
 
         self.game_state = GameState(
-            Ship(), shut_down, location, last_target, cargo_mass
+            Ship(), journal.shut_down, journal.location, journal.target, journal.cargo
         )
         self.selected_journal = journal
-        if shut_down:
+        if journal.shut_down:
             self._show_status_message(
                 _("Selected journal ended with a shut down event."), 10_000
             )
@@ -459,8 +453,12 @@ class NewRouteWindow(NewRouteWindowGUI):
         self._journal_worker = GameWorker(self, [], journal)
         self._journal_worker.start()
 
-        if loadout is not None and location is not None and cargo_mass is not None:
-            self.game_state.ship.update_from_loadout(loadout)
+        if (
+            journal.loadout is not None
+            and journal.location is not None
+            and journal.cargo is not None
+        ):
+            self.game_state.ship.update_from_loadout(journal.loadout)
             self._set_widget_values()
 
         self.status_widget.text = ""

@@ -161,7 +161,7 @@ class PlotterState(QtCore.QObject):
             self._game_state.shut_down = False
             self._game_state.connect_journal(journal)
             journal.shut_down_sig.connect(self.shut_down_signal.emit)
-            journal.reload()
+            journal.parse()
 
             if self._plotter is not None:
                 self.tail_worker.stop()
