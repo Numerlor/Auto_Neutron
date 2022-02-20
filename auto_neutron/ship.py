@@ -3,8 +3,6 @@
 
 from __future__ import annotations
 
-import typing as t
-
 from auto_neutron.constants import BOOSTER_CONSTANTS, FSD_CONSTANTS, FrameShiftDrive
 
 _RATING_TO_CLASS = {"A": 5, "B": 4, "C": 3, "D": 2, "E": 1}
@@ -17,12 +15,12 @@ class Ship:
     """Hold stats of a ship required for plotting."""
 
     def __init__(self):
-        self.fsd: t.Optional[FrameShiftDrive] = None
-        self.jump_range_boost: t.Optional[float] = None
-        self.tank_size: t.Optional[int] = None
-        self.reserve_size: t.Optional[float] = None
-        self.unladen_mass: t.Optional[float] = None
-        self.max_cargo: t.Optional[int] = None
+        self.fsd: FrameShiftDrive | None = None
+        self.jump_range_boost: float | None = None
+        self.tank_size: int | None = None
+        self.reserve_size: float | None = None
+        self.unladen_mass: float | None = None
+        self.max_cargo: int | None = None
         self.initialized = False
 
     def jump_range(self, *, cargo_mass: int) -> float:

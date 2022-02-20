@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import sys
 import textwrap
-import typing as t
 
 from PySide6 import QtCore, QtWidgets
 
@@ -21,7 +20,7 @@ GNU_LICENSES_URL = "https://www.gnu.org/licenses/"
 class LicenseWindow(LicenseWindowGUI):
     """License window displaying the project's and Qt's copyright."""
 
-    def __init__(self, parent: t.Optional[QtWidgets.QWidget] = None):
+    def __init__(self, parent: QtWidgets.QWidget | None = None):
         super().__init__(parent)
         self.about_qt_button.pressed.connect(QtWidgets.QApplication.instance().about_qt)
         self.back_button.pressed.connect(self.retranslate)

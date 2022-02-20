@@ -40,8 +40,8 @@ class VersionDownloadConfirmDialogGUI(QtWidgets.QDialog):
         self._skip_button.size_policy = QtWidgets.QSizePolicy(
             QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
         )
-        self._button_layout.add_widget(self._download_button)
         self._button_layout.add_widget(self._skip_button)
+        self._button_layout.add_widget(self._download_button)
 
         self._main_layout.add_widget(self._text_label)
         self._main_layout.add_widget(self._changelog_label)

@@ -18,7 +18,7 @@ _DEFAULT_SENTINEL = object()
 
 
 class RecursiveDefaultDict(
-    dict[_KT, t.Union[_VT, "RecursiveDefaultDict"]], t.Generic[_KT, _VT]
+    dict[_KT, _VT | "RecursiveDefaultDict"], t.Generic[_KT, _VT]
 ):
     """
     A recursive default dict.
@@ -31,8 +31,8 @@ class RecursiveDefaultDict(
     def __init__(
         self,
         *,
-        create_missing: t.Optional[bool] = True,
-        parent: t.Optional[RecursiveDefaultDict] = None,
+        create_missing: bool | None = True,
+        parent: RecursiveDefaultDict | None = None,
     ):
         super().__init__()
         self.parent = parent
@@ -114,10 +114,8 @@ class RecursiveDefaultDict(
         dict_: dict, key: collections.abc.Hashable, new_value: object
     ) -> None:
         """Check if `key`'s value in `dict_` differs from `new_value`, if it does raise a ValueError."""
-        if (
-            current_value := dict_.get(key, _DEFAULT_SENTINEL)
-        ) is not _DEFAULT_SENTINEL:
-            if current_value != new_value:
-                raise ValueError(
-                    f"Value conflict with {key=!r} {current_value=!r} {new_value=!r}."
-                )
+        current_value = dict_.get(key, _DEFAULT_SENTINEL)
+        if current_value is not _DEFAULT_SENTINEL and current_value != new_value:
+            raise ValueError(
+                f"Value conflict with {key=!r} {current_value=!r} {new_value=!r}."
+            )

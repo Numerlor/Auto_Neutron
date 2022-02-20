@@ -20,19 +20,19 @@ if t.TYPE_CHECKING:
     import decimal
     from pathlib import Path
 
-    TOMLType = t.Union[
-        bool,
-        int,
-        float,
-        datetime.date,
-        datetime.time,
-        datetime.datetime,
-        decimal.Decimal,
-        str,
-        list,
-        tuple,
-        dict,
-    ]
+    TOMLType = (
+        bool
+        | int
+        | float
+        | datetime.date
+        | datetime.time
+        | datetime.datetime
+        | decimal.Decimal
+        | str
+        | list
+        | tuple
+        | dict
+    )
 
 _DEFAULT_SENTINEL = t.cast(t.Any, object())
 _MISSING_SENTINEL = t.cast(t.Any, object())
@@ -236,9 +236,11 @@ class TOMLSettings:
         """
         log.info(f"Syncing settings to {self.path}.")
         file_settings: RecursiveDefaultDict[str, t.Any] = RecursiveDefaultDict()
-        with suppress(FileNotFoundError):
+
+        with suppress(FileNotFoundError):  # noqa SIM117
             with self.path.open("rb") as settings_file:
                 file_settings.update_from_dict_recursive(tomli.load(settings_file))
+
         file_settings.update_from_dict_recursive(
             self._settings_dict, ignore_conflicts=overwrite_external
         )

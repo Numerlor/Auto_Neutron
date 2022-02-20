@@ -38,7 +38,7 @@ class MainWindow(MainWindowGUI):
         self.resize_connection.connect()
 
         self._current_route_type: t.Optional[
-            t.Union[type[ExactPlotRow], type[NeutronPlotRow]]
+            type[ExactPlotRow] | type[NeutronPlotRow]
         ] = None
         self._last_index = None
 

@@ -3,7 +3,6 @@
 
 from __future__ import annotations
 
-import typing as t
 from functools import partial
 
 from PySide6 import QtCore, QtWidgets
@@ -31,7 +30,7 @@ class _ReorderedCheckBox(QtWidgets.QCheckBox):
 class AppearanceWidget(QtWidgets.QWidget):
     """Widget containing options for configuring the appearance of the app."""
 
-    def __init__(self, parent: t.Optional[QtWidgets.QWidget]):
+    def __init__(self, parent: QtWidgets.QWidget | None):
         super().__init__(parent)
         self.main_layout = QtWidgets.QVBoxLayout(self)
         self.font_chooser = QtWidgets.QFontComboBox(self)
@@ -71,7 +70,7 @@ class AppearanceWidget(QtWidgets.QWidget):
 class BehaviourWidget(QtWidgets.QWidget):
     """Widget containing options for configuring the behaviour of the app."""
 
-    def __init__(self, parent: t.Optional[QtWidgets.QWidget]):
+    def __init__(self, parent: QtWidgets.QWidget | None):
         super().__init__(parent)
         self.main_layout = QtWidgets.QVBoxLayout(self)
         self.plotter_options_layout = QtWidgets.QHBoxLayout()
@@ -101,7 +100,7 @@ class BehaviourWidget(QtWidgets.QWidget):
 class AlertsWidget(QtWidgets.QWidget):
     """Widget containing options for configuring the alert system."""
 
-    def __init__(self, parent: t.Optional[QtWidgets.QWidget]):
+    def __init__(self, parent: QtWidgets.QWidget | None):
         super().__init__(parent)
         self.main_layout = QtWidgets.QVBoxLayout(self)
         self.alert_checkbox_layout = QtWidgets.QHBoxLayout()
@@ -157,7 +156,7 @@ class AlertsWidget(QtWidgets.QWidget):
 class SimpleScriptWidget(QtWidgets.QWidget):
     """Widget containing options used to configured the AHK simple mode."""
 
-    def __init__(self, parent: t.Optional[QtWidgets.QWidget]):
+    def __init__(self, parent: QtWidgets.QWidget | None):
         super().__init__(parent)
         self.main_layout = QtWidgets.QVBoxLayout(self)
         self.main_layout.contents_margins = QtCore.QMargins(0, 0, 0, 0)
@@ -220,7 +219,7 @@ class SimpleScriptWidget(QtWidgets.QWidget):
 class ScriptWidget(QtWidgets.QWidget):
     """Widget containing options for configuring the AHK script."""
 
-    def __init__(self, parent: t.Optional[QtWidgets.QWidget]):
+    def __init__(self, parent: QtWidgets.QWidget | None):
         super().__init__(parent)
         self.main_layout = QtWidgets.QVBoxLayout(self)
         self.switch_widget = QtWidgets.QStackedWidget(self)
@@ -270,7 +269,7 @@ class ScriptWidget(QtWidgets.QWidget):
 class SettingsWindowGUI(QtWidgets.QDialog):
     """Implement the basic settings GUI with multiple settings categories from the settings module."""
 
-    def __init__(self, parent: t.Optional[QtWidgets.QWidget]):
+    def __init__(self, parent: QtWidgets.QWidget | None):
         super().__init__(parent)
         self.set_attribute(QtCore.Qt.WidgetAttribute.WA_DeleteOnClose)
         # region layout/widget init

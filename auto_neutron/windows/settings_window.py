@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import logging
-import typing as t
 from operator import attrgetter
 from pathlib import Path
 
@@ -26,7 +25,7 @@ class SettingsWindow(SettingsWindowGUI):
 
     settings_applied = QtCore.Signal()
 
-    def __init__(self, parent: t.Optional[QtWidgets.QWidget]):
+    def __init__(self, parent: QtWidgets.QWidget | None):
         super().__init__(parent)
         # pairs of widgets that we can assign directly to settings and the relevant settings
         self.settings_pairs = (

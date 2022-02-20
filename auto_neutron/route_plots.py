@@ -60,7 +60,7 @@ class ExactPlotRow(DataClassBase):
     refuel: bool
     neutron_star: bool
 
-    def __eq__(self, other: t.Union[ExactPlotRow, str]):
+    def __eq__(self, other: ExactPlotRow | str):
         if isinstance(other, str):
             return self.system.lower() == other.lower()
         return super().__eq__(other)
@@ -98,7 +98,7 @@ class NeutronPlotRow(DataClassBase):
     dist_rem: float
     jumps: int
 
-    def __eq__(self, other: t.Union[NeutronPlotRow, str]):
+    def __eq__(self, other: NeutronPlotRow | str):
         if isinstance(other, str):
             return self.system.lower() == other.lower()
         return super().__eq__(other)
@@ -115,18 +115,18 @@ class NeutronPlotRow(DataClassBase):
         return [self.system, self.dist_to_arrival, self.dist_rem, "", self.jumps]
 
 
-RouteList = t.Union[list[ExactPlotRow], list[NeutronPlotRow]]
+RouteList = list[ExactPlotRow] | list[NeutronPlotRow]
 
 
 class Plotter(abc.ABC):
     """Provide the base interface for a game plotter."""
 
-    def __init__(self, start_system: t.Optional[str] = None):
+    def __init__(self, start_system: str | None = None):
         if start_system is not None:
             self.update_system(start_system)
 
     @abc.abstractmethod
-    def update_system(self, system: str, system_index: t.Optional[int] = None) -> None:
+    def update_system(self, system: str, system_index: int | None = None) -> None:
         """Update the plotter with the given system."""
         ...
 
@@ -141,7 +141,7 @@ class Plotter(abc.ABC):
 class CopyPlotter(Plotter):
     """Plot by copying given systems on the route into the clipboard."""
 
-    def update_system(self, system: str, system_index: t.Optional[int] = None) -> None:
+    def update_system(self, system: str, system_index: int | None = None) -> None:
         """Set the system clipboard to `system`."""
         log.info(f"Pasting {system!r} to clipboard.")
         QtWidgets.QApplication.clipboard().set_text(system)
@@ -150,8 +150,8 @@ class CopyPlotter(Plotter):
 class AhkPlotter(Plotter):
     """Plot through ahk by supplying the system through stdin to the ahk process."""
 
-    def __init__(self, start_system: t.Optional[str] = None):
-        self.process: t.Optional[subprocess.Popen] = None
+    def __init__(self, start_system: str | None = None):
+        self.process: subprocess.Popen | None = None
         self._used_script = None
         self._used_ahk_path = None
         self._used_hotkey = None
@@ -187,7 +187,7 @@ class AhkPlotter(Plotter):
         atexit.register(self.process.terminate)
         log.debug("Created AHK subprocess.")
 
-    def update_system(self, system: str, system_index: t.Optional[int] = None) -> None:
+    def update_system(self, system: str, system_index: int | None = None) -> None:
         """Update the ahk script with `system`."""
         if self.process is None or self.process.poll() is not None:
             self._start_ahk()

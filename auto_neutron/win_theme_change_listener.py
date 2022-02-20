@@ -47,7 +47,7 @@ class WinThemeChangeListener(QtCore.QObject):
 
     theme_changed = QtCore.Signal(bool)
 
-    def __init__(self, parent: t.Optional[QtCore.QObject] = None):
+    def __init__(self, parent: QtCore.QObject | None = None):
         super().__init__(parent)
         self._change_timer = QtCore.QTimer(parent)
         self._change_timer.single_shot_ = True
@@ -93,7 +93,7 @@ class WinThemeChangeListener(QtCore.QObject):
         self,
         exc_type: type[BaseException],
         exc_val: BaseException,
-        exc_tb: t.Optional[TracebackType],
+        exc_tb: TracebackType | None,
     ):
         """Close the key when exiting."""
         self._registry_key.Close()
@@ -101,7 +101,7 @@ class WinThemeChangeListener(QtCore.QObject):
 
 
 def create_listener(
-    parent: t.Optional[QtCore.QObject] = None,
+    parent: QtCore.QObject | None = None,
 ) -> WinThemeChangeListener:
     """Create a `WinThemeChangeListener` and register it with the app."""
     listener = WinThemeChangeListener(parent)

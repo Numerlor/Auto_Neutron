@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import logging
 import textwrap
-import typing as t
 from pathlib import Path
 
 from PySide6 import QtCore, QtGui, QtWidgets
@@ -60,7 +59,7 @@ class ErrorWindow(ErrorWindowGUI):
         """Reset the error count to zero when the window is closed."""
         self._num_errors = 0
 
-    def _get_log_file_name(self) -> t.Optional[str]:
+    def _get_log_file_name(self) -> str | None:
         """Get the file name of the current active file logger, or None if none are used."""
         handler = next(
             (

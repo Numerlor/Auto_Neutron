@@ -63,13 +63,7 @@ class Journal(QtCore.QObject):
 
     def get_static_state(
         self,
-    ) -> tuple[
-        t.Optional[dict],
-        t.Optional[Location],
-        t.Optional[Location],
-        t.Optional[int],
-        bool,
-    ]:
+    ) -> tuple[dict | None, Location | None, Location | None, int | None, bool]:
         """Parse the whole journal file and return the ship, location, current cargo and game was shut down state."""
         log.info(f"Statically parsing journal file at {self.path}.")
         loadout = None

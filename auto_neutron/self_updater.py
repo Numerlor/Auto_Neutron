@@ -44,7 +44,7 @@ class Updater(QtCore.QObject):
 
     _download_started = QtCore.Signal(QtNetwork.QNetworkReply)
 
-    def __init__(self, parent: t.Optional[QtWidgets.QWidget] = None):
+    def __init__(self, parent: QtWidgets.QWidget | None = None):
         super().__init__(parent)
         self._download_started.connect(self._show_progress_dialog)
 

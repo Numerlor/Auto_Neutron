@@ -49,10 +49,10 @@ class SessionBackupHandler(logging.FileHandler):
     def __init__(
         self,
         filename: os.PathLike[t.AnyStr],
-        encoding: t.Optional[str] = None,
+        encoding: str | None = None,
         backup_count: int = 0,
         delay: bool = False,
-        errors: t.Optional[str] = None,
+        errors: str | None = None,
     ):
         self.backup_count = backup_count
         super().__init__(filename, "w", encoding, delay, errors)
@@ -84,7 +84,7 @@ def patch_log_module(
 
     def patched_caller(
         self: logging.Logger, stack_info: bool, stack_level: int
-    ) -> tuple[str, int, str, t.Optional[str]]:
+    ) -> tuple[str, int, str, str] | None:
         """Patch filename on logs after this was applied to be `module_name`."""
         _, lno, func, sinfo = original_find_caller(stack_info, stack_level)
         return module_name, lno, func, sinfo

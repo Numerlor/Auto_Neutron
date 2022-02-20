@@ -71,13 +71,13 @@ class AHK(metaclass=SettingsCategory):  # noqa D101
             return cls.user_script
 
 
-def _path_serializer(path: t.Union[None, Path, str]) -> str:
+def _path_serializer(path: Path | str | None) -> str:
     if path is None:
         return ""
     return str(path)
 
 
-def _path_deserializer(path_string: str) -> t.Optional[Path]:
+def _path_deserializer(path_string: str) -> Path | None:
     if path_string == "":
         return None
     return Path(path_string)
@@ -85,13 +85,13 @@ def _path_deserializer(path_string: str) -> t.Optional[Path]:
 
 class Paths(metaclass=SettingsCategory):  # noqa D101
     ahk: t.Annotated[
-        t.Optional[Path], SettingsParams("", _path_serializer, _path_deserializer)
+        Path | None, SettingsParams("", _path_serializer, _path_deserializer)
     ]
     csv: t.Annotated[
-        t.Optional[Path], SettingsParams("", _path_serializer, _path_deserializer)
+        Path | None, SettingsParams("", _path_serializer, _path_deserializer)
     ]
     alert_sound: t.Annotated[
-        t.Union[None, Path, str],
+        Path | str | None,
         SettingsParams("", _path_serializer, _path_deserializer),
     ]
 

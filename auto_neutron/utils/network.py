@@ -25,7 +25,7 @@ log = logging.getLogger(__name__)
 class NetworkError(Exception):
     """Raised for Qt network errors."""
 
-    def __init__(self, qt_error: str, reply_error: t.Optional[str]):
+    def __init__(self, qt_error: str, reply_error: str | None):
         self.error_message = qt_error
         self.reply_error = reply_error
         super().__init__(qt_error, reply_error)

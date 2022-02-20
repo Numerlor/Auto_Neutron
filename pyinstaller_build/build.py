@@ -91,9 +91,11 @@ directory_path = Path(f"{BASE_PATH}/dist/Auto_Neutron")
 exe_path = directory_path.with_name("Auto_Neutron.exe")
 
 if not debug:
-    if os.environ.get("SIGN"):
-        if sign_file(directory_path / "Auto_neutron.exe").returncode != 0:
-            print("Failed to sign", directory_path / "Auto_neutron.exe")  # noqa T001
+    if (
+        os.environ.get("SIGN")
+        and sign_file(directory_path / "Auto_neutron.exe").returncode != 0
+    ):
+        print("Failed to sign", directory_path / "Auto_neutron.exe")  # noqa T001
 
     archive_path = Path(
         shutil.make_archive(
@@ -107,9 +109,8 @@ if not debug:
         sha256sum(archive_path) + "\n"
     )
 
-if os.environ.get("SIGN"):
-    if sign_file(exe_path).returncode != 0:
-        print("Failed to sign", exe_path)  # noqa T001
+if os.environ.get("SIGN") and sign_file(exe_path).returncode != 0:
+    print("Failed to sign", exe_path)  # noqa T001
 
 Path(exe_path.with_name(exe_path.name + ".signature.txt")).write_text(
     sha256sum(exe_path) + "\n"

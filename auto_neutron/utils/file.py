@@ -39,7 +39,7 @@ GetFinalPathNameByHandle.argtypes = [
 
 
 def create_delete_share_file(
-    file: Path, encoding: t.Optional[str] = None, errors: t.Optional[str] = None
+    file: Path, encoding: str | None = None, errors: str | None = None
 ) -> t.TextIO:
     """
     Open the file at path with the `FILE_SHARE_DELETE` flag enabled.
@@ -58,7 +58,7 @@ def create_delete_share_file(
     if handle == -1:
         raise ctypes.WinError()
 
-    return open(
+    return open(  # noqa SIM115
         msvcrt.open_osfhandle(handle, os.O_BINARY),
         "w",
         encoding=encoding,
