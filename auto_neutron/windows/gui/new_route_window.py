@@ -3,10 +3,12 @@
 
 from __future__ import annotations
 
-from PySide6 import QtCore, QtWidgets
+from PySide6 import QtCore, QtGui, QtWidgets
 
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa F401
+from auto_neutron.dark_theme import is_dark
+from auto_neutron.utils.file import base_path
 
 from .plain_text_scroller import PlainTextScroller
 from .tooltip_slider import TooltipSlider
@@ -30,12 +32,18 @@ class TabBase(QtWidgets.QWidget):
         (
             self.journal_submit_layout,
             self.journal_combo,
+            self.refresh_button,
             self.submit_button,
         ) = self.create_journal_and_submit_layout(self)
 
     def create_journal_and_submit_layout(
         self, widget_parent: QtWidgets.QWidget
-    ) -> tuple[QtWidgets.QHBoxLayout, QtWidgets.QComboBox, QtWidgets.QPushButton]:
+    ) -> tuple[
+        QtWidgets.QHBoxLayout,
+        QtWidgets.QComboBox,
+        QtWidgets.QPushButton,
+        QtWidgets.QPushButton,
+    ]:
         """Create a layout that holds the bottom journal combo box and submit button."""
         journal_submit_layout = QtWidgets.QHBoxLayout()
 
@@ -49,12 +57,22 @@ class TabBase(QtWidgets.QWidget):
             QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Maximum
         )
 
+        refresh_button = QtWidgets.QPushButton(widget_parent)
+        refresh_button.icon = QtGui.QIcon(self.get_refresh_icon(is_dark()))
+
+        submit_button.size_policy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
+        )
+
         journal_submit_layout.add_widget(
             journal_combo, alignment=QtCore.Qt.AlignmentFlag.AlignLeft
         )
+        journal_submit_layout.add_widget(
+            refresh_button, alignment=QtCore.Qt.AlignmentFlag.AlignLeft
+        )
         journal_submit_layout.add_widget(submit_button)
 
-        return journal_submit_layout, journal_combo, submit_button
+        return journal_submit_layout, journal_combo, refresh_button, submit_button
 
     def create_system_and_cargo_layout(
         self, parent: QtWidgets.QWidget
@@ -82,6 +100,21 @@ class TabBase(QtWidgets.QWidget):
 
         return layout, source_system_edit, target_system_edit, cargo_label, cargo_slider
 
+    def get_refresh_icon(self, dark: bool) -> QtGui.QIcon:
+        """Get an appropriately coloured refresh icon."""
+        if dark:
+            path = base_path() / "resources/refresh-dark.svg"
+        else:
+            path = base_path() / "resources/refresh.svg"
+        return QtGui.QIcon(str(path))
+
+    def change_event(self, event: QtCore.QEvent) -> None:
+        """Update the tooltip's colors when the palette changes."""
+        if event.type() == QtCore.QEvent.Type.PaletteChange:
+            self.refresh_button.icon = self.get_refresh_icon(is_dark())
+
+        super().change_event(event)
+
     def retranslate(self) -> None:
         """Retranslate text that is always on display."""
         if self.has_cargo:
@@ -91,6 +124,7 @@ class TabBase(QtWidgets.QWidget):
             self.cargo_label.text = _("Cargo")
 
         self.submit_button.text = _("Submit")
+        self.refresh_button.tool_tip = _("Refresh journals")
 
 
 class NeutronTab(TabBase):

@@ -120,6 +120,14 @@ class NewRouteWindow(NewRouteWindowGUI):
         for signal in self.combo_signals:
             signal.connect()
 
+        for button in (
+            self.csv_tab.refresh_button,
+            self.spansh_neutron_tab.refresh_button,
+            self.spansh_exact_tab.refresh_button,
+            self.last_route_tab.refresh_button,
+        ):
+            button.pressed.connect(self._populate_journal_combos)
+
         self.tab_widget.currentChanged.connect(self._display_saved_route)
         self._route_displayed = False
         self._loaded_route: list[NeutronPlotRow] | None = None
