@@ -25,6 +25,14 @@ class LicenseWindow(LicenseWindowGUI):
         super().__init__(parent)
         self.about_qt_button.pressed.connect(QtWidgets.QApplication.instance().about_qt)
         self.back_button.pressed.connect(self.retranslate)
+        self.back_button.pressed.connect(
+            lambda: setattr(self.back_button, "enabled", False)  # noqa: B010
+        )
+        self.text.sourceChanged.connect(
+            lambda: setattr(self.back_button, "enabled", True)  # noqa: B010
+        )
+
+        self.back_button.enabled = False
 
     def change_event(self, event: QtCore.QEvent) -> None:
         """Retranslate the GUI when a language change occurs."""
