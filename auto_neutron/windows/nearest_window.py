@@ -16,7 +16,8 @@ from auto_neutron.utils.network import (
     json_from_network_req,
     make_network_request,
 )
-from auto_neutron.windows.gui.nearest_window import NearestWindowGUI
+
+from .gui.nearest_window import NearestWindowGUI
 
 if t.TYPE_CHECKING:
     from auto_neutron.game_state import Location

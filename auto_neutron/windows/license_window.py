@@ -11,7 +11,8 @@ from PySide6 import QtCore, QtWidgets
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa: F401
 from auto_neutron.utils.file import base_path
-from auto_neutron.windows.gui.license_window import LicenseWindowGUI
+
+from .gui.license_window import LicenseWindowGUI
 
 PYTHON_LICENSE_URL = "https://docs.python.org/3.10/license.html"
 GNU_LICENSES_URL = "https://www.gnu.org/licenses/"

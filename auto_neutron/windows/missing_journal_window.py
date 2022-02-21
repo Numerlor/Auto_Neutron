@@ -7,7 +7,8 @@ from PySide6 import QtCore, QtWidgets
 
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa: F401
-from auto_neutron.windows.gui.missing_journal_window import MissingJournalWindowGUI
+
+from .gui.missing_journal_window import MissingJournalWindowGUI
 
 
 class MissingJournalWindow(MissingJournalWindowGUI):
