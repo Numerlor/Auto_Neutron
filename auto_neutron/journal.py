@@ -3,14 +3,18 @@
 
 from __future__ import annotations
 
+import datetime
 import json
 import logging
 import typing as t
+from operator import attrgetter
 
+import more_itertools
 from PySide6 import QtCore
 
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa: F401
+from auto_neutron.constants import JOURNAL_PATH
 from auto_neutron.game_state import Location
 from auto_neutron.ship import Ship
 from auto_neutron.utils.utils import get_sector_midpoint
@@ -114,3 +118,27 @@ def get_cached_journal(path: Path) -> Journal:
     journal.parse()
 
     return journal
+
+
+def get_unique_cmdr_journals() -> list[Journal]:
+    """
+    Get the latest journals for each found CMDR.
+
+    Only the first 15 journals newer than a week are looked at.
+    """
+    week_before = (datetime.datetime.now() - datetime.timedelta(weeks=1)).timestamp()
+
+    journal_paths = [
+        path
+        for path in JOURNAL_PATH.glob("Journal.*.log")
+        if path.stat().st_ctime > week_before
+    ]
+    journal_paths.sort(key=lambda path: path.stat().st_ctime, reverse=True)
+
+    journals = []
+    for journal_path in journal_paths[:15]:
+        journal = get_cached_journal(journal_path)
+        if not journal.shut_down:
+            journals.append(journal)
+
+    return list(more_itertools.unique_everseen(journals, attrgetter("cmdr")))
