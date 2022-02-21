@@ -25,13 +25,15 @@ from auto_neutron.route_plots import AhkPlotter, CopyPlotter, NeutronPlotRow
 from auto_neutron.self_updater import Updater
 from auto_neutron.settings import delay_sync
 from auto_neutron.utils.signal import ReconnectingSignal
-from auto_neutron.windows.error_window import ErrorWindow
-from auto_neutron.windows.license_window import LicenseWindow
-from auto_neutron.windows.main_window import MainWindow
-from auto_neutron.windows.missing_journal_window import MissingJournalWindow
-from auto_neutron.windows.new_route_window import NewRouteWindow
-from auto_neutron.windows.settings_window import SettingsWindow
-from auto_neutron.windows.shut_down_window import ShutDownWindow
+from auto_neutron.windows import (
+    ErrorWindow,
+    LicenseWindow,
+    MainWindow,
+    MissingJournalWindow,
+    NewRouteWindow,
+    SettingsWindow,
+    ShutDownWindow,
+)
 from auto_neutron.workers import StatusWorker
 
 if t.TYPE_CHECKING:
