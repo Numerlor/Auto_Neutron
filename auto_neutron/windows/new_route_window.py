@@ -22,7 +22,7 @@ from auto_neutron.constants import (
     SPANSH_API_URL,
     get_config_dir,
 )
-from auto_neutron.journal import Journal
+from auto_neutron.journal import Journal, get_cached_journal
 from auto_neutron.route_plots import (
     ExactPlotRow,
     NeutronPlotRow,
@@ -430,7 +430,7 @@ class NewRouteWindow(NewRouteWindowGUI):
         )
         journal_path = journals[min(index, len(journals) - 1)]
         log.info(f"Changing selected journal to {journal_path}.")
-        journal = self._get_journal(journal_path)
+        journal = get_cached_journal(journal_path)
 
         self.selected_journal = journal
         if journal.shut_down:
@@ -469,15 +469,6 @@ class NewRouteWindow(NewRouteWindowGUI):
         self._set_neutron_submit()
         self._set_exact_submit()
         self.last_route_tab.submit_button.enabled = True
-
-    def _get_journal(self, path: Path) -> Journal:
-        """Get the journal object form `path`, if the journal was opened before, get the changed object and parse it."""
-        try:
-            journal = self._journals[path]
-        except KeyError:
-            journal = self._journals[path] = Journal(path)
-        journal.parse()
-        return journal
 
     def emit_and_close(
         self, journal: Journal, route: RouteList, route_index: int

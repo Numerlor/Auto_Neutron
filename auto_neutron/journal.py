@@ -95,3 +95,22 @@ class Journal(QtCore.QObject):
         elif entry["event"] == "Shutdown":
             self.shut_down = True
             self.shut_down_sig.emit()
+
+
+journal_cache = {}
+
+
+def get_cached_journal(path: Path) -> Journal:
+    """
+    Get the journal object form `path`, if the journal was opened before, get the changed object.
+
+    The journal is parsed before being returned.
+    """
+    try:
+        journal = journal_cache[path]
+    except KeyError:
+        journal = journal_cache[path] = Journal(path)
+
+    journal.parse()
+
+    return journal
