@@ -59,6 +59,12 @@ class NewRouteWindow(NewRouteWindowGUI):
         self._status_has_hover = False
         self._status_scheduled_reset = False
         self._setup_status_widget()
+        self._combo_boxes = (
+            self.csv_tab.journal_combo,
+            self.spansh_neutron_tab.journal_combo,
+            self.spansh_exact_tab.journal_combo,
+            self.last_route_tab.journal_combo,
+        )
 
         # region spansh tabs init
         self.spansh_neutron_tab.nearest_button.pressed.connect(
@@ -105,24 +111,14 @@ class NewRouteWindow(NewRouteWindowGUI):
 
         self.last_route_tab.submit_button.pressed.connect(self._last_route_submit)
 
-        self.combo_signals = (
+        self.combo_signals = [
             ReconnectingSignal(
-                self.csv_tab.journal_combo.currentIndexChanged,
+                combo_box.currentIndexChanged,
                 self._sync_journal_combos,
-            ),
-            ReconnectingSignal(
-                self.spansh_neutron_tab.journal_combo.currentIndexChanged,
-                self._sync_journal_combos,
-            ),
-            ReconnectingSignal(
-                self.spansh_exact_tab.journal_combo.currentIndexChanged,
-                self._sync_journal_combos,
-            ),
-            ReconnectingSignal(
-                self.last_route_tab.journal_combo.currentIndexChanged,
-                self._sync_journal_combos,
-            ),
-        )
+            )
+            for combo_box in self._combo_boxes
+        ]
+
         for signal in self.combo_signals:
             signal.connect()
 
@@ -415,10 +411,8 @@ class NewRouteWindow(NewRouteWindowGUI):
         with exit_stack:
             for signal in self.combo_signals:
                 exit_stack.enter_context(signal.temporarily_disconnect())
-            self.csv_tab.journal_combo.current_index = index
-            self.spansh_neutron_tab.journal_combo.current_index = index
-            self.spansh_exact_tab.journal_combo.current_index = index
-            self.last_route_tab.journal_combo.current_index = index
+            for combo_box in self._combo_boxes:
+                combo_box.index = index
         self._change_journal(index)
 
     def _change_journal(self, index: int) -> None:
