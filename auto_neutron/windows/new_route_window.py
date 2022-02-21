@@ -5,12 +5,14 @@ from __future__ import annotations
 
 import contextlib
 import csv
+import datetime
 import json
 import logging
 import typing as t
 from functools import partial
 from pathlib import Path
 
+import babel.dates
 from PySide6 import QtCore, QtGui, QtWidgets
 
 # noinspection PyUnresolvedReferences
@@ -18,6 +20,7 @@ from __feature__ import snake_case, true_property  # noqa F401
 from auto_neutron import settings
 from auto_neutron.constants import ROUTE_FILE_NAME, SPANSH_API_URL, get_config_dir
 from auto_neutron.journal import Journal, get_unique_cmdr_journals
+from auto_neutron.locale import get_active_locale
 from auto_neutron.route_plots import (
     ExactPlotRow,
     NeutronPlotRow,
@@ -462,7 +465,18 @@ class NewRouteWindow(NewRouteWindowGUI):
         ):
             self._set_widget_values()
 
-        self.status_widget.text = ""
+        creation_time = datetime.datetime.fromtimestamp(journal.path.stat().st_ctime)
+        formatted_time = babel.dates.format_time(
+            creation_time, locale=get_active_locale()
+        )
+
+        self._show_status_message(
+            _("Selected journal using {}, created at {}").format(
+                "Oddysey" if journal.is_oddysey else "Horizons", formatted_time
+            ),
+            timeout=5_000,
+        )
+
         self.csv_tab.submit_button.enabled = True
         self._set_neutron_submit()
         self._set_exact_submit()
