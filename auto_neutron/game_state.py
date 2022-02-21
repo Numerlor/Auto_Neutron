@@ -5,14 +5,12 @@ from __future__ import annotations
 
 import logging
 import typing as t
-from dataclasses import dataclass
 from functools import partial
 
 from PySide6 import QtCore
 
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa: F401
-from auto_neutron.ship import Ship
 from auto_neutron.workers import GameWorker
 
 if t.TYPE_CHECKING:
@@ -32,29 +30,6 @@ class Location(t.NamedTuple):
     z: float
 
 
-@dataclass
-class GameState:
-    """
-    Hold the current state of the game from the journal.
-
-    The state can be updated through assignments on public attributes or using `update_from_loadout`.
-    """
-
-    ship: Ship = Ship()
-    shut_down: bool | None = None
-    location: Location | None = None
-    last_target: Location | None = None
-    current_cargo: int | None = None
-
-    def connect_journal(self, journal: Journal) -> None:
-        """Connect the signals from `journal` to set the appropriate attributes when emitted."""
-        journal.shut_down_sig.connect(partial(setattr, self, "shut_down", True))
-        journal.system_sig.connect(partial(setattr, self, "location"))
-        journal.target_signal.connect(partial(setattr, self, "last_target"))
-        journal.cargo_sig.connect(partial(setattr, self, "current_cargo"))
-        journal.loadout_sig.connect(self.ship.update_from_loadout)
-
-
 class PlotterState(QtCore.QObject):
     """Hold the state required for a plotter to function."""
 
@@ -62,10 +37,8 @@ class PlotterState(QtCore.QObject):
     route_end_signal = QtCore.Signal(int)
     shut_down_signal = QtCore.Signal()
 
-    def __init__(self, parent: QtCore.QObject, game_state: GameState):
+    def __init__(self, parent: QtCore.QObject):
         super().__init__(parent)
-        self._game_state = game_state
-
         self._route_index = 0
         self.tail_worker: GameWorker | None = None
         self._active_journal: Journal | None = None
@@ -158,8 +131,6 @@ class PlotterState(QtCore.QObject):
         self._active_journal = journal
         log.info("Setting new journal.")
         if journal is not None:
-            self._game_state.shut_down = False
-            self._game_state.connect_journal(journal)
             journal.shut_down_sig.connect(self.shut_down_signal.emit)
             journal.parse()
 

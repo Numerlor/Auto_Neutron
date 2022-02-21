@@ -12,6 +12,7 @@ from PySide6 import QtCore
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa: F401
 from auto_neutron.game_state import Location
+from auto_neutron.ship import Ship
 from auto_neutron.utils.utils import get_sector_midpoint
 
 if t.TYPE_CHECKING:
@@ -27,13 +28,12 @@ class Journal(QtCore.QObject):
     system_sig = QtCore.Signal(Location)
     target_signal = QtCore.Signal(Location)
     loadout_sig = QtCore.Signal(dict)
-    cargo_sig = QtCore.Signal(int)
     shut_down_sig = QtCore.Signal()
 
     def __init__(self, journal_path: Path):
         super().__init__()
         self.path = journal_path
-        self.loadout = None
+        self.ship = Ship()
         self.location = None
         self.last_target = None
         self.cargo = None
@@ -69,7 +69,7 @@ class Journal(QtCore.QObject):
         """Parse a single line from the journal, setting attributes and emitting signals appropriately."""
         entry = json.loads(line)
         if entry["event"] == "Loadout":
-            self.loadout = entry
+            self.ship.update_from_loadout(entry)
             self.loadout_sig.emit(entry)
 
         elif entry["event"] == "Location" or entry["event"] == "FSDJump":

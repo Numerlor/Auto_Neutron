@@ -20,7 +20,7 @@ from __feature__ import snake_case, true_property  # noqa: F401
 from auto_neutron import Theme, settings
 from auto_neutron.constants import JOURNAL_PATH, ROUTE_FILE_NAME, get_config_dir
 from auto_neutron.fuel_warn import FuelWarn
-from auto_neutron.game_state import GameState, PlotterState
+from auto_neutron.game_state import PlotterState
 from auto_neutron.route_plots import AhkPlotter, CopyPlotter, NeutronPlotRow
 from auto_neutron.self_updater import Updater
 from auto_neutron.settings import delay_sync
@@ -71,9 +71,8 @@ class Hub(QtCore.QObject):
         self.window.settings_action.triggered.connect(self.display_settings)
         self.window.save_action.triggered.connect(self.save_route)
         self.window.table.doubleClicked.connect(self.get_index_row)
-        self.game_state = GameState()
 
-        self.plotter_state = PlotterState(self, self.game_state)
+        self.plotter_state = PlotterState(self)
         self.plotter_state.new_system_signal.connect(self.new_system_callback)
         self.plotter_state.route_end_signal.connect(
             partial(self.new_system_callback, None)
@@ -96,7 +95,7 @@ class Hub(QtCore.QObject):
             MissingJournalWindow(self.window).show()
             return
 
-        self.fuel_warner = FuelWarn(self, self.game_state, self.window)
+        self.fuel_warner = FuelWarn(self, self.window)
         self.warn_worker = StatusWorker(self)
         self.warn_worker.status_signal.connect(self.fuel_warner.warn)
 
@@ -157,9 +156,10 @@ class Hub(QtCore.QObject):
 
         self.plotter_state.route_index = route_index
         self.window.scroll_to_index(route_index)
-        if self.game_state.location is not None:  # may not have a location yet
-            self.plotter_state.tail_worker.emit_next_system(self.game_state.location)
+        if journal.location is not None:  # may not have a location yet
+            self.plotter_state.tail_worker.emit_next_system(journal.location)
         self.warn_worker.start()
+        self.fuel_warner.set_journal(journal)
 
     def apply_settings(self) -> None:
         """Update the appearance and plotter with new settings."""
