@@ -442,17 +442,6 @@ class NewRouteWindow(NewRouteWindowGUI):
         log.info(f"Changing selected journal to {journal.path}.")
 
         self.selected_journal = journal
-        if journal.shut_down:
-            self._show_status_message(
-                _("Selected journal ended with a shut down event."), 10_000
-            )
-            self.csv_tab.submit_button.enabled = False
-            self._set_neutron_submit()
-            self._set_exact_submit()
-            self.last_route_tab.submit_button.enabled = False
-            self._journal_worker = None
-            return
-
         self.selected_journal.shut_down_sig.connect(self._set_neutron_submit)
         self.selected_journal.shut_down_sig.connect(self._set_exact_submit)
 
