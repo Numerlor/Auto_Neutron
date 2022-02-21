@@ -51,6 +51,7 @@ class NewRouteWindow(NewRouteWindowGUI):
     def __init__(self, parent: QtWidgets.QWidget):
         super().__init__(parent)
         self.selected_journal: Journal | None = None
+        self._journals = dict[Path, Journal]()
         self._journal_worker: GameWorker | None = None
         self._status_hide_timer = QtCore.QTimer(self)
         self._status_hide_timer.single_shot_ = True
@@ -429,8 +430,7 @@ class NewRouteWindow(NewRouteWindowGUI):
         )
         journal_path = journals[min(index, len(journals) - 1)]
         log.info(f"Changing selected journal to {journal_path}.")
-        journal = Journal(journal_path)
-        journal.parse()
+        journal = self._get_journal(journal_path)
 
         self.selected_journal = journal
         if journal.shut_down:
@@ -469,6 +469,15 @@ class NewRouteWindow(NewRouteWindowGUI):
         self._set_neutron_submit()
         self._set_exact_submit()
         self.last_route_tab.submit_button.enabled = True
+
+    def _get_journal(self, path: Path) -> Journal:
+        """Get the journal object form `path`, if the journal was opened before, get the changed object and parse it."""
+        try:
+            journal = self._journals[path]
+        except KeyError:
+            journal = self._journals[path] = Journal(path)
+        journal.parse()
+        return journal
 
     def emit_and_close(
         self, journal: Journal, route: RouteList, route_index: int
