@@ -125,6 +125,8 @@ class NewRouteWindow(NewRouteWindowGUI):
         self._loaded_route: list[NeutronPlotRow] | None = None
         self.retranslate()
         self._populate_journal_combos()
+        if self._journals:
+            self._change_journal(0)
 
     # region spansh plotters
     def _submit_neutron(self) -> None:
