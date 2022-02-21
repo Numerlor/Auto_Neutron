@@ -41,6 +41,7 @@ class LicenseWindow(LicenseWindowGUI):
         mit_license_url = (base_path() / "resources/LICENSE_MIT.md").as_uri()
         bsd3_license_url = (base_path() / "resources/LICENSE_BSD_3_Clause.md").as_uri()
         gpl_license_url = (base_path() / "LICENSE.md").as_uri()
+        breeze_license_url = (base_path() / "resources/LICENSE_BREEZE.md").as_uri()
 
         return textwrap.dedent(
             _(
@@ -59,10 +60,15 @@ class LicenseWindow(LicenseWindowGUI):
 
         {python_copyright_notice}
           Python is licensed under the {psf_license_agreement_hyperlink}, see {python_licenses_hyperlink} for more details
+
+        And The Breeze Icons Theme Copyright (C) 2014 Uri Herrera <uri_herrera@nitrux.in> and others, under the {lgplv3_hyperlink}.
         """
             )
         ).format(
             gplv3_hyperlink=self.make_hyperlink(_("GPLv3 license"), gpl_license_url),
+            lgplv3_hyperlink=self.make_hyperlink(
+                _("LGPLv3 license"), breeze_license_url
+            ),
             gnu_licenses_hyperlink=self.make_hyperlink(
                 _("gnu.org/licenses"), GNU_LICENSES_URL
             ),
