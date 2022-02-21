@@ -7,10 +7,10 @@ from PySide6 import QtCore, QtWidgets
 
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa: F401
-from auto_neutron.constants import JOURNAL_PATH
-from auto_neutron.journal import Journal
+from auto_neutron.journal import Journal, get_unique_cmdr_journals
+from auto_neutron.utils.signal import ReconnectingSignal
+from auto_neutron.utils.utils import cmdr_display_name
 
-from ..utils.signal import ReconnectingSignal
 from .gui.shut_down_window import ShutDownWindowGUI
 
 
@@ -26,6 +26,7 @@ class ShutDownWindow(ShutDownWindowGUI):
     def __init__(self, parent: QtWidgets.QWidget):
         super().__init__(parent)
         self._selected_journal = None
+        self._journals = []
         self.journal_changed_signal = ReconnectingSignal(
             self.journal_combo.currentIndexChanged, self._change_journal
         )
@@ -35,20 +36,35 @@ class ShutDownWindow(ShutDownWindowGUI):
         )
         self.quit_button.pressed.connect(QtWidgets.QApplication.instance().quit)
 
-        self._change_journal(0)
+        self._populate_journal_combos()
         self.retranslate()
+
+    def _populate_journal_combos(self) -> None:
+        """
+        Populate the combo boxes with CMDR names referring to latest active journal files.
+
+        The journals they're referring to are stored in `self._journals`.
+        """
+        font_metrics = self.journal_combo.font_metrics()
+
+        combo_items = []
+        self._journals = get_unique_cmdr_journals()
+        for journal in self._journals:
+            combo_items.append(
+                font_metrics.elided_text(
+                    cmdr_display_name(journal.cmdr),
+                    QtCore.Qt.TextElideMode.ElideRight,
+                    80,
+                )
+            )
+        with self.journal_changed_signal.temporarily_disconnect():
+            self.journal_combo.clear()
+            self.journal_combo.add_items(combo_items)
 
     def _change_journal(self, index: int) -> None:
         """Change the selected journal, enable/disable the button depending on its shut down state."""
-        journals = sorted(
-            JOURNAL_PATH.glob("Journal.*.log"),
-            key=lambda path: path.stat().st_ctime,
-            reverse=True,
-        )
-        journal_path = journals[min(index, len(journals) - 1)]
-        journal = Journal(journal_path)
-        *_, shut_down = journal.get_static_state()
-        self.new_journal_button.enabled = not shut_down
+        journal = self._journals[index]
+        self.new_journal_button.enabled = not journal.shut_down
         self._selected_journal = journal
 
     def change_event(self, event: QtCore.QEvent) -> None:

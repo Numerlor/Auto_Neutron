@@ -109,3 +109,11 @@ def get_sector_midpoint(address: int) -> tuple[int, int, int]:
 def _pop_n_lower_bits(number: int, n: int) -> tuple[int, int]:
     """Get n lower-order bits from ˙number` and return the number without those bits, and the bits themselves."""
     return number >> n, number & (1 << n) - 1
+
+
+def cmdr_display_name(name: str | None) -> str:
+    """Get the CMDR display name for `name`."""
+    if name is not None:
+        return f"CMDR {name}"
+    else:
+        return "<No CMDR>"

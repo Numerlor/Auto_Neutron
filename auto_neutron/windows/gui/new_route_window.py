@@ -92,13 +92,6 @@ class TabBase(QtWidgets.QWidget):
 
         self.submit_button.text = _("Submit")
 
-        combo_items = (_("Last journal"), _("Second to last"), _("Third to last"))
-        if self.journal_combo.count == 0:
-            self.journal_combo.add_items(combo_items)
-        else:
-            for index, item in enumerate(combo_items):
-                self.journal_combo.set_item_text(index, item)
-
 
 class NeutronTab(TabBase):
     """The neutron plotter tab."""

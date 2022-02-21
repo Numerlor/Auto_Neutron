@@ -16,13 +16,8 @@ from PySide6 import QtCore, QtGui, QtWidgets
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa F401
 from auto_neutron import settings
-from auto_neutron.constants import (
-    JOURNAL_PATH,
-    ROUTE_FILE_NAME,
-    SPANSH_API_URL,
-    get_config_dir,
-)
-from auto_neutron.journal import Journal, get_cached_journal
+from auto_neutron.constants import ROUTE_FILE_NAME, SPANSH_API_URL, get_config_dir
+from auto_neutron.journal import Journal, get_unique_cmdr_journals
 from auto_neutron.route_plots import (
     ExactPlotRow,
     NeutronPlotRow,
@@ -32,7 +27,7 @@ from auto_neutron.route_plots import (
 from auto_neutron.ship import Ship
 from auto_neutron.utils.network import make_network_request
 from auto_neutron.utils.signal import ReconnectingSignal
-from auto_neutron.utils.utils import create_request_delay_iterator
+from auto_neutron.utils.utils import cmdr_display_name, create_request_delay_iterator
 from auto_neutron.workers import GameWorker
 
 from .gui.new_route_window import NewRouteWindowGUI
@@ -51,7 +46,7 @@ class NewRouteWindow(NewRouteWindowGUI):
     def __init__(self, parent: QtWidgets.QWidget):
         super().__init__(parent)
         self.selected_journal: Journal | None = None
-        self._journals = dict[Path, Journal]()
+        self._journals = list[Journal]()
         self._journal_worker: GameWorker | None = None
         self._status_hide_timer = QtCore.QTimer(self)
         self._status_hide_timer.single_shot_ = True
@@ -126,7 +121,7 @@ class NewRouteWindow(NewRouteWindowGUI):
         self._route_displayed = False
         self._loaded_route: list[NeutronPlotRow] | None = None
         self.retranslate()
-        self._change_journal(0)
+        self._populate_journal_combos()
 
     # region spansh plotters
     def _submit_neutron(self) -> None:
@@ -415,16 +410,36 @@ class NewRouteWindow(NewRouteWindowGUI):
                 combo_box.index = index
         self._change_journal(index)
 
+    def _populate_journal_combos(self) -> None:
+        """
+        Populate the combo boxes with CMDR names referring to latest active journal files.
+
+        The journals they're referring to are stored in `self._journals`.
+        """
+        font_metrics = self._combo_boxes[0].font_metrics()
+
+        combo_items = []
+        self._journals = get_unique_cmdr_journals()
+        for journal in self._journals:
+            combo_items.append(
+                font_metrics.elided_text(
+                    cmdr_display_name(journal.cmdr),
+                    QtCore.Qt.TextElideMode.ElideRight,
+                    80,
+                )
+            )
+
+        with contextlib.ExitStack() as exit_stack:
+            for signal in self.combo_signals:
+                exit_stack.enter_context(signal.temporarily_disconnect())
+            for combo_box in self._combo_boxes:
+                combo_box.clear()
+                combo_box.add_items(combo_items)
+
     def _change_journal(self, index: int) -> None:
         """Change the current journal and update the UI with its data, or display an error if shut down."""
-        journals = sorted(
-            JOURNAL_PATH.glob("Journal.*.log"),
-            key=lambda path: path.stat().st_ctime,
-            reverse=True,
-        )
-        journal_path = journals[min(index, len(journals) - 1)]
-        log.info(f"Changing selected journal to {journal_path}.")
-        journal = get_cached_journal(journal_path)
+        journal = self._journals[index]
+        log.info(f"Changing selected journal to {journal.path}.")
 
         self.selected_journal = journal
         if journal.shut_down:
