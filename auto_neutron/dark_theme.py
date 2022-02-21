@@ -15,12 +15,16 @@ class _ThemeSelector:
     # The palettes are cached because of a bug where reapplying the same dark palette but as a new QPalette instance
     # caused the app's style to revert back to the default instead of being unchanged.
 
+    def __init__(self):
+        self.is_dark = False
+
     def set_theme(self, is_dark: bool) -> None:
         """Set the app's theme depending on `is_dark`."""
         if is_dark:
             self._app.set_palette(self._dark_palette)
         else:
             self._app.set_palette(self._light_palette)
+        self.is_dark = is_dark
 
     @functools.cached_property
     def _dark_palette(self) -> QtGui.QPalette:
@@ -72,4 +76,10 @@ class _ThemeSelector:
         return QtWidgets.QApplication.instance()
 
 
-set_theme = _ThemeSelector().set_theme
+selector = _ThemeSelector()
+set_theme = selector.set_theme
+
+
+def is_dark() -> bool:
+    """Return True if the app is using the dark theme, False otherwise."""
+    return selector.is_dark
