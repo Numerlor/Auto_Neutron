@@ -251,7 +251,7 @@ class NewRouteWindow(NewRouteWindowGUI):
         """Recalculate jump range with the new cargo_mass."""
         if cargo_mass is None:
             cargo_mass = self.selected_journal.cargo
-        if self.selected_journal.ship.initialized:  # Ship may not be available yet
+        if self.selected_journal.ship is not None:  # Ship may not be available yet
             self.spansh_neutron_tab.range_spin.value = (
                 self.selected_journal.ship.jump_range(cargo_mass=cargo_mass)
             )
@@ -271,7 +271,7 @@ class NewRouteWindow(NewRouteWindowGUI):
             and self.spansh_exact_tab.target_edit.text
             and not self.selected_journal.shut_down
             and (
-                self.selected_journal.ship.initialized
+                self.selected_journal.ship is not None
                 or self.spansh_exact_tab.use_clipboard_checkbox.checked
             )
         )
@@ -461,7 +461,7 @@ class NewRouteWindow(NewRouteWindowGUI):
         self._journal_worker.start()
 
         if (
-            journal.ship.initialized
+            journal.ship is not None
             and journal.location is not None
             and journal.cargo is not None
         ):

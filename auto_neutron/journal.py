@@ -37,7 +37,7 @@ class Journal(QtCore.QObject):
     def __init__(self, journal_path: Path):
         super().__init__()
         self.path = journal_path
-        self.ship = Ship()
+        self.ship = None
         self.location = None
         self.last_target = None
         self.cargo = None
@@ -73,6 +73,8 @@ class Journal(QtCore.QObject):
         """Parse a single line from the journal, setting attributes and emitting signals appropriately."""
         entry = json.loads(line)
         if entry["event"] == "Loadout":
+            if self.ship is None:
+                self.ship = Ship()
             self.ship.update_from_loadout(entry)
             self.loadout_sig.emit(entry)
 
