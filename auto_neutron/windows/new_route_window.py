@@ -434,12 +434,18 @@ class NewRouteWindow(NewRouteWindowGUI):
                 )
             )
 
-        with contextlib.ExitStack() as exit_stack:
-            for signal in self.combo_signals:
-                exit_stack.enter_context(signal.temporarily_disconnect())
-            for combo_box in self._combo_boxes:
-                combo_box.clear()
-                combo_box.add_items(combo_items)
+        if self._journals:
+            with contextlib.ExitStack() as exit_stack:
+                for signal in self.combo_signals:
+                    exit_stack.enter_context(signal.temporarily_disconnect())
+                for combo_box in self._combo_boxes:
+                    combo_box.clear()
+                    combo_box.add_items(combo_items)
+        else:
+            self._show_status_message(
+                _("Found no active journal files from within the last week."),
+                timeout=10_000,
+            )
 
     def _change_journal(self, index: int) -> None:
         """Change the current journal and update the UI with its data, or display an error if shut down."""
