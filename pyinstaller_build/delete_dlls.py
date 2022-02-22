@@ -25,7 +25,6 @@ PLUGINS_DELETE = (
     "imageformats/qgif.dll",
     "imageformats/qicns.dll",
     "imageformats/qjpeg.dll",
-    "imageformats/qsvg.dll",
     "imageformats/qtga.dll",
     "imageformats/qtiff.dll",
     "imageformats/qwbmp.dll",
