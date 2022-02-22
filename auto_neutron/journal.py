@@ -55,6 +55,7 @@ class Journal(QtCore.QObject):
             while True:
                 if line := journal_file.readline():
                     self._parse_journal_line(line)
+                    self._last_file_pos = journal_file.tell()
                 else:
                     yield
 
