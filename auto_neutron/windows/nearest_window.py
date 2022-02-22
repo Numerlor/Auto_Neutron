@@ -20,6 +20,8 @@ from auto_neutron.utils.network import (
 from .gui.nearest_window import NearestWindowGUI
 
 if t.TYPE_CHECKING:
+    import collections.abc
+
     from auto_neutron.game_state import Location
 
 
@@ -33,12 +35,13 @@ class NearestWindow(NearestWindowGUI):
         self,
         parent: QtWidgets.QWidget,
         start_location: Location,
-        status_bar: QtWidgets.QStatusBar,
+        status_callback: collections.abc.Callable[[str]]
+        | collections.abc.Callable[[str, int]],
     ):
         super().__init__(parent)
         self.set_input_values_from_location(start_location)
         self.search_button.pressed.connect(self._make_nearest_request)
-        self._parent_status_bar = status_bar
+        self._status_callback = status_callback
         self.retranslate()
 
     def set_input_values_from_location(self, location: Location | None) -> None:
@@ -74,7 +77,7 @@ class NearestWindow(NearestWindowGUI):
             else:
                 # Fall back to Qt error message if spansh didn't respond
                 message = e.error_message
-            self._parent_status_bar.show_message(message, 10_000)
+            self._status_callback.show_message(message, 10_000)
         else:
             self.system_name_result_label.text = data["system"]["name"]
             self.distance_result_label.text = (
