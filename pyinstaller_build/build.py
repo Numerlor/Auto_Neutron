@@ -8,10 +8,10 @@ import subprocess  # noqa S404
 import sys
 from pathlib import Path
 
-import delete_babel_dat
 import dotenv
 import PyInstaller.__main__
 
+import delete_babel_dat
 import delete_dlls
 
 dotenv.load_dotenv()
