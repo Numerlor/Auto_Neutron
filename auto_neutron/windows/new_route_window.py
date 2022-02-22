@@ -127,6 +127,7 @@ class NewRouteWindow(NewRouteWindowGUI):
             self.last_route_tab.refresh_button,
         ):
             button.pressed.connect(self._populate_journal_combos)
+            button.pressed.connect(partial(self._change_journal, 0))
 
         self.tab_widget.currentChanged.connect(self._display_saved_route)
         self._route_displayed = False
