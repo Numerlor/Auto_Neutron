@@ -54,8 +54,8 @@ class Journal(QtCore.QObject):
             journal_file.seek(0, 2)
             while True:
                 if line := journal_file.readline():
-                    self._parse_journal_line(line)
                     self._last_file_pos = journal_file.tell()
+                    self._parse_journal_line(line)
                 else:
                     yield
 
@@ -66,9 +66,9 @@ class Journal(QtCore.QObject):
         )
         with self.path.open(encoding="utf8") as journal_file:
             journal_file.seek(self._last_file_pos)
-            for line in journal_file:
+            while line := journal_file.readline():
+                self._last_file_pos = journal_file.tell()
                 self._parse_journal_line(line)
-            self._last_file_pos = journal_file.tell()
 
     def _parse_journal_line(self, line: str) -> None:
         """Parse a single line from the journal, setting attributes and emitting signals appropriately."""
