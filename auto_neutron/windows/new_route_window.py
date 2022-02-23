@@ -461,7 +461,7 @@ class NewRouteWindow(NewRouteWindowGUI):
     def _change_journal(self, index: int) -> None:
         """Change the current journal and update the UI with its data, or display an error if shut down."""
         journal = self._journals[index]
-        log.info(f"Changing selected journal to index {index} ({journal.path}).")
+        log.info(f"Changing selected journal to index {index} ({journal.path.name}).")
 
         self.selected_journal = journal
         self.selected_journal.shut_down_sig.connect(self._set_neutron_submit)

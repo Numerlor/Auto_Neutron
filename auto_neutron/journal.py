@@ -49,7 +49,7 @@ class Journal(QtCore.QObject):
 
     def tail(self) -> collections.abc.Generator[None, None, None]:
         """Follow a log file, and emit signals for new systems, loadout changes and game shut down."""
-        log.info(f"Starting tailer of journal file at {self.path}.")
+        log.info(f"Starting tailer of journal file {self.path.name}.")
         with self.path.open(encoding="utf8") as journal_file:
             journal_file.seek(0, 2)
             while True:
@@ -62,7 +62,7 @@ class Journal(QtCore.QObject):
     def parse(self) -> None:
         """Parse the whole journal file and update the fields that were set."""
         log.info(
-            f"Statically parsing journal file at {self.path} from pos {self._last_file_pos}."
+            f"Statically parsing journal file {self.path.name} from pos {self._last_file_pos}."
         )
         with self.path.open(encoding="utf8") as journal_file:
             journal_file.seek(self._last_file_pos)
