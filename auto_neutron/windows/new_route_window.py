@@ -440,21 +440,28 @@ class NewRouteWindow(NewRouteWindowGUI):
                 )
             )
 
-        if self._journals:
-            log.info(f"Populating journal combos with {len(self._journals)} journals.")
-            with contextlib.ExitStack() as exit_stack:
-                for signal in self.combo_signals:
-                    exit_stack.enter_context(signal.temporarily_disconnect())
+        with contextlib.ExitStack() as exit_stack:
+            for signal in self.combo_signals:
+                exit_stack.enter_context(signal.temporarily_disconnect())
+
+            if self._journals:
+                log.info(
+                    f"Populating journal combos with {len(self._journals)} journals."
+                )
                 for combo_box in self._combo_boxes:
                     combo_box.clear()
                     combo_box.add_items(combo_items)
-            self._change_journal(0, show_change_message=show_change_message)
-        else:
-            log.info("No valid journals found to populate combos with.")
-            self._show_status_message(
-                _("Found no active journal files from within the last week."),
-                timeout=10_000,
-            )
+                self._change_journal(0, show_change_message=show_change_message)
+
+            else:
+                for combo_box in self._combo_boxes:
+                    combo_box.clear()
+
+                log.info("No valid journals found to populate combos with.")
+                self._show_status_message(
+                    _("Found no active journal files from within the last week."),
+                    timeout=10_000,
+                )
 
     def _change_journal(self, index: int, *, show_change_message: bool = True) -> None:
         """Change the current journal and update the UI with its data, or display an error if shut down."""
