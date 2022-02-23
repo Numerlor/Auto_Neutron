@@ -267,7 +267,6 @@ class NewRouteWindow(NewRouteWindowGUI):
         self.spansh_neutron_tab.submit_button.enabled = bool(
             self.spansh_neutron_tab.source_edit.text
             and self.spansh_neutron_tab.target_edit.text
-            and not self.selected_journal.shut_down
         )
 
     def _set_exact_submit(self) -> None:
@@ -275,7 +274,6 @@ class NewRouteWindow(NewRouteWindowGUI):
         self.spansh_exact_tab.submit_button.enabled = bool(
             self.spansh_exact_tab.source_edit.text
             and self.spansh_exact_tab.target_edit.text
-            and not self.selected_journal.shut_down
             and (
                 self.selected_journal.ship is not None
                 or self.spansh_exact_tab.use_clipboard_checkbox.checked
