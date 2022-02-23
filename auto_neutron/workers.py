@@ -37,7 +37,9 @@ class GameWorker(QtCore.QObject):
         self._generator = journal.tail()
         self._timer = QtCore.QTimer(self)
         self._timer.interval = 250
-        self._timer.timeout.connect(partial(next, self._generator))
+        self._advance_connection = self._timer.timeout.connect(
+            partial(next, self._generator)
+        )
         self._stopped = False
         self.route = route
         journal.system_sig.connect(self.emit_next_system)
@@ -61,8 +63,9 @@ class GameWorker(QtCore.QObject):
     def stop(self) -> None:
         """Stop the worker from tailing the journal file."""
         log.debug("Stopping GameWorker.")
-        self._timer.stop()
-        self._generator.close()
+        self._timer.timeout.connect(self._generator.close)
+        self._timer.disconnect(self._advance_connection)
+        self._timer.single_shot_ = True
         self._stopped = True
 
 
@@ -75,7 +78,9 @@ class StatusWorker(QtCore.QObject):
         super().__init__(parent)
         self._generator = self.read_status()
         self._timer = QtCore.QTimer(self)
-        self._timer.timeout.connect(partial(next, self._generator))
+        self._advance_connection = self._timer.timeout.connect(
+            partial(next, self._generator)
+        )
         self._timer.interval = 250
         self._stopped = False
 
@@ -89,8 +94,9 @@ class StatusWorker(QtCore.QObject):
     def stop(self) -> None:
         """Stop following the status file."""
         log.debug("Stopping StatusWorker.")
-        self._timer.stop()
-        self._generator.close()
+        self._timer.timeout.connect(self._generator.close)
+        self._timer.disconnect(self._advance_connection)
+        self._timer.single_shot_ = True
         self._stopped = True
 
     def read_status(self) -> collections.abc.Generator[None, None, None]:
