@@ -461,6 +461,13 @@ class NewRouteWindow(NewRouteWindowGUI):
         journal = self._journals[index]
         log.info(f"Changing selected journal to index {index} ({journal.path.name}).")
 
+        journal.parse()
+        if journal.shut_down:
+            if self._journal_worker is not None:
+                self._journal_worker.stop()
+            self._refresh_journals_on_shutdown()
+            return
+
         self.selected_journal = journal
 
         self.selected_journal.shut_down_sig.connect(self._refresh_journals_on_shutdown)
