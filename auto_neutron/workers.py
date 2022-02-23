@@ -54,6 +54,8 @@ class GameWorker(QtCore.QObject):
     def start(self) -> None:
         """Start the worker to tail the journal file."""
         log.debug("Starting GameWorker.")
+        if self._stopped:
+            raise RuntimeError("Can't restart a stopped worker.")
         self._timer.start()
 
     def stop(self) -> None:
@@ -61,6 +63,7 @@ class GameWorker(QtCore.QObject):
         log.debug("Stopping GameWorker.")
         self._timer.stop()
         self._generator.close()
+        self._stopped = True
 
 
 class StatusWorker(QtCore.QObject):
@@ -74,10 +77,14 @@ class StatusWorker(QtCore.QObject):
         self._timer = QtCore.QTimer(self)
         self._timer.timeout.connect(partial(next, self._generator))
         self._timer.interval = 250
+        self._running = False
 
     def start(self) -> None:
         """Start the worker to follow the status file."""
         log.debug("Starting StatusWorker.")
+        if self._running:
+            raise RuntimeError("Worker already started")
+        self._running = True
         self._timer.start()
 
     def stop(self) -> None:
@@ -85,6 +92,7 @@ class StatusWorker(QtCore.QObject):
         log.debug("Stopping StatusWorker.")
         self._timer.stop()
         self._generator.close()
+        self._running = False
 
     def read_status(self) -> collections.abc.Generator[None, None, None]:
         """Emit status_signal with the status dict on every status file change."""
