@@ -116,4 +116,4 @@ def cmdr_display_name(name: str | None) -> str:
     if name is not None:
         return f"CMDR {name}"
     else:
-        return "<No CMDR>"
+        return _("<Main menu>")
