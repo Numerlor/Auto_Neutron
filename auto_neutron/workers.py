@@ -26,21 +26,50 @@ if t.TYPE_CHECKING:
 log = logging.getLogger(__name__)
 
 
-class GameWorker(QtCore.QObject):
+class _WorkerBase(QtCore.QObject):
+    """The base class used for workers that advance generators at a given interval."""
+
+    def __init__(
+        self,
+        parent: QtCore.QObject,
+        generator: collections.abc.Generator,
+        interval: int,
+    ):
+        super().__init__(parent)
+        self._generator = generator
+        self._timer = QtCore.QTimer(self)
+        self._timer.interval = interval
+        self._advance_connection = self._timer.timeout.connect(
+            partial(next, self._generator)
+        )
+        self._stopped = False
+
+    def start(self) -> None:
+        """Start the worker to tail the journal file."""
+        log.debug("Starting GameWorker.")
+        if self._stopped:
+            raise RuntimeError("Can't restart a stopped worker.")
+        self._timer.start()
+
+    def stop(self) -> None:
+        """Stop the worker from tailing the journal file."""
+        log.debug(f"Stopping {self.__class__.__name__}.")
+        # Remove the generator advance signal, connect it to close the generator,
+        # and set single_shot_ so the next timeout is the last.
+        self._timer.timeout.connect(self._generator.close)
+        self._timer.disconnect(self._advance_connection)
+        self._timer.single_shot_ = True
+        self._stopped = True
+
+
+class GameWorker(_WorkerBase):
     """Handle dispatching route signals from the journal's tailer."""
 
     new_system_index_sig = QtCore.Signal(int)
     route_end_sig = QtCore.Signal(int)
 
     def __init__(self, parent: QtCore.QObject, route: RouteList, journal: Journal):
-        super().__init__(parent)
-        self._generator = journal.tail()
-        self._timer = QtCore.QTimer(self)
-        self._timer.interval = 250
-        self._advance_connection = self._timer.timeout.connect(
-            partial(next, self._generator)
-        )
-        self._stopped = False
+        super().__init__(parent, journal.tail(), 500)
         self.route = route
         journal.system_sig.connect(self.emit_next_system)
 
@@ -53,51 +82,14 @@ class GameWorker(QtCore.QObject):
             else:
                 self.route_end_sig.emit(new_index)
 
-    def start(self) -> None:
-        """Start the worker to tail the journal file."""
-        log.debug("Starting GameWorker.")
-        if self._stopped:
-            raise RuntimeError("Can't restart a stopped worker.")
-        self._timer.start()
 
-    def stop(self) -> None:
-        """Stop the worker from tailing the journal file."""
-        log.debug("Stopping GameWorker.")
-        self._timer.timeout.connect(self._generator.close)
-        self._timer.disconnect(self._advance_connection)
-        self._timer.single_shot_ = True
-        self._stopped = True
-
-
-class StatusWorker(QtCore.QObject):
+class StatusWorker(_WorkerBase):
     """Follow the status file and dispatch `status_signal` from its contents."""
 
     status_signal = QtCore.Signal(dict)
 
     def __init__(self, parent: QtCore.QObject):
-        super().__init__(parent)
-        self._generator = self.read_status()
-        self._timer = QtCore.QTimer(self)
-        self._advance_connection = self._timer.timeout.connect(
-            partial(next, self._generator)
-        )
-        self._timer.interval = 250
-        self._stopped = False
-
-    def start(self) -> None:
-        """Start the worker to follow the status file."""
-        log.debug("Starting StatusWorker.")
-        if self._stopped:
-            raise RuntimeError("Can't restart a stopped worker.")
-        self._timer.start()
-
-    def stop(self) -> None:
-        """Stop following the status file."""
-        log.debug("Stopping StatusWorker.")
-        self._timer.timeout.connect(self._generator.close)
-        self._timer.disconnect(self._advance_connection)
-        self._timer.single_shot_ = True
-        self._stopped = True
+        super().__init__(parent, self.read_status(), 250)
 
     def read_status(self) -> collections.abc.Generator[None, None, None]:
         """Emit status_signal with the status dict on every status file change."""
