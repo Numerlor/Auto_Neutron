@@ -421,7 +421,7 @@ class NewRouteWindow(NewRouteWindowGUI):
                 combo_box.index = index
         self._change_journal(index)
 
-    def _populate_journal_combos(self) -> None:
+    def _populate_journal_combos(self, *, show_change_message: bool = True) -> None:
         """
         Populate the combo boxes with CMDR names referring to latest active journal files.
 
@@ -448,7 +448,7 @@ class NewRouteWindow(NewRouteWindowGUI):
                 for combo_box in self._combo_boxes:
                     combo_box.clear()
                     combo_box.add_items(combo_items)
-            self._change_journal(0)
+            self._change_journal(0, show_change_message=show_change_message)
         else:
             log.info("No valid journals found to populate combos with.")
             self._show_status_message(
@@ -456,14 +456,14 @@ class NewRouteWindow(NewRouteWindowGUI):
                 timeout=10_000,
             )
 
-    def _change_journal(self, index: int) -> None:
+    def _change_journal(self, index: int, *, show_change_message: bool = True) -> None:
         """Change the current journal and update the UI with its data, or display an error if shut down."""
         journal = self._journals[index]
         log.info(f"Changing selected journal to index {index} ({journal.path.name}).")
 
         self.selected_journal = journal
 
-        self.selected_journal.shut_down_sig.connect(self._populate_journal_combos)
+        self.selected_journal.shut_down_sig.connect(self._refresh_journals_on_shutdown)
         self.selected_journal.loadout_sig.connect(lambda: self._recalculate_range())
         self.selected_journal.loadout_sig.connect(self._set_widget_values)
         self.selected_journal.system_sig.connect(self._set_widget_values)
@@ -486,17 +486,26 @@ class NewRouteWindow(NewRouteWindowGUI):
             creation_time, locale=get_active_locale()
         )
 
-        self._show_status_message(
-            _("Selected journal using {}, created at {}").format(
-                "Oddysey" if journal.is_oddysey else "Horizons", formatted_time
-            ),
-            timeout=5_000,
-        )
+        if show_change_message:
+            self._show_status_message(
+                _("Selected journal using {}, created at {}").format(
+                    "Oddysey" if journal.is_oddysey else "Horizons", formatted_time
+                ),
+                timeout=5_000,
+            )
 
         self.csv_tab.submit_button.enabled = True
         self._set_neutron_submit()
         self._set_exact_submit()
         self.last_route_tab.submit_button.enabled = True
+
+    def _refresh_journals_on_shutdown(self) -> None:
+        """Refresh the journal combo box and display a message saying that the selected journal got shut down."""
+        self._show_status_message(
+            _("Selected journal got shut down, available journals refreshed."),
+            timeout=7_500,
+        )
+        self._populate_journal_combos(show_change_message=False)
 
     def emit_and_close(
         self, journal: Journal, route: RouteList, route_index: int
