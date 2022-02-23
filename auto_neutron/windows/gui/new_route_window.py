@@ -302,9 +302,9 @@ class NewRouteWindowGUI(QtWidgets.QDialog):
         self.spansh_exact_tab = ExactTab(self.tab_widget)
         self.last_route_tab = LastTab(self.tab_widget)
 
-        self.tab_widget.add_tab(self.csv_tab, "")
         self.tab_widget.add_tab(self.spansh_neutron_tab, "")
         self.tab_widget.add_tab(self.spansh_exact_tab, "")
+        self.tab_widget.add_tab(self.csv_tab, "")
         self.tab_widget.add_tab(self.last_route_tab, "")
 
         self.status_layout = QtWidgets.QHBoxLayout()
@@ -331,7 +331,7 @@ class NewRouteWindowGUI(QtWidgets.QDialog):
         self.spansh_neutron_tab.retranslate()
         self.spansh_exact_tab.retranslate()
         self.last_route_tab.retranslate()
-        self.tab_widget.set_tab_text(0, _("CSV"))
-        self.tab_widget.set_tab_text(1, _("Neutron plotter"))
-        self.tab_widget.set_tab_text(2, _("Galaxy plotter"))
+        self.tab_widget.set_tab_text(0, _("Neutron plotter"))
+        self.tab_widget.set_tab_text(1, _("Galaxy plotter"))
+        self.tab_widget.set_tab_text(2, _("CSV"))
         self.tab_widget.set_tab_text(3, _("Saved route"))
