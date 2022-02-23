@@ -127,15 +127,12 @@ class NewRouteWindow(NewRouteWindowGUI):
             self.last_route_tab.refresh_button,
         ):
             button.pressed.connect(self._populate_journal_combos)
-            button.pressed.connect(partial(self._change_journal, 0))
 
         self.tab_widget.currentChanged.connect(self._display_saved_route)
         self._route_displayed = False
         self._loaded_route: list[NeutronPlotRow] | None = None
         self.retranslate()
         self._populate_journal_combos()
-        if self._journals:
-            self._change_journal(0)
 
     # region spansh plotters
     def _submit_neutron(self) -> None:
@@ -451,6 +448,7 @@ class NewRouteWindow(NewRouteWindowGUI):
                 for combo_box in self._combo_boxes:
                     combo_box.clear()
                     combo_box.add_items(combo_items)
+            self._change_journal(0)
         else:
             log.info("No valid journals found to populate combos with.")
             self._show_status_message(
