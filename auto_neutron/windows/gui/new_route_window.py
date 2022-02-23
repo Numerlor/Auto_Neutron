@@ -258,7 +258,7 @@ class CSVTab(TabBase):
     def retranslate(self) -> None:
         """Retranslate text that is always on display."""
         super().retranslate()
-        self.path_edit.placeholder_text = "CSV path"
+        self.path_edit.placeholder_text = _("CSV path")
 
 
 class LastTab(TabBase):
