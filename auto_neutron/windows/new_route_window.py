@@ -462,9 +462,8 @@ class NewRouteWindow(NewRouteWindowGUI):
         log.info(f"Changing selected journal to index {index} ({journal.path.name}).")
 
         self.selected_journal = journal
-        self.selected_journal.shut_down_sig.connect(self._set_neutron_submit)
-        self.selected_journal.shut_down_sig.connect(self._set_exact_submit)
 
+        self.selected_journal.shut_down_sig.connect(self._populate_journal_combos)
         self.selected_journal.loadout_sig.connect(lambda: self._recalculate_range())
         self.selected_journal.loadout_sig.connect(self._set_widget_values)
         self.selected_journal.system_sig.connect(self._set_widget_values)
