@@ -114,6 +114,6 @@ def _pop_n_lower_bits(number: int, n: int) -> tuple[int, int]:
 def cmdr_display_name(name: str | None) -> str:
     """Get the CMDR display name for `name`."""
     if name is not None:
-        return f"CMDR {name}"
+        return name
     else:
         return _("<Main menu>")
