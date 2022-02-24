@@ -60,10 +60,6 @@ class TabBase(QtWidgets.QWidget):
         refresh_button = QtWidgets.QPushButton(widget_parent)
         refresh_button.icon = QtGui.QIcon(self.get_refresh_icon(is_dark()))
 
-        submit_button.size_policy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
-        )
-
         journal_submit_layout.add_widget(
             journal_combo, alignment=QtCore.Qt.AlignmentFlag.AlignLeft
         )
