@@ -143,6 +143,10 @@ class Hub(QtCore.QObject):
         if route_index is None:
             logging.debug("Using current plotter index.")
             route_index = self.plotter_state.route_index
+
+        if route_index >= len(route):
+            route_index = len(route) - 1
+
         logging.debug(
             f"Creating a new {type(route[0]).__name__} route with {route_index=}."
         )
