@@ -17,7 +17,6 @@ ROOT_DELETE = (
     "Qt6OpenGL.dll",
     "Qt6Quick.dll",
     "Qt6QmlModels.dll",
-    "Qt6Svg.dll",
     "Qt6VirtualKeyboard.dll",
 )
 PLUGINS_DELETE = (
