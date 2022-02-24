@@ -60,11 +60,10 @@ class TabBase(QtWidgets.QWidget):
         refresh_button = QtWidgets.QPushButton(widget_parent)
         refresh_button.icon = QtGui.QIcon(self.get_refresh_icon(is_dark()))
 
-        journal_submit_layout.add_widget(
-            journal_combo, alignment=QtCore.Qt.AlignmentFlag.AlignLeft
-        )
-        journal_submit_layout.add_widget(
-            refresh_button, alignment=QtCore.Qt.AlignmentFlag.AlignLeft
+        journal_submit_layout.add_widget(journal_combo)
+        journal_submit_layout.add_widget(refresh_button)
+        journal_submit_layout.add_spacer_item(
+            QtWidgets.QSpacerItem(1, 1, QtWidgets.QSizePolicy.Expanding)
         )
         journal_submit_layout.add_widget(submit_button)
 
