@@ -53,6 +53,8 @@ class NewRouteWindow(NewRouteWindowGUI):
         self._setup_status_widget()
         self._combo_boxes = [tab.journal_combo for tab in self.tabs]
 
+        self._current_network_reply = None
+
         # region spansh tabs init
         self.spansh_neutron_tab.nearest_button.pressed.connect(
             self._display_nearest_window
@@ -111,6 +113,7 @@ class NewRouteWindow(NewRouteWindowGUI):
 
         for tab in self.tabs:
             tab.refresh_button.pressed.connect(self._populate_journal_combos)
+            tab.abort_button.pressed.connect(self._abort_request)
 
         self.tab_widget.currentChanged.connect(self._display_saved_route)
         self._route_displayed = False
@@ -141,6 +144,7 @@ class NewRouteWindow(NewRouteWindowGUI):
             ),
         )
         self.cursor = QtGui.QCursor(QtCore.Qt.CursorShape.BusyCursor)
+        self.switch_submit_abort()
 
     def _submit_exact(self) -> None:
         """Submit an exact plotter request to spansh."""
@@ -194,6 +198,7 @@ class NewRouteWindow(NewRouteWindowGUI):
             ),
         )
         self.cursor = QtGui.QCursor(QtCore.Qt.CursorShape.BusyCursor)
+        self.switch_submit_abort()
 
     def _set_widget_values(self) -> None:
         """Update the UI with values from the game state."""
@@ -318,6 +323,17 @@ class NewRouteWindow(NewRouteWindowGUI):
         """Reset the cursor shape and display `error_message` in the status bar."""
         self.cursor = QtGui.QCursor(QtCore.Qt.CursorShape.ArrowCursor)
         self._show_status_message(error_message, 10_000)
+        self._current_network_reply = None
+        self.switch_submit_abort()
+
+    def _abort_request(self) -> None:
+        """Abort the current network request, if any."""
+        if self._current_network_reply is not None:
+            self._current_network_reply.abort()
+            self.switch_submit_abort()
+            self._show_status_message("Cancelled route plot.", 2_500)
+        self._current_network_reply = None
+        self.cursor = QtGui.QCursor(QtCore.Qt.CursorShape.ArrowCursor)
 
     # endregion
 
@@ -516,6 +532,8 @@ class NewRouteWindow(NewRouteWindowGUI):
     ) -> None:
         """Emit a new route and close the window."""
         self.route_created_signal.emit(journal, route, route_index)
+        self._current_network_reply = None
+        self.switch_submit_abort()
         self.close()
 
     def _show_status_message(self, message: str, timeout: int = 0) -> None:
