@@ -12,7 +12,8 @@ from PySide6 import QtCore, QtGui, QtWidgets
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa: F401
 from auto_neutron.utils.file import get_file_name
-from auto_neutron.windows.gui.error_window import ErrorWindowGUI
+
+from .gui.error_window import ErrorWindowGUI
 
 root_logger = logging.getLogger()
 

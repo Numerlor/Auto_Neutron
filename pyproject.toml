@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "Auto_Neutron"
-version = "2.0.9"
+version = "2.1.0"
 description = "An automatic neutron route plotter for Elite Dangerous"
 authors = ["Numerlor <numerlor@gmail.com>"]
 license = "GPL-3.0-or-later"
@@ -12,6 +12,7 @@ PySide6 = "~6.2.0"
 tomli = "~2.0.1"
 tomli-w = "~1.0.0"
 babel = "~2.9.1"
+more-itertools = "~8.12.0"
 
 [tool.poetry.dev-dependencies]
 typing-extensions = ">=4.0.1"
@@ -31,7 +32,7 @@ multi_line_output = 3
 line_length = 88
 include_trailing_comma = true
 use_parentheses = true
-known_first_party = ["auto_neutron", "__feature__", "delete_dlls"]
+known_first_party = ["auto_neutron", "__feature__", "delete_dlls", "delete_babel_dat"]
 
 [tool.black]
 target-version = ["py310"]

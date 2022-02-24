@@ -12,7 +12,7 @@ Example of AHK script in action, with no user keyboard input apart from the hotk
 
 ![](https://i.imgur.com/ciZ5iQW.jpg)
 
-![](https://i.imgur.com/kTagchR.png)
+![](https://i.imgur.com/xzq2L1U.png)
 
 ## Features
 
@@ -29,7 +29,10 @@ On the initial launch, Windows will warn you about this being an untrusted appli
 
 ## Usage
 
-On launch, the app will display a popup that allows you to create a new route, either from a CSV file, Spansh, or a previously saved route.\
+On launch, the app will display a popup that allows you to create a new route, either from a CSV file, Spansh, or a previously saved route.
+
+The dropdown list at the bottom left lets you select the journal to follow for the route. If you started a new game while the window is open, you can press the refresh button next to it to refresh the available journals.
+
 After creating a route, the popup will close and the main window will be filled with route entries, and the plotter will start.\
 When you reach a system in the route, Auto_Neutron will either copy the next system into the clipboard, or it'll feed it to AHK.
 

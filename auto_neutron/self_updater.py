@@ -25,8 +25,7 @@ from auto_neutron.utils.network import (
     json_from_network_req,
     make_network_request,
 )
-from auto_neutron.windows.download_confirm_dialog import VersionDownloadConfirmDialog
-from auto_neutron.windows.update_error_window import UpdateErrorWindow
+from auto_neutron.windows import UpdateErrorWindow, VersionDownloadConfirmDialog
 
 log = logging.getLogger(__name__)
 

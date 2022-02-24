@@ -13,7 +13,7 @@ from __feature__ import snake_case, true_property  # noqa: F401
 from auto_neutron import settings
 
 if t.TYPE_CHECKING:
-    from auto_neutron.hub import GameState
+    from auto_neutron.journal import Journal
 
 log = logging.getLogger(__name__)
 
@@ -27,30 +27,29 @@ class FuelWarn(QtCore.QObject):
     def __init__(
         self,
         parent: QtCore.QObject,
-        game_state: GameState,
         alert_widget: QtWidgets.QWidget,
     ):
         super().__init__(parent)
         self._warned = False
         self._alert_widget = alert_widget
-        self._game_state = game_state
+        self._journal = None
         self.player = QtMultimedia.QMediaPlayer(self)
         self.player.audio_output = self.audio_output = QtMultimedia.QAudioOutput(self)
 
+    def set_journal(self, journal: Journal) -> None:
+        """Set the journal to get the ship values from."""
+        self._journal = journal
+
     def warn(self, status_dict: dict) -> None:
         """Execute alert when in supercruise, on FSD cool down and fuel is below threshold."""
-        if (
-            not self._game_state.ship.initialized
-            and not status_dict
-            or "Fuel" not in status_dict
-        ):
+        if self._journal.ship is None or "Fuel" not in status_dict:
             # Sometimes we get empty JSON,
             # or when the game is shut down it only contains data up to flags.
             return
 
         status_flags = status_dict["Flags"]
         fuel_threshold = (
-            self._game_state.ship.fsd.max_fuel_usage * settings.Alerts.threshold / 100
+            self._journal.ship.fsd.max_fuel_usage * settings.Alerts.threshold / 100
         )
         if (
             not self._warned

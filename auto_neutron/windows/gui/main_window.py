@@ -9,11 +9,8 @@ from PySide6 import QtCore, QtGui, QtWidgets
 
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa: F401
-from auto_neutron.windows.gui.delegates import (
-    CheckBoxDelegate,
-    DoubleSpinBoxDelegate,
-    SpinBoxDelegate,
-)
+
+from .delegates import CheckBoxDelegate, DoubleSpinBoxDelegate, SpinBoxDelegate
 
 if t.TYPE_CHECKING:
     import collections.abc

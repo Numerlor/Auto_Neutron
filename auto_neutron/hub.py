@@ -5,13 +5,12 @@ from __future__ import annotations
 
 import atexit
 import csv
-import functools
 import logging
 import typing as t
 from functools import partial
 
 import babel
-from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6 import QtCore, QtWidgets
 
 import auto_neutron.locale
 
@@ -19,19 +18,22 @@ import auto_neutron.locale
 from __feature__ import snake_case, true_property  # noqa: F401
 from auto_neutron import Theme, settings
 from auto_neutron.constants import JOURNAL_PATH, ROUTE_FILE_NAME, get_config_dir
+from auto_neutron.dark_theme import set_theme
 from auto_neutron.fuel_warn import FuelWarn
-from auto_neutron.game_state import GameState, PlotterState
+from auto_neutron.game_state import PlotterState
 from auto_neutron.route_plots import AhkPlotter, CopyPlotter, NeutronPlotRow
 from auto_neutron.self_updater import Updater
 from auto_neutron.settings import delay_sync
 from auto_neutron.utils.signal import ReconnectingSignal
-from auto_neutron.windows.error_window import ErrorWindow
-from auto_neutron.windows.license_window import LicenseWindow
-from auto_neutron.windows.main_window import MainWindow
-from auto_neutron.windows.missing_journal_window import MissingJournalWindow
-from auto_neutron.windows.new_route_window import NewRouteWindow
-from auto_neutron.windows.settings_window import SettingsWindow
-from auto_neutron.windows.shut_down_window import ShutDownWindow
+from auto_neutron.windows import (
+    ErrorWindow,
+    LicenseWindow,
+    MainWindow,
+    MissingJournalWindow,
+    NewRouteWindow,
+    SettingsWindow,
+    ShutDownWindow,
+)
 from auto_neutron.workers import StatusWorker
 
 if t.TYPE_CHECKING:
@@ -71,9 +73,8 @@ class Hub(QtCore.QObject):
         self.window.settings_action.triggered.connect(self.display_settings)
         self.window.save_action.triggered.connect(self.save_route)
         self.window.table.doubleClicked.connect(self.get_index_row)
-        self.game_state = GameState()
 
-        self.plotter_state = PlotterState(self, self.game_state)
+        self.plotter_state = PlotterState(self)
         self.plotter_state.new_system_signal.connect(self.new_system_callback)
         self.plotter_state.route_end_signal.connect(
             partial(self.new_system_callback, None)
@@ -89,14 +90,14 @@ class Hub(QtCore.QObject):
 
         if (
             not JOURNAL_PATH.exists()
-            or list(JOURNAL_PATH.glob("Journal.*.log")) == 0
+            or not list(JOURNAL_PATH.glob("Journal.*.log"))
             or not (JOURNAL_PATH / "Status.json").exists()
         ):
             # If the journal folder is missing, force the user to quit
             MissingJournalWindow(self.window).show()
             return
 
-        self.fuel_warner = FuelWarn(self, self.game_state, self.window)
+        self.fuel_warner = FuelWarn(self, self.window)
         self.warn_worker = StatusWorker(self)
         self.warn_worker.status_signal.connect(self.fuel_warner.warn)
 
@@ -142,6 +143,10 @@ class Hub(QtCore.QObject):
         if route_index is None:
             logging.debug("Using current plotter index.")
             route_index = self.plotter_state.route_index
+
+        if route_index >= len(route):
+            route_index = len(route) - 1
+
         logging.debug(
             f"Creating a new {type(route[0]).__name__} route with {route_index=}."
         )
@@ -157,9 +162,10 @@ class Hub(QtCore.QObject):
 
         self.plotter_state.route_index = route_index
         self.window.scroll_to_index(route_index)
-        if self.game_state.location is not None:  # may not have a location yet
-            self.plotter_state.tail_worker.emit_next_system(self.game_state.location)
+        if journal.location is not None:  # may not have a location yet
+            self.plotter_state.tail_worker.emit_next_system(journal.location)
         self.warn_worker.start()
+        self.fuel_warner.set_journal(journal)
 
     def apply_settings(self) -> None:
         """Update the appearance and plotter with new settings."""
@@ -259,69 +265,3 @@ class Hub(QtCore.QObject):
                 writer.writerows(row.to_csv() for row in self.plotter_state.route)
 
             settings.General.last_route_index = self.plotter_state.route_index
-
-
-class _ThemeSelector:
-    """Allow changing the app's theme through the `set_theme` method."""
-
-    # The palettes are cached because of a bug where reapplying the same dark palette but as a new QPalette instance
-    # caused the app's style to revert back to the default instead of being unchanged.
-
-    def set_theme(self, is_dark: bool) -> None:
-        """Set the app's theme depending on `is_dark`."""
-        if is_dark:
-            self._app.set_palette(self._dark_palette)
-        else:
-            self._app.set_palette(self._light_palette)
-
-    @functools.cached_property
-    def _dark_palette(self) -> QtGui.QPalette:
-        """Create a dark themed palette."""
-        p = QtGui.QPalette()
-        p.set_color(QtGui.QPalette.Window, QtGui.QColor(35, 35, 35))
-        p.set_color(QtGui.QPalette.WindowText, QtGui.QColor(247, 247, 247))
-        p.set_color(QtGui.QPalette.Base, QtGui.QColor(25, 25, 25))
-        p.set_color(QtGui.QPalette.Text, QtGui.QColor(247, 247, 247))
-        p.set_color(QtGui.QPalette.Button, QtGui.QColor(60, 60, 60))
-        p.set_color(QtGui.QPalette.AlternateBase, QtGui.QColor(45, 45, 45))
-        p.set_color(QtGui.QPalette.ToolTipText, QtCore.Qt.white)
-        p.set_color(QtGui.QPalette.ButtonText, QtCore.Qt.white)
-        p.set_color(QtGui.QPalette.PlaceholderText, QtGui.QColor(110, 110, 100))
-        p.set_color(QtGui.QPalette.Link, QtGui.QColor(0, 123, 255))
-        p.set_color(
-            QtGui.QPalette.Disabled,
-            QtGui.QPalette.Light,
-            QtGui.QColor(0, 0, 0),
-        )
-        p.set_color(
-            QtGui.QPalette.Disabled,
-            QtGui.QPalette.Text,
-            QtGui.QColor(110, 110, 100),
-        )
-        p.set_color(
-            QtGui.QPalette.Disabled,
-            QtGui.QPalette.ButtonText,
-            QtGui.QColor(110, 110, 100),
-        )
-        p.set_color(
-            QtGui.QPalette.Disabled,
-            QtGui.QPalette.Button,
-            QtGui.QColor(50, 50, 50),
-        )
-
-        return p
-
-    @functools.cached_property
-    def _light_palette(self) -> QtGui.QPalette:
-        """Create a light themed palette."""
-        p = self._app.style().standard_palette()
-        p.set_color(QtGui.QPalette.Link, QtGui.QColor(0, 123, 255))
-        return p
-
-    @functools.cached_property
-    def _app(self) -> QtWidgets.QApplication:
-        """Get the application's instance."""
-        return QtWidgets.QApplication.instance()
-
-
-set_theme = _ThemeSelector().set_theme

@@ -15,7 +15,8 @@ from auto_neutron import settings
 from auto_neutron.constants import AHK_PATH
 from auto_neutron.locale import code_from_locale, get_available_locales
 from auto_neutron.settings import delay_sync
-from auto_neutron.windows.gui.settings_window import SettingsWindowGUI
+
+from .gui.settings_window import SettingsWindowGUI
 
 log = logging.getLogger(__name__)
 

@@ -71,10 +71,3 @@ class ShutDownWindowGUI(QtWidgets.QDialog):
         self.new_journal_button.text = _("New journal")
         self.save_route_button.text = _("Save route")
         self.quit_button.text = _("Quit")
-
-        combo_items = (_("Last journal"), _("Second to last"), _("Third to last"))
-        if self.journal_combo.count == 0:
-            self.journal_combo.add_items(combo_items)
-        else:
-            for index, item in enumerate(combo_items):
-                self.journal_combo.set_item_text(index, item)

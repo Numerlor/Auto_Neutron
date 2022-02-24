@@ -25,9 +25,15 @@ log = logging.getLogger(__name__)
 class NetworkError(Exception):
     """Raised for Qt network errors."""
 
-    def __init__(self, qt_error: str, reply_error: str | None):
+    def __init__(
+        self,
+        error_type: QtNetwork.QNetworkReply.NetworkError,
+        qt_error: str,
+        reply_error: str | None,
+    ):
         self.error_message = qt_error
         self.reply_error = reply_error
+        self.error_type = error_type
         super().__init__(qt_error, reply_error)
 
 
@@ -56,12 +62,18 @@ def json_from_network_req(
     try:
         if reply.error() is QtNetwork.QNetworkReply.NetworkError.NoError:
             return json.loads(reply.read_all().data())
+
+        elif (
+            reply.error() is QtNetwork.QNetworkReply.NetworkError.OperationCanceledError
+        ):
+            raise NetworkError(reply.error(), reply.error_string(), None)
+
         else:
             text_response = reply.read_all().data()
             if text_response:
                 reply_error = json.loads(text_response)[json_error_key]
             else:
                 reply_error = None
-            raise NetworkError(reply.error_string(), reply_error)
+            raise NetworkError(reply.error(), reply.error_string(), reply_error)
     finally:
         reply.delete_later()

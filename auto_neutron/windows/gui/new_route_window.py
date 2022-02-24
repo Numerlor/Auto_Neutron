@@ -3,10 +3,12 @@
 
 from __future__ import annotations
 
-from PySide6 import QtCore, QtWidgets
+from PySide6 import QtCore, QtGui, QtWidgets
 
 # noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa F401
+from auto_neutron.dark_theme import is_dark
+from auto_neutron.utils.file import base_path
 
 from .plain_text_scroller import PlainTextScroller
 from .tooltip_slider import TooltipSlider
@@ -30,12 +32,20 @@ class TabBase(QtWidgets.QWidget):
         (
             self.journal_submit_layout,
             self.journal_combo,
+            self.refresh_button,
             self.submit_button,
+            self.abort_button,
         ) = self.create_journal_and_submit_layout(self)
 
     def create_journal_and_submit_layout(
         self, widget_parent: QtWidgets.QWidget
-    ) -> tuple[QtWidgets.QHBoxLayout, QtWidgets.QComboBox, QtWidgets.QPushButton]:
+    ) -> tuple[
+        QtWidgets.QHBoxLayout,
+        QtWidgets.QComboBox,
+        QtWidgets.QPushButton,
+        QtWidgets.QPushButton,
+        QtWidgets.QPushButton,
+    ]:
         """Create a layout that holds the bottom journal combo box and submit button."""
         journal_submit_layout = QtWidgets.QHBoxLayout()
 
@@ -48,13 +58,29 @@ class TabBase(QtWidgets.QWidget):
         submit_button.size_policy = QtWidgets.QSizePolicy(
             QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Maximum
         )
+        abort_button = QtWidgets.QPushButton(widget_parent)
+        abort_button.size_policy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Maximum
+        )
+        abort_button.hide()
+        refresh_button = QtWidgets.QPushButton(widget_parent)
+        refresh_button.icon = QtGui.QIcon(self.get_refresh_icon(is_dark()))
 
-        journal_submit_layout.add_widget(
-            journal_combo, alignment=QtCore.Qt.AlignmentFlag.AlignLeft
+        journal_submit_layout.add_widget(journal_combo)
+        journal_submit_layout.add_widget(refresh_button)
+        journal_submit_layout.add_spacer_item(
+            QtWidgets.QSpacerItem(1, 1, QtWidgets.QSizePolicy.Expanding)
         )
         journal_submit_layout.add_widget(submit_button)
+        journal_submit_layout.add_widget(abort_button)
 
-        return journal_submit_layout, journal_combo, submit_button
+        return (
+            journal_submit_layout,
+            journal_combo,
+            refresh_button,
+            submit_button,
+            abort_button,
+        )
 
     def create_system_and_cargo_layout(
         self, parent: QtWidgets.QWidget
@@ -82,6 +108,21 @@ class TabBase(QtWidgets.QWidget):
 
         return layout, source_system_edit, target_system_edit, cargo_label, cargo_slider
 
+    def get_refresh_icon(self, dark: bool) -> QtGui.QIcon:
+        """Get an appropriately coloured refresh icon."""
+        if dark:
+            path = base_path() / "resources/refresh-dark.svg"
+        else:
+            path = base_path() / "resources/refresh.svg"
+        return QtGui.QIcon(str(path))
+
+    def change_event(self, event: QtCore.QEvent) -> None:
+        """Update the tooltip's colors when the palette changes."""
+        if event.type() == QtCore.QEvent.Type.PaletteChange:
+            self.refresh_button.icon = self.get_refresh_icon(is_dark())
+
+        super().change_event(event)
+
     def retranslate(self) -> None:
         """Retranslate text that is always on display."""
         if self.has_cargo:
@@ -91,13 +132,9 @@ class TabBase(QtWidgets.QWidget):
             self.cargo_label.text = _("Cargo")
 
         self.submit_button.text = _("Submit")
-
-        combo_items = (_("Last journal"), _("Second to last"), _("Third to last"))
-        if self.journal_combo.count == 0:
-            self.journal_combo.add_items(combo_items)
-        else:
-            for index, item in enumerate(combo_items):
-                self.journal_combo.set_item_text(index, item)
+        self.abort_button.text = _("Abort")
+        self.abort_button.tool_tip = _("Cancel the current route plot")
+        self.refresh_button.tool_tip = _("Refresh journals")
 
 
 class NeutronTab(TabBase):
@@ -231,7 +268,7 @@ class CSVTab(TabBase):
     def retranslate(self) -> None:
         """Retranslate text that is always on display."""
         super().retranslate()
-        self.path_edit.placeholder_text = "CSV path"
+        self.path_edit.placeholder_text = _("CSV path")
 
 
 class LastTab(TabBase):
@@ -275,10 +312,14 @@ class NewRouteWindowGUI(QtWidgets.QDialog):
         self.spansh_exact_tab = ExactTab(self.tab_widget)
         self.last_route_tab = LastTab(self.tab_widget)
 
-        self.tab_widget.add_tab(self.csv_tab, "")
-        self.tab_widget.add_tab(self.spansh_neutron_tab, "")
-        self.tab_widget.add_tab(self.spansh_exact_tab, "")
-        self.tab_widget.add_tab(self.last_route_tab, "")
+        self.tabs = (
+            self.spansh_neutron_tab,
+            self.spansh_exact_tab,
+            self.csv_tab,
+            self.last_route_tab,
+        )
+        for tab in self.tabs:
+            self.tab_widget.add_tab(tab, "")
 
         self.status_layout = QtWidgets.QHBoxLayout()
         self.status_widget = PlainTextScroller(self)
@@ -298,13 +339,24 @@ class NewRouteWindowGUI(QtWidgets.QDialog):
 
         self.csv_tab.journal_combo.adjust_size()
 
+    def switch_submit_abort(self) -> None:
+        """Switches the currently appearing submit/abort buttons for the other one."""
+        abort_hidden = self.spansh_neutron_tab.abort_button.is_hidden()
+        for tab in self.tabs:
+            if abort_hidden:
+                tab.abort_button.show()
+                tab.submit_button.hide()
+            else:
+                tab.abort_button.hide()
+                tab.submit_button.show()
+
     def retranslate(self) -> None:
         """Retranslate text that is always on display."""
         self.csv_tab.retranslate()
         self.spansh_neutron_tab.retranslate()
         self.spansh_exact_tab.retranslate()
         self.last_route_tab.retranslate()
-        self.tab_widget.set_tab_text(0, _("CSV"))
-        self.tab_widget.set_tab_text(1, _("Neutron plotter"))
-        self.tab_widget.set_tab_text(2, _("Galaxy plotter"))
+        self.tab_widget.set_tab_text(0, _("Neutron plotter"))
+        self.tab_widget.set_tab_text(1, _("Galaxy plotter"))
+        self.tab_widget.set_tab_text(2, _("CSV"))
         self.tab_widget.set_tab_text(3, _("Saved route"))
