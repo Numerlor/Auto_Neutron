@@ -267,6 +267,7 @@ class NewRouteWindow(NewRouteWindowGUI):
         self.spansh_neutron_tab.submit_button.enabled = bool(
             self.spansh_neutron_tab.source_edit.text
             and self.spansh_neutron_tab.target_edit.text
+            and self.selected_journal is not None
         )
 
     def _set_exact_submit(self) -> None:
@@ -274,6 +275,7 @@ class NewRouteWindow(NewRouteWindowGUI):
         self.spansh_exact_tab.submit_button.enabled = bool(
             self.spansh_exact_tab.source_edit.text
             and self.spansh_exact_tab.target_edit.text
+            and self.selected_journal is not None
             and (
                 self.selected_journal.ship is not None
                 or self.spansh_exact_tab.use_clipboard_checkbox.checked
@@ -450,6 +452,10 @@ class NewRouteWindow(NewRouteWindowGUI):
                     combo_box.clear()
                     combo_box.add_items(combo_items)
                 self._change_journal(0, show_change_message=show_change_message)
+                self.csv_tab.submit_button.enabled = True
+                self._set_neutron_submit()
+                self._set_exact_submit()
+                self.last_route_tab.submit_button.enabled = True
 
             else:
                 for combo_box in self._combo_boxes:
@@ -460,6 +466,11 @@ class NewRouteWindow(NewRouteWindowGUI):
                     _("Found no active journal files from within the last week."),
                     timeout=10_000,
                 )
+                self.csv_tab.submit_button.enabled = False
+                self.spansh_neutron_tab.submit_button.enabled = False
+                self.spansh_exact_tab.submit_button.enabled = False
+                self.last_route_tab.submit_button.enabled = False
+                self.selected_journal = None
 
     def _change_journal(self, index: int, *, show_change_message: bool = True) -> None:
         """Change the current journal and update the UI with its data, or display an error if shut down."""
@@ -505,11 +516,6 @@ class NewRouteWindow(NewRouteWindowGUI):
                 ),
                 timeout=5_000,
             )
-
-        self.csv_tab.submit_button.enabled = True
-        self._set_neutron_submit()
-        self._set_exact_submit()
-        self.last_route_tab.submit_button.enabled = True
 
     def _refresh_journals_on_shutdown(self) -> None:
         """Refresh the journal combo box and display a message saying that the selected journal got shut down."""
