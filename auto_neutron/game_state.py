@@ -44,6 +44,7 @@ class PlotterState(QtCore.QObject):
         self._active_journal: Journal | None = None
         self._active_route: list | None = None
         self._plotter: Plotter | None = None
+        self._shut_down_connection = None
 
     def create_worker_with_route(self, route: RouteList) -> None:
         """
@@ -130,8 +131,13 @@ class PlotterState(QtCore.QObject):
         """
         self._active_journal = journal
         log.info("Setting new journal.")
+        if self._shut_down_connection is not None:
+            self.disconnect(self._shut_down_connection)
+
         if journal is not None:
-            journal.shut_down_sig.connect(self.shut_down_signal.emit)
+            self._shut_down_connection = journal.shut_down_sig.connect(
+                self.shut_down_signal.emit
+            )
             journal.parse()
 
             if self._plotter is not None:

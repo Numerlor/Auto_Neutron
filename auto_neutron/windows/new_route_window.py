@@ -54,6 +54,7 @@ class NewRouteWindow(NewRouteWindowGUI):
         self._combo_boxes = [tab.journal_combo for tab in self.tabs]
 
         self._current_network_reply = None
+        self._journal_connections = []
 
         # region spansh tabs init
         self.spansh_neutron_tab.nearest_button.pressed.connect(
@@ -436,6 +437,7 @@ class NewRouteWindow(NewRouteWindowGUI):
 
         The journals they're referring to are stored in `self._journals`.
         """
+        self._disconnect_journal_connections()
         font_metrics = self._combo_boxes[0].font_metrics()
 
         combo_items = []
@@ -495,12 +497,7 @@ class NewRouteWindow(NewRouteWindowGUI):
 
         self.selected_journal = journal
 
-        self.selected_journal.shut_down_sig.connect(self._refresh_journals_on_shutdown)
-        self.selected_journal.loadout_sig.connect(lambda: self._recalculate_range())
-        self.selected_journal.loadout_sig.connect(self._set_widget_values)
-        self.selected_journal.system_sig.connect(self._set_widget_values)
-        self.selected_journal.target_signal.connect(self._set_widget_values)
-        self.selected_journal.cargo_signal.connect(self._set_widget_values)
+        self._reconnect_journal()
 
         if self._journal_worker is not None:
             self._journal_worker.stop()
@@ -526,6 +523,31 @@ class NewRouteWindow(NewRouteWindowGUI):
                 ),
                 timeout=5_000,
             )
+
+    def _disconnect_journal_connections(self) -> None:
+        """Disconnect all of the current journal connections."""
+        if self.selected_journal is not None:
+            for connection in self._journal_connections:
+                self.selected_journal.disconnect(connection)
+
+    def _reconnect_journal(self) -> None:
+        """Disconnect all of the previous connections from the selected journal, and connect the new journal."""
+        self._disconnect_journal_connections()
+        self._journal_connections.clear()
+        self._journal_connections.extend(
+            (
+                self.selected_journal.shut_down_sig.connect(
+                    self._refresh_journals_on_shutdown
+                ),
+                self.selected_journal.loadout_sig.connect(
+                    lambda: self._recalculate_range()
+                ),
+                self.selected_journal.loadout_sig.connect(self._set_widget_values),
+                self.selected_journal.system_sig.connect(self._set_widget_values),
+                self.selected_journal.target_signal.connect(self._set_widget_values),
+                self.selected_journal.cargo_signal.connect(self._set_widget_values),
+            )
+        )
 
     def _refresh_journals_on_shutdown(self) -> None:
         """Refresh the journal combo box and display a message saying that the selected journal got shut down."""
@@ -595,6 +617,7 @@ class NewRouteWindow(NewRouteWindowGUI):
     def close_event(self, event: QtGui.QCloseEvent) -> None:
         """Abort any running network request on close."""
         self._abort_request()
+        self._disconnect_journal_connections()
 
     def retranslate(self) -> None:
         """Retranslate text that is always on display."""

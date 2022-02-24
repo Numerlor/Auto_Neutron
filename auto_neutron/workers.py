@@ -71,7 +71,7 @@ class GameWorker(_WorkerBase):
     def __init__(self, parent: QtCore.QObject, route: RouteList, journal: Journal):
         super().__init__(parent, journal.tail(), 500)
         self.route = route
-        journal.system_sig.connect(self.emit_next_system)
+        self._journal_connection = journal.system_sig.connect(self.emit_next_system)
 
     def emit_next_system(self, location: Location) -> None:
         """Emit the next system in the route and its index if location is in the route, or the end of route signal."""
@@ -81,6 +81,11 @@ class GameWorker(_WorkerBase):
                 self.new_system_index_sig.emit(new_index)
             else:
                 self.route_end_sig.emit(new_index)
+
+    def stop(self) -> None:
+        """Disconnect the journal system signal."""
+        super().stop()
+        self.disconnect(self._journal_connection)
 
 
 class StatusWorker(_WorkerBase):
