@@ -21,14 +21,8 @@ from auto_neutron import settings
 from auto_neutron.constants import ROUTE_FILE_NAME, SPANSH_API_URL, get_config_dir
 from auto_neutron.journal import Journal, get_unique_cmdr_journals
 from auto_neutron.locale import get_active_locale
-from auto_neutron.route_plots import (
-    ExactPlotRow,
-    NeutronPlotRow,
-    spansh_exact_callback,
-    spansh_neutron_callback,
-)
+from auto_neutron.route_plots import ExactPlotRow, NeutronPlotRow, SpanshReplyTracker
 from auto_neutron.ship import Ship
-from auto_neutron.utils.network import make_network_request
 from auto_neutron.utils.signal import ReconnectingSignal
 from auto_neutron.utils.utils import cmdr_display_name, create_request_delay_iterator
 from auto_neutron.workers import GameWorker
@@ -128,7 +122,8 @@ class NewRouteWindow(NewRouteWindowGUI):
     def _submit_neutron(self) -> None:
         """Submit a neutron plotter request to spansh."""
         log.info("Submitting neutron job.")
-        make_network_request(
+        self._current_network_reply = SpanshReplyTracker(self)
+        self._current_network_reply.make_request(
             SPANSH_API_URL + "/route",
             params={
                 "efficiency": self.spansh_neutron_tab.efficiency_spin.value,
@@ -137,7 +132,7 @@ class NewRouteWindow(NewRouteWindowGUI):
                 "to": self.spansh_neutron_tab.target_edit.text,
             },
             finished_callback=partial(
-                spansh_neutron_callback,
+                self._current_network_reply.spansh_neutron_callback,
                 error_callback=self._spansh_error_callback,
                 delay_iterator=create_request_delay_iterator(),
                 result_callback=partial(
@@ -161,7 +156,8 @@ class NewRouteWindow(NewRouteWindowGUI):
         else:
             ship = self.selected_journal.ship
 
-        make_network_request(
+        self._current_network_reply = SpanshReplyTracker(self)
+        self._current_network_reply.make_request(
             SPANSH_API_URL + "/generic/route",
             params={
                 "source": self.spansh_exact_tab.source_edit.text,
@@ -189,7 +185,7 @@ class NewRouteWindow(NewRouteWindowGUI):
                 "cargo": self.spansh_exact_tab.cargo_slider.value,
             },
             finished_callback=partial(
-                spansh_exact_callback,
+                self._current_network_reply.spansh_exact_callback,
                 error_callback=self._spansh_error_callback,
                 delay_iterator=create_request_delay_iterator(),
                 result_callback=partial(
