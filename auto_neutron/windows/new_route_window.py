@@ -125,6 +125,8 @@ class NewRouteWindow(NewRouteWindowGUI):
     def _submit_neutron(self) -> None:
         """Submit a neutron plotter request to spansh."""
         log.info("Submitting neutron job.")
+        self._abort_request()
+
         self._current_network_reply = SpanshReplyTracker(self)
         self._current_network_reply.make_request(
             SPANSH_API_URL + "/route",
@@ -149,6 +151,8 @@ class NewRouteWindow(NewRouteWindowGUI):
     def _submit_exact(self) -> None:
         """Submit an exact plotter request to spansh."""
         log.info("Submitting exact job.")
+        self._abort_request()
+
         if self.spansh_exact_tab.use_clipboard_checkbox.checked:
             try:
                 ship = Ship.from_coriolis(
@@ -583,6 +587,10 @@ class NewRouteWindow(NewRouteWindowGUI):
         """Retranslate the GUI when a language change occurs."""
         if event.type() == QtCore.QEvent.LanguageChange:
             self.retranslate()
+
+    def close_event(self, event: QtGui.QCloseEvent) -> None:
+        """Abort any running network request on close."""
+        self._abort_request()
 
     def retranslate(self) -> None:
         """Retranslate text that is always on display."""

@@ -42,6 +42,7 @@ class NearestWindow(NearestWindowGUI):
         self.set_input_values_from_location(start_location)
         self.search_button.pressed.connect(self._make_nearest_request)
         self._status_callback = status_callback
+        self._current_network_request = None
         self.retranslate()
 
     def set_input_values_from_location(self, location: Location | None) -> None:
@@ -54,7 +55,8 @@ class NearestWindow(NearestWindowGUI):
 
     def _make_nearest_request(self) -> None:
         """Make a request to Spansh's nearest endpoint with the values from spinboxes."""
-        make_network_request(
+        self._abort_request()
+        self._current_network_request = make_network_request(
             SPANSH_API_URL + "/nearest",
             params={
                 "x": self.x_spinbox.value,
@@ -68,10 +70,17 @@ class NearestWindow(NearestWindowGUI):
     def _assign_from_reply(self, reply: QtNetwork.QNetworkReply) -> None:
         """Decode the spansh JSON reply and display the data to the user."""
         self.cursor = QtGui.QCursor(QtCore.Qt.CursorShape.BusyCursor)
+        self._current_network_request = None
 
         try:
             data = json_from_network_req(reply, json_error_key="error")
         except NetworkError as e:
+            if (
+                e.error_type
+                is QtNetwork.QNetworkReply.NetworkError.OperationCanceledError
+            ):
+                return
+
             if e.reply_error is not None:
                 message = _("Received error from Spansh: {}").format(e.reply_error)
             else:
@@ -94,6 +103,16 @@ class NearestWindow(NearestWindowGUI):
             self.z_result_label.text = (
                 format(data["system"]["z"], ".2f").rstrip("0").rstrip(".")
             )
+
+    def _abort_request(self) -> None:
+        """Abort the currently running network request, if any."""
+        if self._current_network_request is not None:
+            self._current_network_request.abort()
+        self.cursor = QtGui.QCursor(QtCore.Qt.CursorShape.ArrowCursor)
+
+    def close_event(self, event: QtGui.QCloseEvent) -> None:
+        """Abort any running network request on close."""
+        self._abort_request()
 
     def change_event(self, event: QtCore.QEvent) -> None:
         """Retranslate the GUI when a language change occurs."""
