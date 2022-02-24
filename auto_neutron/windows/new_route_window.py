@@ -238,21 +238,24 @@ class NewRouteWindow(NewRouteWindowGUI):
         self.spansh_neutron_tab.cargo_slider.maximum = (
             self.selected_journal.ship.max_cargo
         )
-        self.spansh_neutron_tab.cargo_slider.value = self.selected_journal.cargo
+        if self.selected_journal.cargo is not None:
+            self.spansh_neutron_tab.cargo_slider.value = self.selected_journal.cargo
+            self.spansh_exact_tab.cargo_slider.value = self.selected_journal.cargo
 
-        self.spansh_exact_tab.cargo_slider.value = self.selected_journal.cargo
-
-        self.spansh_neutron_tab.range_spin.value = (
-            self.selected_journal.ship.jump_range(
-                cargo_mass=self.selected_journal.cargo
+            self.spansh_neutron_tab.range_spin.value = (
+                self.selected_journal.ship.jump_range(
+                    cargo_mass=self.selected_journal.cargo
+                )
             )
-        )
 
     def _recalculate_range(self, cargo_mass: int | None = None) -> None:
         """Recalculate jump range with the new cargo_mass."""
         if cargo_mass is None:
             cargo_mass = self.selected_journal.cargo
-        if self.selected_journal.ship is not None:  # Ship may not be available yet
+        if (
+            self.selected_journal.ship is not None
+            and self.selected_journal.cargo is not None
+        ):  # Ship may not be available yet
             self.spansh_neutron_tab.range_spin.value = (
                 self.selected_journal.ship.jump_range(cargo_mass=cargo_mass)
             )
