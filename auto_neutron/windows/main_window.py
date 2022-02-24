@@ -108,7 +108,7 @@ class MainWindow(MainWindowGUI):
             if self._current_route_type is ExactPlotRow:
                 self.table.horizontal_header_item(0).set_text(
                     # NOTE: made jumps/ total
-                    _("System name ({}/{})").format(index + 1, self.table.row_count)
+                    _("System name ({}/{})").format(index, self.table.row_count)
                 )
             else:
                 total_jumps = sum(
