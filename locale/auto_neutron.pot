@@ -5,9 +5,9 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Auto Neutron 2.0.8\n"
+"Project-Id-Version: Auto Neutron 2.1.0\n"
 "Report-Msgid-Bugs-To: Numerlor@gmail\n"
-"POT-Creation-Date: 2022-02-13 22:41+0100\n"
+"POT-Creation-Date: 2022-02-24 22:12+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,47 +16,51 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.9.1\n"
 
-#: auto_neutron/route_plots.py:275
-msgid "Received invalid response from Spansh."
-msgstr ""
-
-#: auto_neutron/route_plots.py:278 auto_neutron/windows/nearest_window.py:72
+#: auto_neutron/route_plots.py:299 auto_neutron/windows/nearest_window.py:85
 msgid "Received error from Spansh: {}"
 msgstr ""
 
-#: auto_neutron/self_updater.py:110
+#: auto_neutron/route_plots.py:331
+msgid "Received invalid response from Spansh."
+msgstr ""
+
+#: auto_neutron/self_updater.py:109
 msgid "Downloading new release"
 msgstr ""
 
-#: auto_neutron/self_updater.py:149
+#: auto_neutron/self_updater.py:148
 msgid "Unable to find appropriate new release."
 msgstr ""
 
-#: auto_neutron/self_updater.py:220
+#: auto_neutron/self_updater.py:219
 msgid "Downloaded file does not match expected checksum."
 msgstr ""
 
-#: auto_neutron/self_updater.py:229
+#: auto_neutron/self_updater.py:228
 msgid "Unable to rename executable: "
 msgstr ""
 
-#: auto_neutron/self_updater.py:234
+#: auto_neutron/self_updater.py:233
 msgid "Unable to create new executable: "
 msgstr ""
 
-#: auto_neutron/self_updater.py:245
+#: auto_neutron/self_updater.py:244
 msgid "Unable to create temporary directory: "
 msgstr ""
 
-#: auto_neutron/self_updater.py:254
+#: auto_neutron/self_updater.py:253
 msgid "Unable to move files into temporary directory: "
 msgstr ""
 
-#: auto_neutron/self_updater.py:262
+#: auto_neutron/self_updater.py:261
 msgid "Unable to extract new release files: "
 msgstr ""
 
-#: auto_neutron/windows/download_confirm_dialog.py:45
+#: auto_neutron/utils/utils.py:119
+msgid "<Main menu>"
+msgstr ""
+
+#: auto_neutron/windows/download_confirm_dialog.py:44
 msgid "A new release is available: {} -> {}"
 msgstr ""
 
@@ -65,7 +69,7 @@ msgstr ""
 msgid "Multiple unexpected errors have occurred (x{})"
 msgstr ""
 
-#: auto_neutron/windows/license_window.py:47
+#: auto_neutron/windows/license_window.py:56
 msgid ""
 "        Auto_Neutron Copyright (C) 2019 Numerlor\\\n"
 "        This program comes with ABSOLUTELY NO WARRANTY.\\\n"
@@ -84,30 +88,37 @@ msgid ""
 "        {python_copyright_notice}\n"
 "          Python is licensed under the {psf_license_agreement_hyperlink},"
 " see {python_licenses_hyperlink} for more details\n"
+"\n"
+"        And The Breeze Icons Theme Copyright (C) 2014 Uri Herrera "
+"<uri_herrera@nitrux.in> and others, under the {lgplv3_hyperlink}.\n"
 "        "
 msgstr ""
 
-#: auto_neutron/windows/license_window.py:66
+#: auto_neutron/windows/license_window.py:77
 msgid "GPLv3 license"
 msgstr ""
 
-#: auto_neutron/windows/license_window.py:68
+#: auto_neutron/windows/license_window.py:79
+msgid "LGPLv3 license"
+msgstr ""
+
+#: auto_neutron/windows/license_window.py:82
 msgid "gnu.org/licenses"
 msgstr ""
 
-#: auto_neutron/windows/license_window.py:71
+#: auto_neutron/windows/license_window.py:85
 msgid "PSF License Agreement"
 msgstr ""
 
-#: auto_neutron/windows/license_window.py:74
+#: auto_neutron/windows/license_window.py:88
 msgid "docs.python.org/license.html"
 msgstr ""
 
-#: auto_neutron/windows/license_window.py:76
+#: auto_neutron/windows/license_window.py:90
 msgid "MIT license"
 msgstr ""
 
-#: auto_neutron/windows/license_window.py:78
+#: auto_neutron/windows/license_window.py:92
 msgid "3-Clause BSD license"
 msgstr ""
 
@@ -133,57 +144,65 @@ msgstr ""
 msgid "Jumps"
 msgstr ""
 
-#: auto_neutron/windows/new_route_window.py:168
+#: auto_neutron/windows/new_route_window.py:163
 msgid "Invalid ship data in clipboard."
 msgstr ""
 
-#: auto_neutron/windows/new_route_window.py:336
+#: auto_neutron/windows/new_route_window.py:357
 msgid "Select CSV file"
 msgstr ""
 
-#: auto_neutron/windows/new_route_window.py:336
+#: auto_neutron/windows/new_route_window.py:357
 msgid "CSV (*.csv);;All types (*.*)"
 msgstr ""
 
-#: auto_neutron/windows/new_route_window.py:365
+#: auto_neutron/windows/new_route_window.py:386
 msgid "Invalid CSV file."
 msgstr ""
 
-#: auto_neutron/windows/new_route_window.py:370
+#: auto_neutron/windows/new_route_window.py:391
 msgid "CSV file doesn't exist."
 msgstr ""
 
-#: auto_neutron/windows/new_route_window.py:372
+#: auto_neutron/windows/new_route_window.py:393
 msgid "Invalid CSV file: "
 msgstr ""
 
-#: auto_neutron/windows/new_route_window.py:374
+#: auto_neutron/windows/new_route_window.py:395
 msgid "Truncated data in CSV file."
 msgstr ""
 
-#: auto_neutron/windows/new_route_window.py:376
+#: auto_neutron/windows/new_route_window.py:397
 msgid "Invalid data in CSV file."
 msgstr ""
 
-#: auto_neutron/windows/new_route_window.py:378
+#: auto_neutron/windows/new_route_window.py:399
 msgid "Invalid path."
 msgstr ""
 
-#: auto_neutron/windows/new_route_window.py:439
-msgid "Selected journal ended with a shut down event."
+#: auto_neutron/windows/new_route_window.py:477
+msgid "Found no active journal files from within the last week."
+msgstr ""
+
+#: auto_neutron/windows/new_route_window.py:521
+msgid "Selected journal using {}, created at {}"
+msgstr ""
+
+#: auto_neutron/windows/new_route_window.py:555
+msgid "Selected journal got shut down, available journals refreshed."
 msgstr ""
 
 #. NOTE: Source system
-#: auto_neutron/windows/new_route_window.py:540
+#: auto_neutron/windows/new_route_window.py:635
 msgid "Source: {}"
 msgstr ""
 
-#: auto_neutron/windows/new_route_window.py:543
+#: auto_neutron/windows/new_route_window.py:638
 msgid "Saved location: {}"
 msgstr ""
 
 #. NOTE: destination system
-#: auto_neutron/windows/new_route_window.py:547
+#: auto_neutron/windows/new_route_window.py:642
 msgid "Destination: {}"
 msgstr ""
 
@@ -226,51 +245,51 @@ msgid "Quit"
 msgstr ""
 
 #: auto_neutron/windows/gui/error_window.py:49
-#: auto_neutron/windows/gui/main_window.py:136
+#: auto_neutron/windows/gui/main_window.py:133
 #: auto_neutron/windows/gui/shut_down_window.py:72
 msgid "Save route"
 msgstr ""
 
-#: auto_neutron/windows/gui/license_window.py:54
+#: auto_neutron/windows/gui/license_window.py:52
 msgid "About Qt"
 msgstr ""
 
-#: auto_neutron/windows/gui/license_window.py:55
+#: auto_neutron/windows/gui/license_window.py:53
 msgid "Back"
 msgstr ""
 
-#: auto_neutron/windows/gui/main_window.py:135
+#: auto_neutron/windows/gui/main_window.py:132
 msgid "Edit"
 msgstr ""
 
-#: auto_neutron/windows/gui/main_window.py:137
+#: auto_neutron/windows/gui/main_window.py:134
 msgid "Copy"
 msgstr ""
 
-#: auto_neutron/windows/gui/main_window.py:138
+#: auto_neutron/windows/gui/main_window.py:135
 msgid "Start a new route"
 msgstr ""
 
-#: auto_neutron/windows/gui/main_window.py:139
-#: auto_neutron/windows/gui/settings_window.py:344
+#: auto_neutron/windows/gui/main_window.py:136
+#: auto_neutron/windows/gui/settings_window.py:343
 msgid "Settings"
 msgstr ""
 
-#: auto_neutron/windows/gui/main_window.py:140
+#: auto_neutron/windows/gui/main_window.py:137
 msgid "About"
 msgstr ""
 
-#: auto_neutron/windows/gui/main_window.py:145
+#: auto_neutron/windows/gui/main_window.py:142
 #: auto_neutron/windows/gui/nearest_window.py:131
 msgid "System name"
 msgstr ""
 
-#: auto_neutron/windows/gui/main_window.py:147
+#: auto_neutron/windows/gui/main_window.py:144
 #: auto_neutron/windows/gui/nearest_window.py:132
 msgid "Distance"
 msgstr ""
 
-#: auto_neutron/windows/gui/main_window.py:149
+#: auto_neutron/windows/gui/main_window.py:146
 msgid "Remaining"
 msgstr ""
 
@@ -329,193 +348,194 @@ msgstr ""
 msgid "Search"
 msgstr ""
 
-#: auto_neutron/windows/gui/new_route_window.py:90
+#: auto_neutron/windows/gui/new_route_window.py:129
 msgid "Source system"
 msgstr ""
 
-#: auto_neutron/windows/gui/new_route_window.py:91
+#: auto_neutron/windows/gui/new_route_window.py:130
 msgid "Destination system"
 msgstr ""
 
-#: auto_neutron/windows/gui/new_route_window.py:93
+#: auto_neutron/windows/gui/new_route_window.py:132
 msgid "Cargo"
 msgstr ""
 
-#: auto_neutron/windows/gui/new_route_window.py:95
+#: auto_neutron/windows/gui/new_route_window.py:134
 msgid "Submit"
 msgstr ""
 
-#: auto_neutron/windows/gui/new_route_window.py:97
-#: auto_neutron/windows/gui/shut_down_window.py:75
-msgid "Last journal"
+#: auto_neutron/windows/gui/new_route_window.py:135
+msgid "Abort"
 msgstr ""
 
-#: auto_neutron/windows/gui/new_route_window.py:97
-#: auto_neutron/windows/gui/shut_down_window.py:75
-msgid "Second to last"
+#: auto_neutron/windows/gui/new_route_window.py:136
+msgid "Cancel the current route plot"
 msgstr ""
 
-#: auto_neutron/windows/gui/new_route_window.py:97
-#: auto_neutron/windows/gui/shut_down_window.py:75
-msgid "Third to last"
+#: auto_neutron/windows/gui/new_route_window.py:137
+msgid "Refresh journals"
 msgstr ""
 
-#: auto_neutron/windows/gui/new_route_window.py:154
+#: auto_neutron/windows/gui/new_route_window.py:189
 msgid "Range"
 msgstr ""
 
-#: auto_neutron/windows/gui/new_route_window.py:155
+#: auto_neutron/windows/gui/new_route_window.py:190
 msgid "Efficiency"
 msgstr ""
 
-#: auto_neutron/windows/gui/new_route_window.py:156
-#: auto_neutron/windows/gui/new_route_window.py:206
+#: auto_neutron/windows/gui/new_route_window.py:191
+#: auto_neutron/windows/gui/new_route_window.py:241
 msgid "Nearest"
 msgstr ""
 
-#: auto_neutron/windows/gui/new_route_window.py:201
+#: auto_neutron/windows/gui/new_route_window.py:236
 msgid "Already supercharged"
 msgstr ""
 
-#: auto_neutron/windows/gui/new_route_window.py:202
+#: auto_neutron/windows/gui/new_route_window.py:237
 msgid "Use supercharge"
 msgstr ""
 
-#: auto_neutron/windows/gui/new_route_window.py:203
+#: auto_neutron/windows/gui/new_route_window.py:238
 msgid "Use FSD injections"
 msgstr ""
 
-#: auto_neutron/windows/gui/new_route_window.py:204
+#: auto_neutron/windows/gui/new_route_window.py:239
 msgid "Exclude secondary stars"
 msgstr ""
 
-#: auto_neutron/windows/gui/new_route_window.py:205
+#: auto_neutron/windows/gui/new_route_window.py:240
 msgid "Use ship from clipboard"
 msgstr ""
 
-#: auto_neutron/windows/gui/new_route_window.py:309
-msgid "CSV"
+#: auto_neutron/windows/gui/new_route_window.py:271
+msgid "CSV path"
 msgstr ""
 
-#: auto_neutron/windows/gui/new_route_window.py:310
+#: auto_neutron/windows/gui/new_route_window.py:359
 msgid "Neutron plotter"
 msgstr ""
 
-#: auto_neutron/windows/gui/new_route_window.py:311
+#: auto_neutron/windows/gui/new_route_window.py:360
 msgid "Galaxy plotter"
 msgstr ""
 
-#: auto_neutron/windows/gui/new_route_window.py:312
+#: auto_neutron/windows/gui/new_route_window.py:361
+msgid "CSV"
+msgstr ""
+
+#: auto_neutron/windows/gui/new_route_window.py:362
 msgid "Saved route"
 msgstr ""
 
-#: auto_neutron/windows/gui/settings_window.py:66
+#: auto_neutron/windows/gui/settings_window.py:65
 msgid "Bold"
 msgstr ""
 
-#: auto_neutron/windows/gui/settings_window.py:67
+#: auto_neutron/windows/gui/settings_window.py:66
 msgid "Language"
 msgstr ""
 
-#: auto_neutron/windows/gui/settings_window.py:68
+#: auto_neutron/windows/gui/settings_window.py:67
 msgid "Dark mode"
 msgstr ""
 
-#: auto_neutron/windows/gui/settings_window.py:95
+#: auto_neutron/windows/gui/settings_window.py:94
 msgid "Save route on window close"
 msgstr ""
 
-#: auto_neutron/windows/gui/settings_window.py:96
+#: auto_neutron/windows/gui/settings_window.py:95
 msgid "Copy Mode"
 msgstr ""
 
-#: auto_neutron/windows/gui/settings_window.py:97
+#: auto_neutron/windows/gui/settings_window.py:96
 msgid "AHK Path"
 msgstr ""
 
-#: auto_neutron/windows/gui/settings_window.py:98
+#: auto_neutron/windows/gui/settings_window.py:97
 msgid "Auto scroll"
 msgstr ""
 
-#: auto_neutron/windows/gui/settings_window.py:148
+#: auto_neutron/windows/gui/settings_window.py:147
 msgid "Taskbar fuel alert"
 msgstr ""
 
-#: auto_neutron/windows/gui/settings_window.py:149
+#: auto_neutron/windows/gui/settings_window.py:148
 msgid "Sound fuel alert"
 msgstr ""
 
-#: auto_neutron/windows/gui/settings_window.py:150
+#: auto_neutron/windows/gui/settings_window.py:149
 msgid "Custom sound alert file:"
 msgstr ""
 
-#: auto_neutron/windows/gui/settings_window.py:152
+#: auto_neutron/windows/gui/settings_window.py:151
 #, python-format
 msgid "%% of maximum fuel usage left in tank before triggering alert"
 msgstr ""
 
-#: auto_neutron/windows/gui/settings_window.py:204
+#: auto_neutron/windows/gui/settings_window.py:203
 msgid "Galaxy map open key"
 msgstr ""
 
-#: auto_neutron/windows/gui/settings_window.py:205
+#: auto_neutron/windows/gui/settings_window.py:204
 msgid "Time to wait for galaxy map to open"
 msgstr ""
 
-#: auto_neutron/windows/gui/settings_window.py:206
+#: auto_neutron/windows/gui/settings_window.py:205
 msgid "Key to use to navigate right in the map"
 msgstr ""
 
-#: auto_neutron/windows/gui/settings_window.py:209
+#: auto_neutron/windows/gui/settings_window.py:208
 msgid "Key to use to focus onto the system input field"
 msgstr ""
 
-#: auto_neutron/windows/gui/settings_window.py:212
+#: auto_neutron/windows/gui/settings_window.py:211
 msgid "Key to submit the entered system"
 msgstr ""
 
-#: auto_neutron/windows/gui/settings_window.py:215
+#: auto_neutron/windows/gui/settings_window.py:214
 msgid "AutoHotKey key reference"
 msgstr ""
 
-#: auto_neutron/windows/gui/settings_window.py:260
+#: auto_neutron/windows/gui/settings_window.py:259
 msgid ""
 "Bind to trigger the script, # for win key, ! for alt, ^ for control, + "
 "for shift"
 msgstr ""
 
-#: auto_neutron/windows/gui/settings_window.py:263
+#: auto_neutron/windows/gui/settings_window.py:262
 msgid "Simple mode"
 msgstr ""
 
-#: auto_neutron/windows/gui/settings_window.py:264
+#: auto_neutron/windows/gui/settings_window.py:263
 msgid ""
 "With Simple mode enabled, a default script filled with the specified "
 "settings is used, if simple mode is not enabled, the script can be fully "
 "customized."
 msgstr ""
 
-#: auto_neutron/windows/gui/settings_window.py:333
+#: auto_neutron/windows/gui/settings_window.py:332
 msgid "Ok"
 msgstr ""
 
-#: auto_neutron/windows/gui/settings_window.py:334
+#: auto_neutron/windows/gui/settings_window.py:333
 msgid "Apply"
 msgstr ""
 
-#: auto_neutron/windows/gui/settings_window.py:338
+#: auto_neutron/windows/gui/settings_window.py:337
 msgid "Appearance"
 msgstr ""
 
-#: auto_neutron/windows/gui/settings_window.py:338
+#: auto_neutron/windows/gui/settings_window.py:337
 msgid "Behaviour"
 msgstr ""
 
-#: auto_neutron/windows/gui/settings_window.py:338
+#: auto_neutron/windows/gui/settings_window.py:337
 msgid "Alerts"
 msgstr ""
 
-#: auto_neutron/windows/gui/settings_window.py:338
+#: auto_neutron/windows/gui/settings_window.py:337
 msgid "AHK script"
 msgstr ""
 
