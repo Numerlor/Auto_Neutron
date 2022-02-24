@@ -312,10 +312,14 @@ class NewRouteWindowGUI(QtWidgets.QDialog):
         self.spansh_exact_tab = ExactTab(self.tab_widget)
         self.last_route_tab = LastTab(self.tab_widget)
 
-        self.tab_widget.add_tab(self.spansh_neutron_tab, "")
-        self.tab_widget.add_tab(self.spansh_exact_tab, "")
-        self.tab_widget.add_tab(self.csv_tab, "")
-        self.tab_widget.add_tab(self.last_route_tab, "")
+        self.tabs = (
+            self.spansh_neutron_tab,
+            self.spansh_exact_tab,
+            self.csv_tab,
+            self.last_route_tab,
+        )
+        for tab in self.tabs:
+            self.tab_widget.add_tab(tab, "")
 
         self.status_layout = QtWidgets.QHBoxLayout()
         self.status_widget = PlainTextScroller(self)
@@ -338,12 +342,7 @@ class NewRouteWindowGUI(QtWidgets.QDialog):
     def switch_submit_abort(self) -> None:
         """Switches the currently appearing submit/abort buttons for the other one."""
         abort_hidden = self.spansh_neutron_tab.abort_button.is_hidden()
-        for tab in (
-            self.spansh_neutron_tab,
-            self.spansh_exact_tab,
-            self.csv_tab,
-            self.last_route_tab,
-        ):
+        for tab in self.tabs:
             if abort_hidden:
                 tab.abort_button.show()
                 tab.submit_button.hide()

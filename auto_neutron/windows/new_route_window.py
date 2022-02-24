@@ -57,12 +57,7 @@ class NewRouteWindow(NewRouteWindowGUI):
         self._status_has_hover = False
         self._status_scheduled_reset = False
         self._setup_status_widget()
-        self._combo_boxes = (
-            self.csv_tab.journal_combo,
-            self.spansh_neutron_tab.journal_combo,
-            self.spansh_exact_tab.journal_combo,
-            self.last_route_tab.journal_combo,
-        )
+        self._combo_boxes = [tab.journal_combo for tab in self.tabs]
 
         # region spansh tabs init
         self.spansh_neutron_tab.nearest_button.pressed.connect(
@@ -120,13 +115,8 @@ class NewRouteWindow(NewRouteWindowGUI):
         for signal in self.combo_signals:
             signal.connect()
 
-        for button in (
-            self.csv_tab.refresh_button,
-            self.spansh_neutron_tab.refresh_button,
-            self.spansh_exact_tab.refresh_button,
-            self.last_route_tab.refresh_button,
-        ):
-            button.pressed.connect(self._populate_journal_combos)
+        for tab in self.tabs:
+            tab.refresh_button.pressed.connect(self._populate_journal_combos)
 
         self.tab_widget.currentChanged.connect(self._display_saved_route)
         self._route_displayed = False
