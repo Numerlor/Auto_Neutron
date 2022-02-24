@@ -288,6 +288,12 @@ class SpanshReplyTracker:
         try:
             job_response = json_from_network_req(reply, json_error_key="error")
         except NetworkError as e:
+            if (
+                e.error_type
+                is QtNetwork.QNetworkReply.NetworkError.OperationCanceledError
+            ):
+                return
+
             if e.reply_error is not None:
                 error_callback(
                     _("Received error from Spansh: {}").format(e.reply_error)
