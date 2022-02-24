@@ -34,6 +34,7 @@ class TabBase(QtWidgets.QWidget):
             self.journal_combo,
             self.refresh_button,
             self.submit_button,
+            self.abort_button,
         ) = self.create_journal_and_submit_layout(self)
 
     def create_journal_and_submit_layout(
@@ -41,6 +42,7 @@ class TabBase(QtWidgets.QWidget):
     ) -> tuple[
         QtWidgets.QHBoxLayout,
         QtWidgets.QComboBox,
+        QtWidgets.QPushButton,
         QtWidgets.QPushButton,
         QtWidgets.QPushButton,
     ]:
@@ -56,7 +58,11 @@ class TabBase(QtWidgets.QWidget):
         submit_button.size_policy = QtWidgets.QSizePolicy(
             QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Maximum
         )
-
+        abort_button = QtWidgets.QPushButton(widget_parent)
+        abort_button.size_policy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Maximum
+        )
+        abort_button.hide()
         refresh_button = QtWidgets.QPushButton(widget_parent)
         refresh_button.icon = QtGui.QIcon(self.get_refresh_icon(is_dark()))
 
@@ -66,8 +72,15 @@ class TabBase(QtWidgets.QWidget):
             QtWidgets.QSpacerItem(1, 1, QtWidgets.QSizePolicy.Expanding)
         )
         journal_submit_layout.add_widget(submit_button)
+        journal_submit_layout.add_widget(abort_button)
 
-        return journal_submit_layout, journal_combo, refresh_button, submit_button
+        return (
+            journal_submit_layout,
+            journal_combo,
+            refresh_button,
+            submit_button,
+            abort_button,
+        )
 
     def create_system_and_cargo_layout(
         self, parent: QtWidgets.QWidget
@@ -119,6 +132,8 @@ class TabBase(QtWidgets.QWidget):
             self.cargo_label.text = _("Cargo")
 
         self.submit_button.text = _("Submit")
+        self.abort_button.text = _("Abort")
+        self.abort_button.tool_tip = _("Cancel the current route plot")
         self.refresh_button.tool_tip = _("Refresh journals")
 
 
@@ -319,6 +334,22 @@ class NewRouteWindowGUI(QtWidgets.QDialog):
             button.auto_default = False
 
         self.csv_tab.journal_combo.adjust_size()
+
+    def switch_submit_abort(self) -> None:
+        """Switches the currently appearing submit/abort buttons for the other one."""
+        abort_hidden = self.spansh_neutron_tab.abort_button.is_hidden()
+        for tab in (
+            self.spansh_neutron_tab,
+            self.spansh_exact_tab,
+            self.csv_tab,
+            self.last_route_tab,
+        ):
+            if abort_hidden:
+                tab.abort_button.show()
+                tab.submit_button.hide()
+            else:
+                tab.abort_button.hide()
+                tab.submit_button.show()
 
     def retranslate(self) -> None:
         """Retranslate text that is always on display."""
