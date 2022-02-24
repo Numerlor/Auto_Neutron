@@ -251,6 +251,17 @@ def _spansh_job_callback(
     """
     try:
         job_response = json_from_network_req(reply, json_error_key="error")
+    except NetworkError as e:
+        if e.reply_error is not None:
+            error_callback(_("Received error from Spansh: {}").format(e.reply_error))
+        else:
+            error_callback(
+                e.error_message
+            )  # Fall back to Qt error message if spansh didn't respond
+    except Exception as e:
+        error_callback(str(e))
+        logging.error(e)
+    else:
         if job_response.get("status") == "queued":
             sec_delay = next(delay_iterator)
             log.debug(f"Re-requesting queued job result in {sec_delay} seconds.")
@@ -273,16 +284,6 @@ def _spansh_job_callback(
             result_callback(result_decode_func(job_response["result"]))
         else:
             error_callback(_("Received invalid response from Spansh."))
-    except NetworkError as e:
-        if e.reply_error is not None:
-            error_callback(_("Received error from Spansh: {}").format(e.reply_error))
-        else:
-            error_callback(
-                e.error_message
-            )  # Fall back to Qt error message if spansh didn't respond
-    except Exception as e:
-        error_callback(str(e))
-        logging.error(e)
 
 
 def _decode_neutron_result(result: dict) -> list[NeutronPlotRow]:
