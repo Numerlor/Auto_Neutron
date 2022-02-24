@@ -31,6 +31,7 @@ class Journal(QtCore.QObject):
 
     system_sig = QtCore.Signal(Location)
     target_signal = QtCore.Signal(Location)
+    cargo_signal = QtCore.Signal(int)
     loadout_sig = QtCore.Signal(dict)
     shut_down_sig = QtCore.Signal()
 
@@ -92,6 +93,7 @@ class Journal(QtCore.QObject):
 
         elif entry["event"] == "Cargo" and entry["Vessel"] == "Ship":
             self.cargo = entry["Count"]
+            self.cargo_signal.emit(self.cargo)
 
         elif entry["event"] == "Fileheader":
             self.is_oddysey = entry.get("Odyssey", False)

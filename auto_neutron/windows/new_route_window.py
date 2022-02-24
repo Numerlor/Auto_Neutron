@@ -500,6 +500,7 @@ class NewRouteWindow(NewRouteWindowGUI):
         self.selected_journal.loadout_sig.connect(self._set_widget_values)
         self.selected_journal.system_sig.connect(self._set_widget_values)
         self.selected_journal.target_signal.connect(self._set_widget_values)
+        self.selected_journal.cargo_signal.connect(self._set_widget_values)
 
         if self._journal_worker is not None:
             self._journal_worker.stop()
