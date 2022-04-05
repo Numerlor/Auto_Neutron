@@ -114,10 +114,10 @@ class PlainTextScroller(QtWidgets.QWidget):
         """
         Return the minimum size hint.
 
-        Height is equal to the text's, width is the text's width with a minimum of 35.
+        Height is equal to the text's, width is the text's width with a minimum of 40.
         """
         text_size = self._text_size
-        return QtCore.QSize(min(40, text_size.width()), text_size.height())
+        return QtCore.QSize(max(40, text_size.width()), text_size.height())
 
     def enter_event(self, event: QtGui.QEnterEvent) -> None:
         """Start scrolling if text doesn't fit on entry."""
