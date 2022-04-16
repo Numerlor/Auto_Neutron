@@ -50,8 +50,10 @@ class TooltipSlider(QtWidgets.QSlider):
             base_leave_event(event)
             cursor_pos = QtGui.QCursor.pos()
             handle_rect = self._handle_rect()
-            if not self._value_spinbox.focus and not handle_rect.contains(
-                self.map_from_global(cursor_pos)
+            if (
+                not self._value_spinbox.focus
+                and not handle_rect.contains(self.map_from_global(cursor_pos))
+                and not self._tooltip_hide_timer.active
             ):
                 self._value_spinbox.hide()
 
