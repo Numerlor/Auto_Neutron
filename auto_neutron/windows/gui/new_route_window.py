@@ -20,29 +20,34 @@ from .tooltip_slider import TooltipSlider
 
 
 class TabBase(QtWidgets.QWidget):
-    """Provide the base for a tab with convenience methods."""
+    """
+    Provide the base for plot tabs, with a journal selector and submit/abort buttons on bottom.
 
-    def __init__(self, parent: QtWidgets.QWidget | None, *, create_cargo: bool):
+    If `create_plot_cargo` is set to True,
+    a source and destination fields along with a cargo slider are added to the top.
+    """
+
+    def __init__(self, parent: QtWidgets.QWidget | None, *, create_plot_cargo: bool):
         super().__init__(parent)
         self.main_layout = QtWidgets.QVBoxLayout(self)
-        self.has_cargo = create_cargo
-        if create_cargo:
+        self.has_plot_cargo = create_plot_cargo
+        if create_plot_cargo:
             (
                 self.system_cargo_layout,
                 self.source_edit,
                 self.target_edit,
                 self.cargo_label,
                 self.cargo_slider,
-            ) = self.create_system_and_cargo_layout()
+            ) = self._create_system_and_cargo_layout()
         (
             self.journal_submit_layout,
             self.journal_combo,
             self.refresh_button,
             self.submit_button,
             self.abort_button,
-        ) = self.create_journal_and_submit_layout()
+        ) = self._create_journal_and_submit_layout()
 
-    def create_journal_and_submit_layout(
+    def _create_journal_and_submit_layout(
         self,
     ) -> tuple[
         QtWidgets.QHBoxLayout,
@@ -87,7 +92,7 @@ class TabBase(QtWidgets.QWidget):
             abort_button,
         )
 
-    def create_system_and_cargo_layout(
+    def _create_system_and_cargo_layout(
         self,
     ) -> tuple[
         QtWidgets.QVBoxLayout,
@@ -130,7 +135,7 @@ class TabBase(QtWidgets.QWidget):
 
     def retranslate(self) -> None:
         """Retranslate text that is always on display."""
-        if self.has_cargo:
+        if self.has_plot_cargo:
             self.source_edit.placeholder_text = _("Source system")
             self.target_edit.placeholder_text = _("Destination system")
 
@@ -146,7 +151,7 @@ class NeutronTabGUI(TabBase):
     """The neutron plotter tab."""
 
     def __init__(self, parent: QtWidgets.QWidget | None):
-        super().__init__(parent, create_cargo=True)
+        super().__init__(parent, create_plot_cargo=True)
 
         self.range_label = QtWidgets.QLabel(self)
         self.range_spin = QtWidgets.QDoubleSpinBox(self)
@@ -200,7 +205,7 @@ class ExactTabGUI(TabBase):
     """The exact plotter tab."""
 
     def __init__(self, parent: QtWidgets.QWidget | None):
-        super().__init__(parent, create_cargo=True)
+        super().__init__(parent, create_plot_cargo=True)
         self.cargo_slider.maximum = (
             999  # static value because ship may come from outside source
         )
@@ -250,7 +255,7 @@ class CSVTabGUI(TabBase):
     """The CSV plotter tab."""
 
     def __init__(self, parent: QtWidgets.QWidget | None):
-        super().__init__(parent, create_cargo=False)
+        super().__init__(parent, create_plot_cargo=False)
 
         self.path_layout = QtWidgets.QHBoxLayout()
 
@@ -280,7 +285,7 @@ class LastTabGUI(TabBase):
     """The last route plot tab."""
 
     def __init__(self, parent: QtWidgets.QWidget | None):
-        super().__init__(parent, create_cargo=False)
+        super().__init__(parent, create_plot_cargo=False)
 
         self.source_label = QtWidgets.QLabel(self)
         self.location_label = QtWidgets.QLabel(self)
