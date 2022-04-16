@@ -28,6 +28,10 @@ DLL_EXCLUDE = {
     "qminimal.dll",
     "qoffscreen.dll",
     "qwindowsvistastyle.dll",
+    "qcertonlybackend.dll",
+    "qopensslbackend.dll",
+    "libssl-1_1.dll",
+    "libcrypto-1_1.dll",
 }
 
 BABEL_INCLUDE = {"root.dat", "en.dat", "en_001.dat", "en_150.dat"}
