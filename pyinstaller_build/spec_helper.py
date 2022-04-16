@@ -32,6 +32,7 @@ DLL_EXCLUDE = {
     "qopensslbackend.dll",
     "libssl-1_1.dll",
     "libcrypto-1_1.dll",
+    "ucrtbase.dll",
 }
 
 BABEL_INCLUDE = {"root.dat", "en.dat", "en_001.dat", "en_150.dat"}
@@ -43,7 +44,11 @@ def filter_binaries(
     """Filter out any binaries that are in DLL_EXCLUDE."""
     filtered = []
     for dest, source, kind in to_filter:
-        if Path(source).name.lower() not in DLL_EXCLUDE:
+        source_path = Path(source)
+        if (
+            source_path.name.lower() not in DLL_EXCLUDE
+            and not source_path.name.startswith("api-ms")
+        ):
             filtered.append((dest, source, kind))
 
     return filtered
