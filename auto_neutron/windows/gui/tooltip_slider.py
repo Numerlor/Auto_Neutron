@@ -43,7 +43,6 @@ class TooltipSlider(QtWidgets.QSlider):
             border_color=self.palette.window().color().darker(140).name()
         )
         self._value_spinbox.adjust_size()
-        self._value_spinbox.hide()
 
         base_leave_event = self._value_spinbox.leave_event
 
@@ -79,6 +78,7 @@ class TooltipSlider(QtWidgets.QSlider):
         self._value_spinbox.focus_out_event = hide_on_focus_out
 
         self._value_spinbox.valueChanged.connect(partial(setattr, self, "value"))
+        self._value_spinbox.hide()
 
     def slider_change(self, change: QtWidgets.QAbstractSlider.SliderChange) -> None:
         """Show the tooltip above the slider's handle. If the user is not holding the slider, hide it in 1 second."""
