@@ -33,17 +33,17 @@ class TabBase(QtWidgets.QWidget):
                 self.target_edit,
                 self.cargo_label,
                 self.cargo_slider,
-            ) = self.create_system_and_cargo_layout(self)
+            ) = self.create_system_and_cargo_layout()
         (
             self.journal_submit_layout,
             self.journal_combo,
             self.refresh_button,
             self.submit_button,
             self.abort_button,
-        ) = self.create_journal_and_submit_layout(self)
+        ) = self.create_journal_and_submit_layout()
 
     def create_journal_and_submit_layout(
-        self, widget_parent: QtWidgets.QWidget | None
+        self,
     ) -> tuple[
         QtWidgets.QHBoxLayout,
         QtWidgets.QComboBox,
@@ -54,21 +54,21 @@ class TabBase(QtWidgets.QWidget):
         """Create a layout that holds the bottom journal combo box and submit button."""
         journal_submit_layout = QtWidgets.QHBoxLayout()
 
-        journal_combo = QtWidgets.QComboBox(widget_parent)
+        journal_combo = QtWidgets.QComboBox(self)
         journal_combo.size_adjust_policy = (
             QtWidgets.QComboBox.SizeAdjustPolicy.AdjustToContents
         )
 
-        submit_button = QtWidgets.QPushButton(widget_parent)
+        submit_button = QtWidgets.QPushButton(self)
         submit_button.size_policy = QtWidgets.QSizePolicy(
             QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Maximum
         )
-        abort_button = QtWidgets.QPushButton(widget_parent)
+        abort_button = QtWidgets.QPushButton(self)
         abort_button.size_policy = QtWidgets.QSizePolicy(
             QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Maximum
         )
         abort_button.hide()
-        refresh_button = QtWidgets.QPushButton(widget_parent)
+        refresh_button = QtWidgets.QPushButton(self)
         refresh_button.icon = QtGui.QIcon(self.get_refresh_icon(is_dark()))
 
         journal_submit_layout.add_widget(journal_combo)
@@ -88,7 +88,7 @@ class TabBase(QtWidgets.QWidget):
         )
 
     def create_system_and_cargo_layout(
-        self, parent: QtWidgets.QWidget | None
+        self,
     ) -> tuple[
         QtWidgets.QVBoxLayout,
         QtWidgets.QLineEdit,
@@ -99,11 +99,11 @@ class TabBase(QtWidgets.QWidget):
         """Create a layout that holds the top system text edits and cargo slider."""
         layout = QtWidgets.QVBoxLayout()
 
-        source_system_edit = QtWidgets.QLineEdit(parent)
-        target_system_edit = QtWidgets.QLineEdit(parent)
+        source_system_edit = QtWidgets.QLineEdit(self)
+        target_system_edit = QtWidgets.QLineEdit(self)
 
-        cargo_label = QtWidgets.QLabel(parent)
-        cargo_slider = TooltipSlider(QtCore.Qt.Orientation.Horizontal, parent)
+        cargo_label = QtWidgets.QLabel(self)
+        cargo_slider = TooltipSlider(QtCore.Qt.Orientation.Horizontal, self)
 
         layout.add_widget(source_system_edit)
         layout.add_widget(target_system_edit)
