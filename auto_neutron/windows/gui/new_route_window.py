@@ -3,6 +3,11 @@
 
 from __future__ import annotations
 
+import typing as t
+
+if t.TYPE_CHECKING:
+    import collections.abc
+
 from PySide6 import QtCore, QtGui, QtWidgets
 
 # noinspection PyUnresolvedReferences
@@ -17,7 +22,7 @@ from .tooltip_slider import TooltipSlider
 class TabBase(QtWidgets.QWidget):
     """Provide the base for a tab with convenience methods."""
 
-    def __init__(self, parent: QtWidgets.QWidget, *, create_cargo: bool):
+    def __init__(self, parent: QtWidgets.QWidget | None, *, create_cargo: bool):
         super().__init__(parent)
         self.main_layout = QtWidgets.QVBoxLayout(self)
         self.has_cargo = create_cargo
@@ -38,7 +43,7 @@ class TabBase(QtWidgets.QWidget):
         ) = self.create_journal_and_submit_layout(self)
 
     def create_journal_and_submit_layout(
-        self, widget_parent: QtWidgets.QWidget
+        self, widget_parent: QtWidgets.QWidget | None
     ) -> tuple[
         QtWidgets.QHBoxLayout,
         QtWidgets.QComboBox,
@@ -83,7 +88,7 @@ class TabBase(QtWidgets.QWidget):
         )
 
     def create_system_and_cargo_layout(
-        self, parent: QtWidgets.QWidget
+        self, parent: QtWidgets.QWidget | None
     ) -> tuple[
         QtWidgets.QVBoxLayout,
         QtWidgets.QLineEdit,
@@ -137,10 +142,10 @@ class TabBase(QtWidgets.QWidget):
         self.refresh_button.tool_tip = _("Refresh journals")
 
 
-class NeutronTab(TabBase):
+class NeutronTabGUI(TabBase):
     """The neutron plotter tab."""
 
-    def __init__(self, parent: QtWidgets.QWidget):
+    def __init__(self, parent: QtWidgets.QWidget | None):
         super().__init__(parent, create_cargo=True)
 
         self.range_label = QtWidgets.QLabel(self)
@@ -191,10 +196,10 @@ class NeutronTab(TabBase):
         self.nearest_button.text = _("Nearest")
 
 
-class ExactTab(TabBase):
+class ExactTabGUI(TabBase):
     """The exact plotter tab."""
 
-    def __init__(self, parent: QtWidgets.QWidget):
+    def __init__(self, parent: QtWidgets.QWidget | None):
         super().__init__(parent, create_cargo=True)
         self.cargo_slider.maximum = (
             999  # static value because ship may come from outside source
@@ -241,10 +246,10 @@ class ExactTab(TabBase):
         self.nearest_button.text = _("Nearest")
 
 
-class CSVTab(TabBase):
+class CSVTabGUI(TabBase):
     """The CSV plotter tab."""
 
-    def __init__(self, parent: QtWidgets.QWidget):
+    def __init__(self, parent: QtWidgets.QWidget | None):
         super().__init__(parent, create_cargo=False)
 
         self.path_layout = QtWidgets.QHBoxLayout()
@@ -271,10 +276,10 @@ class CSVTab(TabBase):
         self.path_edit.placeholder_text = _("CSV path")
 
 
-class LastTab(TabBase):
+class LastTabGUI(TabBase):
     """The last route plot tab."""
 
-    def __init__(self, parent: QtWidgets.QWidget):
+    def __init__(self, parent: QtWidgets.QWidget | None):
         super().__init__(parent, create_cargo=False)
 
         self.source_label = QtWidgets.QLabel(self)
@@ -296,7 +301,12 @@ class LastTab(TabBase):
 class NewRouteWindowGUI(QtWidgets.QDialog):
     """Provide the base GUI for the new route window in the form of tabs for each plotter."""
 
-    def __init__(self, parent: QtWidgets.QWidget | None):
+    def __init__(
+        self,
+        parent: QtWidgets.QWidget | None,
+        *,
+        tabs: collections.abc.Sequence[tuple[TabBase, str]],
+    ):
         super().__init__(parent)
         self.set_attribute(QtCore.Qt.WidgetAttribute.WA_DeleteOnClose)
         self.focus_policy = QtCore.Qt.FocusPolicy.ClickFocus
@@ -307,18 +317,9 @@ class NewRouteWindowGUI(QtWidgets.QDialog):
 
         self.tab_widget = QtWidgets.QTabWidget(self)
 
-        self.csv_tab = CSVTab(self.tab_widget)
-        self.spansh_neutron_tab = NeutronTab(self.tab_widget)
-        self.spansh_exact_tab = ExactTab(self.tab_widget)
-        self.last_route_tab = LastTab(self.tab_widget)
-
-        self.tabs = (
-            self.spansh_neutron_tab,
-            self.spansh_exact_tab,
-            self.csv_tab,
-            self.last_route_tab,
-        )
-        for tab in self.tabs:
+        self.tabs = tabs
+        for tab, __ in tabs:
+            tab.set_parent(self.tab_widget)
             self.tab_widget.add_tab(tab, "")
 
         self.status_layout = QtWidgets.QHBoxLayout()
@@ -339,8 +340,8 @@ class NewRouteWindowGUI(QtWidgets.QDialog):
 
     def switch_submit_abort(self) -> None:
         """Switches the currently appearing submit/abort buttons for the other one."""
-        abort_hidden = self.spansh_neutron_tab.abort_button.is_hidden()
-        for tab in self.tabs:
+        abort_hidden = self.tabs[0][0].abort_button.is_hidden()
+        for tab, __ in self.tabs:
             if abort_hidden:
                 tab.abort_button.show()
                 tab.submit_button.hide()
@@ -350,11 +351,6 @@ class NewRouteWindowGUI(QtWidgets.QDialog):
 
     def retranslate(self) -> None:
         """Retranslate text that is always on display."""
-        self.csv_tab.retranslate()
-        self.spansh_neutron_tab.retranslate()
-        self.spansh_exact_tab.retranslate()
-        self.last_route_tab.retranslate()
-        self.tab_widget.set_tab_text(0, _("Neutron plotter"))
-        self.tab_widget.set_tab_text(1, _("Galaxy plotter"))
-        self.tab_widget.set_tab_text(2, _("CSV"))
-        self.tab_widget.set_tab_text(3, _("Saved route"))
+        for tab_pos, (tab, tab_title) in enumerate(self.tabs):
+            tab.retranslate()
+            self.tab_widget.set_tab_text(tab_pos, _(tab_title))

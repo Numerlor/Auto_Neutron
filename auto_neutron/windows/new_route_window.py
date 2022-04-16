@@ -24,10 +24,20 @@ from auto_neutron.locale import get_active_locale
 from auto_neutron.route_plots import ExactPlotRow, NeutronPlotRow, SpanshReplyTracker
 from auto_neutron.ship import Ship
 from auto_neutron.utils.signal import ReconnectingSignal
-from auto_neutron.utils.utils import cmdr_display_name, create_request_delay_iterator
+from auto_neutron.utils.utils import (
+    N_,
+    cmdr_display_name,
+    create_request_delay_iterator,
+)
 from auto_neutron.workers import GameWorker
 
-from .gui.new_route_window import NewRouteWindowGUI
+from .gui.new_route_window import (
+    CSVTabGUI,
+    ExactTabGUI,
+    LastTabGUI,
+    NeutronTabGUI,
+    NewRouteWindowGUI,
+)
 from .nearest_window import NearestWindow
 
 if t.TYPE_CHECKING:
@@ -41,7 +51,19 @@ class NewRouteWindow(NewRouteWindowGUI):
     route_created_signal = QtCore.Signal(Journal, list, int)
 
     def __init__(self, parent: QtWidgets.QWidget):
-        super().__init__(parent)
+        self.spansh_neutron_tab = NeutronTabGUI(None)
+        self.spansh_exact_tab = ExactTabGUI(None)
+        self.csv_tab = CSVTabGUI(None)
+        self.last_route_tab = LastTabGUI(None)
+        super().__init__(
+            parent,
+            tabs=[
+                (self.spansh_neutron_tab, N_("Neutron plotter")),
+                (self.spansh_exact_tab, N_("Galaxy plotter")),
+                (self.csv_tab, N_("CSV")),
+                (self.last_route_tab, N_("Saved route")),
+            ],
+        )
         self.selected_journal: Journal | None = None
         self._journals = list[Journal]()
         self._journal_worker: GameWorker | None = None
@@ -51,7 +73,7 @@ class NewRouteWindow(NewRouteWindowGUI):
         self._status_has_hover = False
         self._status_scheduled_reset = False
         self._setup_status_widget()
-        self._combo_boxes = [tab.journal_combo for tab in self.tabs]
+        self._combo_boxes = [tab.journal_combo for tab, __ in self.tabs]
 
         self._current_network_reply = None
         self._journal_connections = []
@@ -112,7 +134,7 @@ class NewRouteWindow(NewRouteWindowGUI):
         for signal in self.combo_signals:
             signal.connect()
 
-        for tab in self.tabs:
+        for tab, __ in self.tabs:
             tab.refresh_button.pressed.connect(self._populate_journal_combos)
             tab.abort_button.pressed.connect(self._abort_request)
 
