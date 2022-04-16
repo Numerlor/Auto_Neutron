@@ -337,8 +337,6 @@ class NewRouteWindowGUI(QtWidgets.QDialog):
         for button in self.find_children(QtWidgets.QPushButton):
             button.auto_default = False
 
-        self.csv_tab.journal_combo.adjust_size()
-
     def switch_submit_abort(self) -> None:
         """Switches the currently appearing submit/abort buttons for the other one."""
         abort_hidden = self.spansh_neutron_tab.abort_button.is_hidden()
