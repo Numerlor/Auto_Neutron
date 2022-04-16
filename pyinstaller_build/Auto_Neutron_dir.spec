@@ -40,9 +40,9 @@ exe = EXE(
 )
 coll = COLLECT(
     exe,
-    a.binaries,
+    filter_binaries(a.binaries),
     a.zipfiles,
-    a.datas,
+    filter_datas(a.datas),
     strip=False,
     upx=True,
     upx_exclude=[],

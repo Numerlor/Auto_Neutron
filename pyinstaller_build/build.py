@@ -11,9 +11,6 @@ from pathlib import Path
 import dotenv
 import PyInstaller.__main__
 
-import delete_babel_dat
-import delete_dlls
-
 dotenv.load_dotenv()
 
 
@@ -68,8 +65,7 @@ else:
         BASE_PATH / "Auto_Neutron_debug.spec",
     ]
     debug = True
-delete_dlls.main()
-delete_babel_dat.main()
+
 compiled_process = subprocess.run(  # noqa: S603, S607
     ["poetry", "run", "task", "i18n-compile"]
 )

@@ -22,9 +22,9 @@ pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 exe = EXE(
     pyz,
     a.scripts,
-    a.binaries,
+    filter_binaries(a.binaries),
     a.zipfiles,
-    a.datas,
+    filter_datas(a.datas),
     [],
     name="Auto_Neutron",
     debug=False,
