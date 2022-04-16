@@ -6,7 +6,16 @@ DATAS = [
     ("../locale", "./locale"),
     ("../LICENSE.md", "."),
 ]
-EXCLUDES = []
+EXCLUDES = [
+    "_decimal",
+    "asyncio",
+    "bz2",
+    "lzma",
+    "pkg_resources",
+    "ssl",
+    "unicodedata",
+    "xml.parsers.expat",
+]
 HIDDEN_IMPORTS = ["babel.numbers"]
 
 DLL_EXCLUDE = {
