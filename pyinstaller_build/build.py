@@ -1,6 +1,6 @@
 # This file uses the MIT license.
 # Copyright (C) 2021  Numerlor
-
+import argparse
 import hashlib
 import os
 import shutil
@@ -54,6 +54,14 @@ def sign_file(file: Path) -> subprocess.CompletedProcess:
     )
 
 
+parser = argparse.ArgumentParser(
+    description="Run the pyinstaller build process. If running with the optimize mode build for release."
+)
+parser.add_argument(
+    "--clean", action="store_true", help="run pyinstaller with the --clean argument."
+)
+clean = parser.parse_args().clean
+
 if sys.flags.optimize:
     spec_files = [
         BASE_PATH / "Auto_Neutron.spec",
@@ -81,6 +89,7 @@ for spec_file in spec_files:
             f"--workpath={BASE_PATH}/build",
             f"--distpath={BASE_PATH}/dist",
         ]
+        + (["--clean"] if clean else [])
     )
 
 directory_path = Path(f"{BASE_PATH}/dist/Auto_Neutron")
