@@ -1,3 +1,6 @@
+# This file uses the MIT license.
+# Copyright (C) 2022  Numerlor
+
 """Constants and filter helper functions to be used in spec files."""
 from pathlib import Path
 
