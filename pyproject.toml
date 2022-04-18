@@ -11,13 +11,13 @@ python = "3.10.*"
 PySide6 = "~6.3.0"
 tomli = "~2.0.1"
 tomli-w = "~1.0.0"
-babel = "~2.9.1"
+babel = "~2.10.1"
 more-itertools = "~8.12.0"
 
 [tool.poetry.dev-dependencies]
-typing-extensions = "~4.1.1"
+typing-extensions = "~4.2.0"
 pre-commit = "~2.18"
-pyinstaller = "~4.10"
+pyinstaller = "~5.0.1"
 taskipy = "~1.9"
 python-dotenv = "~0.20.0"
 
