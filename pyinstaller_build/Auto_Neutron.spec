@@ -1,20 +1,18 @@
 # -*- mode: python ; coding: utf-8 -*-
 
+from spec_helper import *
+
 block_cipher = None
 
 a = Analysis(
     ["..\\main.py"],
     pathex=["."],
     binaries=[],
-    datas=[
-        ("../resources/*", "./resources"),
-        ("../locale", "./locale"),
-        ("../LICENSE.md", "."),
-    ],
-    hiddenimports=["babel.numbers"],
+    datas=DATAS,
+    hiddenimports=HIDDEN_IMPORTS,
     hookspath=[],
     runtime_hooks=[],
-    excludes=[],
+    excludes=EXCLUDES,
     win_no_prefer_redirects=False,
     win_private_assemblies=False,
     cipher=block_cipher,
@@ -24,9 +22,9 @@ pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 exe = EXE(
     pyz,
     a.scripts,
-    a.binaries,
+    filter_binaries(a.binaries),
     a.zipfiles,
-    a.datas,
+    filter_datas(a.datas),
     [],
     name="Auto_Neutron",
     debug=False,

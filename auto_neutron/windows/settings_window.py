@@ -97,7 +97,7 @@ class SettingsWindow(SettingsWindowGUI):
         )
         if path:
             settings.Paths.ahk = Path(path)
-            log.info("Setting ahk path to {path}")
+            log.info(f"Setting ahk path to {path}")
             self.behaviour_widget.copy_mode_checkbox.enabled = True
 
     def get_sound_path(self) -> None:

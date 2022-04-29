@@ -117,3 +117,8 @@ def cmdr_display_name(name: str | None) -> str:
         return name
     else:
         return _("<Main menu>")
+
+
+def N_(arg: str) -> str:
+    """Mark string for translation and return unchanged."""
+    return arg

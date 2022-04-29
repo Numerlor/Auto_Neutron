@@ -1,6 +1,6 @@
 # This file uses the MIT license.
 # Copyright (C) 2021  Numerlor
-
+import argparse
 import hashlib
 import os
 import shutil
@@ -10,9 +10,6 @@ from pathlib import Path
 
 import dotenv
 import PyInstaller.__main__
-
-import delete_babel_dat
-import delete_dlls
 
 dotenv.load_dotenv()
 
@@ -57,6 +54,14 @@ def sign_file(file: Path) -> subprocess.CompletedProcess:
     )
 
 
+parser = argparse.ArgumentParser(
+    description="Run the pyinstaller build process. If running with the optimize mode build for release."
+)
+parser.add_argument(
+    "--clean", action="store_true", help="run pyinstaller with the --clean argument."
+)
+clean = parser.parse_args().clean
+
 if sys.flags.optimize:
     spec_files = [
         BASE_PATH / "Auto_Neutron.spec",
@@ -68,8 +73,7 @@ else:
         BASE_PATH / "Auto_Neutron_debug.spec",
     ]
     debug = True
-delete_dlls.main()
-delete_babel_dat.main()
+
 compiled_process = subprocess.run(  # noqa: S603, S607
     ["poetry", "run", "task", "i18n-compile"]
 )
@@ -85,6 +89,7 @@ for spec_file in spec_files:
             f"--workpath={BASE_PATH}/build",
             f"--distpath={BASE_PATH}/dist",
         ]
+        + (["--clean"] if clean else [])
     )
 
 directory_path = Path(f"{BASE_PATH}/dist/Auto_Neutron")
@@ -109,9 +114,9 @@ if not debug:
         sha256sum(archive_path) + "\n"
     )
 
-if os.environ.get("SIGN") and sign_file(exe_path).returncode != 0:
-    print("Failed to sign", exe_path)  # noqa T001
+    if os.environ.get("SIGN") and sign_file(exe_path).returncode != 0:
+        print("Failed to sign", exe_path)  # noqa T001
 
-Path(exe_path.with_name(exe_path.name + ".signature.txt")).write_text(
-    sha256sum(exe_path) + "\n"
-)
+    Path(exe_path.with_name(exe_path.name + ".signature.txt")).write_text(
+        sha256sum(exe_path) + "\n"
+    )

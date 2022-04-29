@@ -8,16 +8,16 @@ license = "GPL-3.0-or-later"
 [tool.poetry.dependencies]
 python = "3.10.*"
 
-PySide6 = "~6.2.4"
+PySide6 = "~6.3.0"
 tomli = "~2.0.1"
 tomli-w = "~1.0.0"
-babel = "~2.9.1"
+babel = "~2.10.1"
 more-itertools = "~8.12.0"
 
 [tool.poetry.dev-dependencies]
-typing-extensions = "~4.1.1"
+typing-extensions = "~4.2.0"
 pre-commit = "~2.18"
-pyinstaller = "~4.10"
+pyinstaller = "~5.0.1"
 taskipy = "~1.9"
 python-dotenv = "~0.20.0"
 
@@ -32,7 +32,7 @@ multi_line_output = 3
 line_length = 88
 include_trailing_comma = true
 use_parentheses = true
-known_first_party = ["auto_neutron", "__feature__", "delete_dlls", "delete_babel_dat"]
+known_first_party = ["auto_neutron", "__feature__"]
 
 [tool.black]
 target-version = ["py310"]
@@ -43,6 +43,7 @@ lint = "pre-commit run --all-files"
 pyside-pyi = "pyside6-genpyi all --feature snake_case true_property"
 build = "python -OO pyinstaller_build/build.py"
 build-debug = "python pyinstaller_build/build.py"
+convert-icon = "python pyinstaller_build/svg_to_ico.py -i resources/icon.svg -o resources/icons_libary.ico"
 
 i18n-init = "pybabel init -i .\\locale\\auto_neutron.pot -d .\\locale -D auto_neutron -l"
 i18n-compile = "pybabel compile -d locale -D auto_neutron"

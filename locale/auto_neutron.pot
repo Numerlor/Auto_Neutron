@@ -5,22 +5,22 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Auto Neutron 2.1.0\n"
-"Report-Msgid-Bugs-To: Numerlor@gmail\n"
-"POT-Creation-Date: 2022-02-24 22:12+0100\n"
+"Project-Id-Version: Auto Neutron 2.1.1\n"
+"Report-Msgid-Bugs-To: Numerlor@gmail.com\n"
+"POT-Creation-Date: 2022-04-29 19:44+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.9.1\n"
+"Generated-By: Babel 2.10.1\n"
 
-#: auto_neutron/route_plots.py:299 auto_neutron/windows/nearest_window.py:85
+#: auto_neutron/route_plots.py:297 auto_neutron/windows/nearest_window.py:85
 msgid "Received error from Spansh: {}"
 msgstr ""
 
-#: auto_neutron/route_plots.py:331
+#: auto_neutron/route_plots.py:329
 msgid "Received invalid response from Spansh."
 msgstr ""
 
@@ -144,65 +144,81 @@ msgstr ""
 msgid "Jumps"
 msgstr ""
 
-#: auto_neutron/windows/new_route_window.py:163
+#: auto_neutron/windows/new_route_window.py:61
+msgid "Neutron plotter"
+msgstr ""
+
+#: auto_neutron/windows/new_route_window.py:62
+msgid "Galaxy plotter"
+msgstr ""
+
+#: auto_neutron/windows/new_route_window.py:63
+msgid "CSV"
+msgstr ""
+
+#: auto_neutron/windows/new_route_window.py:64
+msgid "Saved route"
+msgstr ""
+
+#: auto_neutron/windows/new_route_window.py:185
 msgid "Invalid ship data in clipboard."
 msgstr ""
 
-#: auto_neutron/windows/new_route_window.py:357
+#: auto_neutron/windows/new_route_window.py:384
 msgid "Select CSV file"
 msgstr ""
 
-#: auto_neutron/windows/new_route_window.py:357
+#: auto_neutron/windows/new_route_window.py:384
 msgid "CSV (*.csv);;All types (*.*)"
 msgstr ""
 
-#: auto_neutron/windows/new_route_window.py:386
+#: auto_neutron/windows/new_route_window.py:413
 msgid "Invalid CSV file."
 msgstr ""
 
-#: auto_neutron/windows/new_route_window.py:391
+#: auto_neutron/windows/new_route_window.py:418
 msgid "CSV file doesn't exist."
 msgstr ""
 
-#: auto_neutron/windows/new_route_window.py:393
+#: auto_neutron/windows/new_route_window.py:420
 msgid "Invalid CSV file: "
 msgstr ""
 
-#: auto_neutron/windows/new_route_window.py:395
+#: auto_neutron/windows/new_route_window.py:422
 msgid "Truncated data in CSV file."
 msgstr ""
 
-#: auto_neutron/windows/new_route_window.py:397
+#: auto_neutron/windows/new_route_window.py:424
 msgid "Invalid data in CSV file."
 msgstr ""
 
-#: auto_neutron/windows/new_route_window.py:399
+#: auto_neutron/windows/new_route_window.py:426
 msgid "Invalid path."
 msgstr ""
 
-#: auto_neutron/windows/new_route_window.py:477
+#: auto_neutron/windows/new_route_window.py:504
 msgid "Found no active journal files from within the last week."
 msgstr ""
 
-#: auto_neutron/windows/new_route_window.py:521
+#: auto_neutron/windows/new_route_window.py:548
 msgid "Selected journal using {}, created at {}"
 msgstr ""
 
-#: auto_neutron/windows/new_route_window.py:555
+#: auto_neutron/windows/new_route_window.py:582
 msgid "Selected journal got shut down, available journals refreshed."
 msgstr ""
 
 #. NOTE: Source system
-#: auto_neutron/windows/new_route_window.py:635
+#: auto_neutron/windows/new_route_window.py:662
 msgid "Source: {}"
 msgstr ""
 
-#: auto_neutron/windows/new_route_window.py:638
+#: auto_neutron/windows/new_route_window.py:665
 msgid "Saved location: {}"
 msgstr ""
 
 #. NOTE: destination system
-#: auto_neutron/windows/new_route_window.py:642
+#: auto_neutron/windows/new_route_window.py:669
 msgid "Destination: {}"
 msgstr ""
 
@@ -348,85 +364,69 @@ msgstr ""
 msgid "Search"
 msgstr ""
 
-#: auto_neutron/windows/gui/new_route_window.py:129
+#: auto_neutron/windows/gui/new_route_window.py:139
 msgid "Source system"
 msgstr ""
 
-#: auto_neutron/windows/gui/new_route_window.py:130
+#: auto_neutron/windows/gui/new_route_window.py:140
 msgid "Destination system"
 msgstr ""
 
-#: auto_neutron/windows/gui/new_route_window.py:132
+#: auto_neutron/windows/gui/new_route_window.py:142
 msgid "Cargo"
 msgstr ""
 
-#: auto_neutron/windows/gui/new_route_window.py:134
+#: auto_neutron/windows/gui/new_route_window.py:144
 msgid "Submit"
 msgstr ""
 
-#: auto_neutron/windows/gui/new_route_window.py:135
+#: auto_neutron/windows/gui/new_route_window.py:145
 msgid "Abort"
 msgstr ""
 
-#: auto_neutron/windows/gui/new_route_window.py:136
+#: auto_neutron/windows/gui/new_route_window.py:146
 msgid "Cancel the current route plot"
 msgstr ""
 
-#: auto_neutron/windows/gui/new_route_window.py:137
+#: auto_neutron/windows/gui/new_route_window.py:147
 msgid "Refresh journals"
 msgstr ""
 
-#: auto_neutron/windows/gui/new_route_window.py:189
+#: auto_neutron/windows/gui/new_route_window.py:199
 msgid "Range"
 msgstr ""
 
-#: auto_neutron/windows/gui/new_route_window.py:190
+#: auto_neutron/windows/gui/new_route_window.py:200
 msgid "Efficiency"
 msgstr ""
 
-#: auto_neutron/windows/gui/new_route_window.py:191
-#: auto_neutron/windows/gui/new_route_window.py:241
+#: auto_neutron/windows/gui/new_route_window.py:201
+#: auto_neutron/windows/gui/new_route_window.py:251
 msgid "Nearest"
 msgstr ""
 
-#: auto_neutron/windows/gui/new_route_window.py:236
+#: auto_neutron/windows/gui/new_route_window.py:246
 msgid "Already supercharged"
 msgstr ""
 
-#: auto_neutron/windows/gui/new_route_window.py:237
+#: auto_neutron/windows/gui/new_route_window.py:247
 msgid "Use supercharge"
 msgstr ""
 
-#: auto_neutron/windows/gui/new_route_window.py:238
+#: auto_neutron/windows/gui/new_route_window.py:248
 msgid "Use FSD injections"
 msgstr ""
 
-#: auto_neutron/windows/gui/new_route_window.py:239
+#: auto_neutron/windows/gui/new_route_window.py:249
 msgid "Exclude secondary stars"
 msgstr ""
 
-#: auto_neutron/windows/gui/new_route_window.py:240
+#: auto_neutron/windows/gui/new_route_window.py:250
 msgid "Use ship from clipboard"
 msgstr ""
 
-#: auto_neutron/windows/gui/new_route_window.py:271
+#: auto_neutron/windows/gui/new_route_window.py:281
 msgid "CSV path"
-msgstr ""
-
-#: auto_neutron/windows/gui/new_route_window.py:359
-msgid "Neutron plotter"
-msgstr ""
-
-#: auto_neutron/windows/gui/new_route_window.py:360
-msgid "Galaxy plotter"
-msgstr ""
-
-#: auto_neutron/windows/gui/new_route_window.py:361
-msgid "CSV"
-msgstr ""
-
-#: auto_neutron/windows/gui/new_route_window.py:362
-msgid "Saved route"
 msgstr ""
 
 #: auto_neutron/windows/gui/settings_window.py:65

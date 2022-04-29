@@ -24,10 +24,20 @@ from auto_neutron.locale import get_active_locale
 from auto_neutron.route_plots import ExactPlotRow, NeutronPlotRow, SpanshReplyTracker
 from auto_neutron.ship import Ship
 from auto_neutron.utils.signal import ReconnectingSignal
-from auto_neutron.utils.utils import cmdr_display_name, create_request_delay_iterator
+from auto_neutron.utils.utils import (
+    N_,
+    cmdr_display_name,
+    create_request_delay_iterator,
+)
 from auto_neutron.workers import GameWorker
 
-from .gui.new_route_window import NewRouteWindowGUI
+from .gui.new_route_window import (
+    CSVTabGUI,
+    ExactTabGUI,
+    LastTabGUI,
+    NeutronTabGUI,
+    NewRouteWindowGUI,
+)
 from .nearest_window import NearestWindow
 
 if t.TYPE_CHECKING:
@@ -41,7 +51,19 @@ class NewRouteWindow(NewRouteWindowGUI):
     route_created_signal = QtCore.Signal(Journal, list, int)
 
     def __init__(self, parent: QtWidgets.QWidget):
-        super().__init__(parent)
+        self.spansh_neutron_tab = NeutronTabGUI(None)
+        self.spansh_exact_tab = ExactTabGUI(None)
+        self.csv_tab = CSVTabGUI(None)
+        self.last_route_tab = LastTabGUI(None)
+        super().__init__(
+            parent,
+            tabs=[
+                (self.spansh_neutron_tab, N_("Neutron plotter")),
+                (self.spansh_exact_tab, N_("Galaxy plotter")),
+                (self.csv_tab, N_("CSV")),
+                (self.last_route_tab, N_("Saved route")),
+            ],
+        )
         self.selected_journal: Journal | None = None
         self._journals = list[Journal]()
         self._journal_worker: GameWorker | None = None
@@ -51,7 +73,7 @@ class NewRouteWindow(NewRouteWindowGUI):
         self._status_has_hover = False
         self._status_scheduled_reset = False
         self._setup_status_widget()
-        self._combo_boxes = [tab.journal_combo for tab in self.tabs]
+        self._combo_boxes = [tab.journal_combo for tab, __ in self.tabs]
 
         self._current_network_reply = None
         self._journal_connections = []
@@ -112,7 +134,7 @@ class NewRouteWindow(NewRouteWindowGUI):
         for signal in self.combo_signals:
             signal.connect()
 
-        for tab in self.tabs:
+        for tab, __ in self.tabs:
             tab.refresh_button.pressed.connect(self._populate_journal_combos)
             tab.abort_button.pressed.connect(self._abort_request)
 
@@ -251,15 +273,16 @@ class NewRouteWindow(NewRouteWindowGUI):
 
     def _recalculate_range(self, cargo_mass: int | None = None) -> None:
         """Recalculate jump range with the new cargo_mass."""
-        if cargo_mass is None:
-            cargo_mass = self.selected_journal.cargo
-        if (
-            self.selected_journal.ship is not None
-            and self.selected_journal.cargo is not None
-        ):  # Ship may not be available yet
-            self.spansh_neutron_tab.range_spin.value = (
-                self.selected_journal.ship.jump_range(cargo_mass=cargo_mass)
-            )
+        if self.selected_journal:
+            if cargo_mass is None:
+                cargo_mass = self.selected_journal.cargo
+            if (
+                self.selected_journal.ship is not None
+                and self.selected_journal.cargo is not None
+            ):  # Ship may not be available yet
+                self.spansh_neutron_tab.range_spin.value = (
+                    self.selected_journal.ship.jump_range(cargo_mass=cargo_mass)
+                )
 
     def _set_neutron_submit(self) -> None:
         """Enable the neutron submit button if both inputs are filled, disable otherwise."""
@@ -284,7 +307,10 @@ class NewRouteWindow(NewRouteWindowGUI):
     def _display_nearest_window(self) -> None:
         """Display the nearest system finder window and link its signals."""
         log.info("Displaying nearest window.")
-        window = NearestWindow(self, self.selected_journal.location, self.status_widget)
+        start_loc = (
+            None if self.selected_journal is None else self.selected_journal.location
+        )
+        window = NearestWindow(self, start_loc, self.status_widget)
         window.copy_to_source_button.pressed.connect(
             partial(
                 self._set_line_edits_from_nearest,
@@ -308,16 +334,17 @@ class NewRouteWindow(NewRouteWindowGUI):
         window.copy_to_destination_button.pressed.connect(
             partial(setattr, self.spansh_neutron_tab.source_edit, "modified", True)
         )
-        window.from_target_button.pressed.connect(
-            lambda: window.set_input_values_from_location(
-                self.selected_journal.last_target
-            )
-        )
-        window.from_location_button.pressed.connect(
-            lambda: window.set_input_values_from_location(
-                self.selected_journal.location
-            )
-        )
+
+        def set_input_from_target() -> None:
+            if self.selected_journal is not None:
+                window.set_input_values_from_location(self.selected_journal.last_target)
+
+        def set_input_from_location() -> None:
+            if self.selected_journal is not None:
+                window.set_input_values_from_location(self.selected_journal.location)
+
+        window.from_target_button.pressed.connect(set_input_from_target)
+        window.from_location_button.pressed.connect(set_input_from_location)
         window.show()
 
     def _set_line_edits_from_nearest(

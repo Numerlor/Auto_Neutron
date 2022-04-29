@@ -128,14 +128,12 @@ class Plotter(abc.ABC):
     @abc.abstractmethod
     def update_system(self, system: str, system_index: int | None = None) -> None:
         """Update the plotter with the given system."""
-        ...
 
     def refresh_settings(self) -> None:
         """Refresh the settings."""
 
     def stop(self) -> None:
         """Stop the plotter."""
-        ...
 
 
 class CopyPlotter(Plotter):
