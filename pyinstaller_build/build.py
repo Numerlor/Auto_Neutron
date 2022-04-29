@@ -114,9 +114,9 @@ if not debug:
         sha256sum(archive_path) + "\n"
     )
 
-if os.environ.get("SIGN") and sign_file(exe_path).returncode != 0:
-    print("Failed to sign", exe_path)  # noqa T001
+    if os.environ.get("SIGN") and sign_file(exe_path).returncode != 0:
+        print("Failed to sign", exe_path)  # noqa T001
 
-Path(exe_path.with_name(exe_path.name + ".signature.txt")).write_text(
-    sha256sum(exe_path) + "\n"
-)
+    Path(exe_path.with_name(exe_path.name + ".signature.txt")).write_text(
+        sha256sum(exe_path) + "\n"
+    )
