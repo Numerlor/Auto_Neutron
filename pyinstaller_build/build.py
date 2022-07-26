@@ -4,7 +4,7 @@ import argparse
 import hashlib
 import os
 import shutil
-import subprocess  # noqa S404
+import subprocess  # noqa: S404
 import sys
 from pathlib import Path
 
@@ -36,7 +36,7 @@ def sign_file(file: Path) -> subprocess.CompletedProcess:
 
     The SIGN_TOOL_PATH, TIMESTAMPING_URL, and CERT_SUBJECT env vars must be set.
     """
-    return subprocess.run(  # noqa S603
+    return subprocess.run(  # noqa: S603
         [
             os.environ["SIGN_TOOL_PATH"],
             "sign",
@@ -100,7 +100,7 @@ if not debug:
         os.environ.get("SIGN")
         and sign_file(directory_path / "Auto_neutron.exe").returncode != 0
     ):
-        print("Failed to sign", directory_path / "Auto_neutron.exe")  # noqa T001
+        print("Failed to sign", directory_path / "Auto_neutron.exe")  # noqa: T001
 
     archive_path = Path(
         shutil.make_archive(
@@ -115,7 +115,7 @@ if not debug:
     )
 
     if os.environ.get("SIGN") and sign_file(exe_path).returncode != 0:
-        print("Failed to sign", exe_path)  # noqa T001
+        print("Failed to sign", exe_path)  # noqa: T001
 
     Path(exe_path.with_name(exe_path.name + ".signature.txt")).write_text(
         sha256sum(exe_path) + "\n"

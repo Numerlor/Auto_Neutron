@@ -58,7 +58,7 @@ def create_delete_share_file(
     if handle == -1:
         raise ctypes.WinError()
 
-    return open(  # noqa SIM115
+    return open(  # noqa: SIM115
         msvcrt.open_osfhandle(handle, os.O_BINARY),
         "w",
         encoding=encoding,

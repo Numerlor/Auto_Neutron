@@ -4,7 +4,7 @@
 """Utility script to convert a svg file into an icon library."""
 import argparse
 import shutil
-import subprocess  # noqa S404
+import subprocess  # noqa: S404
 from pathlib import Path
 
 IMAGE_SIZES = (256, 128, 96, 64, 48, 40, 32, 24, 20, 16)
@@ -21,7 +21,7 @@ def main() -> None:
     icon_path = args.output
 
     for size in IMAGE_SIZES:
-        subprocess.run(  # noqa S603
+        subprocess.run(  # noqa: S603
             [
                 shutil.which("inkscape"),
                 "-z",
@@ -35,7 +35,7 @@ def main() -> None:
             ]
         )
 
-    subprocess.run(  # noqa S603
+    subprocess.run(  # noqa: S603
         [
             shutil.which("convert"),
             *[f"icon{size}.png" for size in IMAGE_SIZES],

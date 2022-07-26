@@ -6,13 +6,13 @@ from __future__ import annotations
 from PySide6 import QtCore, QtGui, QtWidgets
 
 # noinspection PyUnresolvedReferences
-from __feature__ import snake_case, true_property  # noqa F401
+from __feature__ import snake_case, true_property  # noqa: F401
 
 
 class SpinBoxDelegate(QtWidgets.QStyledItemDelegate):
     """Item delegate for a table to use cells as `SpinBox`es."""
 
-    def create_editor(  # noqa D102
+    def create_editor(  # noqa: D102
         self,
         parent: QtWidgets.QWidget,
         option: QtWidgets.QStyleOptionViewItem,
@@ -29,7 +29,7 @@ class SpinBoxDelegate(QtWidgets.QStyledItemDelegate):
 class DoubleSpinBoxDelegate(QtWidgets.QStyledItemDelegate):
     """Item delegate for a table to use cells as `DoubleSpinBox`es."""
 
-    def create_editor(  # noqa D102
+    def create_editor(  # noqa: D102
         self,
         parent: QtWidgets.QWidget,
         option: QtWidgets.QStyleOptionViewItem,
@@ -47,7 +47,7 @@ class DoubleSpinBoxDelegate(QtWidgets.QStyledItemDelegate):
 class CheckBoxDelegate(QtWidgets.QStyledItemDelegate):
     """Item delegate for a table to use cells as `CheckBox`es."""
 
-    def create_editor(  # noqa D102
+    def create_editor(  # noqa: D102
         self,
         parent: QtWidgets.QWidget,
         option: QtWidgets.QStyleOptionViewItem,

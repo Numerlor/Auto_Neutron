@@ -8,7 +8,7 @@ from functools import partial
 from PySide6 import QtCore, QtGui, QtWidgets
 
 # noinspection PyUnresolvedReferences
-from __feature__ import snake_case, true_property  # noqa F401
+from __feature__ import snake_case, true_property  # noqa: F401
 
 _SPINBOX_BORDER_STYLESHEET = "border:none;border:1px solid {border_color};border-radius:3px;background:palette(base);"
 

@@ -8,7 +8,7 @@ import atexit
 import contextlib
 import dataclasses
 import logging
-import subprocess  # noqa S404
+import subprocess  # noqa: S404
 import tempfile
 import typing as t
 from functools import partial
@@ -17,7 +17,7 @@ from pathlib import Path
 from PySide6 import QtCore, QtNetwork, QtWidgets
 
 # noinspection PyUnresolvedReferences
-from __feature__ import snake_case, true_property  # noqa F401
+from __feature__ import snake_case, true_property  # noqa: F401
 from auto_neutron import settings
 from auto_neutron.constants import AHK_TEMPLATE, SPANSH_API_URL
 from auto_neutron.utils.network import (
@@ -170,7 +170,7 @@ class AhkPlotter(Plotter):
             if settings.Paths.ahk is None or not settings.Paths.ahk.exists():
                 log.error("AHK path not set or invalid.")
                 return
-            self.process = subprocess.Popen(  # noqa S603
+            self.process = subprocess.Popen(  # noqa: S603
                 [settings.Paths.ahk, script_path],
                 stdin=subprocess.PIPE,
                 stdout=subprocess.DEVNULL,

@@ -9,7 +9,7 @@ from PySide6.QtCore import QByteArray
 from PySide6.QtGui import QFont
 
 # noinspection PyUnresolvedReferences
-from __feature__ import snake_case, true_property  # noqa F401
+from __feature__ import snake_case, true_property  # noqa: F401
 from auto_neutron import Theme
 from auto_neutron.constants import AHK_USER_SCRIPT_TEMPLATE
 
@@ -22,7 +22,7 @@ AHK_DEFAULT_SUBMIT_KEY = "{enter}"
 AHK_DEFAULT_MAP_WAIT_DELAY = 850
 
 
-class General(metaclass=SettingsCategory):  # noqa D101
+class General(metaclass=SettingsCategory):  # noqa: D101
     save_on_quit: t.Annotated[bool, SettingsParams(True)]
     copy_mode: t.Annotated[bool, SettingsParams(True)]
     last_route_index: t.Annotated[int, SettingsParams(0)]
@@ -30,7 +30,7 @@ class General(metaclass=SettingsCategory):  # noqa D101
     last_checked_release: t.Annotated[str, SettingsParams("")]
 
 
-class AHK(metaclass=SettingsCategory):  # noqa D101
+class AHK(metaclass=SettingsCategory):  # noqa: D101
     simple_mode: t.Annotated[bool, SettingsParams(True)]
     bind: t.Annotated[str, SettingsParams("F5", fallback_paths=("General.bind",))]
     user_script: t.Annotated[
@@ -83,7 +83,7 @@ def _path_deserializer(path_string: str) -> Path | None:
     return Path(path_string)
 
 
-class Paths(metaclass=SettingsCategory):  # noqa D101
+class Paths(metaclass=SettingsCategory):  # noqa: D101
     ahk: t.Annotated[
         Path | None, SettingsParams("", _path_serializer, _path_deserializer)
     ]
@@ -102,7 +102,7 @@ def _font_deserializer(val: str) -> QFont:
     return font
 
 
-class Window(metaclass=SettingsCategory):  # noqa D101
+class Window(metaclass=SettingsCategory):  # noqa: D101
     geometry: t.Annotated[
         QByteArray,
         SettingsParams(
@@ -123,7 +123,7 @@ class Window(metaclass=SettingsCategory):  # noqa D101
     ]
 
 
-class Alerts(metaclass=SettingsCategory):  # noqa D101
+class Alerts(metaclass=SettingsCategory):  # noqa: D101
     audio: t.Annotated[bool, SettingsParams(False)]
     visual: t.Annotated[bool, SettingsParams(False)]
     threshold: t.Annotated[int, SettingsParams(150)]

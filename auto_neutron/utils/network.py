@@ -14,7 +14,7 @@ from PySide6 import QtCore, QtNetwork
 import auto_neutron
 
 # noinspection PyUnresolvedReferences
-from __feature__ import snake_case, true_property  # noqa F401
+from __feature__ import snake_case, true_property  # noqa: F401
 
 if t.TYPE_CHECKING:
     import collections.abc
@@ -40,7 +40,7 @@ class NetworkError(Exception):
 def make_network_request(
     url: str,
     *,
-    params: dict = {},  # noqa B006
+    params: dict = {},  # noqa: B006
     finished_callback: collections.abc.Callable[[QtNetwork.QNetworkReply], t.Any],
 ) -> QtNetwork.QNetworkReply:
     """Make a network request to `url` with a `params` query and connect its reply to `callback`."""
