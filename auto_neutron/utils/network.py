@@ -12,8 +12,6 @@ from functools import partial
 from PySide6 import QtCore, QtNetwork
 
 import auto_neutron
-
-# noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa: F401
 
 if t.TYPE_CHECKING:

@@ -9,7 +9,6 @@ from functools import partial
 
 from PySide6 import QtCore
 
-# noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa: F401
 from auto_neutron.workers import GameWorker
 

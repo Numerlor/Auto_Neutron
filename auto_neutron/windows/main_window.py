@@ -8,7 +8,6 @@ import typing as t
 
 from PySide6 import QtCore, QtWidgets
 
-# noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa: F401
 from auto_neutron import settings
 from auto_neutron.route_plots import ExactPlotRow, NeutronPlotRow

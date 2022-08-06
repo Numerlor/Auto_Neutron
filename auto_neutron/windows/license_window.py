@@ -8,7 +8,6 @@ import textwrap
 
 from PySide6 import QtCore, QtWidgets
 
-# noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa: F401
 from auto_neutron.utils.file import base_path
 

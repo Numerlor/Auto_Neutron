@@ -16,7 +16,6 @@ from pathlib import Path
 
 from PySide6 import QtCore, QtNetwork, QtWidgets
 
-# noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa: F401
 from auto_neutron import settings
 from auto_neutron.constants import AHK_TEMPLATE, SPANSH_API_URL

@@ -12,7 +12,6 @@ from types import MethodType
 
 from PySide6 import QtCore
 
-# noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa: F401
 from auto_neutron.utils.file import create_delete_share_file
 

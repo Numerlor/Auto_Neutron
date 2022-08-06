@@ -13,8 +13,6 @@ import babel
 from PySide6 import QtCore, QtWidgets
 
 import auto_neutron.locale
-
-# noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa: F401
 from auto_neutron import Theme, settings
 from auto_neutron.constants import JOURNAL_PATH, ROUTE_FILE_NAME, get_config_dir

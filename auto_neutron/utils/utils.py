@@ -10,7 +10,6 @@ from pathlib import Path
 
 from PySide6 import QtCore, QtWidgets
 
-# noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa: F401
 from auto_neutron.utils.logging import patch_log_module
 

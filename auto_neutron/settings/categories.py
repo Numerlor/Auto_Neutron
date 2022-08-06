@@ -8,7 +8,6 @@ from pathlib import Path
 from PySide6.QtCore import QByteArray
 from PySide6.QtGui import QFont
 
-# noinspection PyUnresolvedReferences
 from __feature__ import snake_case, true_property  # noqa: F401
 from auto_neutron import Theme
 from auto_neutron.constants import AHK_USER_SCRIPT_TEMPLATE
