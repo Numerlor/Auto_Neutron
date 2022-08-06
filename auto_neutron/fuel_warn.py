@@ -7,8 +7,8 @@ import logging
 import typing as t
 
 from PySide6 import QtCore, QtMultimedia, QtWidgets
-
 from __feature__ import snake_case, true_property  # noqa: F401
+
 from auto_neutron import settings
 
 if t.TYPE_CHECKING:

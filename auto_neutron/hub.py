@@ -11,9 +11,9 @@ from functools import partial
 
 import babel
 from PySide6 import QtCore, QtWidgets
+from __feature__ import snake_case, true_property  # noqa: F401
 
 import auto_neutron.locale
-from __feature__ import snake_case, true_property  # noqa: F401
 from auto_neutron import Theme, settings
 from auto_neutron.constants import JOURNAL_PATH, ROUTE_FILE_NAME, get_config_dir
 from auto_neutron.dark_theme import set_theme

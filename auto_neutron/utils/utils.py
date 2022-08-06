@@ -9,8 +9,8 @@ import typing as t
 from pathlib import Path
 
 from PySide6 import QtCore, QtWidgets
-
 from __feature__ import snake_case, true_property  # noqa: F401
+
 from auto_neutron.utils.logging import patch_log_module
 
 if t.TYPE_CHECKING:

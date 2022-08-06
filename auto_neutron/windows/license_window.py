@@ -7,8 +7,8 @@ import sys
 import textwrap
 
 from PySide6 import QtCore, QtWidgets
-
 from __feature__ import snake_case, true_property  # noqa: F401
+
 from auto_neutron.utils.file import base_path
 
 from .gui.license_window import LicenseWindowGUI

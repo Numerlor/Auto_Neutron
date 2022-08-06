@@ -4,8 +4,8 @@
 from __future__ import annotations
 
 from PySide6 import QtCore, QtWidgets
-
 from __feature__ import snake_case, true_property  # noqa: F401
+
 from auto_neutron.journal import Journal, get_unique_cmdr_journals
 from auto_neutron.utils.signal import ReconnectingSignal
 from auto_neutron.utils.utils import cmdr_display_name

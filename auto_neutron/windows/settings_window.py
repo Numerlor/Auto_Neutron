@@ -8,8 +8,8 @@ from operator import attrgetter
 from pathlib import Path
 
 from PySide6 import QtCore, QtWidgets
-
 from __feature__ import snake_case, true_property  # noqa: F401
+
 from auto_neutron import settings
 from auto_neutron.constants import AHK_PATH
 from auto_neutron.locale import code_from_locale, get_available_locales

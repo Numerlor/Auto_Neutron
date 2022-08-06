@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 from PySide6 import QtCore, QtGui, QtWidgets
-
 from __feature__ import snake_case, true_property  # noqa: F401
 
 

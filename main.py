@@ -24,9 +24,9 @@ from pathlib import Path
 
 import babel
 from PySide6 import QtGui, QtNetwork, QtWidgets
+from __feature__ import snake_case, true_property  # noqa: F401
 
 import auto_neutron.locale
-from __feature__ import snake_case, true_property  # noqa: F401
 from auto_neutron import hub, win_theme_change_listener
 from auto_neutron.constants import APP, APPID, ORG, VERSION, get_config_dir
 from auto_neutron.settings import General, set_settings

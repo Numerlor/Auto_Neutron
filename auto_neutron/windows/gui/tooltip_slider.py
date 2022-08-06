@@ -6,7 +6,6 @@ from __future__ import annotations
 from functools import partial
 
 from PySide6 import QtCore, QtGui, QtWidgets
-
 from __feature__ import snake_case, true_property  # noqa: F401
 
 _SPINBOX_BORDER_STYLESHEET = "border:none;border:1px solid {border_color};border-radius:3px;background:palette(base);"

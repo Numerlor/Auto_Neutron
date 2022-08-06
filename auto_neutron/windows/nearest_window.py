@@ -7,8 +7,8 @@ import logging
 import typing as t
 
 from PySide6 import QtCore, QtGui, QtNetwork, QtWidgets
-
 from __feature__ import snake_case, true_property  # noqa: F401
+
 from auto_neutron.constants import SPANSH_API_URL
 from auto_neutron.utils.network import (
     NetworkError,

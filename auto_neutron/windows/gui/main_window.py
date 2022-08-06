@@ -6,7 +6,6 @@ from __future__ import annotations
 import typing as t
 
 from PySide6 import QtCore, QtGui, QtWidgets
-
 from __feature__ import snake_case, true_property  # noqa: F401
 
 from .delegates import CheckBoxDelegate, DoubleSpinBoxDelegate, SpinBoxDelegate

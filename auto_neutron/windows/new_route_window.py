@@ -14,8 +14,8 @@ from pathlib import Path
 
 import babel.dates
 from PySide6 import QtCore, QtGui, QtWidgets
-
 from __feature__ import snake_case, true_property  # noqa: F401
+
 from auto_neutron import settings
 from auto_neutron.constants import ROUTE_FILE_NAME, SPANSH_API_URL, get_config_dir
 from auto_neutron.journal import Journal, get_unique_cmdr_journals
