@@ -8,7 +8,7 @@ import atexit
 import contextlib
 import dataclasses
 import logging
-import subprocess  # noqa: S404
+import subprocess
 import tempfile
 import typing as t
 from functools import partial
@@ -170,7 +170,7 @@ class AhkPlotter(Plotter):
             if settings.Paths.ahk is None or not settings.Paths.ahk.exists():
                 log.error("AHK path not set or invalid.")
                 return
-            self.process = subprocess.Popen(  # noqa: S603
+            self.process = subprocess.Popen(
                 [settings.Paths.ahk, script_path],
                 stdin=subprocess.PIPE,
                 stdout=subprocess.DEVNULL,

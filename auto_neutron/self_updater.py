@@ -7,7 +7,7 @@ import hashlib
 import io
 import logging
 import shutil
-import subprocess  # noqa: S404
+import subprocess
 import sys
 import typing as t
 from functools import partial
@@ -262,5 +262,5 @@ class Updater(QtCore.QObject):
                 )
                 return
 
-        subprocess.Popen(str(EXECUTABLE_PATH))  # noqa: S603
+        subprocess.Popen(str(EXECUTABLE_PATH))
         QtWidgets.QApplication.instance().exit()

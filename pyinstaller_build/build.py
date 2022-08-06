@@ -4,7 +4,7 @@ import argparse
 import hashlib
 import os
 import shutil
-import subprocess  # noqa: S404
+import subprocess
 import sys
 from pathlib import Path
 
@@ -36,7 +36,7 @@ def sign_file(file: Path) -> subprocess.CompletedProcess:
 
     The SIGN_TOOL_PATH, TIMESTAMPING_URL, and CERT_SUBJECT env vars must be set.
     """
-    return subprocess.run(  # noqa: S603
+    return subprocess.run(
         [
             os.environ["SIGN_TOOL_PATH"],
             "sign",
@@ -74,9 +74,7 @@ else:
     ]
     debug = True
 
-compiled_process = subprocess.run(  # noqa: S603, S607
-    ["poetry", "run", "task", "i18n-compile"]
-)
+compiled_process = subprocess.run(["poetry", "run", "task", "i18n-compile"])
 if compiled_process.returncode != 0:
     raise Exception("Failed to compile translation files.")
 
