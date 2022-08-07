@@ -6,12 +6,9 @@ from __future__ import annotations
 import itertools
 import logging
 import typing as t
-from pathlib import Path
 
 from PySide6 import QtCore, QtWidgets
 from __feature__ import snake_case, true_property  # noqa: F401
-
-from auto_neutron.utils.logging import patch_log_module
 
 if t.TYPE_CHECKING:
     import collections.abc
@@ -35,21 +32,12 @@ class ExceptionHandler(QtCore.QObject):
         value: BaseException,
         tb: TracebackType | None,
     ) -> None:
-        """
-        Log exception, mocking the module to the traceback's module and emit `traceback_sig`` with formatted exception.
-
-        If the traceback is not provided, use "UNKNOWN" as the module name.
-        """
+        """Log the raised exception, and emit `traceback_sig` with the formatted exception."""
         if exctype is KeyboardInterrupt:
             QtWidgets.QApplication.instance().exit()
             return
 
-        if tb is None:
-            module_to_patch = "UNKNOWN"
-        else:
-            module_to_patch = Path(tb.tb_frame.f_code.co_filename).stem
-        with patch_log_module(log, module_to_patch):
-            log.critical("Uncaught exception:", exc_info=(exctype, value, tb))
+        log.critical("Uncaught exception:", exc_info=(exctype, value, tb))
 
         self.triggered.emit()
 
