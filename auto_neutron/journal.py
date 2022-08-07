@@ -130,7 +130,12 @@ def get_unique_cmdr_journals() -> list[Journal]:
 
     Only the first 15 journals newer than a week are looked at.
     """
-    week_before = (datetime.datetime.now() - datetime.timedelta(weeks=1)).timestamp()
+    if __debug__:
+        week_before = float("-inf")
+    else:
+        week_before = (
+            datetime.datetime.now() - datetime.timedelta(weeks=1)
+        ).timestamp()
 
     journal_paths = [
         path
