@@ -50,9 +50,6 @@ class ExceptionHandler(QtCore.QObject):
             module_to_patch = Path(tb.tb_frame.f_code.co_filename).stem
         with patch_log_module(log, module_to_patch):
             log.critical("Uncaught exception:", exc_info=(exctype, value, tb))
-            log.critical(
-                ""
-            )  # log empty message to give a bit of space around traceback
 
         self.triggered.emit()
 
