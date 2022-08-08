@@ -337,6 +337,7 @@ class SpanshReplyTracker:
 
     def make_request(self, *args: t.Any, **kwargs: t.Any) -> None:
         """Make a network request and store the result reply."""
+        self.abort()
         self._current_reply = make_network_request(*args, **kwargs)
 
     def abort(self) -> None:
