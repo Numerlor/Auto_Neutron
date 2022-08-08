@@ -54,7 +54,7 @@ get_config_dir().mkdir(parents=True, exist_ok=True)
 root_logger = logging.getLogger()
 
 log_format = UsernameFormatter(
-    "{asctime} | {module:>16} | {levelname:>7} | {message}",
+    "{asctime} | {name:>40} | {levelname:>7} | {message}",
     datefmt="%H:%M:%S",
     style="{",
 )
