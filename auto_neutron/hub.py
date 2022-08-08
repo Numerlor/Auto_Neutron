@@ -18,7 +18,7 @@ from auto_neutron.constants import JOURNAL_PATH, ROUTE_FILE_NAME, get_config_dir
 from auto_neutron.dark_theme import set_theme
 from auto_neutron.fuel_warn import FuelWarn
 from auto_neutron.game_state import PlotterState
-from auto_neutron.route_plots import AhkPlotter, CopyPlotter
+from auto_neutron.plotters import AhkPlotter, CopyPlotter
 from auto_neutron.route import Route
 from auto_neutron.self_updater import Updater
 from auto_neutron.settings import delay_sync
