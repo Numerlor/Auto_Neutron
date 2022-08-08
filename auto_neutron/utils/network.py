@@ -13,6 +13,7 @@ from PySide6 import QtCore, QtNetwork
 from __feature__ import snake_case, true_property  # noqa: F401
 
 import auto_neutron
+from auto_neutron.constants import APP, VERSION
 
 if t.TYPE_CHECKING:
     import collections.abc
@@ -47,6 +48,7 @@ def make_network_request(
         url += "?" + urllib.parse.urlencode(params)
     qurl = QtCore.QUrl(url)
     request = QtNetwork.QNetworkRequest(qurl)
+    request.set_header(QtNetwork.QNetworkRequest.UserAgentHeader, f"{APP}/{VERSION}")
     reply = auto_neutron.network_mgr.get(request)
     reply.finished.connect(partial(finished_callback, reply))
 
