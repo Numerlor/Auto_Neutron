@@ -13,13 +13,13 @@ from PySide6 import QtCore
 from __feature__ import snake_case, true_property  # noqa: F401
 
 from auto_neutron.constants import STATUS_PATH
+from auto_neutron.route import Route
 
 if t.TYPE_CHECKING:
     import collections.abc
 
     from auto_neutron.game_state import Location
     from auto_neutron.journal import Journal
-    from auto_neutron.route_plots import RouteList
 
 log = logging.getLogger(__name__)
 
@@ -66,7 +66,7 @@ class GameWorker(_WorkerBase):
     new_system_index_sig = QtCore.Signal(int)
     route_end_sig = QtCore.Signal(int)
 
-    def __init__(self, parent: QtCore.QObject, route: RouteList, journal: Journal):
+    def __init__(self, parent: QtCore.QObject, route: Route, journal: Journal):
         super().__init__(parent, journal.tail(), 500)
         self.route = route
         self._journal_connection = journal.system_sig.connect(self.emit_next_system)
@@ -74,8 +74,8 @@ class GameWorker(_WorkerBase):
     def emit_next_system(self, location: Location) -> None:
         """Emit the next system in the route and its index if location is in the route, or the end of route signal."""
         with contextlib.suppress(ValueError):
-            new_index = self.route.index(location.name) + 1
-            if new_index < len(self.route):
+            new_index = self.route.entries.index(location.name) + 1
+            if new_index < len(self.route.entries):
                 self.new_system_index_sig.emit(new_index)
             else:
                 self.route_end_sig.emit(new_index)

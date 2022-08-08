@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import atexit
-import csv
 import logging
 import typing as t
 from functools import partial
@@ -19,7 +18,8 @@ from auto_neutron.constants import JOURNAL_PATH, ROUTE_FILE_NAME, get_config_dir
 from auto_neutron.dark_theme import set_theme
 from auto_neutron.fuel_warn import FuelWarn
 from auto_neutron.game_state import PlotterState
-from auto_neutron.route_plots import AhkPlotter, CopyPlotter, NeutronPlotRow
+from auto_neutron.route_plots import AhkPlotter, CopyPlotter
+from auto_neutron.route import Route
 from auto_neutron.self_updater import Updater
 from auto_neutron.settings import delay_sync
 from auto_neutron.utils.signal import ReconnectingSignal
@@ -36,7 +36,6 @@ from auto_neutron.workers import StatusWorker
 
 if t.TYPE_CHECKING:
     from auto_neutron.journal import Journal
-    from auto_neutron.route_plots import RouteList
     from auto_neutron.utils.utils import ExceptionHandler
     from auto_neutron.win_theme_change_listener import WinThemeChangeListener
 
@@ -115,7 +114,7 @@ class Hub(QtCore.QObject):
         log.debug(
             f"Updating info from edited item at x={table_item.row()} y={table_item.column()}."
         )
-        self.plotter_state.route[table_item.row()][
+        self.plotter_state.route.entries[table_item.row()][
             table_item.column()
         ] = table_item.data(QtCore.Qt.ItemDataRole.DisplayRole)
         if table_item.row() == self.plotter_state.route_index:
@@ -132,7 +131,7 @@ class Hub(QtCore.QObject):
         self.plotter_state.route_index = index.row()
 
     def new_route(
-        self, journal: Journal, route: RouteList = None, route_index: int = None
+        self, journal: Journal, route: Route = None, route_index: int = None
     ) -> None:
         """Create a new worker with `route`, populate the main table with it, and set the route index."""
         if route is None:
@@ -142,12 +141,10 @@ class Hub(QtCore.QObject):
             logging.debug("Using current plotter index.")
             route_index = self.plotter_state.route_index
 
-        if route_index >= len(route):
-            route_index = len(route) - 1
+        if route_index >= len(route.entries):
+            route_index = len(route.entries) - 1
 
-        logging.debug(
-            f"Creating a new {type(route[0]).__name__} route with {route_index=}."
-        )
+        logging.debug(f"Creating a new route with {route_index=}.")
         self.plotter_state.journal = journal
         self.plotter_state.create_worker_with_route(route)
         if self.plotter_state.plotter is None:
@@ -176,17 +173,17 @@ class Hub(QtCore.QObject):
         set_theme(dark)
 
         if self.plotter_state.plotter is not None:
-            current_sys = self.plotter_state.route[self.plotter_state.route_index]
+            current_sys = self.plotter_state.route.entries[
+                self.plotter_state.route_index
+            ].system
             if settings.General.copy_mode and not isinstance(
                 self.plotter_state.plotter, CopyPlotter
             ):
-                self.plotter_state.plotter = CopyPlotter(
-                    start_system=current_sys.system
-                )
+                self.plotter_state.plotter = CopyPlotter(start_system=current_sys)
             elif not settings.General.copy_mode and not isinstance(
                 self.plotter_state.plotter, AhkPlotter
             ):
-                self.plotter_state.plotter = AhkPlotter(start_system=current_sys.system)
+                self.plotter_state.plotter = AhkPlotter(start_system=current_sys)
             else:
                 self.plotter_state.plotter.refresh_settings()
 
@@ -233,33 +230,5 @@ class Hub(QtCore.QObject):
         """If route auto saving is enabled, or force is True, save the route to the config directory."""
         if self.plotter_state.route is not None:
             log.info("Saving route.")
-            with open(
-                get_config_dir() / ROUTE_FILE_NAME, "w", encoding="utf8", newline=""
-            ) as out_file:
-                route_type = type(self.plotter_state.route[0])
-                writer = csv.writer(out_file, quoting=csv.QUOTE_ALL)
-                if route_type is NeutronPlotRow:
-                    writer.writerow(
-                        [
-                            "System Name",
-                            "Distance To Arrival",
-                            "Distance Remaining",
-                            "Neutron Star",
-                            "Jumps",
-                        ]
-                    )
-                else:
-                    writer.writerow(
-                        [
-                            "System Name",
-                            "Distance",
-                            "Distance Remaining",
-                            "Fuel Left",
-                            "Fuel Used",
-                            "Refuel",
-                            "Neutron Star",
-                        ]
-                    )
-                writer.writerows(row.to_csv() for row in self.plotter_state.route)
-
+            self.plotter_state.route.to_csv_file(get_config_dir() / ROUTE_FILE_NAME)
             settings.General.last_route_index = self.plotter_state.route_index

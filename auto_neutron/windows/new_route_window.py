@@ -8,7 +8,6 @@ import csv
 import datetime
 import json
 import logging
-import typing as t
 from functools import partial
 from pathlib import Path
 
@@ -20,7 +19,7 @@ from auto_neutron import settings
 from auto_neutron.constants import ROUTE_FILE_NAME, SPANSH_API_URL, get_config_dir
 from auto_neutron.journal import Journal, get_unique_cmdr_journals
 from auto_neutron.locale import get_active_locale
-from auto_neutron.route_plots import ExactPlotRow, NeutronPlotRow, SpanshReplyTracker
+from auto_neutron.route import Route, SpanshReplyTracker
 from auto_neutron.ship import Ship
 from auto_neutron.utils.signal import ReconnectingSignal
 from auto_neutron.utils.utils import (
@@ -39,15 +38,13 @@ from .gui.new_route_window import (
 )
 from .nearest_window import NearestWindow
 
-if t.TYPE_CHECKING:
-    from auto_neutron.route_plots import RouteList
 log = logging.getLogger(__name__)
 
 
 class NewRouteWindow(NewRouteWindowGUI):
     """The UI for plotting a new route, from CSV, Spansh plotters, or the last saved route."""
 
-    route_created_signal = QtCore.Signal(Journal, list, int)
+    route_created_signal = QtCore.Signal(Journal, Route, int)
 
     def __init__(self, parent: QtWidgets.QWidget):
         self.spansh_neutron_tab = NeutronTabGUI(None)
@@ -139,7 +136,7 @@ class NewRouteWindow(NewRouteWindowGUI):
 
         self.tab_widget.currentChanged.connect(self._display_saved_route)
         self._route_displayed = False
-        self._loaded_route: list[NeutronPlotRow] | None = None
+        self._loaded_route: Route | None = None
         self.retranslate()
         self._populate_journal_combos()
 
@@ -399,20 +396,10 @@ class NewRouteWindow(NewRouteWindowGUI):
         log.info(f"Set saved csv {path=}")
         settings.Paths.csv = path
 
-    def _route_from_csv(self, path: Path) -> RouteList | None:
+    def _route_from_csv(self, path: Path) -> Route | None:
         try:
-            with path.open(encoding="utf8") as csv_file:
-                reader = csv.reader(csv_file, strict=True)
-                header = next(reader)
-                if len(header) == 5:
-                    row_type = NeutronPlotRow
-                elif len(header) == 7:
-                    row_type = ExactPlotRow
-                else:
-                    self._show_status_message(_("Invalid CSV file."), 5_000)
-                    return
-                log.info(f"Parsing csv file of type {row_type.__name__} at {path}.")
-                return [row_type.from_csv_row(row) for row in reader]
+            return Route.from_csv_file(path)
+
         except FileNotFoundError:
             self._show_status_message(_("CSV file doesn't exist."), 5_000)
         except csv.Error as error:
@@ -423,6 +410,9 @@ class NewRouteWindow(NewRouteWindowGUI):
             self._show_status_message(_("Invalid data in CSV file."), 5_000)
         except OSError:
             self._show_status_message(_("Invalid path."), 5_000)
+        except Exception as e:
+            self._show_status_message(_("Invalid CSV file."), 5_000)
+            log.info("CSV parsing failed with", exc_info=e)
 
     # endregion
 
@@ -583,9 +573,7 @@ class NewRouteWindow(NewRouteWindowGUI):
         )
         self._populate_journal_combos(show_change_message=False)
 
-    def emit_and_close(
-        self, journal: Journal, route: RouteList, route_index: int
-    ) -> None:
+    def emit_and_close(self, journal: Journal, route: Route, route_index: int) -> None:
         """Emit a new route and close the window."""
         self.route_created_signal.emit(journal, route, route_index)
         self._current_network_reply = None
@@ -659,12 +647,12 @@ class NewRouteWindow(NewRouteWindowGUI):
         if self._loaded_route is not None:
             # NOTE: Source system
             self.last_route_tab.source_label.text = _("Source: {}").format(
-                self._loaded_route[0].system
+                self._loaded_route.entries[0].system
             )
             self.last_route_tab.location_label.text = _("Saved location: {}").format(
-                self._loaded_route[settings.General.last_route_index].system
+                self._loaded_route.entries[settings.General.last_route_index].system
             )
             # NOTE: destination system
             self.last_route_tab.destination_label.text = _("Destination: {}").format(
-                self._loaded_route[-1].system
+                self._loaded_route.entries[-1].system
             )

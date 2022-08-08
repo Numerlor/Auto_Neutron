@@ -10,15 +10,13 @@ from PySide6 import QtCore, QtWidgets
 from __feature__ import snake_case, true_property  # noqa: F401
 
 from auto_neutron import settings
-from auto_neutron.route_plots import ExactPlotRow, NeutronPlotRow
+from auto_neutron.route import ExactPlotRow, NeutronPlotRow, Route
 from auto_neutron.utils.signal import ReconnectingSignal
 
 from .gui.main_window import MainWindowGUI
 
 if t.TYPE_CHECKING:
     import collections.abc
-
-    from auto_neutron.route_plots import RouteList
 
 
 class MainWindow(MainWindowGUI):
@@ -36,9 +34,7 @@ class MainWindow(MainWindowGUI):
         )
         self.resize_connection.connect()
 
-        self._current_route_type: t.Optional[
-            type[ExactPlotRow] | type[NeutronPlotRow]
-        ] = None
+        self._route: Route | None = None
         self._last_index = None
 
         self.restore_window()
@@ -65,22 +61,23 @@ class MainWindow(MainWindowGUI):
             self.table.resize_column_to_contents(0)
             self.table.resize_rows_to_contents()
 
-    def initialize_table(self, route: RouteList) -> None:
-        """Clear the table and insert plot rows from `RouteList` into it with appropriate columns."""
+    def initialize_table(self, route: Route) -> None:
+        """Clear the table and insert plot rows from `Route` into it with appropriate columns."""
+        self._route = route
+
         self.table.clear()
         self.table.row_count = 0
-        self._current_route_type = type(route[0])
 
         self._create_base_headers()
         self._set_header_text()
-        self.mass_insert(dataclasses.astuple(row) for row in route)
+        self.mass_insert(dataclasses.astuple(row) for row in route.entries)
 
-        if self._current_route_type is ExactPlotRow:
+        if route.row_type is ExactPlotRow:
             self.table.set_item_delegate_for_column(3, self._checkbox_delegate)
             self.table.resize_column_to_contents(3)
             self.table.resize_column_to_contents(4)
 
-        elif self._current_route_type is NeutronPlotRow:
+        elif route.row_type is NeutronPlotRow:
             self.table.column_count = 4  # reset column count to 4 to hide last col
             self.table.set_item_delegate_for_column(3, self._spinbox_delegate)
             self.table.resize_column_to_contents(3)
@@ -104,25 +101,20 @@ class MainWindow(MainWindowGUI):
         for neutron plot routes it's in the jump header.
         """
         with self.resize_connection.temporarily_disconnect():
-            if self._current_route_type is ExactPlotRow:
+            if self._route.row_type is ExactPlotRow:
                 self.table.horizontal_header_item(0).set_text(
                     # NOTE: made jumps/ total
-                    _("System name ({}/{})").format(index, self.table.row_count)
+                    _("System name ({}/{})").format(
+                        self._route.remaining_jumps, self._route.total_jumps
+                    )
                 )
             else:
-                total_jumps = sum(
-                    self.table.item(row, 3).data(QtCore.Qt.ItemDataRole.DisplayRole)
-                    for row in range(self.table.row_count)
-                )
-                remaining_jumps = sum(
-                    self.table.item(row, 3).data(QtCore.Qt.ItemDataRole.DisplayRole)
-                    for row in range(index, self.table.row_count)
-                )
                 self.table.horizontal_header_item(3).set_text(
                     # NOTE: made jumps/ total
-                    _("Jumps {}/{}").format(remaining_jumps, total_jumps)
+                    _("Jumps {}/{}").format(
+                        self._route.remaining_jumps, self._route.total_jumps
+                    )
                 )
-        self.table.resize_column_to_contents(0)
         self.table.resize_column_to_contents(3)
         self._last_index = index
 
@@ -130,7 +122,7 @@ class MainWindow(MainWindowGUI):
         """Update the column sizes and information when an item is changed."""
         if table_item.column() == 0:
             self.table.resize_column_to_contents(0)
-        elif self._current_route_type is NeutronPlotRow and table_item.column() == 3:
+        elif self._route.row_type is NeutronPlotRow and table_item.column() == 3:
             self.update_remaining_count(table_item.row())
 
     def restore_window(self) -> None:
@@ -153,7 +145,7 @@ class MainWindow(MainWindowGUI):
     def _set_header_text(self) -> None:
         """Set the text for the headers."""
         super()._set_header_text()
-        if self._current_route_type is ExactPlotRow:
+        if self._route is not None and self._route.row_type is ExactPlotRow:
             if (header := self.table.horizontal_header_item(3)) is not None:
                 header.set_text(_("Scoopable"))
             if (header := self.table.horizontal_header_item(4)) is not None:
