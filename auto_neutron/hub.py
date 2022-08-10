@@ -173,9 +173,7 @@ class Hub(QtCore.QObject):
         set_theme(dark)
 
         if self.plotter_state.plotter is not None:
-            current_sys = self.plotter_state.route.entries[
-                self.plotter_state.route_index
-            ].system
+            current_sys = self.plotter_state.route.current_system
             if settings.General.copy_mode and not isinstance(
                 self.plotter_state.plotter, CopyPlotter
             ):
