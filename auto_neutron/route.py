@@ -171,7 +171,10 @@ class Route(abc.ABC, t.Generic[RowT]):
             cls._row_type_to_route_class[cls.__orig_bases__[0].__args__[0]] = cls
 
     def __new__(cls, row_type: type[RowT], *args, **kwargs) -> te.Self:  # noqa: D102
-        return object.__new__(cls._row_type_to_route_class[row_type])
+        try:
+            return object.__new__(cls._row_type_to_route_class[row_type])
+        except KeyError:
+            raise ValueError("Row type without a registered subclass.")
 
     def __init__(self, row_type: type[RowT], route: list[RowT]):
         self.row_type = row_type
