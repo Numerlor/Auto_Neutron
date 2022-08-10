@@ -157,7 +157,7 @@ _header_to_row_type: dict[tuple[str, ...], type[SystemEntry]] = {
 RowT = t.TypeVar("RowT", bound=SystemEntry)
 
 
-class Route(t.Generic[RowT]):
+class Route(abc.ABC, t.Generic[RowT]):
     """
     A route of `SystemEntry` entries.
 
@@ -212,9 +212,9 @@ class Route(t.Generic[RowT]):
             writer.writerows(row.to_csv() for row in self.entries)
 
     @classmethod
+    @abc.abstractmethod
     def from_json(cls, json_dict: dict) -> te.Self:
         """Create an instance from the `json_dict` json."""
-        raise NotImplementedError
 
 
 class NeutronRoute(Route[NeutronPlotRow]):
