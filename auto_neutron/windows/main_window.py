@@ -35,7 +35,6 @@ class MainWindow(MainWindowGUI):
         self.resize_connection.connect()
 
         self._route: Route | None = None
-        self._last_index = None
 
         self.restore_window()
         self.retranslate()
@@ -86,14 +85,14 @@ class MainWindow(MainWindowGUI):
         """Change the item colours before `index` to appear inactive and update the remaining systems/jump."""
         with self.resize_connection.temporarily_disconnect():
             super().inactivate_before_index(index)
-            self.update_remaining_count(index)
+            self.update_remaining_count()
         top_item = self.table.item_at(QtCore.QPoint(1, 1))
         if settings.Window.autoscroll and top_item.row() == self._current_row_index:
             self.scroll_to_index(index)
 
         self._current_row_index = index
 
-    def update_remaining_count(self, index: int) -> None:
+    def update_remaining_count(self) -> None:
         """
         Update the count of remaining jumps in the header.
 
@@ -116,14 +115,13 @@ class MainWindow(MainWindowGUI):
                     )
                 )
         self.table.resize_column_to_contents(3)
-        self._last_index = index
 
     def manage_item_changed(self, table_item: QtWidgets.QTableWidgetItem) -> None:
         """Update the column sizes and information when an item is changed."""
         if table_item.column() == 0:
             self.table.resize_column_to_contents(0)
         elif self._route.row_type is NeutronPlotRow and table_item.column() == 3:
-            self.update_remaining_count(table_item.row())
+            self.update_remaining_count()
 
     def restore_window(self) -> None:
         """Restore the size and position from the settings."""
@@ -138,9 +136,8 @@ class MainWindow(MainWindowGUI):
         """Retranslate text that is always on display."""
         super().retranslate()
         self._set_header_text()
-
-        if self._last_index is not None:
-            self.update_remaining_count(self._last_index)
+        if self._route is not None:
+            self.update_remaining_count()
 
     def _set_header_text(self) -> None:
         """Set the text for the headers."""
