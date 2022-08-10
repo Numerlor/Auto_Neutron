@@ -111,7 +111,7 @@ class ExactPlotRow(SystemEntry):
             "",
             "",
             "Yes" if self.refuel else "No",
-            "Yes" if self.refuel else "No",
+            "Yes" if self.neutron_star else "No",
         ]
 
 
