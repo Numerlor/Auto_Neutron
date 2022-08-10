@@ -45,6 +45,8 @@ class TabBase(QtWidgets.QWidget):
             self.submit_button,
             self.abort_button,
         ) = self._create_journal_and_submit_layout()
+        self.submit_button.default = True
+        self.abort_button.default = True
 
     def _create_journal_and_submit_layout(
         self,
@@ -338,9 +340,6 @@ class NewRouteWindowGUI(QtWidgets.QDialog):
 
         self.main_layout.add_widget(self.tab_widget)
         self.main_layout.add_layout(self.status_layout)
-
-        for button in self.find_children(QtWidgets.QPushButton):
-            button.auto_default = False
 
     def switch_submit_abort(self) -> None:
         """Switches the currently appearing submit/abort buttons for the other one."""
