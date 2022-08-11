@@ -35,7 +35,7 @@ class SystemEntry(abc.ABC):
     This class must be subclassed by a dataclass.
     """
 
-    csv_header: t.ClassVar[tuple[str, ...]] = None
+    csv_header: t.ClassVar[tuple[str, ...]] = None  # type: ignore
     system: str
 
     def __eq__(self, other: SystemEntry | str):
@@ -103,7 +103,7 @@ class ExactPlotRow(SystemEntry):
             json["has_neutron"],
         )
 
-    def to_csv(self) -> list[str]:  # noqa: D102
+    def to_csv(self) -> list:  # noqa: D102
         return [
             self.system,
             self.dist,
@@ -147,7 +147,7 @@ class NeutronPlotRow(SystemEntry):
             json["jumps"],
         )
 
-    def to_csv(self) -> list[str]:  # noqa: D102
+    def to_csv(self) -> list:  # noqa: D102
         return [self.system, self.dist_to_arrival, self.dist_rem, "", self.jumps]
 
 
