@@ -319,7 +319,7 @@ class NewRouteWindowGUI(QtWidgets.QDialog):
 
         self.main_layout = QtWidgets.QVBoxLayout(self)
         self.main_layout.set_spacing(1)
-        self.main_layout.contents_margins = QtCore.QMargins(4, 6, 2, 3)
+        self.main_layout.contents_margins = QtCore.QMargins(3, 6, 3, 3)
 
         self.tab_widget = QtWidgets.QTabWidget(self)
 
