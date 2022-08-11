@@ -531,11 +531,16 @@ class NewRouteWindow(NewRouteWindowGUI):
         formatted_time = babel.dates.format_time(
             creation_time, locale=get_active_locale()
         )
+        formatted_date = babel.dates.format_date(
+            creation_time, locale=get_active_locale()
+        )
 
         if show_change_message:
             self._show_status_message(
-                _("Selected journal using {}, created at {}").format(
-                    "Oddysey" if journal.is_oddysey else "Horizons", formatted_time
+                _("Selected journal using {}, created at {}; {}").format(
+                    "Oddysey" if journal.is_oddysey else "Horizons",
+                    formatted_time,
+                    formatted_date,
                 ),
                 timeout=5_000,
             )
