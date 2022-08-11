@@ -55,7 +55,7 @@ def create_delete_share_file(
         FILE_ATTRIBUTE_NORMAL,
         None,
     )
-    if handle == -1:
+    if handle == INVALID_HANDLE_VALUE:
         raise ctypes.WinError()
 
     return open(  # noqa: SIM115
