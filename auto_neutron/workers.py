@@ -66,13 +66,16 @@ class GameWorker(_WorkerBase):
     new_system_index_sig = QtCore.Signal(int)
     route_end_sig = QtCore.Signal(int)
 
-    def __init__(self, parent: QtCore.QObject, route: Route, journal: Journal):
+    def __init__(self, parent: QtCore.QObject, route: Route | None, journal: Journal):
         super().__init__(parent, journal.tail(), 500)
         self.route = route
         self._journal_connection = journal.system_sig.connect(self.emit_next_system)
 
     def emit_next_system(self, location: Location) -> None:
         """Emit the next system in the route and its index if location is in the route, or the end of route signal."""
+        if self.route is None:
+            return
+
         with contextlib.suppress(ValueError):
             new_index = self.route.entries.index(location.name) + 1
             if new_index < len(self.route.entries):

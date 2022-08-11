@@ -517,7 +517,7 @@ class NewRouteWindow(NewRouteWindowGUI):
 
         if self._journal_worker is not None:
             self._journal_worker.stop()
-        self._journal_worker = GameWorker(self, [], journal)
+        self._journal_worker = GameWorker(self, None, journal)
         self._journal_worker.start()
 
         if (
