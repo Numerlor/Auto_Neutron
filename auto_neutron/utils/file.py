@@ -32,7 +32,7 @@ CreateFileW.argtypes = [
 GetFinalPathNameByHandle = ctypes.windll.Kernel32.GetFinalPathNameByHandleW
 GetFinalPathNameByHandle.argtypes = [
     wintypes.HANDLE,
-    ctypes.c_wchar_p,
+    wintypes.LPWSTR,
     wintypes.DWORD,
     wintypes.DWORD,
 ]
