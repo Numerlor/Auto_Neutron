@@ -39,10 +39,10 @@ class NetworkError(Exception):
 def make_network_request(
     url: str,
     *,
-    params: dict = {},  # noqa: B006
+    params: collections.abc.Mapping = {},  # noqa: B006
     finished_callback: collections.abc.Callable[[QtNetwork.QNetworkReply], t.Any],
 ) -> QtNetwork.QNetworkReply:
-    """Make a network request to `url` with a `params` query and connect its reply to `callback`."""
+    """Make a network request to `url` with a `params` query and connect its reply to `finished_callback`."""
     log.debug(f"Sending request to {url} with {params=}")
     if params:
         url += "?" + urllib.parse.urlencode(params)
