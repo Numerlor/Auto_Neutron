@@ -12,7 +12,7 @@ from PySide6 import QtCore, QtNetwork
 from __feature__ import snake_case, true_property  # noqa: F401
 
 from auto_neutron.constants import SPANSH_API_URL
-from auto_neutron.route import ExactRoute, NeutronRoute, Route
+from auto_neutron.route import Route
 from auto_neutron.utils.network import (
     NetworkError,
     json_from_network_req,
@@ -92,13 +92,14 @@ class SpanshRequestManager:
             else:
                 error_callback(_("Received invalid response from Spansh."))
 
-    def spansh_exact_callback(self, *args: t.Any, **kwargs: t.Any) -> None:
+    def route_decode_callback(
+        self,
+        *args: t.Any,
+        route_type: type[Route],
+        **kwargs: t.Any,
+    ) -> None:
         """Callback to call the result callback with an ExactPlotRow list."""  # noqa: D401
-        self._reply_callback(*args, **kwargs, result_decode_func=ExactRoute.from_json)
-
-    def spansh_neutron_callback(self, *args: t.Any, **kwargs: t.Any) -> None:
-        """Callback to call the result callback with a NeutronPlotRow list."""  # noqa: D401
-        self._reply_callback(*args, **kwargs, result_decode_func=NeutronRoute.from_json)
+        self._reply_callback(*args, **kwargs, result_decode_func=route_type.from_json)
 
     def make_request(self, *args: t.Any, **kwargs: t.Any) -> None:
         """Make a network request and store the result reply."""
