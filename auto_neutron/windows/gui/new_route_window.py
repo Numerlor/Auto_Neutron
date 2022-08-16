@@ -26,7 +26,13 @@ class TabBase(QtWidgets.QWidget):
     a source and destination fields along with a cargo slider are added to the top.
     """
 
-    def __init__(self, parent: QtWidgets.QWidget | None, *, create_plot_cargo: bool):
+    def __init__(
+        self,
+        parent: QtWidgets.QWidget | None,
+        *args: object,
+        create_plot_cargo: bool,
+        **kwargs: object,
+    ):
         super().__init__(parent)
         self.main_layout = QtWidgets.QVBoxLayout(self)
         self.has_plot_cargo = create_plot_cargo
@@ -151,8 +157,10 @@ class TabBase(QtWidgets.QWidget):
 class NeutronTabGUI(TabBase):
     """The neutron plotter tab."""
 
-    def __init__(self, parent: QtWidgets.QWidget | None):
-        super().__init__(parent, create_plot_cargo=True)
+    def __init__(
+        self, parent: QtWidgets.QWidget | None, *args: object, **kwargs: object
+    ):
+        super().__init__(parent, create_plot_cargo=True, *args, **kwargs)
 
         self.range_label = QtWidgets.QLabel(self)
         self.range_spin = QtWidgets.QDoubleSpinBox(self)
@@ -205,8 +213,10 @@ class NeutronTabGUI(TabBase):
 class ExactTabGUI(TabBase):
     """The exact plotter tab."""
 
-    def __init__(self, parent: QtWidgets.QWidget | None):
-        super().__init__(parent, create_plot_cargo=True)
+    def __init__(
+        self, parent: QtWidgets.QWidget | None, *args: object, **kwargs: object
+    ):
+        super().__init__(parent, create_plot_cargo=True, *args, **kwargs)
         self.cargo_slider.maximum = (
             999  # static value because ship may come from outside source
         )
@@ -255,8 +265,8 @@ class ExactTabGUI(TabBase):
 class CSVTabGUI(TabBase):
     """The CSV plotter tab."""
 
-    def __init__(self, parent: QtWidgets.QWidget | None):
-        super().__init__(parent, create_plot_cargo=False)
+    def __init__(self, parent: QtWidgets.QWidget | None, *args, **kwargs):
+        super().__init__(parent, create_plot_cargo=False, *args, **kwargs)
 
         self.path_layout = QtWidgets.QHBoxLayout()
 
@@ -285,8 +295,10 @@ class CSVTabGUI(TabBase):
 class LastTabGUI(TabBase):
     """The last route plot tab."""
 
-    def __init__(self, parent: QtWidgets.QWidget | None):
-        super().__init__(parent, create_plot_cargo=False)
+    def __init__(
+        self, parent: QtWidgets.QWidget | None, *args: object, **kwargs: object
+    ):
+        super().__init__(parent, create_plot_cargo=False, *args, **kwargs)
 
         self.source_label = QtWidgets.QLabel(self)
         self.location_label = QtWidgets.QLabel(self)
