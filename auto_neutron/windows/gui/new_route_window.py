@@ -379,7 +379,6 @@ class NewRouteWindowGUI(QtWidgets.QDialog):
         for tab, tab_name in tabs:
             self.tabs.append(tab)
             self.tab_names.append(tab_name)
-            tab.set_parent(self.tab_widget)
             self.tab_widget.add_tab(tab, "")
 
         self.status_layout = QtWidgets.QHBoxLayout()
