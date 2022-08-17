@@ -374,8 +374,11 @@ class NewRouteWindowGUI(QtWidgets.QDialog):
 
         self.tab_widget = QtWidgets.QTabWidget(self)
 
-        self.tabs = tabs
-        for tab, __ in tabs:
+        self.tabs = []
+        self.tab_names = []
+        for tab, tab_name in tabs:
+            self.tabs.append(tab)
+            self.tab_names.append(tab_name)
             tab.set_parent(self.tab_widget)
             self.tab_widget.add_tab(tab, "")
 
@@ -394,8 +397,8 @@ class NewRouteWindowGUI(QtWidgets.QDialog):
 
     def switch_submit_abort(self) -> None:
         """Switches the currently appearing submit/abort buttons for the other one."""
-        abort_hidden = self.tabs[0][0].abort_button.is_hidden()
-        for tab, __ in self.tabs:
+        abort_hidden = self.tabs[0].abort_button.is_hidden()
+        for tab in self.tabs:
             if abort_hidden:
                 tab.abort_button.show()
                 tab.submit_button.hide()
@@ -405,6 +408,6 @@ class NewRouteWindowGUI(QtWidgets.QDialog):
 
     def retranslate(self) -> None:
         """Retranslate text that is always on display."""
-        for tab_pos, (tab, tab_title) in enumerate(self.tabs):
+        for tab_pos, (tab, tab_title) in enumerate(zip(self.tabs, self.tab_names)):
             tab.retranslate()
             self.tab_widget.set_tab_text(tab_pos, _(tab_title))
