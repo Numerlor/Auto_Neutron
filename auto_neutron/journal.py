@@ -31,7 +31,7 @@ class Journal(QtCore.QObject):
     system_sig = QtCore.Signal(Location)
     target_signal = QtCore.Signal(Location)
     cargo_signal = QtCore.Signal(int)
-    loadout_sig = QtCore.Signal(dict)
+    loadout_sig = QtCore.Signal(Ship)
     shut_down_sig = QtCore.Signal()
 
     def __init__(self, journal_path: Path):
@@ -77,7 +77,7 @@ class Journal(QtCore.QObject):
             if self.ship is None:
                 self.ship = Ship()
             self.ship.update_from_loadout(entry)
-            self.loadout_sig.emit(entry)
+            self.loadout_sig.emit(self.ship)
 
         elif entry["event"] == "Location" or entry["event"] == "FSDJump":
             self.location = Location(entry["StarSystem"], *entry["StarPos"])
