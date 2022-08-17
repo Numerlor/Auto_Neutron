@@ -30,6 +30,13 @@ log = logging.getLogger(__name__)
 class NearestWindow(NearestWindowGUI):
     """Provide a UI to Spansh's nearest API and let the user get the result through the provided buttons."""
 
+    copy_source = QtCore.Signal(
+        str
+    )  # called when user requests to copy source system to parent window
+    copy_destination = QtCore.Signal(
+        str
+    )  # called when user requests to copy destination system to parent window
+
     def __init__(
         self,
         parent: QtWidgets.QWidget,
@@ -42,6 +49,8 @@ class NearestWindow(NearestWindowGUI):
         self.search_button.pressed.connect(self._make_nearest_request)
         self._status_callback = status_callback
         self._current_network_request = None
+        self.copy_to_source_button.pressed.connect(self._emit_source_copy)
+        self.copy_to_destination_button.pressed.connect(self._emit_destination_copy)
         self.retranslate()
 
     def set_input_values_from_location(self, location: Location | None) -> None:
@@ -117,3 +126,11 @@ class NearestWindow(NearestWindowGUI):
         """Retranslate the GUI when a language change occurs."""
         if event.type() == QtCore.QEvent.LanguageChange:
             self.retranslate()
+
+    def _emit_source_copy(self) -> None:  # noqa: D402
+        if self.system_name_result_label.text:
+            self.copy_source.emit(self.system_name_result_label.text)
+
+    def _emit_destination_copy(self) -> None:  # noqa: D402
+        if self.system_name_result_label.text:
+            self.copy_destination.emit(self.system_name_result_label.text)
