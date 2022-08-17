@@ -19,31 +19,16 @@ from .tooltip_slider import TooltipSlider
 
 
 class TabBase(QtWidgets.QWidget):
-    """
-    Provide the base for plot tabs, with a journal selector and submit/abort buttons on bottom.
-
-    If `create_plot_cargo` is set to True,
-    a source and destination fields along with a cargo slider are added to the top.
-    """
+    """Provide the base for plot tabs, with a journal selector and submit/abort buttons on bottom."""
 
     def __init__(
         self,
         parent: QtWidgets.QWidget | None,
         *args: object,
-        create_plot_cargo: bool,
         **kwargs: object,
     ):
         super().__init__(parent)
         self.main_layout = QtWidgets.QVBoxLayout(self)
-        self.has_plot_cargo = create_plot_cargo
-        if create_plot_cargo:
-            (
-                self.system_cargo_layout,
-                self.source_edit,
-                self.target_edit,
-                self.cargo_label,
-                self.cargo_slider,
-            ) = self._create_system_and_cargo_layout()
         (
             self.journal_submit_layout,
             self.journal_combo,
@@ -99,32 +84,6 @@ class TabBase(QtWidgets.QWidget):
             abort_button,
         )
 
-    def _create_system_and_cargo_layout(
-        self,
-    ) -> tuple[
-        QtWidgets.QVBoxLayout,
-        QtWidgets.QLineEdit,
-        QtWidgets.QLineEdit,
-        QtWidgets.QLabel,
-        TooltipSlider,
-    ]:
-        """Create a layout that holds the top system text edits and cargo slider."""
-        layout = QtWidgets.QVBoxLayout()
-
-        source_system_edit = QtWidgets.QLineEdit(self)
-        target_system_edit = QtWidgets.QLineEdit(self)
-
-        cargo_label = QtWidgets.QLabel(self)
-        cargo_slider = TooltipSlider(QtCore.Qt.Orientation.Horizontal, self)
-
-        layout.add_widget(source_system_edit)
-        layout.add_widget(target_system_edit)
-
-        layout.add_widget(cargo_label, alignment=QtCore.Qt.AlignmentFlag.AlignTop)
-        layout.add_widget(cargo_slider, alignment=QtCore.Qt.AlignmentFlag.AlignTop)
-
-        return layout, source_system_edit, target_system_edit, cargo_label, cargo_slider
-
     def get_refresh_icon(self, dark: bool) -> QtGui.QIcon:
         """Get an appropriately coloured refresh icon."""
         if dark:
@@ -142,12 +101,6 @@ class TabBase(QtWidgets.QWidget):
 
     def retranslate(self) -> None:
         """Retranslate text that is always on display."""
-        if self.has_plot_cargo:
-            self.source_edit.placeholder_text = _("Source system")
-            self.target_edit.placeholder_text = _("Destination system")
-
-            self.cargo_label.text = _("Cargo")
-
         self.submit_button.text = _("Submit")
         self.abort_button.text = _("Abort")
         self.abort_button.tool_tip = _("Cancel the current route plot")
@@ -160,7 +113,15 @@ class SpanshTabGUIBase(TabBase):
     def __init__(
         self, parent: QtWidgets.QWidget | None, *args: object, **kwargs: object
     ):
-        super().__init__(parent, create_plot_cargo=True, *args, **kwargs)
+        super().__init__(parent, *args, **kwargs)
+        (
+            self.system_cargo_layout,
+            self.source_edit,
+            self.target_edit,
+            self.cargo_label,
+            self.cargo_slider,
+        ) = self._create_system_and_cargo_layout()
+
         self.journal_submit_layout = QtWidgets.QHBoxLayout()
 
         self.nearest_button = QtWidgets.QPushButton(self)
@@ -204,6 +165,36 @@ class SpanshTabGUIBase(TabBase):
         """Retranslate text that is always on display."""
         super().retranslate()
         self.nearest_button.text = _("Nearest")
+        self.source_edit.placeholder_text = _("Source system")
+        self.target_edit.placeholder_text = _("Destination system")
+
+        self.cargo_label.text = _("Cargo")
+
+    def _create_system_and_cargo_layout(
+        self,
+    ) -> tuple[
+        QtWidgets.QVBoxLayout,
+        QtWidgets.QLineEdit,
+        QtWidgets.QLineEdit,
+        QtWidgets.QLabel,
+        TooltipSlider,
+    ]:
+        """Create a layout that holds the top system text edits and cargo slider."""
+        layout = QtWidgets.QVBoxLayout()
+
+        source_system_edit = QtWidgets.QLineEdit(self)
+        target_system_edit = QtWidgets.QLineEdit(self)
+
+        cargo_label = QtWidgets.QLabel(self)
+        cargo_slider = TooltipSlider(QtCore.Qt.Orientation.Horizontal, self)
+
+        layout.add_widget(source_system_edit)
+        layout.add_widget(target_system_edit)
+
+        layout.add_widget(cargo_label, alignment=QtCore.Qt.AlignmentFlag.AlignTop)
+        layout.add_widget(cargo_slider, alignment=QtCore.Qt.AlignmentFlag.AlignTop)
+
+        return layout, source_system_edit, target_system_edit, cargo_label, cargo_slider
 
 
 class NeutronTabGUI(SpanshTabGUIBase):
@@ -305,7 +296,7 @@ class CSVTabGUI(TabBase):
     """The CSV plotter tab."""
 
     def __init__(self, parent: QtWidgets.QWidget | None, *args, **kwargs):
-        super().__init__(parent, create_plot_cargo=False, *args, **kwargs)
+        super().__init__(parent, *args, **kwargs)
 
         self.path_layout = QtWidgets.QHBoxLayout()
 
@@ -337,7 +328,7 @@ class LastTabGUI(TabBase):
     def __init__(
         self, parent: QtWidgets.QWidget | None, *args: object, **kwargs: object
     ):
-        super().__init__(parent, create_plot_cargo=False, *args, **kwargs)
+        super().__init__(parent, *args, **kwargs)
 
         self.source_label = QtWidgets.QLabel(self)
         self.location_label = QtWidgets.QLabel(self)
