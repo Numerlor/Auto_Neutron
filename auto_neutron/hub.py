@@ -131,18 +131,12 @@ class Hub(QtCore.QObject):
         log.debug("Setting route index after user interaction.")
         self.plotter_state.route_index = index.row()
 
-    def new_route(
-        self, journal: Journal, route: Route = None, route_index: int = None
-    ) -> None:
+    def new_route(self, journal: Journal, route: Route = None) -> None:
         """Create a new worker with `route`, populate the main table with it, and set the route index."""
         if route is None:
             logging.debug("Using current plotter route.")
             route = self.plotter_state.route
-        if route_index is None:
-            logging.debug("Using current plotter index.")
-            route_index = self.plotter_state.route_index
 
-        logging.debug(f"Creating a new route with {route_index=}.")
         self.plotter_state.journal = journal
         self.plotter_state.create_worker_with_route(route)
         if self.plotter_state.plotter is None:
@@ -153,8 +147,8 @@ class Hub(QtCore.QObject):
         with self.edit_route_update_connection.temporarily_disconnect():
             self.window.initialize_table(route)
 
-        self.plotter_state.route_index = route_index
-        self.window.scroll_to_index(route_index)
+        self.window.scroll_to_index(self.plotter_state.route_index)
+        self.plotter_state.route_index = route.index
         if journal.location is not None:  # may not have a location yet
             self.plotter_state.tail_worker.emit_next_system(journal.location)
         self.warn_worker.start()
@@ -200,7 +194,9 @@ class Hub(QtCore.QObject):
         """Display the shut down window and connect it to create a new route and save the current one."""
         log.info("Displaying shut down window.")
         window = ShutDownWindow(self.window)
-        window.new_journal_signal.connect(self.new_route)
+        window.new_journal_signal.connect(
+            partial(self.new_route, route=self.plotter_state.route)
+        )
         window.save_route_button.pressed.connect(self.save_route)
         window.show()
 

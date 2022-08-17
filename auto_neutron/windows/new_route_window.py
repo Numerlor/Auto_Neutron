@@ -44,7 +44,7 @@ log = logging.getLogger(__name__)
 class NewRouteWindow(NewRouteWindowGUI):
     """The UI for plotting a new route, from CSV, Spansh plotters, or the last saved route."""
 
-    route_created_signal = QtCore.Signal(Journal, Route, int)
+    route_created_signal = QtCore.Signal(Journal, Route)
 
     def __init__(self, parent: QtWidgets.QWidget):
         self.spansh_neutron_tab = NeutronTabGUI(None)
@@ -580,7 +580,7 @@ class NewRouteWindow(NewRouteWindowGUI):
 
     def emit_and_close(self, journal: Journal, route: Route, route_index: int) -> None:
         """Emit a new route and close the window."""
-        self.route_created_signal.emit(journal, route, route_index)
+        self.route_created_signal.emit(journal, route)
         self._current_network_reply = None
         self.switch_submit_abort()
         self.close()
