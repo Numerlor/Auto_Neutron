@@ -18,7 +18,7 @@ from .plain_text_scroller import PlainTextScroller
 from .tooltip_slider import TooltipSlider
 
 
-class TabBase(QtWidgets.QWidget):
+class TabGUIBase(QtWidgets.QWidget):
     """Provide the base for plot tabs, with a journal selector and submit/abort buttons on bottom."""
 
     def __init__(
@@ -107,7 +107,7 @@ class TabBase(QtWidgets.QWidget):
         self.refresh_button.tool_tip = _("Refresh journals")
 
 
-class SpanshTabGUIBase(TabBase):
+class SpanshTabGUIBase(TabGUIBase):
     """Base Spansh layout with the source/target sys inputs, cargo slider and nearest button above submit."""
 
     def __init__(
@@ -292,7 +292,7 @@ class ExactTabGUI(SpanshTabGUIBase):
         self.use_clipboard_checkbox.text = _("Use ship from clipboard")
 
 
-class CSVTabGUI(TabBase):
+class CSVTabGUI(TabGUIBase):
     """The CSV plotter tab."""
 
     def __init__(self, parent: QtWidgets.QWidget | None, *args, **kwargs):
@@ -322,7 +322,7 @@ class CSVTabGUI(TabBase):
         self.path_edit.placeholder_text = _("CSV path")
 
 
-class LastTabGUI(TabBase):
+class LastTabGUI(TabGUIBase):
     """The last route plot tab."""
 
     def __init__(
@@ -353,7 +353,7 @@ class NewRouteWindowGUI(QtWidgets.QDialog):
         self,
         parent: QtWidgets.QWidget | None,
         *,
-        tabs: collections.abc.Sequence[tuple[TabBase, str]],
+        tabs: collections.abc.Sequence[tuple[TabGUIBase, str]],
     ):
         super().__init__(parent)
         self.set_attribute(QtCore.Qt.WidgetAttribute.WA_DeleteOnClose)
