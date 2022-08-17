@@ -167,7 +167,21 @@ class Route(abc.ABC, t.Generic[RowT]):
     def __init__(self, row_type: type[RowT], route: list[RowT]):
         self.row_type = row_type
         self.entries = route
-        self.index = 0
+        self._index = 0
+
+    @property
+    def index(self) -> int:
+        """The route's current index."""  # noqa: D401
+        return self._index
+
+    @index.setter
+    def index(self, new_index: int) -> None:
+        """
+        Set the index to `new_index` clamped to the route's maximum.
+
+        The new index should be positive.
+        """
+        self._index = min(len(self.entries) - 1, new_index)
 
     @property
     def total_jumps(self) -> int:
