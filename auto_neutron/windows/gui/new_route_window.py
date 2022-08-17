@@ -154,13 +154,65 @@ class TabBase(QtWidgets.QWidget):
         self.refresh_button.tool_tip = _("Refresh journals")
 
 
-class NeutronTabGUI(TabBase):
-    """The neutron plotter tab."""
+class SpanshTabGUIBase(TabBase):
+    """Base Spansh layout with the source/target sys inputs, cargo slider and nearest button above submit."""
 
     def __init__(
         self, parent: QtWidgets.QWidget | None, *args: object, **kwargs: object
     ):
         super().__init__(parent, create_plot_cargo=True, *args, **kwargs)
+        self.journal_submit_layout = QtWidgets.QHBoxLayout()
+
+        self.nearest_button = QtWidgets.QPushButton(self)
+        self.nearest_button.size_policy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
+        )
+        submit_nearest_layout = QtWidgets.QVBoxLayout()
+        submit_nearest_layout.add_spacer_item(
+            QtWidgets.QSpacerItem(
+                1,
+                1,
+                QtWidgets.QSizePolicy.Fixed,
+                QtWidgets.QSizePolicy.Expanding,
+            )
+        )
+        submit_nearest_layout.add_widget(self.nearest_button)
+        submit_nearest_layout.add_widget(self.submit_button)
+        submit_nearest_layout.add_widget(self.abort_button)
+
+        self.journal_submit_layout.add_widget(
+            self.journal_combo,
+            alignment=QtCore.Qt.AlignmentFlag.AlignBottom,
+        )
+        self.journal_submit_layout.add_widget(
+            self.refresh_button,
+            alignment=QtCore.Qt.AlignmentFlag.AlignBottom,
+        )
+        self.journal_submit_layout.add_spacer_item(
+            QtWidgets.QSpacerItem(1, 1, QtWidgets.QSizePolicy.Expanding)
+        )
+        spacer = QtWidgets.QSpacerItem(
+            45,
+            1,
+            QtWidgets.QSizePolicy.Expanding,
+            QtWidgets.QSizePolicy.Fixed,
+        )
+        self.journal_submit_layout.add_spacer_item(spacer)
+        self.journal_submit_layout.add_layout(submit_nearest_layout)
+
+    def retranslate(self) -> None:
+        """Retranslate text that is always on display."""
+        super().retranslate()
+        self.nearest_button.text = _("Nearest")
+
+
+class NeutronTabGUI(SpanshTabGUIBase):
+    """The neutron plotter tab."""
+
+    def __init__(
+        self, parent: QtWidgets.QWidget | None, *args: object, **kwargs: object
+    ):
+        super().__init__(parent, *args, **kwargs)
 
         self.range_label = QtWidgets.QLabel(self)
         self.range_spin = QtWidgets.QDoubleSpinBox(self)
@@ -178,28 +230,19 @@ class NeutronTabGUI(TabBase):
             QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
         )
 
-        self.eff_nearest_layout = QtWidgets.QHBoxLayout()
-        self.nearest_button = QtWidgets.QPushButton(self)
-        self.nearest_button.size_policy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
-        )
-        self.eff_nearest_layout.add_widget(
-            self.efficiency_spin, alignment=QtCore.Qt.AlignmentFlag.AlignLeft
-        )
-        self.eff_nearest_layout.add_widget(
-            self.nearest_button, alignment=QtCore.Qt.AlignmentFlag.AlignBottom
-        )
-
         self.main_layout.add_layout(self.system_cargo_layout)
-        self.main_layout.add_spacer_item(
-            QtWidgets.QSpacerItem(
-                1, 1, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Expanding
-            )
-        )
         self.main_layout.add_widget(self.range_label)
         self.main_layout.add_widget(self.range_spin)
         self.main_layout.add_widget(self.efficiency_label)
-        self.main_layout.add_layout(self.eff_nearest_layout)
+        self.main_layout.add_widget(self.efficiency_spin)
+        self.main_layout.add_spacer_item(
+            QtWidgets.QSpacerItem(
+                1,
+                1,
+                QtWidgets.QSizePolicy.Fixed,
+                QtWidgets.QSizePolicy.Expanding,
+            )
+        )
         self.main_layout.add_layout(self.journal_submit_layout)
 
     def retranslate(self) -> None:
@@ -207,16 +250,15 @@ class NeutronTabGUI(TabBase):
         super().retranslate()
         self.range_label.text = _("Range")
         self.efficiency_label.text = _("Efficiency")
-        self.nearest_button.text = _("Nearest")
 
 
-class ExactTabGUI(TabBase):
+class ExactTabGUI(SpanshTabGUIBase):
     """The exact plotter tab."""
 
     def __init__(
         self, parent: QtWidgets.QWidget | None, *args: object, **kwargs: object
     ):
-        super().__init__(parent, create_plot_cargo=True, *args, **kwargs)
+        super().__init__(parent, *args, **kwargs)
         self.cargo_slider.maximum = (
             999  # static value because ship may come from outside source
         )
@@ -226,17 +268,7 @@ class ExactTabGUI(TabBase):
         self.fsd_injections_checkbox = QtWidgets.QCheckBox(self)
         self.exclude_secondary_checkbox = QtWidgets.QCheckBox(self)
 
-        self.use_clipboard_and_nearest_layout = QtWidgets.QHBoxLayout()
-
         self.use_clipboard_checkbox = QtWidgets.QCheckBox(self)
-        self.nearest_button = QtWidgets.QPushButton(self)
-        self.nearest_button.size_policy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
-        )
-        self.use_clipboard_and_nearest_layout.add_widget(
-            self.use_clipboard_checkbox, QtCore.Qt.AlignmentFlag.AlignLeft
-        )
-        self.use_clipboard_and_nearest_layout.add_widget(self.nearest_button)
 
         self.main_layout.add_layout(self.system_cargo_layout)
         self.main_layout.add_spacer_item(
@@ -248,7 +280,15 @@ class ExactTabGUI(TabBase):
         self.main_layout.add_widget(self.supercarge_checkbox)
         self.main_layout.add_widget(self.fsd_injections_checkbox)
         self.main_layout.add_widget(self.exclude_secondary_checkbox)
-        self.main_layout.add_layout(self.use_clipboard_and_nearest_layout)
+        self.main_layout.add_widget(self.use_clipboard_checkbox)
+        self.main_layout.add_spacer_item(
+            QtWidgets.QSpacerItem(
+                1,
+                1,
+                QtWidgets.QSizePolicy.Fixed,
+                QtWidgets.QSizePolicy.Expanding,
+            )
+        )
         self.main_layout.add_layout(self.journal_submit_layout)
 
     def retranslate(self) -> None:
@@ -259,7 +299,6 @@ class ExactTabGUI(TabBase):
         self.fsd_injections_checkbox.text = _("Use FSD injections")
         self.exclude_secondary_checkbox.text = _("Exclude secondary stars")
         self.use_clipboard_checkbox.text = _("Use ship from clipboard")
-        self.nearest_button.text = _("Nearest")
 
 
 class CSVTabGUI(TabBase):
