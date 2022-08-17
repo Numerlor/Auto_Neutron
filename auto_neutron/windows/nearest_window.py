@@ -85,7 +85,7 @@ class NearestWindow(NearestWindowGUI):
             else:
                 # Fall back to Qt error message if spansh didn't respond
                 message = e.error_message
-            self._status_callback.show_message(message, 10_000)
+            self._status_callback(message, 10_000)
         else:
             self.system_name_result_label.text = data["system"]["name"]
             self.distance_result_label.text = (
