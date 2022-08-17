@@ -77,7 +77,7 @@ class NearestWindow(NearestWindowGUI):
 
     def _assign_from_reply(self, reply: QtNetwork.QNetworkReply) -> None:
         """Decode the spansh JSON reply and display the data to the user."""
-        self.cursor = QtGui.QCursor(QtCore.Qt.CursorShape.BusyCursor)
+        self.cursor = QtGui.QCursor(QtCore.Qt.CursorShape.ArrowCursor)
         self._current_network_request = None
 
         try:
