@@ -14,7 +14,7 @@ from __feature__ import snake_case, true_property  # noqa: F401
 from auto_neutron.dark_theme import is_dark
 from auto_neutron.utils.file import base_path
 
-from .plain_text_scroller import PlainTextScroller
+from ..scrolled_status import ScrolledStatus
 from .tooltip_slider import TooltipSlider
 
 
@@ -364,7 +364,7 @@ class NewRouteWindowGUI(QtWidgets.QDialog):
             self.tab_widget.add_tab(tab, "")
 
         self.status_layout = QtWidgets.QHBoxLayout()
-        self.status_widget = PlainTextScroller(self)
+        self.status_widget = ScrolledStatus(self)
         # FIXME: layout with spacer won't be necessary after PySide6 is fixed to properly call the widget's size hint
         self.status_layout.add_widget(self.status_widget)
         self.status_layout.add_spacer_item(

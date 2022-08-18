@@ -39,23 +39,27 @@ class NewRouteWindow(NewRouteWindowGUI):
     tabs: list[TabBase]
 
     def __init__(self, parent: QtWidgets.QWidget):
+        def status_callback(*args, **kwargs) -> None:
+            # Widget created in subclass, not available for tabs passed to the super init.
+            self.status_widget.show_message(*args, **kwargs)
+
         super().__init__(
             parent,
             tabs=[
                 (
-                    NeutronTab(status_callback=self._show_status_message),
+                    NeutronTab(status_callback=status_callback),
                     N_("Neutron plotter"),
                 ),
                 (
-                    ExactTab(status_callback=self._show_status_message),
+                    ExactTab(status_callback=status_callback),
                     N_("Galaxy plotter"),
                 ),
                 (
-                    CSVTab(status_callback=self._show_status_message),
+                    CSVTab(status_callback=status_callback),
                     N_("CSV"),
                 ),
                 (
-                    LastRouteTab(status_callback=self._show_status_message),
+                    LastRouteTab(status_callback=status_callback),
                     N_("Saved route"),
                 ),
             ],
@@ -65,12 +69,6 @@ class NewRouteWindow(NewRouteWindowGUI):
         self.selected_journal: Journal | None = None
         self._journals = list[Journal]()
         self._journal_worker: GameWorker | None = None
-        self._status_hide_timer = QtCore.QTimer(self)
-        self._status_hide_timer.single_shot_ = True
-        self._status_hide_timer.timeout.connect(self._reset_status_text)
-        self._status_has_hover = False
-        self._status_scheduled_reset = False
-        self._setup_status_widget()
 
         self.combo_signals = list[ReconnectingSignal]()
         self._source_sync_signals = list[ReconnectingSignal]()
@@ -120,7 +118,7 @@ class NewRouteWindow(NewRouteWindowGUI):
         """Abort the current network request, if any."""
         self._request_manager.abort()
         self.switch_submit_abort()
-        self._show_status_message("Cancelled route plot.", 2_500)
+        self.status_widget.show_message("Cancelled route plot.", 2_500)
         self.cursor = QtGui.QCursor(QtCore.Qt.CursorShape.ArrowCursor)
 
     def _sync_journal_combos(self, index: int) -> None:
@@ -193,9 +191,9 @@ class NewRouteWindow(NewRouteWindowGUI):
                 self._change_journal(0, show_change_message=show_change_message)
             else:
                 log.info("No valid journals found to populate combos with.")
-                self._show_status_message(
+                self.status_widget.show_message(
                     _("Found no active journal files from within the last week."),
-                    timeout=10_000,
+                    duration=10_000,
                 )
 
                 self.selected_journal = None
@@ -233,20 +231,20 @@ class NewRouteWindow(NewRouteWindowGUI):
         )
 
         if show_change_message:
-            self._show_status_message(
+            self.status_widget.show_message(
                 _("Selected journal using {}, created at {}; {}").format(
                     "Oddysey" if journal.is_oddysey else "Horizons",
                     formatted_time,
                     formatted_date,
                 ),
-                timeout=5_000,
+                duration=5_000,
             )
 
     def _refresh_journals_on_shutdown(self) -> None:
         """Refresh the journal combo box and display a message saying that the selected journal got shut down."""
-        self._show_status_message(
+        self.status_widget.show_message(
             _("Selected journal got shut down, available journals refreshed."),
-            timeout=7_500,
+            duration=7_500,
         )
         self._populate_journal_combos(show_change_message=False)
 
@@ -255,49 +253,6 @@ class NewRouteWindow(NewRouteWindowGUI):
         self.route_created_signal.emit(self.selected_journal, route)
         self.switch_submit_abort()
         self.close()
-
-    def _show_status_message(self, message: str, timeout: int = 0) -> None:
-        """
-        Show `message` in the status widget.
-
-        If `timeout` is provided and non-zero, the text is hidden in `timeout` ms.
-        """
-        self._status_hide_timer.stop()
-        if timeout:
-            self._status_hide_timer.interval = timeout
-            self._status_hide_timer.start()
-
-        self.status_widget.text = message
-
-    def _setup_status_widget(self) -> None:
-        """Patch the status widget's methods to intercept hover events."""
-        original_enter_event = self.status_widget.enter_event
-
-        def patched_enter_event(event: QtGui.QEnterEvent) -> None:
-            """Set the status hover attribute."""
-            original_enter_event(event)
-            self._status_has_hover = True
-
-        self.status_widget.enter_event = patched_enter_event
-
-        original_leave_event = self.status_widget.leave_event
-
-        def patched_leave_event(event: QtCore.QEvent) -> None:
-            """Reset text if the user leaves and the text was supposed to be hidden during that."""
-            original_leave_event(event)
-            self._status_has_hover = False
-            if self._status_scheduled_reset:
-                self.status_widget.text = ""
-                self._status_scheduled_reset = False
-
-        self.status_widget.leave_event = patched_leave_event
-
-    def _reset_status_text(self) -> None:
-        """Reset the status text, or set the scheduled attribute if the status widget is currently hovered."""
-        if not self._status_has_hover:
-            self.status_widget.text = ""
-        else:
-            self._status_scheduled_reset = True
 
     def change_event(self, event: QtCore.QEvent) -> None:
         """Retranslate the GUI when a language change occurs."""
