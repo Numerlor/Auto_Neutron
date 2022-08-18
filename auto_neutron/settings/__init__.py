@@ -1,4 +1,4 @@
-# This file is part of Auto_Neutron.
+# This file is part of Auto_Neutron. See the main.py file for more details.
 # Copyright (C) 2019  Numerlor
 
 from .default_settings_obj import get_settings, set_settings  # isort:skip
