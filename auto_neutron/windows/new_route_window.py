@@ -41,20 +41,15 @@ class NewRouteWindow(NewRouteWindowGUI):
     def __init__(self, parent: QtWidgets.QWidget):
         self._request_manager = SpanshRequestManager(None)
         self.spansh_neutron_tab = NeutronTab(
-            None,
             status_callback=self._show_status_message,
             request_manager=self._request_manager,
         )
         self.spansh_exact_tab = ExactTab(
-            None,
             status_callback=self._show_status_message,
             request_manager=self._request_manager,
         )
-        self.csv_tab = CSVTab(None, status_callback=self._show_status_message)
-        self.last_route_tab = LastRouteTab(
-            None,
-            status_callback=self._show_status_message,
-        )
+        self.csv_tab = CSVTab(status_callback=self._show_status_message)
+        self.last_route_tab = LastRouteTab(status_callback=self._show_status_message)
         super().__init__(
             parent,
             tabs=[

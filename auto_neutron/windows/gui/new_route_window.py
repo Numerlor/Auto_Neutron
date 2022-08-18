@@ -23,11 +23,10 @@ class TabGUIBase(QtWidgets.QWidget):
 
     def __init__(
         self,
-        parent: QtWidgets.QWidget | None,
         *args: object,
         **kwargs: object,
     ):
-        super().__init__(parent)
+        super().__init__()
         self.main_layout = QtWidgets.QVBoxLayout(self)
         (
             self.journal_submit_layout,
@@ -110,10 +109,8 @@ class TabGUIBase(QtWidgets.QWidget):
 class SpanshTabGUIBase(TabGUIBase):
     """Base Spansh layout with the source/target sys inputs, cargo slider and nearest button above submit."""
 
-    def __init__(
-        self, parent: QtWidgets.QWidget | None, *args: object, **kwargs: object
-    ):
-        super().__init__(parent, *args, **kwargs)
+    def __init__(self, *args: object, **kwargs: object):
+        super().__init__(*args, **kwargs)
         (
             self.system_cargo_layout,
             self.source_edit,
@@ -200,10 +197,8 @@ class SpanshTabGUIBase(TabGUIBase):
 class NeutronTabGUI(SpanshTabGUIBase):
     """The neutron plotter tab."""
 
-    def __init__(
-        self, parent: QtWidgets.QWidget | None, *args: object, **kwargs: object
-    ):
-        super().__init__(parent, *args, **kwargs)
+    def __init__(self, *args: object, **kwargs: object):
+        super().__init__(*args, **kwargs)
 
         self.range_label = QtWidgets.QLabel(self)
         self.range_spin = QtWidgets.QDoubleSpinBox(self)
@@ -246,10 +241,8 @@ class NeutronTabGUI(SpanshTabGUIBase):
 class ExactTabGUI(SpanshTabGUIBase):
     """The exact plotter tab."""
 
-    def __init__(
-        self, parent: QtWidgets.QWidget | None, *args: object, **kwargs: object
-    ):
-        super().__init__(parent, *args, **kwargs)
+    def __init__(self, *args: object, **kwargs: object):
+        super().__init__(*args, **kwargs)
         self.cargo_slider.maximum = (
             999  # static value because ship may come from outside source
         )
@@ -295,8 +288,8 @@ class ExactTabGUI(SpanshTabGUIBase):
 class CSVTabGUI(TabGUIBase):
     """The CSV plotter tab."""
 
-    def __init__(self, parent: QtWidgets.QWidget | None, *args, **kwargs):
-        super().__init__(parent, *args, **kwargs)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
         self.path_layout = QtWidgets.QHBoxLayout()
 
@@ -325,10 +318,8 @@ class CSVTabGUI(TabGUIBase):
 class LastTabGUI(TabGUIBase):
     """The last route plot tab."""
 
-    def __init__(
-        self, parent: QtWidgets.QWidget | None, *args: object, **kwargs: object
-    ):
-        super().__init__(parent, *args, **kwargs)
+    def __init__(self, *args: object, **kwargs: object):
+        super().__init__(*args, **kwargs)
 
         self.source_label = QtWidgets.QLabel(self)
         self.location_label = QtWidgets.QLabel(self)

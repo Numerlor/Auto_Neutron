@@ -46,12 +46,11 @@ class TabBase(TabGUIBase):
 
     def __init__(
         self,
-        parent: QtWidgets.QWidget | None,
         *args: object,
         status_callback: StatusCallback,
         **kwargs: object,
     ):
-        super().__init__(parent)
+        super().__init__()
         self._journal: Journal | None = None
         self._status_callback = status_callback
         self.submit_button.pressed.connect(self._get_route)
@@ -82,14 +81,10 @@ class TabBase(TabGUIBase):
 class CSVTab(TabBase, CSVTabGUI):  # noqa: D101
     def __init__(
         self,
-        parent: QtWidgets.QWidget | None,
         *,
         status_callback: StatusCallback,
     ):
-        super().__init__(
-            parent,
-            status_callback=status_callback,
-        )
+        super().__init__(status_callback=status_callback)
         self.path_popup_button.pressed.connect(self._path_select_popup)
         self.path_edit.textChanged.connect(self._set_submit_sensitive)
 
@@ -150,14 +145,10 @@ class CSVTab(TabBase, CSVTabGUI):  # noqa: D101
 class LastRouteTab(TabBase, LastTabGUI):  # noqa: D101
     def __init__(
         self,
-        parent: QtWidgets.QWidget | None,
         *,
         status_callback: StatusCallback,
     ):
-        super().__init__(
-            parent,
-            status_callback=status_callback,
-        )
+        super().__init__(status_callback=status_callback)
         self._loaded_route: Route | None = None
 
     def _set_submit_sensitive(self) -> None:
@@ -224,15 +215,11 @@ class SpanshTabBase(TabBase, SpanshTabGUIBase):
 
     def __init__(
         self,
-        parent: QtWidgets.QWidget | None,
         *,
         status_callback: StatusCallback,
         request_manager: SpanshRequestManager,
     ):
-        super().__init__(
-            parent,
-            status_callback=status_callback,
-        )
+        super().__init__(status_callback=status_callback)
         self._request_manager = request_manager
         self._connections = list[QtCore.QMetaObject.Connection]()
         self.nearest_button.pressed.connect(self._display_nearest_window)
