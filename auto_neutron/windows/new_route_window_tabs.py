@@ -279,7 +279,7 @@ class SpanshTabBase(TabBase, SpanshTabGUIBase):
         """Submit a Spansh job to `self.endpoint` and decode it with `self.route_type`."""
         assert (
             self._request_manager is not None
-        ), "Request manger must be set before a request is made."
+        ), "Request manager must be set before a request is made."
         log.info(f"Submitting Spansh job to {self.endpoint} for {self.route_type=}.")
         params = self._request_params()
         if params is None:
