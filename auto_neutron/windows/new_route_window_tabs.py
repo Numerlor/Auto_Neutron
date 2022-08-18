@@ -364,7 +364,7 @@ class NeutronTab(SpanshTabBase, NeutronTabGUI):  # noqa: D101
     def _update_from_loadout(self, ship: Ship) -> None:
         """Update range for changed cargo."""
         super()._update_from_loadout(ship)
-        self._set_range()
+        self._set_range(ship=ship)
 
     def _request_params(self) -> dict[str, t.Any]:
         return {
@@ -374,7 +374,11 @@ class NeutronTab(SpanshTabBase, NeutronTabGUI):  # noqa: D101
             "to": self.target_edit.text,
         }
 
-    def _set_range(self, cargo_mass: int | None = None) -> None:
+    def _set_range(
+        self,
+        cargo_mass: int | None = None,
+        ship: Ship | None = None,
+    ) -> None:
         """
         Set the user's jump range for `cargo_mass`.
 
@@ -386,8 +390,11 @@ class NeutronTab(SpanshTabBase, NeutronTabGUI):  # noqa: D101
             else:
                 cargo_mass = 0
 
-        if self._journal is not None and self._journal.ship is not None:
-            self.range_spin.value = self._journal.ship.jump_range(cargo_mass=cargo_mass)
+        if ship is None and self._journal is not None:
+            ship = self._journal.ship
+
+        if ship is not None:
+            self.range_spin.value = ship.jump_range(cargo_mass=cargo_mass)
 
 
 class ExactTab(SpanshTabBase, ExactTabGUI):  # noqa: D101
