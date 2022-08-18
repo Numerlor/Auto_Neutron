@@ -39,15 +39,8 @@ class NewRouteWindow(NewRouteWindowGUI):
     tabs: list[TabBase]
 
     def __init__(self, parent: QtWidgets.QWidget):
-        self._request_manager = SpanshRequestManager(None)
-        self.spansh_neutron_tab = NeutronTab(
-            status_callback=self._show_status_message,
-            request_manager=self._request_manager,
-        )
-        self.spansh_exact_tab = ExactTab(
-            status_callback=self._show_status_message,
-            request_manager=self._request_manager,
-        )
+        self.spansh_neutron_tab = NeutronTab(status_callback=self._show_status_message)
+        self.spansh_exact_tab = ExactTab(status_callback=self._show_status_message)
         self.csv_tab = CSVTab(status_callback=self._show_status_message)
         self.last_route_tab = LastRouteTab(status_callback=self._show_status_message)
         super().__init__(
@@ -59,6 +52,10 @@ class NewRouteWindow(NewRouteWindowGUI):
                 (self.last_route_tab, N_("Saved route")),
             ],
         )
+        self._request_manager = SpanshRequestManager(self)
+        self.spansh_neutron_tab.set_request_manager(self._request_manager)
+        self.spansh_exact_tab.set_request_manager(self._request_manager)
+
         self.selected_journal: Journal | None = None
         self._journals = list[Journal]()
         self._journal_worker: GameWorker | None = None

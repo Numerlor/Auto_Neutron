@@ -217,10 +217,9 @@ class SpanshTabBase(TabBase, SpanshTabGUIBase):
         self,
         *,
         status_callback: StatusCallback,
-        request_manager: SpanshRequestManager,
     ):
         super().__init__(status_callback=status_callback)
-        self._request_manager = request_manager
+        self._request_manager: SpanshRequestManager | None = None
         self._connections = list[QtCore.QMetaObject.Connection]()
         self.nearest_button.pressed.connect(self._display_nearest_window)
         self.source_edit.textChanged.connect(self._set_submit_sensitive)
@@ -260,6 +259,10 @@ class SpanshTabBase(TabBase, SpanshTabGUIBase):
 
         super().set_journal(journal)
 
+    def set_request_manager(self, manager: SpanshRequestManager) -> None:
+        """Set the request manager to `manager`."""
+        self._request_manager = manager
+
     def _set_submit_sensitive(self) -> None:
         """Set submit to be active when both source and target are filled, and a journal is selected."""
         self.submit_button.enabled = bool(
@@ -274,6 +277,9 @@ class SpanshTabBase(TabBase, SpanshTabGUIBase):
 
     def _get_route(self) -> None:
         """Submit a Spansh job to `self.endpoint` and decode it with `self.route_type`."""
+        assert (
+            self._request_manager is not None
+        ), "Request manger must be set before a request is made."
         log.info(f"Submitting Spansh job to {self.endpoint} for {self.route_type=}.")
         params = self._request_params()
         if params is None:
