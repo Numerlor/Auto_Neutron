@@ -251,7 +251,6 @@ class NewRouteWindow(NewRouteWindowGUI):
     def emit_and_close(self, route: Route) -> None:
         """Emit a new route and close the window."""
         self.route_created_signal.emit(self.selected_journal, route)
-        self.switch_submit_abort()
         self.close()
 
     def change_event(self, event: QtCore.QEvent) -> None:
