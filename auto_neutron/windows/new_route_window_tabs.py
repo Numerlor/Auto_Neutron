@@ -303,7 +303,7 @@ class SpanshTabBase(TabBase, SpanshTabGUIBase):
         log.info("Displaying nearest window.")
         start_loc = None if self._journal is None else self._journal.location
 
-        def set_modified(widget, *args):  # noqa: ANN001, ANN201
+        def set_modified(widget: QtWidgets.QLineEdit, *args) -> None:
             widget.modified = True
 
         window = NearestWindow(self, start_loc, self._status_callback)
