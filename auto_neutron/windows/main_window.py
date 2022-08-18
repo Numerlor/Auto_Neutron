@@ -75,6 +75,7 @@ class MainWindow(MainWindowGUI):
         header.retranslate_headers()
 
         self.mass_insert(dataclasses.astuple(row) for row in route.entries)
+        self.update_remaining_count()
 
     def set_current_row(self, index: int) -> None:
         """Change the item colours before `index` to appear inactive and update the remaining systems/jump."""
