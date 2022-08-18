@@ -55,6 +55,17 @@ class ScrolledStatus(PlainTextScroller):
         else:
             self._scheduled_reset = True
 
+    def _force_reset_text(self) -> None:
+        """Force text reset, disable hide timer and scheduled reset."""
+        self.text = ""
+        self._hide_timer.stop()
+        self._scheduled_reset = False
+
+    def mouse_release_event(self, event: QtGui.QMouseEvent) -> None:
+        """Reset text on click."""
+        super().mouse_release_event(event)
+        self._force_reset_text()
+
     def enter_event(self, event: QtGui.QEnterEvent) -> None:
         """Set hovered status to true."""
         super().enter_event(event)
