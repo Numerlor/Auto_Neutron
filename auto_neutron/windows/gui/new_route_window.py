@@ -13,9 +13,7 @@ from __feature__ import snake_case, true_property  # noqa: F401
 
 from auto_neutron.dark_theme import is_dark
 from auto_neutron.utils.file import base_path
-
-from ..scrolled_status import ScrolledStatus
-from .tooltip_slider import TooltipSlider
+from auto_neutron.widgets import ScrolledStatus, TooltipSlider
 
 
 class TabGUIBase(QtWidgets.QWidget):
