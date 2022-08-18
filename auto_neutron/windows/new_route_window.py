@@ -72,7 +72,9 @@ class NewRouteWindow(NewRouteWindowGUI):
         self._status_scheduled_reset = False
         self._setup_status_widget()
 
-        self.combo_signals = []
+        self.combo_signals = list[ReconnectingSignal]()
+        self._source_sync_signals = list[ReconnectingSignal]()
+        self._destination_sync_signals = list[ReconnectingSignal]()
 
         for tab in self.tabs:
             tab.refresh_button.pressed.connect(self._populate_journal_combos)
@@ -83,6 +85,20 @@ class NewRouteWindow(NewRouteWindowGUI):
                 tab.started_plotting.connect(self._set_busy_cursor)
                 tab.started_plotting.connect(self.switch_submit_abort)
                 tab.plotting_error.connect(self.switch_submit_abort)
+
+                source_sync_signal = ReconnectingSignal(
+                    tab.source_edit.textChanged,
+                    self._sync_source_line_edits,
+                )
+                source_sync_signal.connect()
+                self._source_sync_signals.append(source_sync_signal)
+
+                destination_sync_signal = ReconnectingSignal(
+                    tab.target_edit.textChanged,
+                    self._sync_destination_line_edits,
+                )
+                destination_sync_signal.connect()
+                self._destination_sync_signals.append(destination_sync_signal)
 
                 tab.set_request_manager(self._request_manager)
 
@@ -116,6 +132,30 @@ class NewRouteWindow(NewRouteWindowGUI):
             for tab in self.tabs:
                 tab.journal_combo.current_index = index
         self._change_journal(index)
+
+    def _sync_source_line_edits(self, text: str) -> None:
+        """Sync all source line edits of Spansh tabs."""
+        exit_stack = contextlib.ExitStack()
+        with exit_stack:
+            for signal in self._source_sync_signals:
+                exit_stack.enter_context(signal.temporarily_disconnect())
+            for tab in self.tabs:
+                if isinstance(tab, SpanshTabBase) and (
+                    tab.source_edit.modified or not tab.source_edit.text
+                ):
+                    tab.source_edit.text = text
+
+    def _sync_destination_line_edits(self, text: str) -> None:
+        """Sync all destination line edits of Spansh tabs."""
+        exit_stack = contextlib.ExitStack()
+        with exit_stack:
+            for signal in self._destination_sync_signals:
+                exit_stack.enter_context(signal.temporarily_disconnect())
+            for tab in self.tabs:
+                if isinstance(tab, SpanshTabBase) and (
+                    not tab.target_edit.modified or not tab.target_edit.text
+                ):
+                    tab.target_edit.text = text
 
     def _populate_journal_combos(self, *, show_change_message: bool = True) -> None:
         """
