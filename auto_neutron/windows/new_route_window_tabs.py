@@ -382,7 +382,7 @@ class NeutronTab(SpanshTabBase, NeutronTabGUI):  # noqa: D101
         """
         Set the user's jump range for `cargo_mass`.
 
-        If `cargo_mass` is None or not passed in, the journal's cargo is used, or 0 unknwon.
+        If `cargo_mass` is None or not passed in, the journal's cargo is used, or 0 if unknown.
         """
         if cargo_mass is None:
             if self._journal is not None and self._journal.cargo is not None:
