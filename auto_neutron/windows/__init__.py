@@ -1,3 +1,6 @@
+# This file is part of Auto_Neutron.
+# Copyright (C) 2019  Numerlor
+
 from .download_confirm_dialog import VersionDownloadConfirmDialog
 from .error_window import ErrorWindow
 from .license_window import LicenseWindow
