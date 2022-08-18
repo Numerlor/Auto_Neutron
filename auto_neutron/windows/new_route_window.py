@@ -4,39 +4,30 @@
 from __future__ import annotations
 
 import contextlib
-import csv
 import datetime
-import json
 import logging
-from functools import partial
-from pathlib import Path
 
 import babel.dates
 from PySide6 import QtCore, QtGui, QtWidgets
 from __feature__ import snake_case, true_property  # noqa: F401
 
-from auto_neutron import settings
-from auto_neutron.constants import ROUTE_FILE_NAME, SPANSH_API_URL, get_config_dir
 from auto_neutron.journal import Journal, get_unique_cmdr_journals
 from auto_neutron.locale import get_active_locale
-from auto_neutron.route import Route, SpanshReplyTracker
-from auto_neutron.ship import Ship
+from auto_neutron.route import Route
+from auto_neutron.spansh_request_manager import SpanshRequestManager
 from auto_neutron.utils.signal import ReconnectingSignal
-from auto_neutron.utils.utils import (
-    N_,
-    cmdr_display_name,
-    create_request_delay_iterator,
-)
+from auto_neutron.utils.utils import N_, cmdr_display_name
 from auto_neutron.workers import GameWorker
 
-from .gui.new_route_window import (
-    CSVTabGUI,
-    ExactTabGUI,
-    LastTabGUI,
-    NeutronTabGUI,
-    NewRouteWindowGUI,
+from .gui.new_route_window import NewRouteWindowGUI
+from .new_route_window_tabs import (
+    CSVTab,
+    ExactTab,
+    LastRouteTab,
+    NeutronTab,
+    SpanshTabBase,
+    TabBase,
 )
-from .nearest_window import NearestWindow
 
 log = logging.getLogger(__name__)
 
@@ -45,12 +36,25 @@ class NewRouteWindow(NewRouteWindowGUI):
     """The UI for plotting a new route, from CSV, Spansh plotters, or the last saved route."""
 
     route_created_signal = QtCore.Signal(Journal, Route)
+    tabs: list[TabBase]
 
     def __init__(self, parent: QtWidgets.QWidget):
-        self.spansh_neutron_tab = NeutronTabGUI(None)
-        self.spansh_exact_tab = ExactTabGUI(None)
-        self.csv_tab = CSVTabGUI(None)
-        self.last_route_tab = LastTabGUI(None)
+        self._request_manager = SpanshRequestManager(None)
+        self.spansh_neutron_tab = NeutronTab(
+            None,
+            status_callback=self._show_status_message,
+            request_manager=self._request_manager,
+        )
+        self.spansh_exact_tab = ExactTab(
+            None,
+            status_callback=self._show_status_message,
+            request_manager=self._request_manager,
+        )
+        self.csv_tab = CSVTab(None, status_callback=self._show_status_message)
+        self.last_route_tab = LastRouteTab(
+            None,
+            status_callback=self._show_status_message,
+        )
         super().__init__(
             parent,
             tabs=[
@@ -69,373 +73,38 @@ class NewRouteWindow(NewRouteWindowGUI):
         self._status_has_hover = False
         self._status_scheduled_reset = False
         self._setup_status_widget()
-        self._combo_boxes = [tab.journal_combo for tab, __ in self.tabs]
 
-        self._current_network_reply = None
-        self._journal_connections = []
+        self.combo_signals = []
 
-        # region spansh tabs init
-        self.spansh_neutron_tab.nearest_button.pressed.connect(
-            self._display_nearest_window
-        )
-        self.spansh_exact_tab.nearest_button.pressed.connect(
-            self._display_nearest_window
-        )
-
-        # Disable submit plot buttons and set them to be enabled when their respective from/to fields are filled
-        self.spansh_neutron_tab.submit_button.enabled = False
-        self.spansh_exact_tab.submit_button.enabled = False
-
-        self.spansh_neutron_tab.source_edit.textChanged.connect(
-            self._set_neutron_submit
-        )
-        self.spansh_neutron_tab.target_edit.textChanged.connect(
-            self._set_neutron_submit
-        )
-
-        self.spansh_exact_tab.source_edit.textChanged.connect(self._set_exact_submit)
-        self.spansh_exact_tab.target_edit.textChanged.connect(self._set_exact_submit)
-        self.spansh_exact_tab.use_clipboard_checkbox.stateChanged.connect(
-            self._set_exact_submit
-        )
-
-        self.spansh_neutron_tab.range_spin.value = 50
-        self.spansh_neutron_tab.efficiency_spin.value = 80  # default to 80% efficiency
-
-        self.spansh_neutron_tab.cargo_slider.valueChanged.connect(
-            self._recalculate_range
-        )
-        self.spansh_neutron_tab.submit_button.pressed.connect(self._submit_neutron)
-        self.spansh_exact_tab.submit_button.pressed.connect(self._submit_exact)
-
-        # endregion
-
-        # region csv tab init
-        self.csv_tab.path_popup_button.pressed.connect(self._path_select_popup)
-        self.csv_tab.submit_button.pressed.connect(self._csv_submit)
-        if settings.Paths.csv is not None:
-            self.csv_tab.path_edit.text = str(settings.Paths.csv)
-        # endregion
-
-        self.last_route_tab.submit_button.pressed.connect(self._last_route_submit)
-
-        self.combo_signals = [
-            ReconnectingSignal(
-                combo_box.currentIndexChanged,
-                self._sync_journal_combos,
-            )
-            for combo_box in self._combo_boxes
-        ]
-
-        for signal in self.combo_signals:
-            signal.connect()
-
-        for tab, __ in self.tabs:
+        for tab in self.tabs:
             tab.refresh_button.pressed.connect(self._populate_journal_combos)
             tab.abort_button.pressed.connect(self._abort_request)
+            tab.result_signal.connect(self.emit_and_close)
+            if isinstance(tab, SpanshTabBase):
+                tab.started_plotting.connect(self._set_busy_cursor)
+                tab.started_plotting.connect(self.switch_submit_abort)
+                tab.plotting_error.connect(self.switch_submit_abort)
 
-        self.tab_widget.currentChanged.connect(self._display_saved_route)
-        self._route_displayed = False
-        self._loaded_route: Route | None = None
+            journal_changed_signal = ReconnectingSignal(
+                tab.journal_combo.currentIndexChanged,
+                self._sync_journal_combos,
+            )
+            journal_changed_signal.connect()
+            self.combo_signals.append(journal_changed_signal)
+
         self.retranslate()
         self._populate_journal_combos()
 
-    # region spansh plotters
-    def _submit_neutron(self) -> None:
-        """Submit a neutron plotter request to spansh."""
-        log.info("Submitting neutron job.")
-        self._abort_request()
-
-        self._current_network_reply = SpanshReplyTracker(self)
-        self._current_network_reply.make_request(
-            SPANSH_API_URL + "/route",
-            params={
-                "efficiency": self.spansh_neutron_tab.efficiency_spin.value,
-                "range": self.spansh_neutron_tab.range_spin.value,
-                "from": self.spansh_neutron_tab.source_edit.text,
-                "to": self.spansh_neutron_tab.target_edit.text,
-            },
-            finished_callback=partial(
-                self._current_network_reply.spansh_neutron_callback,
-                error_callback=self._spansh_error_callback,
-                delay_iterator=create_request_delay_iterator(),
-                result_callback=partial(
-                    self.emit_and_close, self.selected_journal, route_index=1
-                ),
-            ),
-        )
+    def _set_busy_cursor(self) -> None:
+        """Set the cursor to the busy cursor."""
         self.cursor = QtGui.QCursor(QtCore.Qt.CursorShape.BusyCursor)
-        self.switch_submit_abort()
-
-    def _submit_exact(self) -> None:
-        """Submit an exact plotter request to spansh."""
-        log.info("Submitting exact job.")
-        self._abort_request()
-
-        if self.spansh_exact_tab.use_clipboard_checkbox.checked:
-            try:
-                ship = Ship.from_coriolis(
-                    json.loads(QtWidgets.QApplication.instance().clipboard().text())
-                )
-            except (json.JSONDecodeError, KeyError):
-                self._show_status_message(_("Invalid ship data in clipboard."), 5_000)
-                return
-        else:
-            ship = self.selected_journal.ship
-
-        self._current_network_reply = SpanshReplyTracker(self)
-        self._current_network_reply.make_request(
-            SPANSH_API_URL + "/generic/route",
-            params={
-                "source": self.spansh_exact_tab.source_edit.text,
-                "destination": self.spansh_exact_tab.target_edit.text,
-                "is_supercharged": int(
-                    self.spansh_exact_tab.is_supercharged_checkbox.checked
-                ),
-                "use_supercharge": int(
-                    self.spansh_exact_tab.supercarge_checkbox.checked
-                ),
-                "use_injections": int(
-                    self.spansh_exact_tab.fsd_injections_checkbox.checked
-                ),
-                "exclude_secondary": int(
-                    self.spansh_exact_tab.exclude_secondary_checkbox.checked
-                ),
-                "fuel_power": ship.fsd.size_const,
-                "fuel_multiplier": ship.fsd.rating_const / 1000,
-                "optimal_mass": ship.fsd.optimal_mass,
-                "base_mass": ship.unladen_mass + ship.reserve_size,
-                "tank_size": ship.tank_size,
-                "internal_tank_size": ship.reserve_size,
-                "max_fuel_per_jump": ship.fsd.max_fuel_usage,
-                "range_boost": ship.jump_range_boost,
-                "cargo": self.spansh_exact_tab.cargo_slider.value,
-            },
-            finished_callback=partial(
-                self._current_network_reply.spansh_exact_callback,
-                error_callback=self._spansh_error_callback,
-                delay_iterator=create_request_delay_iterator(),
-                result_callback=partial(
-                    self.emit_and_close, self.selected_journal, route_index=1
-                ),
-            ),
-        )
-        self.cursor = QtGui.QCursor(QtCore.Qt.CursorShape.BusyCursor)
-        self.switch_submit_abort()
-
-    def _set_widget_values(self) -> None:
-        """Update the UI with values from the game state."""
-        if (
-            not self.spansh_neutron_tab.source_edit.modified
-            or not self.spansh_neutron_tab.source_edit.text
-        ):
-            self.spansh_neutron_tab.source_edit.text = (
-                self.selected_journal.location.name
-            )
-        if (
-            not self.spansh_exact_tab.source_edit.modified
-            or not self.spansh_exact_tab.source_edit.text
-        ):
-            self.spansh_exact_tab.source_edit.text = self.selected_journal.location.name
-
-        if self.selected_journal.last_target is not None:
-            if (
-                not self.spansh_neutron_tab.target_edit.modified
-                or not self.spansh_neutron_tab.target_edit.text
-            ):
-                self.spansh_neutron_tab.target_edit.text = (
-                    self.selected_journal.last_target.name
-                )
-            if (
-                not self.spansh_exact_tab.target_edit.modified
-                or not self.spansh_exact_tab.target_edit.text
-            ):
-                self.spansh_exact_tab.target_edit.text = (
-                    self.selected_journal.last_target.name
-                )
-
-        self.spansh_neutron_tab.cargo_slider.maximum = (
-            self.selected_journal.ship.max_cargo
-        )
-        if self.selected_journal.cargo is not None:
-            self.spansh_neutron_tab.cargo_slider.value = self.selected_journal.cargo
-            self.spansh_exact_tab.cargo_slider.value = self.selected_journal.cargo
-
-            self.spansh_neutron_tab.range_spin.value = (
-                self.selected_journal.ship.jump_range(
-                    cargo_mass=self.selected_journal.cargo
-                )
-            )
-
-    def _recalculate_range(self, cargo_mass: int | None = None) -> None:
-        """Recalculate jump range with the new cargo_mass."""
-        if self.selected_journal:
-            if cargo_mass is None:
-                cargo_mass = self.selected_journal.cargo
-            if (
-                self.selected_journal.ship is not None
-                and self.selected_journal.cargo is not None
-            ):  # Ship may not be available yet
-                self.spansh_neutron_tab.range_spin.value = (
-                    self.selected_journal.ship.jump_range(cargo_mass=cargo_mass)
-                )
-
-    def _set_neutron_submit(self) -> None:
-        """Enable the neutron submit button if both inputs are filled, disable otherwise."""
-        self.spansh_neutron_tab.submit_button.enabled = bool(
-            self.spansh_neutron_tab.source_edit.text
-            and self.spansh_neutron_tab.target_edit.text
-            and self.selected_journal is not None
-        )
-
-    def _set_exact_submit(self) -> None:
-        """Enable the exact submit button if both inputs are filled, disable otherwise."""
-        self.spansh_exact_tab.submit_button.enabled = bool(
-            self.spansh_exact_tab.source_edit.text
-            and self.spansh_exact_tab.target_edit.text
-            and self.selected_journal is not None
-            and (
-                self.selected_journal.ship is not None
-                or self.spansh_exact_tab.use_clipboard_checkbox.checked
-            )
-        )
-
-    def _display_nearest_window(self) -> None:
-        """Display the nearest system finder window and link its signals."""
-        log.info("Displaying nearest window.")
-        start_loc = (
-            None if self.selected_journal is None else self.selected_journal.location
-        )
-        window = NearestWindow(self, start_loc, self.status_widget)
-        window.copy_to_source_button.pressed.connect(
-            partial(
-                self._set_line_edits_from_nearest,
-                self.spansh_neutron_tab.source_edit,
-                self.spansh_exact_tab.source_edit,
-                window=window,
-            )
-        )
-        window.copy_to_source_button.pressed.connect(
-            partial(setattr, self.spansh_neutron_tab.source_edit, "modified", True)
-        )
-
-        window.copy_to_destination_button.pressed.connect(
-            partial(
-                self._set_line_edits_from_nearest,
-                self.spansh_neutron_tab.target_edit,
-                self.spansh_exact_tab.target_edit,
-                window=window,
-            )
-        )
-        window.copy_to_destination_button.pressed.connect(
-            partial(setattr, self.spansh_neutron_tab.source_edit, "modified", True)
-        )
-
-        def set_input_from_target() -> None:
-            if self.selected_journal is not None:
-                window.set_input_values_from_location(self.selected_journal.last_target)
-
-        def set_input_from_location() -> None:
-            if self.selected_journal is not None:
-                window.set_input_values_from_location(self.selected_journal.location)
-
-        window.from_target_button.pressed.connect(set_input_from_target)
-        window.from_location_button.pressed.connect(set_input_from_location)
-        window.show()
-
-    def _set_line_edits_from_nearest(
-        self, *line_edits: QtWidgets.QLineEdit, window: NearestWindow
-    ) -> None:
-        """Update the line edits with `system_name_result_label` contents from `window`."""
-        for line_edit in line_edits:
-            line_edit.text = window.system_name_result_label.text
-
-    def _spansh_error_callback(self, error_message: str) -> None:
-        """Reset the cursor shape and display `error_message` in the status bar."""
-        self.cursor = QtGui.QCursor(QtCore.Qt.CursorShape.ArrowCursor)
-        self._show_status_message(error_message, 10_000)
-        self._current_network_reply = None
-        self.switch_submit_abort()
 
     def _abort_request(self) -> None:
         """Abort the current network request, if any."""
-        if self._current_network_reply is not None:
-            self._current_network_reply.abort()
-            self.switch_submit_abort()
-            self._show_status_message("Cancelled route plot.", 2_500)
-        self._current_network_reply = None
+        self._request_manager.abort()
+        self.switch_submit_abort()
+        self._show_status_message("Cancelled route plot.", 2_500)
         self.cursor = QtGui.QCursor(QtCore.Qt.CursorShape.ArrowCursor)
-
-    # endregion
-
-    # region csv
-
-    def _path_select_popup(self) -> None:
-        """Ask the user for a path and write it to the CSV text edit."""
-        if settings.Paths.csv is not None:
-            start_path = str(settings.Paths.csv.parent)
-        else:
-            start_path = ""
-        path, __ = QtWidgets.QFileDialog.get_open_file_name(
-            self, _("Select CSV file"), start_path, _("CSV (*.csv);;All types (*.*)")
-        )
-        if path:
-            self.csv_tab.path_edit.text = str(Path(path))
-
-    def _csv_submit(self) -> None:
-        """Parse a CSV file of Spansh rows and emit the route created signal."""
-        log.info("Submitting CSV route.")
-        path = Path(self.csv_tab.path_edit.text)
-        route = self._route_from_csv(path)
-        if route is not None:
-            self.emit_and_close(
-                self.selected_journal,
-                route,
-                route_index=1,
-            )
-        log.info(f"Set saved csv {path=}")
-        settings.Paths.csv = path
-
-    def _route_from_csv(self, path: Path) -> Route | None:
-        try:
-            return Route.from_csv_file(path)
-
-        except FileNotFoundError:
-            self._show_status_message(_("CSV file doesn't exist."), 5_000)
-        except csv.Error as error:
-            self._show_status_message(_("Invalid CSV file: ") + str(error), 5_000)
-        except IndexError:
-            self._show_status_message(_("Truncated data in CSV file."), 5_000)
-        except ValueError:
-            self._show_status_message(_("Invalid data in CSV file."), 5_000)
-        except OSError:
-            self._show_status_message(_("Invalid path."), 5_000)
-        except Exception as e:
-            self._show_status_message(_("Invalid CSV file."), 5_000)
-            log.info("CSV parsing failed with", exc_info=e)
-
-    # endregion
-
-    # region last_route
-    def _display_saved_route(self, index: int) -> None:
-        """Display saved route info if user switched to that tab for the first time."""
-        if not self._route_displayed and index == 3:
-            self._loaded_route = self._route_from_csv(
-                get_config_dir() / ROUTE_FILE_NAME
-            )
-            self._update_saved_route_text()
-            self._route_displayed = True
-
-    def _last_route_submit(self) -> None:
-        log.info("Submitting last route.")
-        if self._loaded_route is not None:
-            self.emit_and_close(
-                self.selected_journal,
-                self._loaded_route,
-                route_index=settings.General.last_route_index,
-            )
-
-    # endregion
 
     def _sync_journal_combos(self, index: int) -> None:
         """Assign all journal combo boxes to display the item at `index`."""
@@ -443,8 +112,8 @@ class NewRouteWindow(NewRouteWindowGUI):
         with exit_stack:
             for signal in self.combo_signals:
                 exit_stack.enter_context(signal.temporarily_disconnect())
-            for combo_box in self._combo_boxes:
-                combo_box.index = index
+            for tab in self.tabs:
+                tab.journal_combo.current_index = index
         self._change_journal(index)
 
     def _populate_journal_combos(self, *, show_change_message: bool = True) -> None:
@@ -453,8 +122,7 @@ class NewRouteWindow(NewRouteWindowGUI):
 
         The journals they're referring to are stored in `self._journals`.
         """
-        self._disconnect_journal_connections()
-        font_metrics = self._combo_boxes[0].font_metrics()
+        font_metrics = self.tabs[0].journal_combo.font_metrics()
 
         combo_items = []
         self._journals = get_unique_cmdr_journals()
@@ -471,33 +139,27 @@ class NewRouteWindow(NewRouteWindowGUI):
             for signal in self.combo_signals:
                 exit_stack.enter_context(signal.temporarily_disconnect())
 
+            for tab in self.tabs:
+                tab.journal_combo.clear()
+
             if self._journals:
                 log.info(
                     f"Populating journal combos with {len(self._journals)} journals."
                 )
-                for combo_box in self._combo_boxes:
-                    combo_box.clear()
-                    combo_box.add_items(combo_items)
+                for tab in self.tabs:
+                    tab.journal_combo.add_items(combo_items)
+
                 self._change_journal(0, show_change_message=show_change_message)
-                self.csv_tab.submit_button.enabled = True
-                self._set_neutron_submit()
-                self._set_exact_submit()
-                self.last_route_tab.submit_button.enabled = True
-
             else:
-                for combo_box in self._combo_boxes:
-                    combo_box.clear()
-
                 log.info("No valid journals found to populate combos with.")
                 self._show_status_message(
                     _("Found no active journal files from within the last week."),
                     timeout=10_000,
                 )
-                self.csv_tab.submit_button.enabled = False
-                self.spansh_neutron_tab.submit_button.enabled = False
-                self.spansh_exact_tab.submit_button.enabled = False
-                self.last_route_tab.submit_button.enabled = False
+
                 self.selected_journal = None
+                for tab in self.tabs:
+                    tab.set_journal(None)
 
     def _change_journal(self, index: int, *, show_change_message: bool = True) -> None:
         """Change the current journal and update the UI with its data, or display an error if shut down."""
@@ -513,19 +175,13 @@ class NewRouteWindow(NewRouteWindowGUI):
 
         self.selected_journal = journal
 
-        self._reconnect_journal()
+        for tab in self.tabs:
+            tab.set_journal(journal)
 
         if self._journal_worker is not None:
             self._journal_worker.stop()
         self._journal_worker = GameWorker(self, None, journal)
         self._journal_worker.start()
-
-        if (
-            journal.ship is not None
-            and journal.location is not None
-            and journal.cargo is not None
-        ):
-            self._set_widget_values()
 
         creation_time = datetime.datetime.fromtimestamp(journal.path.stat().st_ctime)
         formatted_time = babel.dates.format_time(
@@ -545,31 +201,6 @@ class NewRouteWindow(NewRouteWindowGUI):
                 timeout=5_000,
             )
 
-    def _disconnect_journal_connections(self) -> None:
-        """Disconnect all of the current journal connections."""
-        if self.selected_journal is not None:
-            for connection in self._journal_connections:
-                self.selected_journal.disconnect(connection)
-
-    def _reconnect_journal(self) -> None:
-        """Disconnect all of the previous connections from the selected journal, and connect the new journal."""
-        self._disconnect_journal_connections()
-        self._journal_connections.clear()
-        self._journal_connections.extend(
-            (
-                self.selected_journal.shut_down_sig.connect(
-                    self._refresh_journals_on_shutdown
-                ),
-                self.selected_journal.loadout_sig.connect(
-                    lambda: self._recalculate_range()
-                ),
-                self.selected_journal.loadout_sig.connect(self._set_widget_values),
-                self.selected_journal.system_sig.connect(self._set_widget_values),
-                self.selected_journal.target_signal.connect(self._set_widget_values),
-                self.selected_journal.cargo_signal.connect(self._set_widget_values),
-            )
-        )
-
     def _refresh_journals_on_shutdown(self) -> None:
         """Refresh the journal combo box and display a message saying that the selected journal got shut down."""
         self._show_status_message(
@@ -578,10 +209,9 @@ class NewRouteWindow(NewRouteWindowGUI):
         )
         self._populate_journal_combos(show_change_message=False)
 
-    def emit_and_close(self, journal: Journal, route: Route, route_index: int) -> None:
+    def emit_and_close(self, route: Route) -> None:
         """Emit a new route and close the window."""
-        self.route_created_signal.emit(journal, route)
-        self._current_network_reply = None
+        self.route_created_signal.emit(self.selected_journal, route)
         self.switch_submit_abort()
         self.close()
 
@@ -636,7 +266,6 @@ class NewRouteWindow(NewRouteWindowGUI):
     def close_event(self, event: QtGui.QCloseEvent) -> None:
         """Abort any running network request on close."""
         self._abort_request()
-        self._disconnect_journal_connections()
 
     def retranslate(self) -> None:
         """Retranslate text that is always on display."""
@@ -645,19 +274,3 @@ class NewRouteWindow(NewRouteWindowGUI):
             for signal in self.combo_signals:
                 exit_stack.enter_context(signal.temporarily_disconnect())
             super().retranslate()
-            self._update_saved_route_text()
-
-    def _update_saved_route_text(self) -> None:
-        """Update the saved route information from the currently loaded route."""
-        if self._loaded_route is not None:
-            # NOTE: Source system
-            self.last_route_tab.source_label.text = _("Source: {}").format(
-                self._loaded_route.entries[0].system
-            )
-            self.last_route_tab.location_label.text = _("Saved location: {}").format(
-                self._loaded_route.entries[settings.General.last_route_index].system
-            )
-            # NOTE: destination system
-            self.last_route_tab.destination_label.text = _("Destination: {}").format(
-                self._loaded_route.entries[-1].system
-            )
