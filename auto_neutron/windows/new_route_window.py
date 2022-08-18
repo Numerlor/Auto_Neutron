@@ -39,22 +39,28 @@ class NewRouteWindow(NewRouteWindowGUI):
     tabs: list[TabBase]
 
     def __init__(self, parent: QtWidgets.QWidget):
-        self.spansh_neutron_tab = NeutronTab(status_callback=self._show_status_message)
-        self.spansh_exact_tab = ExactTab(status_callback=self._show_status_message)
-        self.csv_tab = CSVTab(status_callback=self._show_status_message)
-        self.last_route_tab = LastRouteTab(status_callback=self._show_status_message)
         super().__init__(
             parent,
             tabs=[
-                (self.spansh_neutron_tab, N_("Neutron plotter")),
-                (self.spansh_exact_tab, N_("Galaxy plotter")),
-                (self.csv_tab, N_("CSV")),
-                (self.last_route_tab, N_("Saved route")),
+                (
+                    NeutronTab(status_callback=self._show_status_message),
+                    N_("Neutron plotter"),
+                ),
+                (
+                    ExactTab(status_callback=self._show_status_message),
+                    N_("Galaxy plotter"),
+                ),
+                (
+                    CSVTab(status_callback=self._show_status_message),
+                    N_("CSV"),
+                ),
+                (
+                    LastRouteTab(status_callback=self._show_status_message),
+                    N_("Saved route"),
+                ),
             ],
         )
         self._request_manager = SpanshRequestManager(self)
-        self.spansh_neutron_tab.set_request_manager(self._request_manager)
-        self.spansh_exact_tab.set_request_manager(self._request_manager)
 
         self.selected_journal: Journal | None = None
         self._journals = list[Journal]()
@@ -72,10 +78,13 @@ class NewRouteWindow(NewRouteWindowGUI):
             tab.refresh_button.pressed.connect(self._populate_journal_combos)
             tab.abort_button.pressed.connect(self._abort_request)
             tab.result_signal.connect(self.emit_and_close)
+
             if isinstance(tab, SpanshTabBase):
                 tab.started_plotting.connect(self._set_busy_cursor)
                 tab.started_plotting.connect(self.switch_submit_abort)
                 tab.plotting_error.connect(self.switch_submit_abort)
+
+                tab.set_request_manager(self._request_manager)
 
             journal_changed_signal = ReconnectingSignal(
                 tab.journal_combo.currentIndexChanged,
