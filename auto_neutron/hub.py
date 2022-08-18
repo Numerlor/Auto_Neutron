@@ -9,6 +9,7 @@ import typing as t
 from functools import partial
 
 import babel
+import more_itertools
 from PySide6 import QtCore, QtWidgets
 from __feature__ import snake_case, true_property  # noqa: F401
 
@@ -87,7 +88,7 @@ class Hub(QtCore.QObject):
 
         if (
             not JOURNAL_PATH.exists()
-            or not list(JOURNAL_PATH.glob("Journal.*.log"))
+            or not more_itertools.ilen(JOURNAL_PATH.glob("Journal.*.log"))
             or not (JOURNAL_PATH / "Status.json").exists()
         ):
             # If the journal folder is missing, force the user to quit
