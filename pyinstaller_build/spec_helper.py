@@ -6,6 +6,7 @@ from pathlib import Path
 
 DATAS = [
     ("../resources/*", "./resources"),
+    ("../third_party_licenses/*", "./third_party_licenses"),
     ("../locale", "./locale"),
     ("../LICENSE.md", "."),
 ]

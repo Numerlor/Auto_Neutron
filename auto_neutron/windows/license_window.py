@@ -45,16 +45,26 @@ class LicenseWindow(LicenseWindowGUI):
 
     def get_license_text(self) -> str:
         """Create the license text to show to the user."""
-        python_license_url = (base_path() / "resources/LICENSE_Python.md").as_uri()
-        tomli_license_url = (base_path() / "resources/LICENSE_tomli.md").as_uri()
-        tomli_w_license_url = (base_path() / "resources/LICENSE_tomli-w.md").as_uri()
-        babel_license_url = (base_path() / "resources/LICENSE_babel.md").as_uri()
-        breeze_license_url = (
-            base_path() / "resources/LICENSE_breeze-icons.md"
+        python_license_url = (
+            base_path() / "third_party_licenses/LICENSE_Python.md"
         ).as_uri()
-        pyside_license_url = (base_path() / "resources/LICENSE_PySide6.md").as_uri()
+        tomli_license_url = (
+            base_path() / "third_party_licenses/LICENSE_tomli.md"
+        ).as_uri()
+        tomli_w_license_url = (
+            base_path() / "third_party_licenses/LICENSE_tomli-w.md"
+        ).as_uri()
+        babel_license_url = (
+            base_path() / "third_party_licenses/LICENSE_babel.md"
+        ).as_uri()
+        breeze_license_url = (
+            base_path() / "third_party_licenses/LICENSE_breeze-icons.md"
+        ).as_uri()
+        pyside_license_url = (
+            base_path() / "third_party_licenses/LICENSE_PySide6.md"
+        ).as_uri()
         more_itertools_license_url = (
-            base_path() / "resources/LICENSE_more-itertools.md"
+            base_path() / "third_party_licenses/LICENSE_more-itertools.md"
         ).as_uri()
         auto_neutron_license_url = (base_path() / "LICENSE.md").as_uri()
 
