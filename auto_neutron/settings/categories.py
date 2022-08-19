@@ -2,7 +2,9 @@
 # Copyright (C) 2019  Numerlor
 
 import typing as t
+import winreg
 from base64 import b64decode, b64encode
+from contextlib import suppress
 from pathlib import Path
 
 from PySide6.QtCore import QByteArray
@@ -82,9 +84,35 @@ def _path_deserializer(path_string: str) -> Path | None:
     return Path(path_string)
 
 
+_AHK_REG_PATH = r"SOFTWARE\AutoHotkey"
+
+
+def _ahk_deserializer(path_string: str) -> Path | None:
+    """Return Path from `path_string`, to find ahk path from registry if not set."""
+    serialized = _path_deserializer(path_string)
+    if serialized is None:
+        with (
+            suppress(FileNotFoundError),
+            winreg.OpenKey(winreg.HKEY_CURRENT_USER, _AHK_REG_PATH) as reg_handle,
+        ):
+            return Path(
+                winreg.QueryValueEx(reg_handle, "InstallDir")[0], "AutoHotkey.exe"
+            )
+        with (
+            suppress(FileNotFoundError),
+            winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, _AHK_REG_PATH) as reg_handle,
+        ):
+            return Path(
+                winreg.QueryValueEx(reg_handle, "InstallDir")[0], "AutoHotkey.exe"
+            )
+        return None
+
+    return serialized
+
+
 class Paths(metaclass=SettingsCategory):  # noqa: D101
     ahk: t.Annotated[
-        Path | None, SettingsParams("", _path_serializer, _path_deserializer)
+        Path | None, SettingsParams("", _path_serializer, _ahk_deserializer)
     ]
     csv: t.Annotated[
         Path | None, SettingsParams("", _path_serializer, _path_deserializer)

@@ -30,7 +30,6 @@ JOURNAL_PATH = (
     / "Saved Games/Frontier Developments/Elite Dangerous"
 )
 STATUS_PATH = JOURNAL_PATH / "Status.json"
-AHK_PATH = Path(os.environ["PROGRAMW6432"]) / "AutoHotkey/AutoHotkey.exe"
 ROUTE_FILE_NAME = "route.csv"
 AHK_TEMPLATE = Template(
     """\

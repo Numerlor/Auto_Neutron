@@ -11,7 +11,6 @@ from PySide6 import QtCore, QtWidgets
 from __feature__ import snake_case, true_property  # noqa: F401
 
 from auto_neutron import settings
-from auto_neutron.constants import AHK_PATH
 from auto_neutron.locale import code_from_locale, get_available_locales
 from auto_neutron.settings import delay_sync
 
@@ -91,7 +90,6 @@ class SettingsWindow(SettingsWindowGUI):
         path, __ = QtWidgets.QFileDialog.get_open_file_name(
             self,
             _("Select AHK executable"),
-            str(AHK_PATH),
             filter=_("Executable files (*.exe)"),
         )
         if path:
