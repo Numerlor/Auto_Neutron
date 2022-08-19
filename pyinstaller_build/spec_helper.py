@@ -29,7 +29,7 @@ DLL_EXCLUDE = {
     "qt6qml.dll",
     "qt6qmlmodels.dll",
     "qt6virtualkeyboard.dll",
-    "svgicon.dll",
+    "qsvgicon.dll",
     "qgif.dll",
     "qicns.dll",
     "qjpeg.dll",
