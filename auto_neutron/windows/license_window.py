@@ -53,6 +53,9 @@ class LicenseWindow(LicenseWindowGUI):
             base_path() / "resources/LICENSE_breeze-icons.md"
         ).as_uri()
         pyside_license_url = (base_path() / "resources/LICENSE_PySide6.md").as_uri()
+        more_itertools_license_url = (
+            base_path() / "resources/LICENSE_more-itertools.md"
+        ).as_uri()
         auto_neutron_license_url = (base_path() / "LICENSE.md").as_uri()
 
         return textwrap.dedent(
@@ -69,6 +72,7 @@ class LicenseWindow(LicenseWindowGUI):
         - Qt6, click the "About Qt" button for more details.
         - tomli licensed under the {tomli_hyperlink}
         - tomli-w licensed under the {tomli_w_hyperlink}
+        - more-itertools licensed under the {more_itertools_hyperlink}
         - babel licensed under the {babel_hyperlink}
         - Python and its associated software:
 
@@ -91,6 +95,9 @@ class LicenseWindow(LicenseWindowGUI):
             tomli_hyperlink=self.make_hyperlink(_("MIT license"), tomli_license_url),
             tomli_w_hyperlink=self.make_hyperlink(
                 _("MIT license"), tomli_w_license_url
+            ),
+            more_itertools_hyperlink=self.make_hyperlink(
+                _("MIT license"), more_itertools_license_url
             ),
             babel_hyperlink=self.make_hyperlink(
                 _("3-Clause BSD license"), babel_license_url
