@@ -1,6 +1,6 @@
-Applies to tomli, and tomli-w: Copyright (c) 2021 Taneli Hukkinen
-
 MIT License
+
+Copyright (c) 2021 Taneli Hukkinen
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

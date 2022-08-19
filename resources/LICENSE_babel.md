@@ -1,4 +1,4 @@
-Applies to babel: Copyright (c) 2013-2022 by the Babel Team, see AUTHORS for more information.
+Copyright (c) 2013-2022 by the Babel Team, see AUTHORS for more information.
 
 All rights reserved.
 
