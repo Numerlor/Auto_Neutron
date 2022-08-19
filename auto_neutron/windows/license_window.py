@@ -67,15 +67,15 @@ class LicenseWindow(LicenseWindowGUI):
         Auto_Neutron uses the following software:
         - PySide6 Copyright (C) 2015 The Qt Company Ltd. under the {pyside_hyperlink}
         - Qt6, click the "About Qt" button for more details.
-        - tomli under the {tomli_hyperlink}
-        - tomli-w under the {tomli_w_hyperlink}
-        - babel under the {babel_hyperlink}
+        - tomli licensed under the {tomli_hyperlink}
+        - tomli-w licensed under the {tomli_w_hyperlink}
+        - babel licensed under the {babel_hyperlink}
         - Python and its associated software:
 
         {python_copyright_notice}
           Python is licensed under the {psf_license_agreement_hyperlink}, see {python_licenses_hyperlink} for more details
 
-        And The Breeze Icons Theme Copyright (C) 2014 Uri Herrera <uri_herrera@nitrux.in> and others, under the {breeze_hyperlink}.
+        And The Breeze Icons Theme Copyright (C) 2014 Uri Herrera <uri_herrera@nitrux.in> and others, licensed under the {breeze_hyperlink}.
         """
             )
         ).format(
