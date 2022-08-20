@@ -261,6 +261,8 @@ class NewRouteWindow(NewRouteWindowGUI):
     def close_event(self, event: QtGui.QCloseEvent) -> None:
         """Abort any running network request on close."""
         self._abort_request()
+        if self._journal_worker is not None:
+            self._journal_worker.stop()
 
     def retranslate(self) -> None:
         """Retranslate text that is always on display."""
