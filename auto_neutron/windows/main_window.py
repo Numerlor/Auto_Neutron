@@ -4,9 +4,10 @@
 from __future__ import annotations
 
 import dataclasses
+import time
 import typing as t
 
-from PySide6 import QtCore, QtWidgets
+from PySide6 import QtCore, QtGui, QtWidgets
 from __feature__ import snake_case, true_property  # noqa: F401
 
 from auto_neutron import settings
@@ -35,6 +36,9 @@ class MainWindow(MainWindowGUI):
             self.manage_item_changed,
         )
         self.resize_connection.connect()
+
+        self.table.vertical_scroll_bar().install_event_filter(self)
+        self._last_scroll_time = float("-inf")
 
         self._route: Route | None = None
         self._header_type: RouteTableHeader | None = None
@@ -78,8 +82,8 @@ class MainWindow(MainWindowGUI):
         with self.resize_connection.temporarily_disconnect():
             super().inactivate_before_index(index)
             self.update_remaining_count()
-        top_item = self.table.item_at(QtCore.QPoint(1, 1))
-        if settings.Window.autoscroll and top_item.row() == self._current_row_index:
+
+        if settings.Window.autoscroll and time.monotonic() - self._last_scroll_time > 1:
             self.scroll_to_index(index)
 
         self._current_row_index = index
@@ -109,6 +113,15 @@ class MainWindow(MainWindowGUI):
         """Retranslate the GUI when a language change occurs."""
         if event.type() == QtCore.QEvent.LanguageChange:
             self.retranslate()
+
+    def event_filter(self, watched: QtCore.QObject, event: QtCore.QEvent) -> bool:
+        """Set the last scrolled time on table scroll events."""
+        if (
+            watched is self.table.vertical_scroll_bar()
+            and event.__class__ is QtGui.QWheelEvent
+        ):
+            self._last_scroll_time = time.monotonic()
+        return False
 
     def retranslate(self) -> None:
         """Retranslate text that is always on display."""
