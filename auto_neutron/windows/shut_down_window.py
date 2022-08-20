@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+from functools import partial
+
 from PySide6 import QtCore, QtWidgets
 from __feature__ import snake_case, true_property  # noqa: F401
 
@@ -10,6 +12,7 @@ from auto_neutron.journal import Journal, get_unique_cmdr_journals
 from auto_neutron.utils.signal import ReconnectingSignal
 from auto_neutron.utils.utils import cmdr_display_name
 
+from ..workers import GameWorker
 from .gui.shut_down_window import ShutDownWindowGUI
 
 
@@ -25,6 +28,8 @@ class ShutDownWindow(ShutDownWindowGUI):
     def __init__(self, parent: QtWidgets.QWidget):
         super().__init__(parent)
         self._selected_journal = None
+        self._journal_shutdown_connection: QtCore.QMetaObject.Connection | None = None
+        self._journal_worker: GameWorker | None = None
         self._journals = []
         self.journal_changed_signal = ReconnectingSignal(
             self.journal_combo.currentIndexChanged, self._change_journal
@@ -72,6 +77,18 @@ class ShutDownWindow(ShutDownWindowGUI):
         journal = self._journals[index]
         journal.parse()
         self.new_journal_button.enabled = not journal.shut_down
+
+        if self._journal_worker is not None:
+            self._journal_worker.stop()
+        self._journal_worker = GameWorker(self, None, journal)
+        self._journal_worker.start()
+
+        if self._journal_shutdown_connection is not None:
+            journal.disconnect(self._journal_shutdown_connection)
+
+        self._journal_shutdown_connection = journal.shut_down_sig.connect(
+            partial(setattr, self.new_journal_button, "enabled", False)
+        )
         self._selected_journal = journal
 
     def change_event(self, event: QtCore.QEvent) -> None:
