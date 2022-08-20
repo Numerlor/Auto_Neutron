@@ -121,6 +121,7 @@ class Hub(QtCore.QObject):
         if table_item.row() == self.plotter_state.route_index:
             self.plotter_state.route_index = self.plotter_state.route_index
         self.window.update_remaining_count()
+        self.plotter_state.route.update_indices()
 
     def new_system_callback(self, _: t.Any, index: int) -> None:
         """Ensure we don't edit the route when inactivating rows."""

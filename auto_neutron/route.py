@@ -10,6 +10,8 @@ import logging
 import typing as t
 from pathlib import Path
 
+import more_itertools
+
 if t.TYPE_CHECKING:
     import typing_extensions as te
 
@@ -167,7 +169,9 @@ class Route(abc.ABC, t.Generic[RowT]):
     def __init__(self, row_type: type[RowT], route: list[RowT]):
         self.row_type = row_type
         self.entries = route
+        self._route_indices: dict[str, list[int]] = {}
         self._index = 0
+        self.update_indices()
 
     @property
     def index(self) -> int:
@@ -197,6 +201,28 @@ class Route(abc.ABC, t.Generic[RowT]):
     def current_system(self) -> str:
         """The current system in the route."""  # noqa: D401
         return self.entries[self.index].system
+
+    def system_index(self, system: str) -> int:
+        """
+        Get the index of `system`.
+
+        If the system appears multiple times in the route, try to get the find the first entry after the current index,
+        if none is found return the index of the first occurrence.
+        """
+        if (indices := self._route_indices.get(system)) is None:
+            raise ValueError(f"System {system!r} not in route.")
+
+        try:
+            return more_itertools.first(
+                index for index in indices if index > self.index
+            )
+        except ValueError:
+            return indices[0]
+
+    def update_indices(self) -> None:
+        """Update system indices used in `system_index`."""
+        for index, row in enumerate(self.entries):
+            self._route_indices.setdefault(row.system, []).append(index)
 
     @classmethod
     def from_csv_file(cls, path: Path) -> te.Self:

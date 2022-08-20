@@ -72,7 +72,7 @@ class GameWorker(_WorkerBase):
             return
 
         with contextlib.suppress(ValueError):
-            new_index = self.route.entries.index(location.name) + 1
+            new_index = self.route.system_index(location.name) + 1
             if new_index < len(self.route.entries):
                 self.new_system_index_sig.emit(new_index)
             else:
