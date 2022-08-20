@@ -28,11 +28,6 @@ class SystemEntry(abc.ABC):
     csv_header: t.ClassVar[tuple[str, ...]] = None  # type: ignore
     system: str
 
-    def __eq__(self, other: SystemEntry | str):
-        if isinstance(other, str):
-            return self.system.lower() == other.lower()
-        return super().__eq__(other)
-
     def __setitem__(self, key: int, value: object) -> None:
         """Implement index based item assignment."""
         attr_name = dataclasses.fields(self)[key].name
