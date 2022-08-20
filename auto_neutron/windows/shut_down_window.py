@@ -33,6 +33,7 @@ class ShutDownWindow(ShutDownWindowGUI):
         self.new_journal_button.pressed.connect(
             lambda: self.new_journal_signal.emit(self._selected_journal)
         )
+        self.new_journal_button.pressed.connect(self.close)
         self.quit_button.pressed.connect(QtWidgets.QApplication.instance().quit)
 
         self._populate_journal_combos()
