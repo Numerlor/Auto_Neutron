@@ -70,6 +70,7 @@ class ShutDownWindow(ShutDownWindowGUI):
     def _change_journal(self, index: int) -> None:
         """Change the selected journal, enable/disable the button depending on its shut down state."""
         journal = self._journals[index]
+        journal.parse()
         self.new_journal_button.enabled = not journal.shut_down
         self._selected_journal = journal
 
