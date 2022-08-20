@@ -48,6 +48,11 @@ class ShutDownWindow(ShutDownWindowGUI):
 
         combo_items = []
         self._journals = get_unique_cmdr_journals()
+
+        if not self._journals:
+            self.new_journal_button.enabled = False
+            return
+
         for journal in self._journals:
             combo_items.append(
                 font_metrics.elided_text(
