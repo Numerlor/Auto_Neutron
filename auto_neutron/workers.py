@@ -37,9 +37,7 @@ class _WorkerBase(QtCore.QObject):
         self._generator = generator
         self._timer = QtCore.QTimer(self)
         self._timer.interval = interval
-        self._advance_connection = self._timer.timeout.connect(
-            partial(next, self._generator)
-        )
+        self._timer.timeout.connect(partial(next, self._generator))
         self._stopped = False
 
     def start(self) -> None:
@@ -52,11 +50,8 @@ class _WorkerBase(QtCore.QObject):
     def stop(self) -> None:
         """Stop the worker from tailing the journal file."""
         log.debug(f"Stopping {self.__class__.__name__}.")
-        # Remove the generator advance signal, connect it to close the generator,
-        # and set single_shot_ so the next timeout is the last.
-        self._timer.timeout.connect(self._generator.close)
-        self._timer.disconnect(self._advance_connection)
-        self._timer.single_shot_ = True
+        self._timer.stop()
+        self._generator.close()
         self._stopped = True
 
 
