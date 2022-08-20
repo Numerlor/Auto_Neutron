@@ -52,6 +52,7 @@ class TabBase(TabGUIBase):
     ):
         super().__init__()
         self._journal: Journal | None = None
+        self._journal_shutdown_connection: QtCore.QMetaObject.Connection | None = None
         self._status_callback = status_callback
         self.submit_button.pressed.connect(self._get_route)
 
@@ -61,7 +62,9 @@ class TabBase(TabGUIBase):
 
         By default checks for a selected journal.
         """
-        self.submit_button.enabled = self._journal is not None
+        self.submit_button.enabled = (
+            self._journal is not None and not self._journal.shut_down
+        )
 
     def _get_route(self) -> None:
         """Get the route for the main table, should emit `result_signal` with the route after it's called."""
@@ -69,6 +72,12 @@ class TabBase(TabGUIBase):
 
     def set_journal(self, journal: Journal | None) -> None:
         """Set the tracked journal to `journal`."""
+        if self._journal_shutdown_connection is not None:
+            self._journal.disconnect(self._journal_shutdown_connection)
+        self._journal_shutdown_connection = journal.shut_down_sig.connect(
+            self._set_submit_sensitive
+        )
+
         self._journal = journal
         self._set_submit_sensitive()
 
@@ -92,8 +101,10 @@ class CSVTab(TabBase, CSVTabGUI):  # noqa: D101
             self.path_edit.text = str(settings.Paths.csv)
 
     def _set_submit_sensitive(self) -> None:
-        self.submit_button.enabled = self._journal is not None and bool(
-            self.path_edit.text
+        self.submit_button.enabled = (
+            self._journal is not None
+            and not self._journal.shut_down
+            and bool(self.path_edit.text)
         )
 
     def _get_route(self) -> None:
@@ -152,8 +163,10 @@ class LastRouteTab(TabBase, LastTabGUI):  # noqa: D101
         self._loaded_route: Route | None = None
 
     def _set_submit_sensitive(self) -> None:
-        self.submit_button.enabled = self._journal is not None and bool(
-            self._loaded_route
+        self.submit_button.enabled = (
+            self._journal is not None
+            and not self._journal.shut_down
+            and bool(self._loaded_route)
         )
 
     def _get_route(self) -> None:
@@ -269,6 +282,7 @@ class SpanshTabBase(TabBase, SpanshTabGUIBase):
             self.source_edit.text
             and self.target_edit.text
             and self._journal is not None
+            and not self._journal.shut_down
         )
 
     def _request_params(self) -> dict[str, t.Any] | None:
@@ -439,5 +453,6 @@ class ExactTab(SpanshTabBase, ExactTabGUI):  # noqa: D101
             self.source_edit.text
             and self.target_edit.text
             and self._journal is not None
+            and not self._journal.shut_down
             and (self._journal.ship is not None or self.use_clipboard_checkbox.checked)
         )
