@@ -52,11 +52,7 @@ class MainWindow(MainWindowGUI):
     def mass_insert(
         self, data: collections.abc.Iterable[collections.abc.Iterable[t.Any]]
     ) -> None:
-        """
-        Insert a large amount of rows.
-
-        The `self.conn` itemChanged signal is temporarily disconnected to accommodate this.
-        """
+        """Insert a rows from `data`, then resize columns and rows to contents."""
         with self.resize_connection.temporarily_disconnect():
             for row in data:
                 self.insert_row(row)
