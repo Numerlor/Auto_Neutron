@@ -62,6 +62,7 @@ class ShutDownWindow(ShutDownWindowGUI):
                     80,
                 )
             )
+        self._change_journal(0)
         with self.journal_changed_signal.temporarily_disconnect():
             self.journal_combo.clear()
             self.journal_combo.add_items(combo_items)
