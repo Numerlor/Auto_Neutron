@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import abc
-import collections.abc
 import csv
 import dataclasses
 import logging
@@ -258,7 +257,7 @@ class Route(abc.ABC, t.Generic[RowT]):
     @classmethod
     def route_rows_from_csv(
         cls,
-        reader: collections.abc.Iterator[list[str]],
+        reader: more_itertools.peekable[list[str]],
     ) -> list[RowT]:
         """Get route rows for `row_type` from `reader`."""
         return list(
