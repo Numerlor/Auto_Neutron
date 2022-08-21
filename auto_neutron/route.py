@@ -255,7 +255,7 @@ class Route(abc.ABC, t.Generic[RowT]):
             log.info(f"CSV file at {path} is of type {row_type.__name__}.")
             route = list(
                 more_itertools.unique_justseen(
-                    (row_type.from_csv_row(row) for row in reader),
+                    (row_type.from_csv_row(row) for row in filter(None, reader)),
                     key=attrgetter("system"),
                 )
             )
