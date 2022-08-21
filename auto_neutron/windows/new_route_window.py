@@ -139,7 +139,7 @@ class NewRouteWindow(NewRouteWindowGUI):
                 exit_stack.enter_context(signal.temporarily_disconnect())
             for tab in self.tabs:
                 if isinstance(tab, SpanshTabBase) and (
-                    tab.source_edit.modified or not tab.source_edit.text
+                    not tab.source_edit.modified or not tab.source_edit.text
                 ):
                     tab.source_edit.text = text
 
