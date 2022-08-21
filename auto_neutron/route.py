@@ -8,6 +8,7 @@ import csv
 import dataclasses
 import logging
 import typing as t
+from operator import attrgetter
 from pathlib import Path
 
 import more_itertools
@@ -252,7 +253,12 @@ class Route(abc.ABC, t.Generic[RowT]):
                 row_type = GenericPlotRow
 
             log.info(f"CSV file at {path} is of type {row_type.__name__}.")
-            route = [row_type.from_csv_row(row) for row in reader]
+            route = list(
+                more_itertools.unique_justseen(
+                    (row_type.from_csv_row(row) for row in reader),
+                    key=attrgetter("system"),
+                )
+            )
 
         return cls(row_type, route)
 
