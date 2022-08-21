@@ -240,6 +240,7 @@ class Route(abc.ABC, t.Generic[RowT]):
             self._route_indices.setdefault(row.system, []).append(index)
 
     @classmethod
+    @t.final
     def from_csv_file(cls, path: Path) -> te.Self:
         """Create an instance from a CSV file at `path`."""
         with path.open(encoding="utf8", newline="") as csv_file:
@@ -262,6 +263,7 @@ class Route(abc.ABC, t.Generic[RowT]):
 
         return cls(row_type, route)
 
+    @t.final
     def to_csv_file(self, path: Path) -> None:
         """Save this route to a CSV file at `path`."""
         with path.open("w", encoding="utf8", newline="") as csv_file:
