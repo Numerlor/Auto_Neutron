@@ -7,7 +7,7 @@ from functools import cached_property
 
 from PySide6 import QtWidgets
 
-from auto_neutron.route import ExactPlotRow, NeutronPlotRow, SystemEntry
+from auto_neutron.route import ExactPlotRow, GenericPlotRow, NeutronPlotRow, SystemEntry
 from auto_neutron.utils.utils import N_
 from auto_neutron.windows.gui.delegates import (
     CheckBoxDelegate,
@@ -109,6 +109,18 @@ class RouteTableHeader:
         raise RuntimeError("No jump column for this header.")
 
 
+class GenericHeader(RouteTableHeader):
+    """Table header for generic plots of unknown type."""
+
+    _header_sections = (
+        HeaderSection(
+            text=N_("System name ({}/{})"),
+            has_jumps=True,
+            resize_mode=QtWidgets.QHeaderView.ResizeMode.Stretch,
+        ),
+    )
+
+
 class NeutronHeader(RouteTableHeader):
     """Table header for neutron plots."""
 
@@ -159,6 +171,7 @@ class ExactHeader(RouteTableHeader):
 
 
 _row_type_to_header = {
+    GenericPlotRow: GenericHeader,
     NeutronPlotRow: NeutronHeader,
     ExactPlotRow: ExactHeader,
 }

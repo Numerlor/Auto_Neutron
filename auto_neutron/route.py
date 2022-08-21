@@ -49,6 +49,24 @@ class SystemEntry(abc.ABC):
 
 
 @dataclasses.dataclass
+class GenericPlotRow(SystemEntry):
+    """Plot row of an unknown route or a route with only system names."""
+
+    csv_header: t.ClassVar = ("System Name",)
+    system: str
+
+    @classmethod
+    def from_csv_row(cls, row: list[str]) -> te.Self:  # noqa: D102
+        return cls(row[0])
+
+    def to_csv(self) -> list[str]:  # noqa: D102
+        return [self.system]
+
+    def from_json(cls, json: dict) -> te.Self:  # noqa: D102
+        raise NotImplementedError("Can't create generic plot rows.")
+
+
+@dataclasses.dataclass
 class ExactPlotRow(SystemEntry):
     """One row entry of an exact plot from the Spansh Galaxy Plotter."""
 
@@ -224,8 +242,15 @@ class Route(abc.ABC, t.Generic[RowT]):
     def from_csv_file(cls, path: Path) -> te.Self:
         """Create an instance from a CSV file at `path`."""
         with path.open(encoding="utf8", newline="") as csv_file:
-            reader = csv.reader(csv_file, strict=True)
-            row_type = _header_to_row_type[tuple(next(reader))]
+            reader = more_itertools.peekable(csv.reader(csv_file, strict=True))
+            header = tuple(reader.peek())
+            try:
+                row_type = _header_to_row_type[header]
+                next(reader)  # Header was valid, shouldn't be included in result.
+            except KeyError:
+                # unknown route type, fall back to generic route.
+                row_type = GenericPlotRow
+
             log.info(f"CSV file at {path} is of type {row_type.__name__}.")
             route = [row_type.from_csv_row(row) for row in reader]
 
@@ -242,6 +267,14 @@ class Route(abc.ABC, t.Generic[RowT]):
     @abc.abstractmethod
     def from_json(cls, json_dict: dict) -> te.Self:
         """Create an instance from the `json_dict` json."""
+
+
+class GenericRoute(Route[GenericPlotRow]):
+    """Unknown route with only system names."""
+
+    @classmethod
+    def from_json(cls, json_dict: dict) -> te.Self:  # noqa: D102
+        raise NotImplementedError("Generic routes can't be created from json.")
 
 
 class NeutronRoute(Route[NeutronPlotRow]):
