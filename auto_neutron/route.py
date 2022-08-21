@@ -216,6 +216,7 @@ class Route(abc.ABC, t.Generic[RowT]):
 
     def update_indices(self) -> None:
         """Update system indices used in `system_index`."""
+        self._route_indices.clear()
         for index, row in enumerate(self.entries):
             self._route_indices.setdefault(row.system, []).append(index)
 
