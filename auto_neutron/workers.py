@@ -12,6 +12,7 @@ from functools import partial
 from PySide6 import QtCore
 from __feature__ import snake_case, true_property  # noqa: F401
 
+from auto_neutron import settings
 from auto_neutron.constants import STATUS_PATH
 from auto_neutron.route import Route
 
@@ -76,7 +77,10 @@ class GameWorker(_WorkerBase):
             if new_index < len(self.route.entries):
                 self.new_system_index_sig.emit(new_index)
             else:
-                self.route_end_sig.emit(new_index)
+                if settings.General.loop_routes:
+                    self.new_system_index_sig.emit(0)
+                else:
+                    self.route_end_sig.emit(new_index)
 
     def stop(self) -> None:
         """Disconnect the journal system signal."""

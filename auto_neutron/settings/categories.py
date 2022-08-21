@@ -29,6 +29,7 @@ class General(metaclass=SettingsCategory):  # noqa: D101
     last_route_index: t.Annotated[int, SettingsParams(0)]
     locale: t.Annotated[str, SettingsParams("en")]
     last_checked_release: t.Annotated[str, SettingsParams("")]
+    loop_routes: t.Annotated[bool, SettingsParams(False)]
 
 
 class AHK(metaclass=SettingsCategory):  # noqa: D101

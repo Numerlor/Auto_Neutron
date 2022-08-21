@@ -77,6 +77,7 @@ class BehaviourWidget(QtWidgets.QWidget):
         self.copy_mode_checkbox = QtWidgets.QCheckBox(self)
         self.ahk_path_button = QtWidgets.QPushButton(self)
         self.auto_scroll_checkbox = QtWidgets.QCheckBox(self)
+        self.loop_routes_checkbox = QtWidgets.QCheckBox(self)
 
         self.plotter_options_layout.add_widget(self.copy_mode_checkbox)
         self.plotter_options_layout.add_widget(self.ahk_path_button)
@@ -84,6 +85,7 @@ class BehaviourWidget(QtWidgets.QWidget):
         self.main_layout.add_widget(self.save_on_quit_checkbox)
         self.main_layout.add_layout(self.plotter_options_layout)
         self.main_layout.add_widget(self.auto_scroll_checkbox)
+        self.main_layout.add_widget(self.loop_routes_checkbox)
         self.main_layout.add_spacer_item(get_spacer())
         self.ahk_path_button.maximum_width = 75
 
@@ -93,6 +95,7 @@ class BehaviourWidget(QtWidgets.QWidget):
         self.copy_mode_checkbox.text = _("Copy Mode")
         self.ahk_path_button.text = _("AHK Path")
         self.auto_scroll_checkbox.text = _("Auto scroll")
+        self.loop_routes_checkbox.text = _("Loop routes")
 
 
 class AlertsWidget(QtWidgets.QWidget):

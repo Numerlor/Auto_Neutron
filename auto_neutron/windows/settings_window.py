@@ -59,6 +59,7 @@ class SettingsWindow(SettingsWindowGUI):
             ),
             (self.behaviour_widget.save_on_quit_checkbox, ("General", "save_on_quit")),
             (self.behaviour_widget.copy_mode_checkbox, ("General", "copy_mode")),
+            (self.behaviour_widget.loop_routes_checkbox, ("General", "loop_routes")),
         )
         self.refresh_widgets()
 
