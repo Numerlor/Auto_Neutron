@@ -6,9 +6,10 @@ from __future__ import annotations
 import abc
 import csv
 import dataclasses
+import itertools
 import logging
 import typing as t
-from operator import attrgetter
+from operator import attrgetter, itemgetter
 from pathlib import Path
 
 import more_itertools
@@ -155,8 +156,55 @@ class NeutronPlotRow(SystemEntry):
         return [self.system, self.dist_to_arrival, self.dist_rem, "", self.jumps]
 
 
+@dataclasses.dataclass
+class RoadToRichesRow(SystemEntry):
+    """
+    One row entry of a road to riches  from the Spansh Road 2 Riches plotter.
+
+    Can't be directly created from csv rows because information of a single plot row is spread across
+    multiple csv rows.
+    """
+
+    csv_header: t.ClassVar = (
+        "System Name",
+        "Body Name",
+        "Body Subtype",
+        "Is Terraformable",
+        "Distance To Arrival",
+        "Estimated Scan Value",
+        "Estimated Mapping Value",
+        "Jumps",
+    )
+
+    system: str
+    total_scan_value: int
+    total_mapping_value: int
+    jumps: int
+
+    @classmethod
+    def from_csv_row(cls, row: list[str]) -> te.Self:  # noqa: D102
+        raise NotImplementedError("Can't create RoadToRichesRow from a single csv row.")
+
+    @classmethod
+    def from_json(cls, json: dict) -> te.Self:  # noqa: D102
+        ...
+
+    def to_csv(self) -> list[str]:  # noqa: D102
+        return [
+            self.system,
+            "",
+            "",
+            "",
+            "",
+            self.total_scan_value,
+            self.total_mapping_value,
+            self.jumps,
+        ]
+
+
 _header_to_row_type: dict[tuple[str, ...], type[SystemEntry]] = {
-    type_.csv_header: type_ for type_ in (NeutronPlotRow, ExactPlotRow)
+    type_.csv_header: type_
+    for type_ in (GenericPlotRow, NeutronPlotRow, ExactPlotRow, RoadToRichesRow)
 }
 RowT = t.TypeVar("RowT", bound=SystemEntry)
 
@@ -318,3 +366,47 @@ class ExactRoute(Route[ExactPlotRow]):
             ExactPlotRow.from_json(system_json) for system_json in json_dict["jumps"]
         ]
         return ExactRoute(route)
+
+
+class RoadToRichesRoute(Route[RoadToRichesRow]):
+    """A route of the Spansh Road 2 Riches plotter."""
+
+    @classmethod
+    def route_rows_from_csv(
+        cls,
+        reader: more_itertools.peekable[list[str]],
+    ) -> list[RowT]:
+        """
+        Get the route from `reader`.
+
+        All successive bodies in a single system are added to a single `RoadToRichesRow`.
+        """
+        route = []
+
+        for system_name, bodies in itertools.groupby(reader, itemgetter(0)):
+            bodies = list(bodies)
+            jumps = int(bodies[0][7])
+            total_scan_value = 0
+            total_mapping_value = 0
+            for body in bodies:
+                total_scan_value += int(body[5])
+                total_mapping_value += int(body[6])
+
+            route.append(
+                RoadToRichesRow(
+                    system_name, total_scan_value, total_mapping_value, jumps
+                )
+            )
+        return route
+
+    @classmethod
+    def from_json(cls, json_dict: dict) -> te.Self:  # noqa: D102
+        ...
+
+    @property
+    def total_jumps(self) -> int:  # noqa: D102
+        return sum(entry.jumps for entry in self.entries)
+
+    @property
+    def remaining_jumps(self) -> int:  # noqa: D102
+        return sum(entry.jumps for entry in self.entries[self.index :])
