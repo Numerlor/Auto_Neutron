@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import abc
+import collections.abc
 import csv
 import dataclasses
 import logging
@@ -254,14 +255,23 @@ class Route(abc.ABC, t.Generic[RowT]):
                 row_type = GenericPlotRow
 
             log.info(f"CSV file at {path} is of type {row_type.__name__}.")
-            route = list(
-                more_itertools.unique_justseen(
-                    (row_type.from_csv_row(row) for row in filter(None, reader)),
-                    key=attrgetter("system"),
-                )
+            route = cls._row_type_to_route_class[row_type].route_rows_from_csv(
+                row_type, reader
             )
 
         return cls(row_type, route)
+
+    @classmethod
+    def route_rows_from_csv(
+        cls, row_type: type[RowT], reader: collections.abc.Iterator[list[str]]
+    ) -> list[RowT]:
+        """Get route rows for `row_type` from `reader`."""
+        return list(
+            more_itertools.unique_justseen(
+                (row_type.from_csv_row(row) for row in filter(None, reader)),
+                key=attrgetter("system"),
+            )
+        )
 
     @t.final
     def to_csv_file(self, path: Path) -> None:
