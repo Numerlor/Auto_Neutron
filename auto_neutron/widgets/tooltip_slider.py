@@ -105,6 +105,7 @@ class TooltipSlider(QtWidgets.QSlider):
             )
         )
         self._value_spinbox.show()
+        self._value_spinbox.raise_()
         if start_hide_timer:
             self._tooltip_hide_timer.interval = 1000
             self._tooltip_hide_timer.start()
