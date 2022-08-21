@@ -124,7 +124,7 @@ class Updater(QtCore.QObject):
                 error_msg = e.reply_error
             else:
                 error_msg = e.error_message
-            self._show_error_window(error_msg)
+            log.warning("Unable to find new versions: %s", error_msg)
         else:
             version = release_json["tag_name"]
             log.info(f"Received version info with version {version}.")
