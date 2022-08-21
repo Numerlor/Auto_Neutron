@@ -170,19 +170,14 @@ class Route(abc.ABC, t.Generic[RowT]):
     """
 
     _row_type_to_route_class = {}
+    row_type: type[RowT] | None = None
 
     def __init_subclass__(cls, **kwargs):
         if hasattr(cls, "__orig_bases__"):
             cls._row_type_to_route_class[cls.__orig_bases__[0].__args__[0]] = cls
+            cls.row_type = cls.__orig_bases__[0].__args__[0]
 
-    def __new__(cls, row_type: type[RowT], *args, **kwargs) -> te.Self:  # noqa: D102
-        try:
-            return object.__new__(cls._row_type_to_route_class[row_type])
-        except KeyError:
-            raise ValueError("Row type without a registered subclass.")
-
-    def __init__(self, row_type: type[RowT], route: list[RowT]):
-        self.row_type = row_type
+    def __init__(self, route: list[RowT]):
         self.entries = route
         self._route_indices: dict[str, list[int]] = {}
         self._index = 0
@@ -254,21 +249,21 @@ class Route(abc.ABC, t.Generic[RowT]):
                 # unknown route type, fall back to generic route.
                 row_type = GenericPlotRow
 
+            cls = cls._row_type_to_route_class[row_type]
             log.info(f"CSV file at {path} is of type {row_type.__name__}.")
-            route = cls._row_type_to_route_class[row_type].route_rows_from_csv(
-                row_type, reader
-            )
+            route = cls.route_rows_from_csv(reader)
 
-        return cls(row_type, route)
+        return cls(route)
 
     @classmethod
     def route_rows_from_csv(
-        cls, row_type: type[RowT], reader: collections.abc.Iterator[list[str]]
+        cls,
+        reader: collections.abc.Iterator[list[str]],
     ) -> list[RowT]:
         """Get route rows for `row_type` from `reader`."""
         return list(
             more_itertools.unique_justseen(
-                (row_type.from_csv_row(row) for row in filter(None, reader)),
+                (cls.row_type.from_csv_row(row) for row in filter(None, reader)),
                 key=attrgetter("system"),
             )
         )
@@ -299,12 +294,12 @@ class NeutronRoute(Route[NeutronPlotRow]):
     """A route of the Spansh neutron plotter."""
 
     @classmethod
-    def from_json(cls, json_dict: dict) -> te.Self:  # noqa: D102
+    def from_json(cls, json_dict: dict) -> NeutronRoute:  # noqa: D102
         route = [
             NeutronPlotRow.from_json(system_json)
             for system_json in json_dict["system_jumps"]
         ]
-        return cls(NeutronPlotRow, route)
+        return NeutronRoute(route)
 
     @property
     def total_jumps(self) -> int:  # noqa: D102
@@ -319,8 +314,8 @@ class ExactRoute(Route[ExactPlotRow]):
     """A route of the Spansh galaxy plotter."""
 
     @classmethod
-    def from_json(cls, json_dict: dict) -> te.Self:  # noqa: D102
+    def from_json(cls, json_dict: dict) -> ExactRoute:  # noqa: D102
         route = [
             ExactPlotRow.from_json(system_json) for system_json in json_dict["jumps"]
         ]
-        return cls(ExactPlotRow, route)
+        return ExactRoute(route)
