@@ -31,6 +31,7 @@ from auto_neutron.windows.gui.new_route_window import (
     SpanshTabGUIBase,
     TabGUIBase,
 )
+from auto_neutron.windows.opened_window_manager import create_or_activate_window
 
 log = logging.getLogger(__name__)
 
@@ -315,12 +316,18 @@ class SpanshTabBase(TabBase, SpanshTabGUIBase):
     def _display_nearest_window(self) -> None:
         """Display the nearest system finder window and link its signals."""
         log.info("Displaying nearest window.")
-        start_loc = None if self._journal is None else self._journal.location
+        window = create_or_activate_window(
+            NearestWindow,
+            self.__class__.__name__,
+            self,
+            None if self._journal is None else self._journal.location,
+            self._status_callback,
+        )
+        if window is None:
+            return
 
         def set_modified(widget: QtWidgets.QLineEdit, *args) -> None:
             widget.modified = True
-
-        window = NearestWindow(self, start_loc, self._status_callback)
 
         window.copy_source.connect(partial(setattr, self.source_edit, "text"))
         window.copy_source.connect(partial(set_modified, self.source_edit))

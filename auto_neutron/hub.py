@@ -32,6 +32,7 @@ from auto_neutron.windows import (
     NewRouteWindow,
     SettingsWindow,
     ShutDownWindow,
+    create_or_activate_window,
 )
 from auto_neutron.workers import StatusWorker
 
@@ -106,9 +107,10 @@ class Hub(QtCore.QObject):
     def new_route_window(self) -> None:
         """Display the `NewRouteWindow` and connect its signals."""
         logging.info("Displaying new route window.")
-        route_window = NewRouteWindow(self.window)
-        route_window.route_created_signal.connect(self.new_route)
-        route_window.show()
+        route_window = create_or_activate_window(NewRouteWindow, "hub", self.window)
+        if route_window is not None:
+            route_window.route_created_signal.connect(self.new_route)
+            route_window.show()
 
     def update_route_from_edit(self, table_item: QtWidgets.QTableWidgetItem) -> None:
         """Edit the plotter's route with the new data in `table_item`."""
@@ -188,9 +190,10 @@ class Hub(QtCore.QObject):
     def display_settings(self) -> None:
         """Display the settings window and connect the applied signal to refresh appearance."""
         log.info("Displaying settings window.")
-        window = SettingsWindow(self.window)
-        window.settings_applied.connect(self.apply_settings)
-        window.show()
+        window = create_or_activate_window(SettingsWindow, "hub", self.window)
+        if window is not None:
+            window.settings_applied.connect(self.apply_settings)
+            window.show()
 
     def display_shut_down_window(self) -> None:
         """Display the shut down window and connect it to create a new route and save the current one."""
@@ -205,8 +208,9 @@ class Hub(QtCore.QObject):
     def display_license_window(self) -> None:
         """Display the license window."""
         log.info("Displaying license window.")
-        window = LicenseWindow(self.window)
-        window.show()
+        window = create_or_activate_window(LicenseWindow, "hub", self.window)
+        if window is not None:
+            window.show()
 
     def set_theme_from_os(self, dark: bool) -> None:
         """Set the current theme to the OS' theme, if the theme setting is set to follow the OS."""

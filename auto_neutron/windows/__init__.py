@@ -8,6 +8,7 @@ from .main_window import MainWindow
 from .missing_journal_window import MissingJournalWindow
 from .nearest_window import NearestWindow
 from .new_route_window import NewRouteWindow
+from .opened_window_manager import create_or_activate_window
 from .settings_window import SettingsWindow
 from .shut_down_window import ShutDownWindow
 from .update_error_window import UpdateErrorWindow
@@ -23,4 +24,5 @@ __all__ = [
     "SettingsWindow",
     "ShutDownWindow",
     "UpdateErrorWindow",
+    "create_or_activate_window",
 ]
