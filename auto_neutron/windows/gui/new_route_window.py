@@ -253,11 +253,6 @@ class ExactTabGUI(SpanshTabGUIBase):
         self.use_clipboard_checkbox = QtWidgets.QCheckBox(self)
 
         self.main_layout.add_layout(self.system_cargo_layout)
-        self.main_layout.add_spacer_item(
-            QtWidgets.QSpacerItem(
-                1, 1, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Expanding
-            )
-        )
         self.main_layout.add_widget(self.is_supercharged_checkbox)
         self.main_layout.add_widget(self.supercarge_checkbox)
         self.main_layout.add_widget(self.fsd_injections_checkbox)
