@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import itertools
 import logging
+import sys
 import typing as t
 
 from PySide6 import QtCore, QtWidgets
@@ -106,3 +107,10 @@ def cmdr_display_name(name: str | None) -> str:
 def N_(arg: str) -> str:
     """Mark string for translation and return unchanged."""
     return arg
+
+
+def intern_list(list_: list[str]) -> list[str]:
+    """Intern all strings in `list_`."""
+    for index, string_to_intern in enumerate(list_):
+        list_[index] = sys.intern(string_to_intern)
+    return list_
