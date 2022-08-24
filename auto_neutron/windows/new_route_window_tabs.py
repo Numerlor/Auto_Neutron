@@ -380,12 +380,19 @@ class NeutronTab(SpanshTabBase, NeutronTabGUI):  # noqa: D101
         self.range_spin.value = 50
         self.efficiency_spin.value = 80
 
-        self.cargo_slider.valueChanged.connect(self._set_range)
+        self.cargo_slider.valueChanged.connect(self._range_from_cargo)
 
     def _update_from_loadout(self, ship: Ship) -> None:
         """Update range for changed cargo."""
         super()._update_from_loadout(ship)
-        self._set_range(ship=ship)
+        range_ = _get_range(journal=self._journal, ship=ship)
+        if range_ is not None:
+            self.range_spin.value = range_
+
+    def _range_from_cargo(self, cargo: int) -> None:
+        range_ = _get_range(journal=self._journal, cargo_mass=cargo)
+        if range_ is not None:
+            self.range_spin.value = range_
 
     def _request_params(self) -> dict[str, t.Any]:
         return {
@@ -394,28 +401,6 @@ class NeutronTab(SpanshTabBase, NeutronTabGUI):  # noqa: D101
             "from": self.source_edit.text,
             "to": self.target_edit.text,
         }
-
-    def _set_range(
-        self,
-        cargo_mass: int | None = None,
-        ship: Ship | None = None,
-    ) -> None:
-        """
-        Set the user's jump range for `cargo_mass`.
-
-        If `cargo_mass` is None or not passed in, the journal's cargo is used, or 0 if unknown.
-        """
-        if cargo_mass is None:
-            if self._journal is not None and self._journal.cargo is not None:
-                cargo_mass = self._journal.cargo
-            else:
-                cargo_mass = 0
-
-        if ship is None and self._journal is not None:
-            ship = self._journal.ship
-
-        if ship is not None:
-            self.range_spin.value = ship.jump_range(cargo_mass=cargo_mass)
 
 
 class ExactTab(SpanshTabBase, ExactTabGUI):  # noqa: D101
@@ -466,3 +451,27 @@ class ExactTab(SpanshTabBase, ExactTabGUI):  # noqa: D101
 
     def _update_from_cargo(self, new_cargo: int) -> None:
         """Don't update cargo maximum."""
+
+
+def _get_range(
+    *,
+    journal: Journal | None,
+    cargo_mass: int | None = None,
+    ship: Ship | None = None,
+) -> float | None:
+    """
+    Get the user's jump range for `cargo_mass`.
+
+    If `cargo_mass` is None or not passed in, the journal's cargo is used, or 0 if unknown.
+    """
+    if cargo_mass is None:
+        if journal is not None and journal.cargo is not None:
+            cargo_mass = journal.cargo
+        else:
+            cargo_mass = 0
+
+    if ship is None and journal is not None:
+        ship = journal.ship
+
+    if ship is not None:
+        return ship.jump_range(cargo_mass=cargo_mass)
