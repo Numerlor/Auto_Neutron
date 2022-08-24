@@ -463,3 +463,6 @@ class ExactTab(SpanshTabBase, ExactTabGUI):  # noqa: D101
             and not self._journal.shut_down
             and (self._journal.ship is not None or self.use_clipboard_checkbox.checked)
         )
+
+    def _update_from_cargo(self, new_cargo: int) -> None:
+        """Don't update cargo maximum."""
