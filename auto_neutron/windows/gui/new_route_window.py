@@ -200,6 +200,7 @@ class NeutronTabGUI(SpanshTabGUIBase):
 
         self.range_label = QtWidgets.QLabel(self)
         self.range_spin = QtWidgets.QDoubleSpinBox(self)
+        self.range_spin.suffix = " Ly"
         self.range_spin.accelerated = True
         self.range_spin.size_policy = QtWidgets.QSizePolicy(
             QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
