@@ -177,6 +177,7 @@ class RoadToRichesRow(SystemEntry):
     )
 
     system: str
+    body_count: int
     total_scan_value: int
     total_mapping_value: int
     jumps: int
@@ -394,7 +395,11 @@ class RoadToRichesRoute(Route[RoadToRichesRow]):
 
             route.append(
                 RoadToRichesRow(
-                    system_name, total_scan_value, total_mapping_value, jumps
+                    system_name,
+                    len(bodies),
+                    total_scan_value,
+                    total_mapping_value,
+                    jumps,
                 )
             )
         return route

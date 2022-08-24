@@ -181,6 +181,7 @@ class RoadToRichesHeader(RouteTableHeader):
 
     _header_sections = (
         HeaderSection(text=N_("System name")),
+        HeaderSection(text=N_("Body count"), delegate_type=SpinBoxDelegate),
         HeaderSection(
             text=N_("Total scan value"),
             delegate_type=SpinBoxDelegate,
