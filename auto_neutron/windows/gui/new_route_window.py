@@ -330,6 +330,7 @@ class RoadToRichesTabGUI(SpanshTabGUIBase):
         )
         self.radius_spinbox.accelerated = True
         self.radius_spinbox.suffix = " Ly"
+        self.radius_spinbox.value = 25
 
         self.max_systems_label = QtWidgets.QLabel(self.scroll_widget)
         self.max_systems_spinbox = QtWidgets.QSpinBox(self.scroll_widget)
@@ -339,6 +340,7 @@ class RoadToRichesTabGUI(SpanshTabGUIBase):
         )
         self.max_systems_spinbox.accelerated = True
         self.max_systems_spinbox.maximum = 500
+        self.max_systems_spinbox.value = 50
 
         self.use_mapping_value_checkbox = QtWidgets.QCheckBox(self.scroll_widget)
         self.loop_checkbox = QtWidgets.QCheckBox(self.scroll_widget)
@@ -348,6 +350,7 @@ class RoadToRichesTabGUI(SpanshTabGUIBase):
             QtCore.Qt.Orientation.Horizontal, self.scroll_widget
         )
         self.max_distance_slider.maximum = 1_000_000
+        self.max_distance_slider.value = 10_000
 
         self.minimum_scan_label = QtWidgets.QLabel(self.scroll_widget)
         self.minimum_scan_slider = TooltipSlider(
@@ -355,6 +358,7 @@ class RoadToRichesTabGUI(SpanshTabGUIBase):
         )
         self.minimum_scan_slider.minimum = 100
         self.minimum_scan_slider.maximum = 1_000_000
+        self.minimum_scan_slider.value = 100_000
 
         self.scroll_layout.add_layout(self.system_cargo_layout)
         self.scroll_layout.add_widget(self.range_label)
