@@ -97,13 +97,22 @@ class TooltipSlider(QtWidgets.QSlider):
 
         handle_rect = self._handle_rect()
         self._value_spinbox.value = self.value
-        self._value_spinbox.pos = self.map_to_parent(
+
+        mapped_pos = self.map_to_parent(
             QtCore.QPoint(
                 handle_rect.left()
                 - (self._value_spinbox.rect.width() - handle_rect.width()) / 2,
                 handle_rect.top() - self._value_spinbox.rect.height() + 1,
             )
         )
+        if mapped_pos.x() < 0:
+            mapped_pos.set_x(0)
+        elif (
+            parent := self.parent_widget()
+        ) is not None and mapped_pos.x() + self._value_spinbox.width > parent.width:
+            mapped_pos.set_x(self.parent_widget().width - self._value_spinbox.width)
+
+        self._value_spinbox.pos = mapped_pos
         self._value_spinbox.show()
         self._value_spinbox.raise_()
         if start_hide_timer:
