@@ -188,7 +188,20 @@ class RoadToRichesRow(SystemEntry):
 
     @classmethod
     def from_json(cls, json: dict) -> te.Self:  # noqa: D102
-        ...
+        bodies = json["bodies"]
+        total_scan_value = 0
+        total_mapping_value = 0
+        for body in bodies:
+            total_scan_value += body["estimated_scan_value"]
+            total_mapping_value += body["estimated_mapping_value"]
+
+        return cls(
+            json["name"],
+            len(bodies),
+            total_scan_value,
+            total_mapping_value,
+            json["jumps"],
+        )
 
     def to_csv(self) -> list[str]:  # noqa: D102
         return [
@@ -406,7 +419,8 @@ class RoadToRichesRoute(Route[RoadToRichesRow]):
 
     @classmethod
     def from_json(cls, json_dict: dict) -> te.Self:  # noqa: D102
-        ...
+        route = [RoadToRichesRow.from_json(system_json) for system_json in json_dict]
+        return RoadToRichesRoute(route)
 
     @property
     def total_jumps(self) -> int:  # noqa: D102
