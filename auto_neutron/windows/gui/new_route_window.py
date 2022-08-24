@@ -279,6 +279,119 @@ class ExactTabGUI(SpanshTabGUIBase):
         self.use_clipboard_checkbox.text = _("Use ship from clipboard")
 
 
+class RoadToRichesTabGUI(SpanshTabGUIBase):
+    """The road to riches plotter tab."""
+
+    def __init__(self, *args: object, **kwargs: object):
+        super().__init__(*args, **kwargs)
+        self.main_layout.contents_margins = QtCore.QMargins(
+            0, 0, 0, 0
+        )  # Holds only the scroll area.
+
+        self.scroll_area = QtWidgets.QScrollArea(self)
+        self.scroll_area.frame_shape = QtWidgets.QFrame.Shape.NoFrame
+        self.scroll_area.horizontal_scroll_bar_policy = (
+            QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff
+        )
+        self.scroll_area.size_policy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Ignored,
+            QtWidgets.QSizePolicy.Policy.Ignored,
+        )
+        self.scroll_area.widget_resizable = True
+        # The widget in the scroll area renders its background with the Window color even with
+        # auto_fill_background set to False, and changing the Window role color affects how child widgets are rendered.
+        # Because the tab widget this is in has its own background color,
+        # and to avoid having to set a palette on all the children created here, the scroll area is forced to use
+        # a an otherwise unused role for the color.
+        palette = self.scroll_area.palette
+        palette.set_color(palette.Shadow, QtGui.QColor(0, 0, 0, 0))
+        self.scroll_area.palette = palette
+        self.scroll_area.set_background_role(palette.Shadow)
+
+        self.scroll_widget = QtWidgets.QWidget(self)
+        self.scroll_area.set_widget(self.scroll_widget)
+        self.scroll_layout = QtWidgets.QVBoxLayout(self.scroll_widget)
+
+        self.range_label = QtWidgets.QLabel(self.scroll_widget)
+        self.range_spinbox = QtWidgets.QDoubleSpinBox(self.scroll_widget)
+        self.range_spinbox.size_policy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Fixed,
+            QtWidgets.QSizePolicy.Policy.Fixed,
+        )
+        self.range_spinbox.maximum = 100
+        self.range_spinbox.accelerated = True
+        self.range_spinbox.suffix = " Ly"
+
+        self.radius_label = QtWidgets.QLabel(self.scroll_widget)
+        self.radius_spinbox = QtWidgets.QSpinBox(self.scroll_widget)
+        self.radius_spinbox.size_policy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Fixed,
+            QtWidgets.QSizePolicy.Policy.Fixed,
+        )
+        self.radius_spinbox.accelerated = True
+        self.radius_spinbox.suffix = " Ly"
+
+        self.max_systems_label = QtWidgets.QLabel(self.scroll_widget)
+        self.max_systems_spinbox = QtWidgets.QSpinBox(self.scroll_widget)
+        self.max_systems_spinbox.size_policy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Fixed,
+            QtWidgets.QSizePolicy.Policy.Fixed,
+        )
+        self.max_systems_spinbox.accelerated = True
+        self.max_systems_spinbox.maximum = 500
+
+        self.use_mapping_value_checkbox = QtWidgets.QCheckBox(self.scroll_widget)
+        self.loop_checkbox = QtWidgets.QCheckBox(self.scroll_widget)
+
+        self.maximum_distance_label = QtWidgets.QLabel(self.scroll_widget)
+        self.max_distance_slider = TooltipSlider(
+            QtCore.Qt.Orientation.Horizontal, self.scroll_widget
+        )
+        self.max_distance_slider.maximum = 1_000_000
+
+        self.minimum_scan_label = QtWidgets.QLabel(self.scroll_widget)
+        self.minimum_scan_slider = TooltipSlider(
+            QtCore.Qt.Orientation.Horizontal, self.scroll_widget
+        )
+        self.minimum_scan_slider.minimum = 100
+        self.minimum_scan_slider.maximum = 1_000_000
+
+        self.scroll_layout.add_layout(self.system_cargo_layout)
+        self.scroll_layout.add_widget(self.range_label)
+        self.scroll_layout.add_widget(self.range_spinbox)
+        self.scroll_layout.add_widget(self.radius_label)
+        self.scroll_layout.add_widget(self.radius_spinbox)
+        self.scroll_layout.add_widget(self.max_systems_label)
+        self.scroll_layout.add_widget(self.max_systems_spinbox)
+        self.scroll_layout.add_widget(self.use_mapping_value_checkbox)
+        self.scroll_layout.add_widget(self.loop_checkbox)
+        self.scroll_layout.add_widget(self.maximum_distance_label)
+        self.scroll_layout.add_widget(self.max_distance_slider)
+        self.scroll_layout.add_widget(self.minimum_scan_label)
+        self.scroll_layout.add_widget(self.minimum_scan_slider)
+        self.scroll_layout.add_spacer_item(
+            QtWidgets.QSpacerItem(
+                1,
+                1,
+                QtWidgets.QSizePolicy.Fixed,
+                QtWidgets.QSizePolicy.Expanding,
+            )
+        )
+        self.scroll_layout.add_layout(self.journal_submit_layout)
+        self.main_layout.add_widget(self.scroll_area)
+
+    def retranslate(self) -> None:
+        """Retranslate text that is always on display."""
+        super().retranslate()
+        self.range_label.text = _("Range")
+        self.radius_label.text = _("Radius")
+        self.max_systems_label.text = _("Maximum systems")
+        self.use_mapping_value_checkbox.text = _("Use mapping value")
+        self.loop_checkbox.text = _("Loop back to start")
+        self.maximum_distance_label.text = _("Maximum distance to arrival")
+        self.minimum_scan_label.text = _("Minimum scan value")
+
+
 class CSVTabGUI(TabGUIBase):
     """The CSV plotter tab."""
 
