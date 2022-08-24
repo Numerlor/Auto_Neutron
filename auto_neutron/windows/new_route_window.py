@@ -25,6 +25,7 @@ from .new_route_window_tabs import (
     ExactTab,
     LastRouteTab,
     NeutronTab,
+    RoadToRichesTab,
     SpanshTabBase,
     TabBase,
 )
@@ -53,6 +54,10 @@ class NewRouteWindow(NewRouteWindowGUI):
                 (
                     ExactTab(status_callback=status_callback),
                     N_("Galaxy plotter"),
+                ),
+                (
+                    RoadToRichesTab(status_callback=status_callback),
+                    N_("Road to riches"),
                 ),
                 (
                     CSVTab(status_callback=status_callback),

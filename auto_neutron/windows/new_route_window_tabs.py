@@ -18,7 +18,7 @@ from auto_neutron import settings
 from auto_neutron.constants import ROUTE_FILE_NAME, SPANSH_API_URL, get_config_dir
 from auto_neutron.game_state import Location
 from auto_neutron.journal import Journal
-from auto_neutron.route import ExactRoute, NeutronRoute, Route
+from auto_neutron.route import ExactRoute, NeutronRoute, RoadToRichesRoute, Route
 from auto_neutron.ship import Ship
 from auto_neutron.spansh_request_manager import SpanshRequestManager
 from auto_neutron.utils.utils import create_request_delay_iterator
@@ -28,6 +28,7 @@ from auto_neutron.windows.gui.new_route_window import (
     ExactTabGUI,
     LastTabGUI,
     NeutronTabGUI,
+    RoadToRichesTabGUI,
     SpanshTabGUIBase,
     TabGUIBase,
 )
@@ -451,6 +452,52 @@ class ExactTab(SpanshTabBase, ExactTabGUI):  # noqa: D101
 
     def _update_from_cargo(self, new_cargo: int) -> None:
         """Don't update cargo maximum."""
+
+
+class RoadToRichesTab(SpanshTabBase, RoadToRichesTabGUI):  # noqa: D101
+    endpoint = "riches/route"
+    route_type = RoadToRichesRoute
+
+    def __init__(self, *args: object, **kwargs: object):
+        super().__init__(*args, **kwargs)
+        self.target_edit.textChanged.connect(self._disable_loop_on_target)
+        self.cargo_slider.valueChanged.connect(self._range_from_cargo)
+
+    def _request_params(self) -> dict[str, t.Any] | None:
+        return {
+            "radius": self.radius_spinbox.value,
+            "range": self.range_spinbox.value,
+            "from": self.source_edit.text,
+            "to": self.target_edit.text,
+            "max_results": self.max_systems_spinbox.value,
+            "max_distance": self.max_distance_slider.value,
+            "min_value": self.minimum_scan_slider.value,
+            "use_mapping_value": self.use_mapping_value_checkbox.checked,
+            "loop": self.loop_checkbox.checked,
+        }
+
+    def _update_from_loadout(self, ship: Ship) -> None:
+        """Update range for changed cargo."""
+        super()._update_from_loadout(ship)
+        range_ = _get_range(journal=self._journal, ship=ship)
+        if range_ is not None:
+            self.range_spinbox.value = range_
+
+    def _range_from_cargo(self, cargo: int) -> None:
+        range_ = _get_range(journal=self._journal, cargo_mass=cargo)
+        if range_ is not None:
+            self.range_spinbox.value = range_
+
+    def _disable_loop_on_target(self, target_text: str) -> None:
+        """Disable the loop route checkbox if there's any `target_text`."""
+        self.loop_checkbox.enabled = not target_text
+
+    def _set_submit_sensitive(self) -> None:
+        self.submit_button.enabled = bool(
+            self.source_edit.text
+            and self._journal is not None
+            and not self._journal.shut_down
+        )
 
 
 def _get_range(
