@@ -188,7 +188,7 @@ class TooltipSlider(QtWidgets.QSlider):
     @maximum.setter
     def maximum(self, value: int) -> None:
         """Set the slider's maximum value."""
-        super(self.__class__, self.__class__).maximum.__set__(self, value)
+        super(TooltipSlider, self.__class__).maximum.__set__(self, value)
         self._value_spinbox.maximum = value
         self._value_spinbox.adjust_size()
 
@@ -200,5 +200,5 @@ class TooltipSlider(QtWidgets.QSlider):
     @minimum.setter
     def minimum(self, value: int) -> None:
         """Set the slider's minimum value."""
-        super(self.__class__, self.__class__).minimum.__set__(self, value)
+        super(TooltipSlider, self.__class__).minimum.__set__(self, value)
         self._value_spinbox.minimum = value
