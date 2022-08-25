@@ -21,6 +21,7 @@ class LogSlider(QtWidgets.QSlider):
         self._log_min = 0
         self._log_max = 1_000_000
         self._log_value = 0
+        self._manual_set = False
 
         self.minimum = 0
         self.maximum = steps
@@ -34,6 +35,9 @@ class LogSlider(QtWidgets.QSlider):
     @log_value.setter
     def log_value(self, value: int) -> None:
         """Set the current value to `value`."""
+        # Prevent slider's valueChanged from rewriting `log_value` when `log_value` is set,
+        # as it'll be emitted after self.value is assigned here.
+        self._manual_set = True
         self._log_value = value
         log_min = math.log1p(self._log_min)
         log_max = math.log1p(self._log_max)
@@ -94,5 +98,8 @@ class LogSlider(QtWidgets.QSlider):
         return round(math.e ** (log_min + scale * self.value) - 1)
 
     def _on_value_changed(self) -> None:
-        self._log_value = self._log_value_from_slider_pos()
+        if not self._manual_set:
+            # Only update from slider position if the slider was moved, not when assigned directly to `log_value`.
+            self._log_value = self._log_value_from_slider_pos()
+        self._manual_set = False
         self.log_value_changed.emit(self._log_value)

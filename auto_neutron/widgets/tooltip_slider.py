@@ -13,8 +13,12 @@ from auto_neutron.widgets import LogSlider
 _SPINBOX_BORDER_STYLESHEET = "border:none;border:1px solid {border_color};border-radius:3px;background:palette(base);"
 
 
-class TooltipSlider(QtWidgets.QSlider):
-    """Slider that shows current value in an editable tooltip above the handle."""
+class _TooltipSliderBase(QtWidgets.QSlider):
+    """
+    Slider that shows current value in an editable tooltip above the handle.
+
+    `slider_value`, `tooltip_maximum`, and `tooltip_minimum` properties have to be implemented.
+    """
 
     def __init__(self, orientation: QtCore.Qt.Orientation, parent: QtWidgets.QWidget):
         self._finished_init = False
@@ -33,14 +37,34 @@ class TooltipSlider(QtWidgets.QSlider):
         self._mouse_on_handle = False
         self._finished_init = True
 
+    @property
+    def slider_value(self) -> int:
+        """The value of the slider used for the tooltip."""  # noqa: D401
+        raise NotImplementedError
+
+    @slider_value.setter
+    def slider_value(self, value: int) -> None:
+        """Set the slider's value from the tooltip."""
+        raise NotImplementedError
+
+    @property
+    def tooltip_maximum(self) -> int:
+        """The maximum value for the tooltip."""  # noqa: D401
+        raise NotImplementedError
+
+    @property
+    def tooltip_minimum(self) -> int:
+        """The minimum value for the tooltip."""  # noqa: D401
+        raise NotImplementedError
+
     def _set_up_spinbox(self) -> None:
         """Set up the value spinbox and hide it."""
         self._value_spinbox.size_policy = QtWidgets.QSizePolicy(
             QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
         )
         self._value_spinbox.button_symbols = QtWidgets.QAbstractSpinBox.NoButtons
-        self._value_spinbox.minimum = self.minimum
-        self._value_spinbox.maximum = self.maximum
+        self._value_spinbox.minimum = self.tooltip_minimum
+        self._value_spinbox.maximum = self.tooltip_maximum
         self._value_spinbox.style_sheet = _SPINBOX_BORDER_STYLESHEET.format(
             border_color=self.palette.window().color().darker(140).name()
         )
@@ -81,7 +105,7 @@ class TooltipSlider(QtWidgets.QSlider):
 
         self._value_spinbox.focus_out_event = hide_on_focus_out
 
-        self._value_spinbox.valueChanged.connect(partial(setattr, self, "value"))
+        self._value_spinbox.valueChanged.connect(partial(setattr, self, "slider_value"))
         self._value_spinbox.hide()
 
     def slider_change(self, change: QtWidgets.QAbstractSlider.SliderChange) -> None:
@@ -101,7 +125,7 @@ class TooltipSlider(QtWidgets.QSlider):
         self.init_style_option(option)
 
         handle_rect = self._handle_rect()
-        self._value_spinbox.value = self.value
+        self._value_spinbox.value = self.slider_value
 
         mapped_pos = self.map_to_parent(
             QtCore.QPoint(
@@ -185,6 +209,26 @@ class TooltipSlider(QtWidgets.QSlider):
             self,
         )
 
+
+class TooltipSlider(_TooltipSliderBase):
+    """A plain slider with a tooltip."""
+
+    @property
+    def slider_value(self) -> int:  # noqa: D102
+        return self.value
+
+    @slider_value.setter
+    def slider_value(self, value: int) -> None:  # noqa: D102
+        self.value = value
+
+    @property
+    def tooltip_maximum(self) -> int:  # noqa: D102
+        return self.maximum
+
+    @property
+    def tooltip_minimum(self) -> int:  # noqa: D102
+        return self.minimum
+
     @property
     def maximum(self) -> int:
         """Return the slider's maximum value."""
@@ -192,7 +236,7 @@ class TooltipSlider(QtWidgets.QSlider):
 
     @maximum.setter
     def maximum(self, value: int) -> None:
-        """Set the slider's maximum value."""
+        """Set the slider's maximum value, and update the tooltip's max to the same."""
         super(TooltipSlider, self.__class__).maximum.__set__(self, value)
         self._value_spinbox.maximum = value
         self._value_spinbox.adjust_size()
@@ -204,7 +248,7 @@ class TooltipSlider(QtWidgets.QSlider):
 
     @minimum.setter
     def minimum(self, value: int) -> None:
-        """Set the slider's minimum value."""
+        """Set the slider's minimum value, and update the tooltip's min to the same."""
         super(TooltipSlider, self.__class__).minimum.__set__(self, value)
         self._value_spinbox.minimum = value
 
