@@ -15,6 +15,7 @@ class TooltipSlider(QtWidgets.QSlider):
     """Slider that shows current value in an editable tooltip above the handle."""
 
     def __init__(self, orientation: QtCore.Qt.Orientation, parent: QtWidgets.QWidget):
+        self._finished_init = False
         super().__init__(orientation, parent)
         self._value_spinbox = QtWidgets.QSpinBox(parent)
         self._set_up_spinbox()
@@ -28,6 +29,7 @@ class TooltipSlider(QtWidgets.QSlider):
 
         self.mouse_tracking = True
         self._mouse_on_handle = False
+        self._finished_init = True
 
     def _set_up_spinbox(self) -> None:
         """Set up the value spinbox and hide it."""
@@ -84,7 +86,8 @@ class TooltipSlider(QtWidgets.QSlider):
         """Show the tooltip above the slider's handle. If the user is not holding the slider, hide it in 1 second."""
         super().slider_change(change)
         if (
-            not self._value_spinbox.focus
+            self._finished_init
+            and not self._value_spinbox.focus
             and self.visible
             and change == QtWidgets.QAbstractSlider.SliderChange.SliderValueChange
         ):
