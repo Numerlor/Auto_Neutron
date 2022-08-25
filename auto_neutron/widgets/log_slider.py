@@ -22,6 +22,7 @@ class LogSlider(QtWidgets.QSlider):
         self._log_max = 1_000_000
         self._log_value = 0
         self._manual_set = False
+        self._last_val = None
 
         self.minimum = 0
         self.maximum = steps
@@ -30,6 +31,12 @@ class LogSlider(QtWidgets.QSlider):
     @property
     def log_value(self) -> int:
         """The current value selected by the slider."""  # noqa: D401
+        if self._last_val != self.value:
+            # Update value if the slider's position changed.
+            # The class can't rely purely on the valueChanged connection
+            # because this may run between the update and when the event loop actually handles the slots.
+            self._log_value = self._log_value_from_slider_pos()
+        self._last_val = self.value
         return self._log_value
 
     @log_value.setter
@@ -43,7 +50,7 @@ class LogSlider(QtWidgets.QSlider):
         log_max = math.log1p(self._log_max)
 
         scale = (log_max - log_min) / self.steps
-        self.value = round((math.log1p(value) - log_min) / scale)
+        self.value = self._last_val = round((math.log1p(value) - log_min) / scale)
 
     @property
     def log_maximum(self) -> int:
