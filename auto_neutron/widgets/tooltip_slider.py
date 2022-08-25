@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import typing as t
 from functools import partial
 
 from PySide6 import QtCore, QtGui, QtWidgets
@@ -59,6 +60,8 @@ class _TooltipSliderBase(QtWidgets.QSlider):
 
     def _set_up_spinbox(self) -> None:
         """Set up the value spinbox and hide it."""
+        self._value_spinbox.install_event_filter(self)
+
         self._value_spinbox.size_policy = QtWidgets.QSizePolicy(
             QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
         )
@@ -69,41 +72,6 @@ class _TooltipSliderBase(QtWidgets.QSlider):
             border_color=self.palette.window().color().darker(140).name()
         )
         self._value_spinbox.adjust_size()
-
-        base_leave_event = self._value_spinbox.leave_event
-
-        def hide_on_leave(event: QtCore.QEvent) -> None:
-            base_leave_event(event)
-            cursor_pos = QtGui.QCursor.pos()
-            handle_rect = self._handle_rect()
-            if (
-                not self._value_spinbox.focus
-                and not handle_rect.contains(self.map_from_global(cursor_pos))
-                and not self._tooltip_hide_timer.active
-            ):
-                self._value_spinbox.hide()
-
-        self._value_spinbox.leave_event = hide_on_leave
-
-        base_key_release_event = self._value_spinbox.key_release_event
-
-        def hide_on_confirm(event: QtGui.QKeyEvent) -> None:
-            key = event.key()
-            if key == QtCore.Qt.Key.Key_Return or key == QtCore.Qt.Key.Key_Enter:
-                self._value_spinbox.clear_focus()
-                self._value_spinbox.hide()
-            else:
-                base_key_release_event(event)
-
-        self._value_spinbox.key_release_event = hide_on_confirm
-
-        base_focus_out_event = self._value_spinbox.focus_out_event
-
-        def hide_on_focus_out(event: QtGui.QFocusEvent) -> None:
-            base_focus_out_event(event)
-            self._value_spinbox.hide()
-
-        self._value_spinbox.focus_out_event = hide_on_focus_out
 
         self._value_spinbox.valueChanged.connect(partial(setattr, self, "slider_value"))
         self._value_spinbox.hide()
@@ -196,6 +164,31 @@ class _TooltipSliderBase(QtWidgets.QSlider):
         """Start the timer to hide the tooltip in 500ms."""
         self._tooltip_hide_timer.interval = 500
         self._tooltip_hide_timer.start()
+
+    def event_filter(self, watched: QtCore.QObject, event: QtCore.QEvent) -> bool:
+        """Correctly hide the spinbox on its events."""
+        if watched is self._value_spinbox:
+            event_type = event.type()
+            if event_type is QtCore.QEvent.Type.Leave:
+                cursor_pos = QtGui.QCursor.pos()
+                handle_rect = self._handle_rect()
+                if (
+                    not self._value_spinbox.focus
+                    and not handle_rect.contains(self.map_from_global(cursor_pos))
+                    and not self._tooltip_hide_timer.active
+                ):
+                    self._value_spinbox.hide()
+
+            elif event_type is QtCore.QEvent.Type.FocusOut:
+                self._value_spinbox.hide()
+
+            elif event_type is QtCore.QEvent.Type.KeyRelease:
+                key = t.cast("QtGui.QKeyEvent", event).key()
+                if key in {QtCore.Qt.Key_Return, QtCore.Qt.Key.Key_Enter}:
+                    self._value_spinbox.clear_focus()
+                    self._value_spinbox.hide()
+
+        return False
 
     def _handle_rect(self) -> QtCore.QRect:
         """Get the rect of the handle's current position."""
