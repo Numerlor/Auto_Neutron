@@ -5,6 +5,8 @@ from __future__ import annotations
 
 import typing as t
 
+from auto_neutron.widgets.tooltip_slider import LogTooltipSlider
+
 if t.TYPE_CHECKING:
     import collections.abc
 
@@ -346,19 +348,19 @@ class RoadToRichesTabGUI(SpanshTabGUIBase):
         self.loop_checkbox = QtWidgets.QCheckBox(self.scroll_widget)
 
         self.maximum_distance_label = QtWidgets.QLabel(self.scroll_widget)
-        self.max_distance_slider = TooltipSlider(
+        self.max_distance_slider = LogTooltipSlider(
             QtCore.Qt.Orientation.Horizontal, self.scroll_widget
         )
-        self.max_distance_slider.maximum = 1_000_000
-        self.max_distance_slider.value = 10_000
+        self.max_distance_slider.log_maximum = 1_000_000
+        self.max_distance_slider.log_value = 10_000
 
         self.minimum_scan_label = QtWidgets.QLabel(self.scroll_widget)
-        self.minimum_scan_slider = TooltipSlider(
+        self.minimum_scan_slider = LogTooltipSlider(
             QtCore.Qt.Orientation.Horizontal, self.scroll_widget
         )
-        self.minimum_scan_slider.minimum = 100
-        self.minimum_scan_slider.maximum = 1_000_000
-        self.minimum_scan_slider.value = 100_000
+        self.minimum_scan_slider.log_minimum = 100
+        self.minimum_scan_slider.log_maximum = 1_000_000
+        self.minimum_scan_slider.log_value = 100_000
 
         self.scroll_layout.add_layout(self.system_cargo_layout)
         self.scroll_layout.add_widget(self.range_label)

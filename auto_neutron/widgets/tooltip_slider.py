@@ -8,6 +8,8 @@ from functools import partial
 from PySide6 import QtCore, QtGui, QtWidgets
 from __feature__ import snake_case, true_property  # noqa: F401
 
+from auto_neutron.widgets import LogSlider
+
 _SPINBOX_BORDER_STYLESHEET = "border:none;border:1px solid {border_color};border-radius:3px;background:palette(base);"
 
 
@@ -204,4 +206,46 @@ class TooltipSlider(QtWidgets.QSlider):
     def minimum(self, value: int) -> None:
         """Set the slider's minimum value."""
         super(TooltipSlider, self.__class__).minimum.__set__(self, value)
+        self._value_spinbox.minimum = value
+
+
+class LogTooltipSlider(_TooltipSliderBase, LogSlider):
+    """Logarithmic slider with a tooltip."""
+
+    @property
+    def slider_value(self) -> int:  # noqa: D102
+        return self.log_value
+
+    @slider_value.setter
+    def slider_value(self, value: int) -> None:  # noqa: D102
+        self.log_value = value
+
+    @property
+    def tooltip_maximum(self) -> int:  # noqa: D102
+        return self.log_maximum
+
+    @property
+    def tooltip_minimum(self) -> int:  # noqa: D102
+        return self.log_minimum
+
+    @property
+    def log_maximum(self) -> int:
+        """Return the slider's log_maximum value."""
+        return super().log_maximum
+
+    @log_maximum.setter
+    def log_maximum(self, value: int) -> None:
+        """Set the slider's log_maximum value, and update the tooltip's max to the same."""
+        super(LogTooltipSlider, self.__class__).log_maximum.fset(self, value)
+        self._value_spinbox.maximum = value
+
+    @property
+    def log_minimum(self) -> int:
+        """Return the slider's log_minimum value."""
+        return super().log_minimum
+
+    @log_minimum.setter
+    def log_minimum(self, value: int) -> None:
+        """Set the slider's log_minimum value, and update the tooltip's min to the same."""
+        super(LogTooltipSlider, self.__class__).log_minimum.fset(self, value)
         self._value_spinbox.minimum = value
