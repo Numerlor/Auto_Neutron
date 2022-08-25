@@ -137,6 +137,7 @@ class _TooltipSliderBase(QtWidgets.QSlider):
             if not self._value_spinbox.focus and not self._tooltip_hide_timer.active:
                 self._hide_value_tooltip_if_not_hover()
 
+    @QtCore.Slot()
     def _hide_value_tooltip_if_not_hover(self) -> None:
         """Hide the value tooltip if the cursor is not hovering over the handle or the spinbox."""
         mouse_pos = self.map_to_parent(self.map_from_global(QtGui.QCursor.pos()))
@@ -155,11 +156,13 @@ class _TooltipSliderBase(QtWidgets.QSlider):
             )
         super().change_event(event)
 
+    @QtCore.Slot()
     def _on_press(self) -> None:
         """Stop the hide timer."""
         self._tooltip_hide_timer.stop()
         self._display_value_tooltip(start_hide_timer=False)
 
+    @QtCore.Slot()
     def _on_release(self) -> None:
         """Start the timer to hide the tooltip in 500ms."""
         self._tooltip_hide_timer.interval = 500

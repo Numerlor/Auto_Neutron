@@ -58,6 +58,7 @@ class TabBase(TabGUIBase):
         self._status_callback = status_callback
         self.submit_button.pressed.connect(self._get_route)
 
+    @QtCore.Slot()
     def _set_submit_sensitive(self) -> None:
         """
         Set the submit_button to be enabled/disabled depending on whether the user can submit a plot.
@@ -68,6 +69,7 @@ class TabBase(TabGUIBase):
             self._journal is not None and not self._journal.shut_down
         )
 
+    @QtCore.Slot()
     def _get_route(self) -> None:
         """Get the route for the main table, should emit `result_signal` with the route after it's called."""
         raise NotImplementedError  # QObject's metaclass is problematic so can't use abc.
@@ -102,6 +104,7 @@ class CSVTab(TabBase, CSVTabGUI):  # noqa: D101
         if settings.Paths.csv is not None:
             self.path_edit.text = str(settings.Paths.csv)
 
+    @QtCore.Slot()
     def _set_submit_sensitive(self) -> None:
         self.submit_button.enabled = (
             self._journal is not None
@@ -109,6 +112,7 @@ class CSVTab(TabBase, CSVTabGUI):  # noqa: D101
             and bool(self.path_edit.text)
         )
 
+    @QtCore.Slot()
     def _get_route(self) -> None:
         """Parse a CSV file of Spansh rows and emit the route created signal."""
         log.info("Submitting CSV route.")
@@ -164,6 +168,7 @@ class LastRouteTab(TabBase, LastTabGUI):  # noqa: D101
         super().__init__(status_callback=status_callback)
         self._loaded_route: Route | None = None
 
+    @QtCore.Slot()
     def _set_submit_sensitive(self) -> None:
         self.submit_button.enabled = (
             self._journal is not None
@@ -171,6 +176,7 @@ class LastRouteTab(TabBase, LastTabGUI):  # noqa: D101
             and bool(self._loaded_route)
         )
 
+    @QtCore.Slot()
     def _get_route(self) -> None:
         log.info("Submitting last route.")
         if self._loaded_route is not None:
@@ -278,6 +284,7 @@ class SpanshTabBase(TabBase, SpanshTabGUIBase):
         """Set the request manager to `manager`."""
         self._request_manager = manager
 
+    @QtCore.Slot()
     def _set_submit_sensitive(self) -> None:
         """Set submit to be active when both source and target are filled, and a journal is selected."""
         self.submit_button.enabled = bool(
@@ -291,6 +298,7 @@ class SpanshTabBase(TabBase, SpanshTabGUIBase):
         """Get the params to send with the request."""
         raise NotImplementedError
 
+    @QtCore.Slot()
     def _get_route(self) -> None:
         """Submit a Spansh job to `self.endpoint` and decode it with `self.route_type`."""
         assert (
@@ -314,6 +322,7 @@ class SpanshTabBase(TabBase, SpanshTabGUIBase):
         )
         self.started_plotting.emit()
 
+    @QtCore.Slot()
     def _display_nearest_window(self) -> None:
         """Display the nearest system finder window and link its signals."""
         log.info("Displaying nearest window.")
@@ -336,10 +345,12 @@ class SpanshTabBase(TabBase, SpanshTabGUIBase):
         window.copy_destination.connect(partial(setattr, self.target_edit, "text"))
         window.copy_destination.connect(partial(set_modified, self.target_edit))
 
+        @QtCore.Slot()
         def set_input_from_target() -> None:
             if self._journal is not None:
                 window.set_input_values_from_location(self._journal.last_target)
 
+        @QtCore.Slot()
         def set_input_from_location() -> None:
             if self._journal is not None:
                 window.set_input_values_from_location(self._journal.location)
@@ -353,20 +364,24 @@ class SpanshTabBase(TabBase, SpanshTabGUIBase):
         self._status_callback(error_message, 10_000)
         self.plotting_error.emit()
 
+    @QtCore.Slot()
     def _update_from_loadout(self, ship: Ship) -> None:
         """Update widget values for a new ship loadout."""
         self.cargo_slider.maximum = ship.max_cargo
 
+    @QtCore.Slot()
     def _update_from_location(self, new_location: Location) -> None:
         """Update widget values for a new location."""
         if not self.source_edit.modified or not self.source_edit.text:
             self.source_edit.text = new_location.name
 
+    @QtCore.Slot()
     def _update_from_target(self, new_target: Location) -> None:
         """Update widget values for a new target."""
         if not self.target_edit.modified or not self.target_edit.text:
             self.target_edit.text = new_target.name
 
+    @QtCore.Slot()
     def _update_from_cargo(self, new_cargo: int) -> None:
         """Update widget values for a new location."""
         self.cargo_slider.value = new_cargo
@@ -383,6 +398,7 @@ class NeutronTab(SpanshTabBase, NeutronTabGUI):  # noqa: D101
 
         self.cargo_slider.valueChanged.connect(self._range_from_cargo)
 
+    @QtCore.Slot()
     def _update_from_loadout(self, ship: Ship) -> None:
         """Update range for changed cargo."""
         super()._update_from_loadout(ship)
@@ -390,6 +406,7 @@ class NeutronTab(SpanshTabBase, NeutronTabGUI):  # noqa: D101
         if range_ is not None:
             self.range_spin.value = range_
 
+    @QtCore.Slot()
     def _range_from_cargo(self, cargo: int) -> None:
         range_ = _get_range(journal=self._journal, cargo_mass=cargo)
         if range_ is not None:
@@ -441,6 +458,7 @@ class ExactTab(SpanshTabBase, ExactTabGUI):  # noqa: D101
             "cargo": self.cargo_slider.value,
         }
 
+    @QtCore.Slot()
     def _set_submit_sensitive(self) -> None:
         self.submit_button.enabled = bool(
             self.source_edit.text
@@ -450,6 +468,7 @@ class ExactTab(SpanshTabBase, ExactTabGUI):  # noqa: D101
             and (self._journal.ship is not None or self.use_clipboard_checkbox.checked)
         )
 
+    @QtCore.Slot()
     def _update_from_cargo(self, new_cargo: int) -> None:
         """Don't update cargo maximum."""
 
@@ -476,6 +495,7 @@ class RoadToRichesTab(SpanshTabBase, RoadToRichesTabGUI):  # noqa: D101
             "loop": self.loop_checkbox.checked,
         }
 
+    @QtCore.Slot()
     def _update_from_loadout(self, ship: Ship) -> None:
         """Update range for changed cargo."""
         super()._update_from_loadout(ship)
@@ -483,15 +503,18 @@ class RoadToRichesTab(SpanshTabBase, RoadToRichesTabGUI):  # noqa: D101
         if range_ is not None:
             self.range_spinbox.value = range_
 
+    @QtCore.Slot()
     def _range_from_cargo(self, cargo: int) -> None:
         range_ = _get_range(journal=self._journal, cargo_mass=cargo)
         if range_ is not None:
             self.range_spinbox.value = range_
 
+    @QtCore.Slot()
     def _disable_loop_on_target(self, target_text: str) -> None:
         """Disable the loop route checkbox if there's any `target_text`."""
         self.loop_checkbox.enabled = not target_text
 
+    @QtCore.Slot()
     def _set_submit_sensitive(self) -> None:
         self.submit_button.enabled = bool(
             self.source_edit.text

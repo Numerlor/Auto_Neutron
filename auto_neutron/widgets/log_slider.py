@@ -104,6 +104,7 @@ class LogSlider(QtWidgets.QSlider):
 
         return round(math.e ** (log_min + scale * self.value) - 1)
 
+    @QtCore.Slot()
     def _on_value_changed(self) -> None:
         if not self._manual_set:
             # Only update from slider position if the slider was moved, not when assigned directly to `log_value`.

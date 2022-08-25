@@ -104,6 +104,7 @@ class Hub(QtCore.QObject):
 
         atexit.register(self.save_on_exit)
 
+    @QtCore.Slot()
     def new_route_window(self) -> None:
         """Display the `NewRouteWindow` and connect its signals."""
         logging.info("Displaying new route window.")
@@ -112,6 +113,7 @@ class Hub(QtCore.QObject):
             route_window.route_created_signal.connect(self.new_route)
             route_window.show()
 
+    @QtCore.Slot(QtWidgets.QTableWidgetItem)
     def update_route_from_edit(self, table_item: QtWidgets.QTableWidgetItem) -> None:
         """Edit the plotter's route with the new data in `table_item`."""
         log.debug(
@@ -125,16 +127,19 @@ class Hub(QtCore.QObject):
         self.window.update_remaining_count()
         self.plotter_state.route.update_indices()
 
+    @QtCore.Slot(object, int)
     def new_system_callback(self, _: t.Any, index: int) -> None:
         """Ensure we don't edit the route when inactivating rows."""
         with self.edit_route_update_connection.temporarily_disconnect():
             self.window.set_current_row(index)
 
+    @QtCore.Slot(QtCore.QModelIndex)
     def get_index_row(self, index: QtCore.QModelIndex) -> None:
         """Set the current route index to `index`'s row."""
         log.debug("Setting route index after user interaction.")
         self.plotter_state.route_index = index.row()
 
+    @QtCore.Slot(object, object)
     def new_route(self, journal: Journal, route: Route = None) -> None:
         """Create a new worker with `route`, populate the main table with it, and set the route index."""
         if route is None:
@@ -158,6 +163,7 @@ class Hub(QtCore.QObject):
         self.warn_worker.start()
         self.fuel_warner.set_journal(journal)
 
+    @QtCore.Slot()
     def apply_settings(self) -> None:
         """Update the appearance and plotter with new settings."""
         log.debug("Refreshing settings.")
@@ -187,6 +193,7 @@ class Hub(QtCore.QObject):
             app = QtWidgets.QApplication.instance()
             app.post_event(app, QtCore.QEvent(QtCore.QEvent.LanguageChange))
 
+    @QtCore.Slot()
     def display_settings(self) -> None:
         """Display the settings window and connect the applied signal to refresh appearance."""
         log.info("Displaying settings window.")
@@ -195,6 +202,7 @@ class Hub(QtCore.QObject):
             window.settings_applied.connect(self.apply_settings)
             window.show()
 
+    @QtCore.Slot()
     def display_shut_down_window(self) -> None:
         """Display the shut down window and connect it to create a new route and save the current one."""
         log.info("Displaying shut down window.")
@@ -205,6 +213,7 @@ class Hub(QtCore.QObject):
         window.save_route_button.pressed.connect(self.save_route)
         window.show()
 
+    @QtCore.Slot()
     def display_license_window(self) -> None:
         """Display the license window."""
         log.info("Displaying license window.")
@@ -212,6 +221,7 @@ class Hub(QtCore.QObject):
         if window is not None:
             window.show()
 
+    @QtCore.Slot(bool)
     def set_theme_from_os(self, dark: bool) -> None:
         """Set the current theme to the OS' theme, if the theme setting is set to follow the OS."""
         if settings.Window.dark_mode is Theme.OS_THEME:
@@ -224,6 +234,7 @@ class Hub(QtCore.QObject):
             if settings.General.save_on_quit:
                 self.save_route()
 
+    @QtCore.Slot()
     def save_route(self) -> None:
         """If route auto saving is enabled, or force is True, save the route to the config directory."""
         if self.plotter_state.route is not None:

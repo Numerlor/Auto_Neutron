@@ -243,6 +243,7 @@ class ScriptWidget(QtWidgets.QWidget):
         self.main_layout.add_widget(self.ahk_bind_edit)
         self.main_layout.add_widget(self.switch_widget)
 
+    @QtCore.Slot(int)
     def set_mode_widget_from_checkbox(self, state: int) -> None:
         """
         Set the current index of the switch widget from the checkbox's state.

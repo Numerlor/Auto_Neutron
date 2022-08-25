@@ -40,6 +40,7 @@ class LicenseWindow(LicenseWindowGUI):
         if event.type() == QtCore.QEvent.LanguageChange:
             self.retranslate()
 
+    @QtCore.Slot()
     def retranslate(self) -> None:
         """Set the text browser text."""
         super().retranslate()

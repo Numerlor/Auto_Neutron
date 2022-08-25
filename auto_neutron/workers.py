@@ -67,6 +67,7 @@ class GameWorker(_WorkerBase):
         self.route = route
         self._journal_connection = journal.system_sig.connect(self.emit_next_system)
 
+    @QtCore.Slot(object)
     def emit_next_system(self, location: Location) -> None:
         """Emit the next system in the route and its index if location is in the route, or the end of route signal."""
         if self.route is None:

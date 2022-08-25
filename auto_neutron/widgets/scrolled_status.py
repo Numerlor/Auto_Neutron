@@ -48,6 +48,7 @@ class ScrolledStatus(PlainTextScroller):
 
         self.text = message
 
+    @QtCore.Slot()
     def _reset_text(self) -> None:
         """Reset the text if not hovered, or schedule a reset for when the user leaves the widget if hovered."""
         if not self._hovered:

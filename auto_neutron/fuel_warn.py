@@ -39,6 +39,7 @@ class FuelWarn(QtCore.QObject):
         """Set the journal to get the ship values from."""
         self._journal = journal
 
+    @QtCore.Slot()
     def warn(self, status_dict: dict) -> None:
         """Execute alert when in supercruise, on FSD cool down and fuel is below threshold."""
         if self._journal.ship is None or "Fuel" not in status_dict:

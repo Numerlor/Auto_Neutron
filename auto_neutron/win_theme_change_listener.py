@@ -72,6 +72,7 @@ class WinThemeChangeListener(QtCore.QObject):
         if ctypes.cast(msg.lParam, ctypes.wintypes.LPWSTR).value == "ImmersiveColorSet":
             self._change_timer.start()
 
+    @QtCore.Slot()
     def _emit_if_changed(self) -> None:
         """Emit the `theme_changed` signal if the theme changed from the current value."""
         use_dark_theme = self._os_dark_theme()

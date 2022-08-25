@@ -119,6 +119,7 @@ class NewRouteWindow(NewRouteWindowGUI):
         """Set the cursor to the busy cursor."""
         self.cursor = QtGui.QCursor(QtCore.Qt.CursorShape.BusyCursor)
 
+    @QtCore.Slot()
     def _abort_request(self) -> None:
         """Abort the current network request, if any."""
         self._request_manager.abort()
@@ -126,6 +127,7 @@ class NewRouteWindow(NewRouteWindowGUI):
         self.status_widget.show_message("Cancelled route plot.", 2_500)
         self.cursor = QtGui.QCursor(QtCore.Qt.CursorShape.ArrowCursor)
 
+    @QtCore.Slot(int)
     def _sync_journal_combos(self, index: int) -> None:
         """Assign all journal combo boxes to display the item at `index`."""
         exit_stack = contextlib.ExitStack()
@@ -136,6 +138,7 @@ class NewRouteWindow(NewRouteWindowGUI):
                 tab.journal_combo.current_index = index
         self._change_journal(index)
 
+    @QtCore.Slot(str)
     def _sync_source_line_edits(self, text: str) -> None:
         """Sync all source line edits of Spansh tabs."""
         exit_stack = contextlib.ExitStack()
@@ -148,6 +151,7 @@ class NewRouteWindow(NewRouteWindowGUI):
                 ):
                     tab.source_edit.text = text
 
+    @QtCore.Slot(str)
     def _sync_destination_line_edits(self, text: str) -> None:
         """Sync all destination line edits of Spansh tabs."""
         exit_stack = contextlib.ExitStack()
@@ -160,6 +164,7 @@ class NewRouteWindow(NewRouteWindowGUI):
                 ):
                     tab.target_edit.text = text
 
+    @QtCore.Slot()
     def _populate_journal_combos(self, *, show_change_message: bool = True) -> None:
         """
         Populate the combo boxes with CMDR names referring to latest active journal files.
@@ -253,6 +258,7 @@ class NewRouteWindow(NewRouteWindowGUI):
         )
         self._populate_journal_combos(show_change_message=False)
 
+    @QtCore.Slot()
     def emit_and_close(self, route: Route) -> None:
         """Emit a new route and close the window."""
         self.route_created_signal.emit(self.selected_journal, route)

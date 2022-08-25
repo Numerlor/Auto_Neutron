@@ -66,6 +66,7 @@ class MainWindowGUI(QtWidgets.QMainWindow):
             for column in range(0, self.table.column_count):
                 self.table.item(row, column).set_foreground(default_brush)
 
+    @QtCore.Slot(QtCore.QPoint)
     def _main_context(self, location: QtCore.QPoint) -> None:
         """Provide the context menu displayed on the window."""
         menu = QtWidgets.QMenu()
@@ -77,6 +78,7 @@ class MainWindowGUI(QtWidgets.QMainWindow):
         menu.add_action(self.about_action)
         menu.exec(self.map_to_global(location))
 
+    @QtCore.Slot(QtCore.QPoint)
     def _table_context(self, location: QtCore.QPoint) -> None:
         """Provide the context menu displayed on the table."""
         menu = QtWidgets.QMenu()

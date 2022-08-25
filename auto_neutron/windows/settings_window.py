@@ -86,6 +86,7 @@ class SettingsWindow(SettingsWindowGUI):
         )
         self.appearance_widget.language_combo.current_index = active_locale_index
 
+    @QtCore.Slot()
     def get_ahk_path(self) -> None:
         """Ask the user for the AHK executable file path and save it to the setting."""
         path, __ = QtWidgets.QFileDialog.get_open_file_name(
@@ -98,6 +99,7 @@ class SettingsWindow(SettingsWindowGUI):
             log.info(f"Setting ahk path to {path}")
             self.behaviour_widget.copy_mode_checkbox.enabled = True
 
+    @QtCore.Slot()
     def get_sound_path(self) -> None:
         """Ask the user for the alert file path and save it to the line edit."""
         path, __ = QtWidgets.QFileDialog.get_open_file_name(
@@ -133,6 +135,7 @@ class SettingsWindow(SettingsWindowGUI):
         self.appearance_widget.font_size_chooser.value = font.point_size()
         self.appearance_widget.font_chooser.current_font = font
 
+    @QtCore.Slot()
     def save_settings(self) -> None:
         """Save the settings from the widgets."""
         with delay_sync():

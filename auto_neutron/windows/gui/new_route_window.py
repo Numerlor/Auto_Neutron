@@ -489,6 +489,7 @@ class NewRouteWindowGUI(QtWidgets.QDialog):
         self.main_layout.add_widget(self.tab_widget)
         self.main_layout.add_layout(self.status_layout)
 
+    @QtCore.Slot()
     def switch_submit_abort(self) -> None:
         """Switches the currently appearing submit/abort buttons for the other one."""
         abort_hidden = self.tabs[0].abort_button.is_hidden()

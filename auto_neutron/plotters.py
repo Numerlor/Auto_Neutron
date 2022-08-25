@@ -12,7 +12,7 @@ import tempfile
 import typing as t
 from pathlib import Path
 
-from PySide6 import QtWidgets
+from PySide6 import QtCore, QtWidgets
 from __feature__ import snake_case, true_property  # noqa: F401
 
 from auto_neutron import settings
@@ -31,6 +31,8 @@ class Plotter(abc.ABC):
         if start_system is not None:
             self.update_system(start_system)
 
+    @QtCore.Slot(str, int)
+    @QtCore.Slot(str)
     @abc.abstractmethod
     def update_system(self, system: str, system_index: int | None = None) -> None:
         """Update the plotter with the given system."""
@@ -45,6 +47,8 @@ class Plotter(abc.ABC):
 class CopyPlotter(Plotter):
     """Plot by copying given systems on the route into the clipboard."""
 
+    @QtCore.Slot(str, int)
+    @QtCore.Slot(str)
     def update_system(self, system: str, system_index: int | None = None) -> None:
         """Set the system clipboard to `system`."""
         log.info(f"Pasting {system!r} to clipboard.")
@@ -91,6 +95,8 @@ class AhkPlotter(Plotter):
         atexit.register(self.process.terminate)
         log.debug("Created AHK subprocess.")
 
+    @QtCore.Slot(str, int)
+    @QtCore.Slot(str)
     def update_system(self, system: str, system_index: int | None = None) -> None:
         """Update the ahk script with `system`."""
         if self.process is None or self.process.poll() is not None:

@@ -48,6 +48,7 @@ class MainWindow(MainWindowGUI):
 
         self._current_row_index = 0
 
+    @QtCore.Slot()
     def copy_table_item_text(self) -> None:
         """Copy the text of the selected table item into the clipboard."""
         if (item := self.table.current_item()) is not None:
@@ -101,6 +102,7 @@ class MainWindow(MainWindowGUI):
             )
             self._header_type.format_jump_header()
 
+    @QtCore.Slot(QtWidgets.QTableWidgetItem)
     def manage_item_changed(self, table_item: QtWidgets.QTableWidgetItem) -> None:
         """Update the column sizes and information when an item is changed."""
         self._header_type.item_changed(table_item)

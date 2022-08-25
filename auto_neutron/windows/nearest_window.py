@@ -61,6 +61,7 @@ class NearestWindow(NearestWindowGUI):
             self.y_spinbox.value = location.y
             self.z_spinbox.value = location.z
 
+    @QtCore.Slot()
     def _make_nearest_request(self) -> None:
         """Make a request to Spansh's nearest endpoint with the values from spinboxes."""
         self._abort_request()
@@ -127,10 +128,12 @@ class NearestWindow(NearestWindowGUI):
         if event.type() == QtCore.QEvent.LanguageChange:
             self.retranslate()
 
+    @QtCore.Slot()
     def _emit_source_copy(self) -> None:  # noqa: D402
         if self.system_name_result_label.text:
             self.copy_source.emit(self.system_name_result_label.text)
 
+    @QtCore.Slot()
     def _emit_destination_copy(self) -> None:  # noqa: D402
         if self.system_name_result_label.text:
             self.copy_destination.emit(self.system_name_result_label.text)

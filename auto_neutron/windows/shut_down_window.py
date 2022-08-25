@@ -72,6 +72,7 @@ class ShutDownWindow(ShutDownWindowGUI):
             self.journal_combo.clear()
             self.journal_combo.add_items(combo_items)
 
+    @QtCore.Slot(int)
     def _change_journal(self, index: int) -> None:
         """Change the selected journal, enable/disable the button depending on its shut down state."""
         journal = self._journals[index]
