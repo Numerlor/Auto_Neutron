@@ -85,9 +85,10 @@ class TabBase(TabGUIBase):
         """Set the tracked journal to `journal`."""
         if self._journal_shutdown_connection is not None:
             self._journal.disconnect(self._journal_shutdown_connection)
-        self._journal_shutdown_connection = journal.shut_down_sig.connect(
-            self._set_submit_sensitive
-        )
+        if journal is not None:
+            self._journal_shutdown_connection = journal.shut_down_sig.connect(
+                self._set_submit_sensitive
+            )
 
         self._journal = journal
         self._set_submit_sensitive()
