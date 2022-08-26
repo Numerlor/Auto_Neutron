@@ -8,10 +8,12 @@ import csv
 import json
 import logging
 import typing as t
+import weakref
+from contextlib import suppress
 from functools import partial
 from pathlib import Path
 
-from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6 import QtCore, QtGui, QtNetwork, QtWidgets
 from __feature__ import snake_case, true_property  # noqa: F401
 
 from auto_neutron import settings
@@ -21,7 +23,12 @@ from auto_neutron.journal import Journal
 from auto_neutron.route import ExactRoute, NeutronRoute, RoadToRichesRoute, Route
 from auto_neutron.ship import Ship
 from auto_neutron.spansh_request_manager import SpanshRequestManager
-from auto_neutron.utils.utils import create_request_delay_iterator
+from auto_neutron.utils.network import (
+    NetworkError,
+    json_from_network_req,
+    make_network_request,
+)
+from auto_neutron.utils.utils import create_request_delay_iterator, intern_list
 from auto_neutron.windows import NearestWindow
 from auto_neutron.windows.gui.new_route_window import (
     CSVTabGUI,
@@ -217,6 +224,12 @@ class LastRouteTab(TabBase, LastTabGUI):  # noqa: D101
         self._update_saved_route_text()
 
 
+class DictWeakref(dict):
+    """Dict that can have weakrefs made to it."""
+
+    __slots__ = ("__weakref__",)
+
+
 class SpanshTabBase(TabBase, SpanshTabGUIBase):
     """
     Base class for tabs that interface with Spansh.
@@ -234,6 +247,10 @@ class SpanshTabBase(TabBase, SpanshTabGUIBase):
     started_plotting = QtCore.Signal()
     plotting_error = QtCore.Signal()
 
+    _completer_caches: weakref.WeakValueDictionary[
+        QtWidgets.QWidget, DictWeakref[str, list[str]]
+    ] = weakref.WeakValueDictionary()
+
     def __init__(
         self,
         *,
@@ -245,6 +262,37 @@ class SpanshTabBase(TabBase, SpanshTabGUIBase):
         self.nearest_button.pressed.connect(self._display_nearest_window)
         self.source_edit.textChanged.connect(self._set_submit_sensitive)
         self.target_edit.textChanged.connect(self._set_submit_sensitive)
+
+        self._source_completer_model = QtCore.QStringListModel([""], self)
+        self.source_completer = QtWidgets.QCompleter(self._source_completer_model, self)
+        self.source_completer.set_widget(self.source_edit)
+        self.source_completer.case_sensitivity = (
+            QtCore.Qt.CaseSensitivity.CaseInsensitive
+        )
+        self.source_edit.textEdited.connect(
+            partial(
+                self._make_completer_request,
+                completer=self.source_completer,
+            )
+        )
+
+        self._target_completer_model = QtCore.QStringListModel(self)
+        self.target_completer = QtWidgets.QCompleter(self._target_completer_model, self)
+        self.target_completer.set_widget(self.target_edit)
+        self.target_completer.case_sensitivity = (
+            QtCore.Qt.CaseSensitivity.CaseInsensitive
+        )
+        self.target_edit.textEdited.connect(
+            partial(
+                self._make_completer_request,
+                completer=self.target_completer,
+            )
+        )
+
+        self._completer_request: QtNetwork.QNetworkReply | None = None
+        self._completer_cache = self._completer_caches.setdefault(
+            self.parent(), DictWeakref()
+        )
 
     def set_journal(self, journal: Journal | None) -> None:
         """
@@ -385,6 +433,56 @@ class SpanshTabBase(TabBase, SpanshTabGUIBase):
     def _update_from_cargo(self, new_cargo: int) -> None:
         """Update widget values for a new location."""
         self.cargo_slider.value = new_cargo
+
+    def _make_completer_request(
+        self,
+        query: str,
+        completer: QtWidgets.QCompleter,
+    ) -> None:
+        if self._completer_request is not None:
+            self._completer_request.abort()
+        if not query:
+            return
+
+        if (cached_response := self._completer_cache.get(query.casefold())) is not None:
+            completer.model().set_string_list(cached_response)
+            completer.complete()
+            return
+
+        self._completer_request = make_network_request(
+            SPANSH_API_URL + "/systems/field_values/system_names",
+            params={"q": query},
+            finished_callback=partial(
+                self._update_model_from_completer_query_result,
+                completer=completer,
+                query_to_cache=query,
+            ),
+        )
+
+    def _update_model_from_completer_query_result(
+        self,
+        reply: QtNetwork.QNetworkReply,
+        completer: QtWidgets.QCompleter,
+        query_to_cache: str,
+    ) -> None:
+        with suppress(NetworkError):
+            response = json_from_network_req(
+                reply, json_error_key="error"
+            )  # can't fail? error key may be wrong.
+            suggestions = self._completer_cache[
+                query_to_cache.casefold()
+            ] = intern_list(response["values"])
+
+            completer.model().set_string_list(suggestions)
+            completer.complete()
+
+        self._completer_request = None
+
+    def close_event(self, event: QtGui.QCloseEvent) -> None:
+        """Abort any requests on close."""
+        super().close_event(event)
+        if self._completer_request is not None:
+            self._completer_request.abort()
 
 
 class NeutronTab(SpanshTabBase, NeutronTabGUI):  # noqa: D101
