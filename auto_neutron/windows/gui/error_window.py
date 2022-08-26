@@ -24,8 +24,12 @@ class ErrorWindowGUI(QtWidgets.QDialog):
 
         self.button_layout = QtWidgets.QHBoxLayout()
         self.quit_button = QtWidgets.QPushButton(self)
+        self.send_log = QtWidgets.QPushButton(self)
         self.save_button = QtWidgets.QPushButton(self)
         self.quit_button.size_policy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
+        )
+        self.send_log.size_policy = QtWidgets.QSizePolicy(
             QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
         )
         self.save_button.size_policy = QtWidgets.QSizePolicy(
@@ -33,6 +37,7 @@ class ErrorWindowGUI(QtWidgets.QDialog):
         )
 
         self.button_layout.add_widget(self.save_button)
+        self.button_layout.add_widget(self.send_log)
         self.button_layout.add_widget(self.quit_button)
 
         self.main_layout.add_widget(self.info_label)
@@ -44,4 +49,5 @@ class ErrorWindowGUI(QtWidgets.QDialog):
         """Retranslate text that is always on display."""
         self.info_label.text = _("An unexpected error has occurred")
         self.quit_button.text = _("Quit")
+        self.send_log.text = _("Send session log")
         self.save_button.text = _("Save route")

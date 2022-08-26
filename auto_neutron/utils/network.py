@@ -55,6 +55,26 @@ def make_network_request(
     return reply
 
 
+def post_request(
+    url: str,
+    *,
+    json_: collections.abc.Mapping = {},  # noqa: B006
+    finished_callback: collections.abc.Callable[[QtNetwork.QNetworkReply], t.Any],
+) -> QtNetwork.QNetworkReply:
+    """Make a post request to `url` with `json_` as its body. Connect its reply to `finished_callback`."""
+    qurl = QtCore.QUrl(url)
+    request = QtNetwork.QNetworkRequest(qurl)
+    request.set_header(QtNetwork.QNetworkRequest.UserAgentHeader, f"{APP}/{VERSION}")
+    request.set_header(QtNetwork.QNetworkRequest.ContentTypeHeader, "application/json")
+    reply = auto_neutron.network_mgr.post(
+        request,
+        json.dumps(json_).encode(),
+    )
+    reply.finished.connect(partial(finished_callback, reply))
+
+    return reply
+
+
 def json_from_network_req(
     reply: QtNetwork.QNetworkReply, *, json_error_key: str | None = None
 ) -> dict:
