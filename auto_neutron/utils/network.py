@@ -56,7 +56,7 @@ def make_network_request(
 
 
 def json_from_network_req(
-    reply: QtNetwork.QNetworkReply, *, json_error_key: str
+    reply: QtNetwork.QNetworkReply, *, json_error_key: str | None = None
 ) -> dict:
     """Decode bytes from the `QNetworkReply` object or raise an error on failed requests."""
     try:
@@ -71,7 +71,10 @@ def json_from_network_req(
         else:
             text_response = reply.read_all().data()
             if text_response:
-                reply_error = json.loads(text_response)[json_error_key]
+                if json_error_key is not None:
+                    reply_error = json.loads(text_response)[json_error_key]
+                else:
+                    reply_error = text_response
             else:
                 reply_error = None
             raise NetworkError(reply.error(), reply.error_string(), reply_error)
