@@ -466,9 +466,7 @@ class SpanshTabBase(TabBase, SpanshTabGUIBase):
         query_to_cache: str,
     ) -> None:
         with suppress(NetworkError):
-            response = json_from_network_req(
-                reply, json_error_key="error"
-            )  # can't fail? error key may be wrong.
+            response = json_from_network_req(reply)
             suggestions = self._completer_cache[
                 query_to_cache.casefold()
             ] = intern_list(response["values"])
