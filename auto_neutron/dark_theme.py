@@ -50,6 +50,11 @@ class _ThemeSelector:
         )
         p.set_color(
             QtGui.QPalette.Disabled,
+            QtGui.QPalette.WindowText,
+            QtGui.QColor(110, 110, 100),
+        )
+        p.set_color(
+            QtGui.QPalette.Disabled,
             QtGui.QPalette.ButtonText,
             QtGui.QColor(110, 110, 100),
         )
