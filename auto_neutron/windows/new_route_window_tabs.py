@@ -264,7 +264,7 @@ class SpanshTabBase(TabBase, SpanshTabGUIBase):
         self.source_edit.textChanged.connect(self._set_submit_sensitive)
         self.target_edit.textChanged.connect(self._set_submit_sensitive)
 
-        self._source_completer_model = QtCore.QStringListModel([""], self)
+        self._source_completer_model = QtCore.QStringListModel(self)
         self.source_completer = QtWidgets.QCompleter(self._source_completer_model, self)
         self.source_completer.set_widget(self.source_edit)
         self.source_completer.case_sensitivity = (
