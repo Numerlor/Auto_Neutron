@@ -66,7 +66,7 @@ class SpanshRequestManager:
                 )  # Fall back to Qt error message if spansh didn't respond
         except Exception as e:
             error_callback(str(e))
-            logging.error(e)
+            log.error(e)
         else:
             if job_response.get("status") == "queued":
                 sec_delay = next(delay_iterator)

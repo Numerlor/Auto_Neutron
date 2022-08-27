@@ -107,7 +107,7 @@ class Hub(QtCore.QObject):
     @QtCore.Slot()
     def new_route_window(self) -> None:
         """Display the `NewRouteWindow` and connect its signals."""
-        logging.info("Displaying new route window.")
+        log.info("Displaying new route window.")
         route_window = create_or_activate_window(NewRouteWindow, "hub", self.window)
         if route_window is not None:
             route_window.route_created_signal.connect(self.new_route)
@@ -143,7 +143,7 @@ class Hub(QtCore.QObject):
     def new_route(self, journal: Journal, route: Route = None) -> None:
         """Create a new worker with `route`, populate the main table with it, and set the route index."""
         if route is None:
-            logging.debug("Using current plotter route.")
+            log.debug("Using current plotter route.")
             route = self.plotter_state.route
 
         self.plotter_state.journal = journal
