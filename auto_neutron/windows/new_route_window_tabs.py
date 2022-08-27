@@ -578,6 +578,7 @@ class RoadToRichesTab(SpanshTabBase, RoadToRichesTabGUI):  # noqa: D101
         super().__init__(*args, **kwargs)
         self.target_edit.textChanged.connect(self._disable_loop_on_target)
         self.cargo_slider.valueChanged.connect(self._range_from_cargo)
+        self.loop_checkbox.install_event_filter(self)
 
     def _request_params(self) -> dict[str, t.Any] | None:
         return {
@@ -618,6 +619,18 @@ class RoadToRichesTab(SpanshTabBase, RoadToRichesTabGUI):  # noqa: D101
             and self._journal is not None
             and not self._journal.shut_down
         )
+
+    def event_filter(self, watched: QtWidgets.QWidget, event: QtCore.QEvent) -> bool:
+        """Allow scrolling when hovering disabled loop checkbox."""
+        if (
+            event.type() is QtCore.QEvent.Wheel
+            and not watched.enabled
+            and watched.parent() is not None
+        ):
+            watched.parent().wheel_event(event)
+            return True
+
+        return super().event_filter(watched, event)
 
 
 def _get_range(
