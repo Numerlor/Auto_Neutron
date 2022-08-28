@@ -91,6 +91,3 @@ $ cd Auto_Neutron  # Switch to the cloned folder
 $ poetry install --no-dev  # Install the project's dependencies
 $ poetry run start  # Start the application
 ```
-
-Utility for creating custom CSV files usable by this app:
-https://github.com/Numerlor/Neutron-CSV-Builder
