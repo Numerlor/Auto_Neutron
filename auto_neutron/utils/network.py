@@ -1,4 +1,4 @@
-# This file is part of Auto_Neutron.
+# This file is part of Auto_Neutron. See the main.py file for more details.
 # Copyright (C) 2019  Numerlor
 
 from __future__ import annotations
@@ -13,6 +13,7 @@ from PySide6 import QtCore, QtNetwork
 from __feature__ import snake_case, true_property  # noqa: F401
 
 import auto_neutron
+from auto_neutron.constants import APP, VERSION
 
 if t.TYPE_CHECKING:
     import collections.abc
@@ -38,23 +39,44 @@ class NetworkError(Exception):
 def make_network_request(
     url: str,
     *,
-    params: dict = {},  # noqa: B006
+    params: collections.abc.Mapping = {},  # noqa: B006
     finished_callback: collections.abc.Callable[[QtNetwork.QNetworkReply], t.Any],
 ) -> QtNetwork.QNetworkReply:
-    """Make a network request to `url` with a `params` query and connect its reply to `callback`."""
+    """Make a network request to `url` with a `params` query and connect its reply to `finished_callback`."""
     log.debug(f"Sending request to {url} with {params=}")
     if params:
         url += "?" + urllib.parse.urlencode(params)
     qurl = QtCore.QUrl(url)
     request = QtNetwork.QNetworkRequest(qurl)
+    request.set_header(QtNetwork.QNetworkRequest.UserAgentHeader, f"{APP}/{VERSION}")
     reply = auto_neutron.network_mgr.get(request)
     reply.finished.connect(partial(finished_callback, reply))
 
     return reply
 
 
+def post_request(
+    url: str,
+    *,
+    json_: collections.abc.Mapping = {},  # noqa: B006
+    finished_callback: collections.abc.Callable[[QtNetwork.QNetworkReply], t.Any],
+) -> QtNetwork.QNetworkReply:
+    """Make a post request to `url` with `json_` as its body. Connect its reply to `finished_callback`."""
+    qurl = QtCore.QUrl(url)
+    request = QtNetwork.QNetworkRequest(qurl)
+    request.set_header(QtNetwork.QNetworkRequest.UserAgentHeader, f"{APP}/{VERSION}")
+    request.set_header(QtNetwork.QNetworkRequest.ContentTypeHeader, "application/json")
+    reply = auto_neutron.network_mgr.post(
+        request,
+        json.dumps(json_).encode(),
+    )
+    reply.finished.connect(partial(finished_callback, reply))
+
+    return reply
+
+
 def json_from_network_req(
-    reply: QtNetwork.QNetworkReply, *, json_error_key: str
+    reply: QtNetwork.QNetworkReply, *, json_error_key: str | None = None
 ) -> dict:
     """Decode bytes from the `QNetworkReply` object or raise an error on failed requests."""
     try:
@@ -69,7 +91,10 @@ def json_from_network_req(
         else:
             text_response = reply.read_all().data()
             if text_response:
-                reply_error = json.loads(text_response)[json_error_key]
+                if json_error_key is not None:
+                    reply_error = json.loads(text_response)[json_error_key]
+                else:
+                    reply_error = text_response
             else:
                 reply_error = None
             raise NetworkError(reply.error(), reply.error_string(), reply_error)

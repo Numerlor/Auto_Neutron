@@ -1,4 +1,4 @@
-# This file is part of Auto_Neutron.
+# This file is part of Auto_Neutron. See the main.py file for more details.
 # Copyright (C) 2019  Numerlor
 
 from __future__ import annotations
@@ -32,7 +32,7 @@ CreateFileW.argtypes = [
 GetFinalPathNameByHandle = ctypes.windll.Kernel32.GetFinalPathNameByHandleW
 GetFinalPathNameByHandle.argtypes = [
     wintypes.HANDLE,
-    ctypes.c_wchar_p,
+    wintypes.LPWSTR,
     wintypes.DWORD,
     wintypes.DWORD,
 ]
@@ -55,7 +55,7 @@ def create_delete_share_file(
         FILE_ATTRIBUTE_NORMAL,
         None,
     )
-    if handle == -1:
+    if handle == INVALID_HANDLE_VALUE:
         raise ctypes.WinError()
 
     return open(  # noqa: SIM115

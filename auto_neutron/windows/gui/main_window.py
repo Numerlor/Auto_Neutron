@@ -1,4 +1,4 @@
-# This file is part of Auto_Neutron.
+# This file is part of Auto_Neutron. See the main.py file for more details.
 # Copyright (C) 2019  Numerlor
 
 from __future__ import annotations
@@ -54,24 +54,6 @@ class MainWindowGUI(QtWidgets.QMainWindow):
         palette.set_color(QtGui.QPalette.HighlightedText, QtGui.QColor(0, 123, 255))
         self.table.palette = palette
 
-    def _create_base_headers(self) -> None:
-        """Create all header items and set the static resize modes and delegates."""
-        self.table.column_count = 5
-        for column in range(5):
-            self.table.set_horizontal_header_item(column, QtWidgets.QTableWidgetItem())
-
-        horizontal_header = self.table.horizontal_header()
-        horizontal_header.set_section_resize_mode(1, QtWidgets.QHeaderView.Stretch)
-        horizontal_header.set_section_resize_mode(2, QtWidgets.QHeaderView.Stretch)
-        horizontal_header.set_section_resize_mode(3, QtWidgets.QHeaderView.Fixed)
-        horizontal_header.set_section_resize_mode(4, QtWidgets.QHeaderView.Fixed)
-        horizontal_header.highlight_sections = False
-
-        self.table.set_item_delegate_for_column(1, self._double_spinbox_delegate)
-        self.table.set_item_delegate_for_column(2, self._double_spinbox_delegate)
-        # 3rd column delegate is variable and set by the subclass
-        self.table.set_item_delegate_for_column(4, self._checkbox_delegate)
-
     def inactivate_before_index(self, index: int) -> None:
         """Make all the items before `index` grey, and after, the default color."""
         assert index <= self.table.row_count, f"Index {index} out of range."
@@ -84,6 +66,7 @@ class MainWindowGUI(QtWidgets.QMainWindow):
             for column in range(0, self.table.column_count):
                 self.table.item(row, column).set_foreground(default_brush)
 
+    @QtCore.Slot(QtCore.QPoint)
     def _main_context(self, location: QtCore.QPoint) -> None:
         """Provide the context menu displayed on the window."""
         menu = QtWidgets.QMenu()
@@ -95,6 +78,7 @@ class MainWindowGUI(QtWidgets.QMainWindow):
         menu.add_action(self.about_action)
         menu.exec(self.map_to_global(location))
 
+    @QtCore.Slot(QtCore.QPoint)
     def _table_context(self, location: QtCore.QPoint) -> None:
         """Provide the context menu displayed on the table."""
         menu = QtWidgets.QMenu()

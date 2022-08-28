@@ -1,4 +1,4 @@
-# This file is part of Auto_Neutron.
+# This file is part of Auto_Neutron. See the main.py file for more details.
 # Copyright (C) 2019  Numerlor
 
 from __future__ import annotations
@@ -30,6 +30,13 @@ log = logging.getLogger(__name__)
 class NearestWindow(NearestWindowGUI):
     """Provide a UI to Spansh's nearest API and let the user get the result through the provided buttons."""
 
+    copy_source = QtCore.Signal(
+        str
+    )  # called when user requests to copy source system to parent window
+    copy_destination = QtCore.Signal(
+        str
+    )  # called when user requests to copy destination system to parent window
+
     def __init__(
         self,
         parent: QtWidgets.QWidget,
@@ -42,6 +49,8 @@ class NearestWindow(NearestWindowGUI):
         self.search_button.pressed.connect(self._make_nearest_request)
         self._status_callback = status_callback
         self._current_network_request = None
+        self.copy_to_source_button.pressed.connect(self._emit_source_copy)
+        self.copy_to_destination_button.pressed.connect(self._emit_destination_copy)
         self.retranslate()
 
     def set_input_values_from_location(self, location: Location | None) -> None:
@@ -52,6 +61,7 @@ class NearestWindow(NearestWindowGUI):
             self.y_spinbox.value = location.y
             self.z_spinbox.value = location.z
 
+    @QtCore.Slot()
     def _make_nearest_request(self) -> None:
         """Make a request to Spansh's nearest endpoint with the values from spinboxes."""
         self._abort_request()
@@ -68,7 +78,7 @@ class NearestWindow(NearestWindowGUI):
 
     def _assign_from_reply(self, reply: QtNetwork.QNetworkReply) -> None:
         """Decode the spansh JSON reply and display the data to the user."""
-        self.cursor = QtGui.QCursor(QtCore.Qt.CursorShape.BusyCursor)
+        self.cursor = QtGui.QCursor(QtCore.Qt.CursorShape.ArrowCursor)
         self._current_network_request = None
 
         try:
@@ -85,7 +95,7 @@ class NearestWindow(NearestWindowGUI):
             else:
                 # Fall back to Qt error message if spansh didn't respond
                 message = e.error_message
-            self._status_callback.show_message(message, 10_000)
+            self._status_callback(message, 10_000)
         else:
             self.system_name_result_label.text = data["system"]["name"]
             self.distance_result_label.text = (
@@ -117,3 +127,13 @@ class NearestWindow(NearestWindowGUI):
         """Retranslate the GUI when a language change occurs."""
         if event.type() == QtCore.QEvent.LanguageChange:
             self.retranslate()
+
+    @QtCore.Slot()
+    def _emit_source_copy(self) -> None:  # noqa: D402
+        if self.system_name_result_label.text:
+            self.copy_source.emit(self.system_name_result_label.text)
+
+    @QtCore.Slot()
+    def _emit_destination_copy(self) -> None:  # noqa: D402
+        if self.system_name_result_label.text:
+            self.copy_destination.emit(self.system_name_result_label.text)

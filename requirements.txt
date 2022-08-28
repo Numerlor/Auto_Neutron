@@ -1,0 +1,15 @@
+babel==2.10.3; python_version >= "3.6"
+more-itertools==8.13.0; python_version >= "3.5"
+pyside6-addons==6.3.1; python_version >= "3.6" and python_version < "3.11"
+pyside6-essentials==6.3.1; python_version >= "3.6" and python_version < "3.11"
+pyside6==6.3.1; python_version >= "3.6" and python_version < "3.11"
+pytz==2022.1; python_version >= "3.6" \
+    --hash=sha256:e68985985296d9a66a881eb3193b0906246245294a881e7c8afe623866ac6a5c \
+    --hash=sha256:1e760e2fe6a8163bc0b3d9a19c4f84342afa0a2affebfaa84b01b978a02ecaa7
+shiboken6==6.3.1; python_version >= "3.6" and python_version < "3.11"
+tomli-w==1.0.0; python_version >= "3.7" \
+    --hash=sha256:9f2a07e8be30a0729e533ec968016807069991ae2fd921a78d42f429ae5f4463 \
+    --hash=sha256:f463434305e0336248cac9c2dc8076b707d8a12d019dd349f5c1e382dd1ae1b9
+tomli==2.0.1; python_version >= "3.7" \
+    --hash=sha256:939de3e7a6161af0c887ef91b7d41a53e7c5a1ca976325f429cb46ea9bc30ecc \
+    --hash=sha256:de526c12914f0c550d15924c62d72abc48d6fe7364aa87328337a31007fe8a4f

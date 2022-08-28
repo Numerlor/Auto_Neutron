@@ -1,15 +1,15 @@
-# This file is part of Auto_Neutron.
+# This file is part of Auto_Neutron. See the main.py file for more details.
 # Copyright (C) 2019  Numerlor
 
 from __future__ import annotations
 
 import atexit
-import csv
 import logging
 import typing as t
 from functools import partial
 
 import babel
+import more_itertools
 from PySide6 import QtCore, QtWidgets
 from __feature__ import snake_case, true_property  # noqa: F401
 
@@ -19,7 +19,8 @@ from auto_neutron.constants import JOURNAL_PATH, ROUTE_FILE_NAME, get_config_dir
 from auto_neutron.dark_theme import set_theme
 from auto_neutron.fuel_warn import FuelWarn
 from auto_neutron.game_state import PlotterState
-from auto_neutron.route_plots import AhkPlotter, CopyPlotter, NeutronPlotRow
+from auto_neutron.plotters import AhkPlotter, CopyPlotter
+from auto_neutron.route import Route
 from auto_neutron.self_updater import Updater
 from auto_neutron.settings import delay_sync
 from auto_neutron.utils.signal import ReconnectingSignal
@@ -31,12 +32,12 @@ from auto_neutron.windows import (
     NewRouteWindow,
     SettingsWindow,
     ShutDownWindow,
+    create_or_activate_window,
 )
 from auto_neutron.workers import StatusWorker
 
 if t.TYPE_CHECKING:
     from auto_neutron.journal import Journal
-    from auto_neutron.route_plots import RouteList
     from auto_neutron.utils.utils import ExceptionHandler
     from auto_neutron.win_theme_change_listener import WinThemeChangeListener
 
@@ -88,7 +89,7 @@ class Hub(QtCore.QObject):
 
         if (
             not JOURNAL_PATH.exists()
-            or not list(JOURNAL_PATH.glob("Journal.*.log"))
+            or not more_itertools.ilen(JOURNAL_PATH.glob("Journal.*.log"))
             or not (JOURNAL_PATH / "Status.json").exists()
         ):
             # If the journal folder is missing, force the user to quit
@@ -103,51 +104,48 @@ class Hub(QtCore.QObject):
 
         atexit.register(self.save_on_exit)
 
+    @QtCore.Slot()
     def new_route_window(self) -> None:
         """Display the `NewRouteWindow` and connect its signals."""
-        logging.info("Displaying new route window.")
-        route_window = NewRouteWindow(self.window)
-        route_window.route_created_signal.connect(self.new_route)
-        route_window.show()
+        log.info("Displaying new route window.")
+        route_window = create_or_activate_window(NewRouteWindow, "hub", self.window)
+        if route_window is not None:
+            route_window.route_created_signal.connect(self.new_route)
+            route_window.show()
 
+    @QtCore.Slot(QtWidgets.QTableWidgetItem)
     def update_route_from_edit(self, table_item: QtWidgets.QTableWidgetItem) -> None:
         """Edit the plotter's route with the new data in `table_item`."""
         log.debug(
             f"Updating info from edited item at x={table_item.row()} y={table_item.column()}."
         )
-        self.plotter_state.route[table_item.row()][
+        self.plotter_state.route.entries[table_item.row()][
             table_item.column()
         ] = table_item.data(QtCore.Qt.ItemDataRole.DisplayRole)
         if table_item.row() == self.plotter_state.route_index:
             self.plotter_state.route_index = self.plotter_state.route_index
+        self.window.update_remaining_count()
+        self.plotter_state.route.update_indices()
 
+    @QtCore.Slot(object, int)
     def new_system_callback(self, _: t.Any, index: int) -> None:
         """Ensure we don't edit the route when inactivating rows."""
         with self.edit_route_update_connection.temporarily_disconnect():
             self.window.set_current_row(index)
 
+    @QtCore.Slot(QtCore.QModelIndex)
     def get_index_row(self, index: QtCore.QModelIndex) -> None:
         """Set the current route index to `index`'s row."""
         log.debug("Setting route index after user interaction.")
         self.plotter_state.route_index = index.row()
 
-    def new_route(
-        self, journal: Journal, route: RouteList = None, route_index: int = None
-    ) -> None:
+    @QtCore.Slot(object, object)
+    def new_route(self, journal: Journal, route: Route = None) -> None:
         """Create a new worker with `route`, populate the main table with it, and set the route index."""
         if route is None:
-            logging.debug("Using current plotter route.")
+            log.debug("Using current plotter route.")
             route = self.plotter_state.route
-        if route_index is None:
-            logging.debug("Using current plotter index.")
-            route_index = self.plotter_state.route_index
 
-        if route_index >= len(route):
-            route_index = len(route) - 1
-
-        logging.debug(
-            f"Creating a new {type(route[0]).__name__} route with {route_index=}."
-        )
         self.plotter_state.journal = journal
         self.plotter_state.create_worker_with_route(route)
         if self.plotter_state.plotter is None:
@@ -158,13 +156,14 @@ class Hub(QtCore.QObject):
         with self.edit_route_update_connection.temporarily_disconnect():
             self.window.initialize_table(route)
 
-        self.plotter_state.route_index = route_index
-        self.window.scroll_to_index(route_index)
+        self.window.scroll_to_index(self.plotter_state.route_index)
+        self.plotter_state.route_index = route.index
         if journal.location is not None:  # may not have a location yet
             self.plotter_state.tail_worker.emit_next_system(journal.location)
         self.warn_worker.start()
         self.fuel_warner.set_journal(journal)
 
+    @QtCore.Slot()
     def apply_settings(self) -> None:
         """Update the appearance and plotter with new settings."""
         log.debug("Refreshing settings.")
@@ -176,17 +175,15 @@ class Hub(QtCore.QObject):
         set_theme(dark)
 
         if self.plotter_state.plotter is not None:
-            current_sys = self.plotter_state.route[self.plotter_state.route_index]
+            current_sys = self.plotter_state.route.current_system
             if settings.General.copy_mode and not isinstance(
                 self.plotter_state.plotter, CopyPlotter
             ):
-                self.plotter_state.plotter = CopyPlotter(
-                    start_system=current_sys.system
-                )
+                self.plotter_state.plotter = CopyPlotter(start_system=current_sys)
             elif not settings.General.copy_mode and not isinstance(
                 self.plotter_state.plotter, AhkPlotter
             ):
-                self.plotter_state.plotter = AhkPlotter(start_system=current_sys.system)
+                self.plotter_state.plotter = AhkPlotter(start_system=current_sys)
             else:
                 self.plotter_state.plotter.refresh_settings()
 
@@ -196,27 +193,35 @@ class Hub(QtCore.QObject):
             app = QtWidgets.QApplication.instance()
             app.post_event(app, QtCore.QEvent(QtCore.QEvent.LanguageChange))
 
+    @QtCore.Slot()
     def display_settings(self) -> None:
         """Display the settings window and connect the applied signal to refresh appearance."""
         log.info("Displaying settings window.")
-        window = SettingsWindow(self.window)
-        window.settings_applied.connect(self.apply_settings)
-        window.show()
+        window = create_or_activate_window(SettingsWindow, "hub", self.window)
+        if window is not None:
+            window.settings_applied.connect(self.apply_settings)
+            window.show()
 
+    @QtCore.Slot()
     def display_shut_down_window(self) -> None:
         """Display the shut down window and connect it to create a new route and save the current one."""
         log.info("Displaying shut down window.")
         window = ShutDownWindow(self.window)
-        window.new_journal_signal.connect(self.new_route)
+        window.new_journal_signal.connect(
+            partial(self.new_route, route=self.plotter_state.route)
+        )
         window.save_route_button.pressed.connect(self.save_route)
         window.show()
 
+    @QtCore.Slot()
     def display_license_window(self) -> None:
         """Display the license window."""
         log.info("Displaying license window.")
-        window = LicenseWindow(self.window)
-        window.show()
+        window = create_or_activate_window(LicenseWindow, "hub", self.window)
+        if window is not None:
+            window.show()
 
+    @QtCore.Slot(bool)
     def set_theme_from_os(self, dark: bool) -> None:
         """Set the current theme to the OS' theme, if the theme setting is set to follow the OS."""
         if settings.Window.dark_mode is Theme.OS_THEME:
@@ -229,37 +234,10 @@ class Hub(QtCore.QObject):
             if settings.General.save_on_quit:
                 self.save_route()
 
+    @QtCore.Slot()
     def save_route(self) -> None:
         """If route auto saving is enabled, or force is True, save the route to the config directory."""
         if self.plotter_state.route is not None:
             log.info("Saving route.")
-            with open(
-                get_config_dir() / ROUTE_FILE_NAME, "w", encoding="utf8", newline=""
-            ) as out_file:
-                route_type = type(self.plotter_state.route[0])
-                writer = csv.writer(out_file, quoting=csv.QUOTE_ALL)
-                if route_type is NeutronPlotRow:
-                    writer.writerow(
-                        [
-                            "System Name",
-                            "Distance To Arrival",
-                            "Distance Remaining",
-                            "Neutron Star",
-                            "Jumps",
-                        ]
-                    )
-                else:
-                    writer.writerow(
-                        [
-                            "System Name",
-                            "Distance",
-                            "Distance Remaining",
-                            "Fuel Left",
-                            "Fuel Used",
-                            "Refuel",
-                            "Neutron Star",
-                        ]
-                    )
-                writer.writerows(row.to_csv() for row in self.plotter_state.route)
-
+            self.plotter_state.route.to_csv_file(get_config_dir() / ROUTE_FILE_NAME)
             settings.General.last_route_index = self.plotter_state.route_index

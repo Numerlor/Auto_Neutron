@@ -1,4 +1,4 @@
-# This file is part of Auto_Neutron.
+# This file is part of Auto_Neutron. See the main.py file for more details.
 # Copyright (C) 2019  Numerlor
 
 from __future__ import annotations
@@ -93,6 +93,7 @@ class Updater(QtCore.QObject):
         )
         dialog.show()
 
+    @QtCore.Slot(QtNetwork.QNetworkReply)
     def _show_progress_dialog(self, reply: QtNetwork.QNetworkReply) -> None:
         """Show the download progress dialog reporting on `reply`."""
         dialog = QtWidgets.QProgressDialog(self.parent())
@@ -100,6 +101,7 @@ class Updater(QtCore.QObject):
         dialog.canceled.connect(dialog.close)
         dialog.set_modal(True)
 
+        @QtCore.Slot(int, int)
         def update_progress(received_bytes: int, total_bytes: int) -> None:
             dialog.maximum = total_bytes
             dialog.value = received_bytes
@@ -113,6 +115,7 @@ class Updater(QtCore.QObject):
         window = UpdateErrorWindow(self.parent(), error)
         window.show()
 
+    @QtCore.Slot(QtNetwork.QNetworkReply)
     def _check_new_version(self, network_reply: QtNetwork.QNetworkReply) -> None:
         """Check the json from `network_reply` for a new version, show the ask dialog if it's not skipped or current."""
         try:
@@ -124,13 +127,14 @@ class Updater(QtCore.QObject):
                 error_msg = e.reply_error
             else:
                 error_msg = e.error_message
-            self._show_error_window(error_msg)
+            log.warning("Unable to find new versions: %s", error_msg)
         else:
             version = release_json["tag_name"]
             log.info(f"Received version info with version {version}.")
             if version not in {VERSION, General.last_checked_release}:
                 self._show_ask_dialog(release_json)
 
+    @QtCore.Slot(dict)
     def _download_new_release(self, release_json: dict[str, t.Any]) -> None:
         """Start downloading the appropriate new release asset."""
         if IS_ONEFILE:

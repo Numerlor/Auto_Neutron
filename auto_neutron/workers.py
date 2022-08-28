@@ -1,4 +1,4 @@
-# This file is part of Auto_Neutron.
+# This file is part of Auto_Neutron. See the main.py file for more details.
 # Copyright (C) 2019  Numerlor
 
 from __future__ import annotations
@@ -12,14 +12,15 @@ from functools import partial
 from PySide6 import QtCore
 from __feature__ import snake_case, true_property  # noqa: F401
 
+from auto_neutron import settings
 from auto_neutron.constants import STATUS_PATH
+from auto_neutron.route import Route
 
 if t.TYPE_CHECKING:
     import collections.abc
 
     from auto_neutron.game_state import Location
     from auto_neutron.journal import Journal
-    from auto_neutron.route_plots import RouteList
 
 log = logging.getLogger(__name__)
 
@@ -37,9 +38,7 @@ class _WorkerBase(QtCore.QObject):
         self._generator = generator
         self._timer = QtCore.QTimer(self)
         self._timer.interval = interval
-        self._advance_connection = self._timer.timeout.connect(
-            partial(next, self._generator)
-        )
+        self._timer.timeout.connect(partial(next, self._generator))
         self._stopped = False
 
     def start(self) -> None:
@@ -52,11 +51,8 @@ class _WorkerBase(QtCore.QObject):
     def stop(self) -> None:
         """Stop the worker from tailing the journal file."""
         log.debug(f"Stopping {self.__class__.__name__}.")
-        # Remove the generator advance signal, connect it to close the generator,
-        # and set single_shot_ so the next timeout is the last.
-        self._timer.timeout.connect(self._generator.close)
-        self._timer.disconnect(self._advance_connection)
-        self._timer.single_shot_ = True
+        self._timer.stop()
+        self._generator.close()
         self._stopped = True
 
 
@@ -66,19 +62,26 @@ class GameWorker(_WorkerBase):
     new_system_index_sig = QtCore.Signal(int)
     route_end_sig = QtCore.Signal(int)
 
-    def __init__(self, parent: QtCore.QObject, route: RouteList, journal: Journal):
+    def __init__(self, parent: QtCore.QObject, route: Route | None, journal: Journal):
         super().__init__(parent, journal.tail(), 500)
         self.route = route
         self._journal_connection = journal.system_sig.connect(self.emit_next_system)
 
+    @QtCore.Slot(object)
     def emit_next_system(self, location: Location) -> None:
         """Emit the next system in the route and its index if location is in the route, or the end of route signal."""
+        if self.route is None:
+            return
+
         with contextlib.suppress(ValueError):
-            new_index = self.route.index(location.name) + 1
-            if new_index < len(self.route):
+            new_index = self.route.system_index(location.name) + 1
+            if new_index < len(self.route.entries):
                 self.new_system_index_sig.emit(new_index)
             else:
-                self.route_end_sig.emit(new_index)
+                if settings.General.loop_routes:
+                    self.new_system_index_sig.emit(0)
+                else:
+                    self.route_end_sig.emit(new_index)
 
     def stop(self) -> None:
         """Disconnect the journal system signal."""

@@ -6,6 +6,7 @@ from pathlib import Path
 
 DATAS = [
     ("../resources/*", "./resources"),
+    ("../third_party_licenses/*", "./third_party_licenses"),
     ("../locale", "./locale"),
     ("../LICENSE.md", "."),
 ]
@@ -28,7 +29,7 @@ DLL_EXCLUDE = {
     "qt6qml.dll",
     "qt6qmlmodels.dll",
     "qt6virtualkeyboard.dll",
-    "svgicon.dll",
+    "qsvgicon.dll",
     "qgif.dll",
     "qicns.dll",
     "qjpeg.dll",

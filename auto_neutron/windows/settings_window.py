@@ -1,4 +1,4 @@
-# This file is part of Auto_Neutron.
+# This file is part of Auto_Neutron. See the main.py file for more details.
 # Copyright (C) 2019  Numerlor
 
 from __future__ import annotations
@@ -11,7 +11,6 @@ from PySide6 import QtCore, QtWidgets
 from __feature__ import snake_case, true_property  # noqa: F401
 
 from auto_neutron import settings
-from auto_neutron.constants import AHK_PATH
 from auto_neutron.locale import code_from_locale, get_available_locales
 from auto_neutron.settings import delay_sync
 
@@ -60,6 +59,7 @@ class SettingsWindow(SettingsWindowGUI):
             ),
             (self.behaviour_widget.save_on_quit_checkbox, ("General", "save_on_quit")),
             (self.behaviour_widget.copy_mode_checkbox, ("General", "copy_mode")),
+            (self.behaviour_widget.loop_routes_checkbox, ("General", "loop_routes")),
         )
         self.refresh_widgets()
 
@@ -86,12 +86,12 @@ class SettingsWindow(SettingsWindowGUI):
         )
         self.appearance_widget.language_combo.current_index = active_locale_index
 
+    @QtCore.Slot()
     def get_ahk_path(self) -> None:
         """Ask the user for the AHK executable file path and save it to the setting."""
         path, __ = QtWidgets.QFileDialog.get_open_file_name(
             self,
             _("Select AHK executable"),
-            str(AHK_PATH),
             filter=_("Executable files (*.exe)"),
         )
         if path:
@@ -99,6 +99,7 @@ class SettingsWindow(SettingsWindowGUI):
             log.info(f"Setting ahk path to {path}")
             self.behaviour_widget.copy_mode_checkbox.enabled = True
 
+    @QtCore.Slot()
     def get_sound_path(self) -> None:
         """Ask the user for the alert file path and save it to the line edit."""
         path, __ = QtWidgets.QFileDialog.get_open_file_name(
@@ -134,6 +135,7 @@ class SettingsWindow(SettingsWindowGUI):
         self.appearance_widget.font_size_chooser.value = font.point_size()
         self.appearance_widget.font_chooser.current_font = font
 
+    @QtCore.Slot()
     def save_settings(self) -> None:
         """Save the settings from the widgets."""
         with delay_sync():

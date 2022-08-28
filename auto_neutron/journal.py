@@ -1,4 +1,4 @@
-# This file is part of Auto_Neutron.
+# This file is part of Auto_Neutron. See the main.py file for more details.
 # Copyright (C) 2019  Numerlor
 
 from __future__ import annotations
@@ -31,7 +31,7 @@ class Journal(QtCore.QObject):
     system_sig = QtCore.Signal(Location)
     target_signal = QtCore.Signal(Location)
     cargo_signal = QtCore.Signal(int)
-    loadout_sig = QtCore.Signal(dict)
+    loadout_sig = QtCore.Signal(Ship)
     shut_down_sig = QtCore.Signal()
 
     def __init__(self, journal_path: Path):
@@ -49,15 +49,18 @@ class Journal(QtCore.QObject):
 
     def tail(self) -> collections.abc.Generator[None, None, None]:
         """Follow a log file, and emit signals for new systems, loadout changes and game shut down."""
-        log.info(f"Starting tailer of journal file {self.path.name}.")
-        with self.path.open(encoding="utf8") as journal_file:
-            journal_file.seek(0, 2)
-            while True:
-                if line := journal_file.readline():
-                    self._last_file_pos = journal_file.tell()
-                    self._parse_journal_line(line)
-                else:
-                    yield
+        log.info(f"Starting tailer of journal file {self.path.name} {id(self)=:x}.")
+        try:
+            with self.path.open(encoding="utf8") as journal_file:
+                journal_file.seek(0, 2)
+                while True:
+                    if line := journal_file.readline():
+                        self._last_file_pos = journal_file.tell()
+                        self._parse_journal_line(line)
+                    else:
+                        yield
+        finally:
+            log.info(f"Stopping tailer of journal file {self.path.name} {id(self)=:x}.")
 
     def parse(self) -> None:
         """Parse the whole journal file and update the fields that were set."""
@@ -77,7 +80,7 @@ class Journal(QtCore.QObject):
             if self.ship is None:
                 self.ship = Ship()
             self.ship.update_from_loadout(entry)
-            self.loadout_sig.emit(entry)
+            self.loadout_sig.emit(self.ship)
 
         elif entry["event"] == "Location" or entry["event"] == "FSDJump":
             self.location = Location(entry["StarSystem"], *entry["StarPos"])
@@ -130,7 +133,12 @@ def get_unique_cmdr_journals() -> list[Journal]:
 
     Only the first 15 journals newer than a week are looked at.
     """
-    week_before = (datetime.datetime.now() - datetime.timedelta(weeks=1)).timestamp()
+    if __debug__:
+        week_before = float("-inf")
+    else:
+        week_before = (
+            datetime.datetime.now() - datetime.timedelta(weeks=1)
+        ).timestamp()
 
     journal_paths = [
         path

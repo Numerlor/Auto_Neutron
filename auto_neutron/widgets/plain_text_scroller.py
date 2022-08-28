@@ -1,4 +1,4 @@
-# This file is part of Auto_Neutron.
+# This file is part of Auto_Neutron. See the main.py file for more details.
 # Copyright (C) 2019  Numerlor
 
 from __future__ import annotations
@@ -133,6 +133,7 @@ class PlainTextScroller(QtWidgets.QWidget):
         self._delay_scroll_start_timer.stop()
         self.update()
 
+    @QtCore.Slot()
     def _reposition(self) -> None:
         """
         Move the text and redraw.
@@ -147,6 +148,7 @@ class PlainTextScroller(QtWidgets.QWidget):
             self._scroll_pos += self.scroll_step
         self.update()
 
+    @QtCore.Slot()
     def _reset_pos(self) -> None:
         """Reset the text to its initial position, and start the scroll timer which will start scrolling in 750ms."""
         self._scroll_pos = 0

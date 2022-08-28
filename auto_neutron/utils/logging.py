@@ -1,4 +1,4 @@
-# This file is part of Auto_Neutron.
+# This file is part of Auto_Neutron. See the main.py file for more details.
 # Copyright (C) 2019  Numerlor
 
 from __future__ import annotations
@@ -6,19 +6,15 @@ from __future__ import annotations
 import logging
 import os
 import typing as t
-from contextlib import contextmanager
 from pathlib import Path
-from types import MethodType
 
 from PySide6 import QtCore
 from __feature__ import snake_case, true_property  # noqa: F401
 
 from auto_neutron.utils.file import create_delete_share_file
 
-if t.TYPE_CHECKING:
-    import collections.abc
-
 log = logging.getLogger(__name__)
+qt_log = logging.getLogger("<Qt>")
 
 QT_LOG_LEVELS = {
     0: logging.DEBUG,
@@ -74,32 +70,10 @@ class SessionBackupHandler(logging.FileHandler):
         )
 
 
-@contextmanager
-def patch_log_module(
-    logger: logging.Logger, module_name: str
-) -> collections.abc.Iterator[None]:
-    """Patch logs using `logger` within this context manager to use `module_name` as the module name."""
-    original_find_caller = logger.findCaller
-
-    def patched_caller(
-        self: logging.Logger, stack_info: bool, stack_level: int
-    ) -> tuple[str, int, str, str] | None:
-        """Patch filename on logs after this was applied to be `module_name`."""
-        _, lno, func, sinfo = original_find_caller(stack_info, stack_level)
-        return module_name, lno, func, sinfo
-
-    logger.findCaller = MethodType(patched_caller, logger)
-    try:
-        yield
-    finally:
-        logger.findCaller = original_find_caller
-
-
 def init_qt_logging() -> None:
-    """Redirect QDebug calls to `logger`."""
+    """Redirect QDebug logs to a Qt specific logging logger."""
 
     def handler(level: int, _context: QtCore.QMessageLogContext, message: str) -> None:
-        with patch_log_module(log, "<Qt>"):
-            log.log(QT_LOG_LEVELS[level], message)
+        qt_log.log(QT_LOG_LEVELS[level], message)
 
     QtCore.qInstallMessageHandler(handler)

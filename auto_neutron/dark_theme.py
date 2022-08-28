@@ -1,4 +1,4 @@
-# This file is part of Auto_Neutron.
+# This file is part of Auto_Neutron. See the main.py file for more details.
 # Copyright (C) 2019  Numerlor
 
 import functools
@@ -46,6 +46,11 @@ class _ThemeSelector:
         p.set_color(
             QtGui.QPalette.Disabled,
             QtGui.QPalette.Text,
+            QtGui.QColor(110, 110, 100),
+        )
+        p.set_color(
+            QtGui.QPalette.Disabled,
+            QtGui.QPalette.WindowText,
             QtGui.QColor(110, 110, 100),
         )
         p.set_color(

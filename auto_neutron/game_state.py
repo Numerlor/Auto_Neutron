@@ -1,4 +1,4 @@
-# This file is part of Auto_Neutron.
+# This file is part of Auto_Neutron. See the main.py file for more details.
 # Copyright (C) 2019  Numerlor
 
 from __future__ import annotations
@@ -10,11 +10,12 @@ from functools import partial
 from PySide6 import QtCore
 from __feature__ import snake_case, true_property  # noqa: F401
 
+from auto_neutron.plotters import Plotter
+from auto_neutron.route import Route
 from auto_neutron.workers import GameWorker
 
 if t.TYPE_CHECKING:
     from auto_neutron.journal import Journal
-    from auto_neutron.route_plots import Plotter, RouteList
 
 log = logging.getLogger(__name__)
 
@@ -38,14 +39,13 @@ class PlotterState(QtCore.QObject):
 
     def __init__(self, parent: QtCore.QObject):
         super().__init__(parent)
-        self._route_index = 0
         self.tail_worker: GameWorker | None = None
         self._active_journal: Journal | None = None
-        self._active_route: list | None = None
+        self._active_route: Route | None = None
         self._plotter: Plotter | None = None
         self._shut_down_connection = None
 
-    def create_worker_with_route(self, route: RouteList) -> None:
+    def create_worker_with_route(self, route: Route) -> None:
         """
         Set the `tail_worker`'s route to `route`.
 
@@ -66,22 +66,22 @@ class PlotterState(QtCore.QObject):
     @property
     def route_index(self) -> int:
         """Return the current route index."""
-        return self._route_index
+        return self._active_route.index
 
     @route_index.setter
     def route_index(self, index: int) -> None:
         """Set the current route index and emit `self.new_system_signal` with the system at it, and the index itself."""
         log.info(f"Setting route_{index=}.")
-        self._route_index = index
-        self.new_system_signal.emit(self._active_route[index].system, index)
+        self._active_route.index = index
+        self.new_system_signal.emit(self._active_route.current_system, index)
 
     @property
-    def route(self) -> RouteList | None:
+    def route(self) -> Route | None:
         """Return the active route."""
         return self._active_route
 
     @route.setter
-    def route(self, route: RouteList) -> None:
+    def route(self, route: Route) -> None:
         """Set the active route and update the worker."""
         log.info("Setting new route.")
         self._active_route = route

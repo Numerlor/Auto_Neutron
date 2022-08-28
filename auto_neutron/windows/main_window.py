@@ -1,24 +1,25 @@
-# This file is part of Auto_Neutron.
+# This file is part of Auto_Neutron. See the main.py file for more details.
 # Copyright (C) 2019  Numerlor
 
 from __future__ import annotations
 
 import dataclasses
+import time
 import typing as t
 
-from PySide6 import QtCore, QtWidgets
+from PySide6 import QtCore, QtGui, QtWidgets
 from __feature__ import snake_case, true_property  # noqa: F401
 
 from auto_neutron import settings
-from auto_neutron.route_plots import ExactPlotRow, NeutronPlotRow
 from auto_neutron.utils.signal import ReconnectingSignal
 
 from .gui.main_window import MainWindowGUI
+from .route_table_header import RouteTableHeader, header_from_row_type
 
 if t.TYPE_CHECKING:
     import collections.abc
 
-    from auto_neutron.route_plots import RouteList
+    from auto_neutron.route import Route
 
 
 class MainWindow(MainWindowGUI):
@@ -36,16 +37,18 @@ class MainWindow(MainWindowGUI):
         )
         self.resize_connection.connect()
 
-        self._current_route_type: t.Optional[
-            type[ExactPlotRow] | type[NeutronPlotRow]
-        ] = None
-        self._last_index = None
+        self.table.vertical_scroll_bar().install_event_filter(self)
+        self._last_scroll_time = float("-inf")
+
+        self._route: Route | None = None
+        self._header_type: RouteTableHeader | None = None
 
         self.restore_window()
         self.retranslate()
 
         self._current_row_index = 0
 
+    @QtCore.Slot()
     def copy_table_item_text(self) -> None:
         """Copy the text of the selected table item into the clipboard."""
         if (item := self.table.current_item()) is not None:
@@ -54,49 +57,39 @@ class MainWindow(MainWindowGUI):
     def mass_insert(
         self, data: collections.abc.Iterable[collections.abc.Iterable[t.Any]]
     ) -> None:
-        """
-        Insert a large amount of rows.
-
-        The `self.conn` itemChanged signal is temporarily disconnected to accommodate this.
-        """
+        """Insert a rows from `data`, then resize columns and rows to contents."""
         with self.resize_connection.temporarily_disconnect():
             for row in data:
                 self.insert_row(row)
-            self.table.resize_column_to_contents(0)
-            self.table.resize_rows_to_contents()
+        self.table.resize_columns_to_contents()
+        self.table.resize_rows_to_contents()
 
-    def initialize_table(self, route: RouteList) -> None:
-        """Clear the table and insert plot rows from `RouteList` into it with appropriate columns."""
+    def initialize_table(self, route: Route) -> None:
+        """Clear the table and insert plot rows from `Route` into it with appropriate columns."""
+        self._route = route
+
         self.table.clear()
         self.table.row_count = 0
-        self._current_route_type = type(route[0])
 
-        self._create_base_headers()
-        self._set_header_text()
-        self.mass_insert(dataclasses.astuple(row) for row in route)
+        self._header_type = header = header_from_row_type(route.row_type)(self.table)
+        header.initialize_headers()
+        header.retranslate_headers()
 
-        if self._current_route_type is ExactPlotRow:
-            self.table.set_item_delegate_for_column(3, self._checkbox_delegate)
-            self.table.resize_column_to_contents(3)
-            self.table.resize_column_to_contents(4)
-
-        elif self._current_route_type is NeutronPlotRow:
-            self.table.column_count = 4  # reset column count to 4 to hide last col
-            self.table.set_item_delegate_for_column(3, self._spinbox_delegate)
-            self.table.resize_column_to_contents(3)
+        self.mass_insert(dataclasses.astuple(row) for row in route.entries)
+        self.update_remaining_count()
 
     def set_current_row(self, index: int) -> None:
         """Change the item colours before `index` to appear inactive and update the remaining systems/jump."""
         with self.resize_connection.temporarily_disconnect():
             super().inactivate_before_index(index)
-            self.update_remaining_count(index)
-        top_item = self.table.item_at(QtCore.QPoint(1, 1))
-        if settings.Window.autoscroll and top_item.row() == self._current_row_index:
+            self.update_remaining_count()
+
+        if settings.Window.autoscroll and time.monotonic() - self._last_scroll_time > 1:
             self.scroll_to_index(index)
 
         self._current_row_index = index
 
-    def update_remaining_count(self, index: int) -> None:
+    def update_remaining_count(self) -> None:
         """
         Update the count of remaining jumps in the header.
 
@@ -104,34 +97,15 @@ class MainWindow(MainWindowGUI):
         for neutron plot routes it's in the jump header.
         """
         with self.resize_connection.temporarily_disconnect():
-            if self._current_route_type is ExactPlotRow:
-                self.table.horizontal_header_item(0).set_text(
-                    # NOTE: made jumps/ total
-                    _("System name ({}/{})").format(index, self.table.row_count)
-                )
-            else:
-                total_jumps = sum(
-                    self.table.item(row, 3).data(QtCore.Qt.ItemDataRole.DisplayRole)
-                    for row in range(self.table.row_count)
-                )
-                remaining_jumps = sum(
-                    self.table.item(row, 3).data(QtCore.Qt.ItemDataRole.DisplayRole)
-                    for row in range(index, self.table.row_count)
-                )
-                self.table.horizontal_header_item(3).set_text(
-                    # NOTE: made jumps/ total
-                    _("Jumps {}/{}").format(remaining_jumps, total_jumps)
-                )
-        self.table.resize_column_to_contents(0)
-        self.table.resize_column_to_contents(3)
-        self._last_index = index
+            self._header_type.set_jumps(
+                remaining=self._route.remaining_jumps, total=self._route.total_jumps
+            )
+            self._header_type.format_jump_header()
 
+    @QtCore.Slot(QtWidgets.QTableWidgetItem)
     def manage_item_changed(self, table_item: QtWidgets.QTableWidgetItem) -> None:
         """Update the column sizes and information when an item is changed."""
-        if table_item.column() == 0:
-            self.table.resize_column_to_contents(0)
-        elif self._current_route_type is NeutronPlotRow and table_item.column() == 3:
-            self.update_remaining_count(table_item.row())
+        self._header_type.item_changed(table_item)
 
     def restore_window(self) -> None:
         """Restore the size and position from the settings."""
@@ -142,22 +116,17 @@ class MainWindow(MainWindowGUI):
         if event.type() == QtCore.QEvent.LanguageChange:
             self.retranslate()
 
+    def event_filter(self, watched: QtCore.QObject, event: QtCore.QEvent) -> bool:
+        """Set the last scrolled time on table scroll events."""
+        if (
+            watched is self.table.vertical_scroll_bar()
+            and event.__class__ is QtGui.QWheelEvent
+        ):
+            self._last_scroll_time = time.monotonic()
+        return False
+
     def retranslate(self) -> None:
         """Retranslate text that is always on display."""
         super().retranslate()
-        self._set_header_text()
-
-        if self._last_index is not None:
-            self.update_remaining_count(self._last_index)
-
-    def _set_header_text(self) -> None:
-        """Set the text for the headers."""
-        super()._set_header_text()
-        if self._current_route_type is ExactPlotRow:
-            if (header := self.table.horizontal_header_item(3)) is not None:
-                header.set_text(_("Scoopable"))
-            if (header := self.table.horizontal_header_item(4)) is not None:
-                header.set_text(_("Neutron"))
-        else:
-            if (header := self.table.horizontal_header_item(3)) is not None:
-                header.set_text(_("Jumps"))
+        if self._header_type is not None:
+            self._header_type.retranslate_headers()
