@@ -26,7 +26,7 @@ Example of AHK script in action, with no user keyboard input apart from the hotk
 To install, download either of the [latest](https://github.com/Numerlor/Auto_Neutron/releases/latest) releases of Auto_Neutron, or [run it directly with python](#running-directly).
 You can choose either the self-contained executable file, or the zip archive which contains the application in a directory which is a bit faster to launch.
 
-On the initial launch, Windows will warn you about this being an untrusted application because it doesn't contain a known signed certificate, to ignore this warning, press on `More info` and then click `Run anyway`.
+On the initial launch, Windows may warn you about this being an untrusted application because the executable is not signed, to ignore this warning, press on `More info` and then click `Run anyway`.
 
 ## Usage
 
@@ -43,7 +43,11 @@ Further interactions like editing the system entries, starting a new route, chan
 
 In case you want to plot with Spansh, but the source or target systems are not found, you can use the [nearest window](#nearest-window) to find the nearest known system around given coordinates.
 
-To use the AHK feature, you will first need to configure the AHK executable path in the settings and disable the copy mode in the Behaviour settings
+To use the AHK feature, the copy mode has to be disabled in the settings. The AHK path may need to be configured before this is possible.
+
+### Plotting from CSV files
+
+Auto_Neutron will try to match the CSV file's format to one of the supported formats from Spansh, if no format is matched the file will be parsed as a csv file with one column, with an optional "System Name" header.
 
 ## Settings
 ### Appearance
@@ -54,7 +58,7 @@ To use the AHK feature, you will first need to configure the AHK executable path
 ### Behaviour
 * The "Save route on window close" checkmark changes where the current route and its position are saved to be reused later when the window is closed
 * The copy mode checkmark changes the mode the application runs in - copying to clipboard, or running an AHK script. Before it can be unchecked to use AHK, the path to AHK has to be configured through the AHK Path button to the right
-* When the auto scroll checkmark is checked, the app will automatically auto scroll the main window down to the next system if the system that was jumped to is at the top, or the route just started.
+* When the auto scroll checkmark is checked, the app will automatically auto scroll the main window to the next system on route when the current system is reached.
 
 ### Alerts
 * If the taskbar fuel alert checkbox is checked, the app will flash on the taskbar for 5 seconds when low fuel is reached.
