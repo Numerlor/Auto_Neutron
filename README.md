@@ -59,6 +59,7 @@ Auto_Neutron will try to match the CSV file's format to one of the supported for
 * The "Save route on window close" checkmark changes where the current route and its position are saved to be reused later when the window is closed
 * The copy mode checkmark changes the mode the application runs in - copying to clipboard, or running an AHK script. Before it can be unchecked to use AHK, the path to AHK has to be configured through the AHK Path button to the right
 * When the auto scroll checkmark is checked, the app will automatically auto scroll the main window to the next system on route when the current system is reached.
+* When the loop routes checkbox is checked, routes that reach their end will loop back to the start.
 
 ### Alerts
 * If the taskbar fuel alert checkbox is checked, the app will flash on the taskbar for 5 seconds when low fuel is reached.
