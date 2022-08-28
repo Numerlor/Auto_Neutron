@@ -17,6 +17,7 @@ Example of AHK script in action, with no user keyboard input apart from the hotk
 ## Features
 
 * Built in plotters using Spansh's api
+* Plotting from CSV files
 * Saving of routes
 * Low fuel alert when customisable threshold is reached
 
@@ -84,10 +85,15 @@ The `from target` button will copy your current target's coordinates into the in
 After searching for a system you can copy the result system's name into the source or destination text inputs with their respective buttons.
 
 ## Running directly
-To run the application directly with python, clone the repository, and then install the project's dependencies and run through poetry.
+To run the application directly with Python, clone the repository and install from requirements.txt.
 ```shell
 $ git clone git@github.com:Numerlor/Auto_Neutron.git  # Clone the project
 $ cd Auto_Neutron  # Switch to the cloned folder
-$ poetry install --no-dev  # Install the project's dependencies
-$ poetry run start  # Start the application
+$ pip install -r requirements.txt
+$ python main.py
+```
+Or install and run through poetry.
+```shell
+$ poetry install --no-dev
+$ poetry run start
 ```
