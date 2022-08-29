@@ -276,6 +276,7 @@ class SpanshTabBase(TabBase, SpanshTabGUIBase):
         self._completer_cache = self._completer_caches.setdefault(
             self.parent(), DictWeakref()
         )
+        self.destroyed.connect(self._close_cleanup)
 
     def set_journal(self, journal: Journal | None) -> None:
         """
@@ -475,11 +476,12 @@ class SpanshTabBase(TabBase, SpanshTabGUIBase):
             QtWidgets.QCompleter.CompletionMode.UnfilteredPopupCompletion
         )
 
-    def close_event(self, event: QtGui.QCloseEvent) -> None:
-        """Abort any requests on close."""
-        super().close_event(event)
+    def _close_cleanup(self) -> None:
+        """Abort any requests on close and disconnect signals."""
         if self._completer_request is not None:
             self._completer_request.abort()
+        for connection in self._connections:
+            self._journal.disconnect(connection)
 
 
 class NeutronTab(SpanshTabBase, NeutronTabGUI):  # noqa: D101
