@@ -6,9 +6,9 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Auto Neutron 2.1.1\n"
+"Project-Id-Version: Auto Neutron 2.2.1\n"
 "Report-Msgid-Bugs-To: https://github.com/Numerlor/Auto_Neutron/issues\n"
-"POT-Creation-Date: 2022-08-28 17:24+0200\n"
+"POT-Creation-Date: 2022-08-29 19:11+0200\n"
 "PO-Revision-Date: 2022-01-02 23:58+0100\n"
 "Last-Translator: Numerlor <Numerlor@gmail.com>\n"
 "Language: en\n"
@@ -76,6 +76,24 @@ msgstr "Failed to upload session log."
 #: auto_neutron/windows/error_window.py:126
 msgid "Multiple unexpected errors have occurred (x{})"
 msgstr "Multiple unexpected errors have occurred (x{})"
+
+#: auto_neutron/windows/error_window.py:131
+msgid ""
+"        Please make sure to report the bug by submitting the session log,"
+" or at [Github]({issues_url}),\n"
+"        and include the {{file_name}} file from [the log "
+"directory]({{log_path}}).\\\n"
+"        You may close this window, but the program may not be fully "
+"functional, or it may produce erroneous behaviour.\n"
+"        "
+msgstr ""
+"        Please make sure to report the bug by submitting the session log,"
+" or at [Github]({issues_url}),\n"
+"        and include the {{file_name}} file from [the log "
+"directory]({{log_path}}).\\\n"
+"        You may close this window, but the program may not be fully "
+"functional, or it may produce erroneous behaviour.\n"
+"        "
 
 #: auto_neutron/windows/license_window.py:75
 msgid ""

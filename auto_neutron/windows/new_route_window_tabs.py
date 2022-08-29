@@ -266,34 +266,17 @@ class SpanshTabBase(TabBase, SpanshTabGUIBase):
 
         self._source_completer_model = QtCore.QStringListModel(self)
         self.source_completer = QtWidgets.QCompleter(self._source_completer_model, self)
-        self.source_completer.set_widget(self.source_edit)
-        self.source_completer.case_sensitivity = (
-            QtCore.Qt.CaseSensitivity.CaseInsensitive
-        )
-        self.source_edit.textEdited.connect(
-            partial(
-                self._make_completer_request,
-                completer=self.source_completer,
-            )
-        )
+        self._setup_completer(self.source_completer, line_edit=self.source_edit)
 
         self._target_completer_model = QtCore.QStringListModel(self)
         self.target_completer = QtWidgets.QCompleter(self._target_completer_model, self)
-        self.target_completer.set_widget(self.target_edit)
-        self.target_completer.case_sensitivity = (
-            QtCore.Qt.CaseSensitivity.CaseInsensitive
-        )
-        self.target_edit.textEdited.connect(
-            partial(
-                self._make_completer_request,
-                completer=self.target_completer,
-            )
-        )
+        self._setup_completer(self.target_completer, line_edit=self.target_edit)
 
         self._completer_request: QtNetwork.QNetworkReply | None = None
         self._completer_cache = self._completer_caches.setdefault(
             self.parent(), DictWeakref()
         )
+        self.destroyed.connect(self._close_cleanup)
 
     def set_journal(self, journal: Journal | None) -> None:
         """
@@ -477,11 +460,28 @@ class SpanshTabBase(TabBase, SpanshTabGUIBase):
 
         self._completer_request = None
 
-    def close_event(self, event: QtGui.QCloseEvent) -> None:
-        """Abort any requests on close."""
-        super().close_event(event)
+    def _setup_completer(
+        self,
+        completer: QtWidgets.QCompleter,
+        *,
+        line_edit: QtWidgets.QLineEdit,
+    ) -> None:
+        completer.set_widget(line_edit)
+        completer.case_sensitivity = QtCore.Qt.CaseSensitivity.CaseInsensitive
+        line_edit.textEdited.connect(
+            partial(self._make_completer_request, completer=completer)
+        )
+        completer.highlighted.connect(partial(setattr, line_edit, "text"))
+        completer.completion_mode = (
+            QtWidgets.QCompleter.CompletionMode.UnfilteredPopupCompletion
+        )
+
+    def _close_cleanup(self) -> None:
+        """Abort any requests on close and disconnect signals."""
         if self._completer_request is not None:
             self._completer_request.abort()
+        for connection in self._connections:
+            self._journal.disconnect(connection)
 
 
 class NeutronTab(SpanshTabBase, NeutronTabGUI):  # noqa: D101

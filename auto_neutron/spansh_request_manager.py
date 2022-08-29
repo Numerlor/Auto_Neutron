@@ -108,8 +108,8 @@ class SpanshRequestManager:
 
     def abort(self) -> None:
         """Abort the current request."""
-        log.debug("Aborting route plot request.")
         if self._current_reply is not None:
+            log.debug("Aborting route plot request.")
             self._current_reply.abort()
         self._delay_timer.stop()
 

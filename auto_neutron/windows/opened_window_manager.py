@@ -3,8 +3,9 @@
 
 import collections.abc
 import typing as t
+from functools import partial
 
-from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6 import QtCore, QtWidgets
 
 _WindowT = t.TypeVar("_WindowT", bound=QtWidgets.QWidget)
 
@@ -14,9 +15,6 @@ class _OpenedWindowManager(QtCore.QObject):
         super().__init__()
         self._window_cache = dict[
             tuple[type[QtWidgets.QWidget], collections.abc.Hashable], QtWidgets.QWidget
-        ]()
-        self._window_to_cache_entry = dict[
-            QtWidgets.QWidget, tuple[type[QtWidgets.QWidget], collections.abc.Hashable]
         ]()
 
     def create_or_activate_window(
@@ -35,21 +33,13 @@ class _OpenedWindowManager(QtCore.QObject):
             existing_window = self._window_cache[(window_type, namespace)]
         except KeyError:
             new_window = window_type(*args, **kwargs)
-            new_window.install_event_filter(self)
-            self._window_cache[(window_type, namespace)] = new_window
-            self._window_to_cache_entry[new_window] = (window_type, namespace)
+            window_key = (window_type, namespace)
+            self._window_cache[window_key] = new_window
+            new_window.destroyed.connect(partial(self._window_cache.pop, window_key))
             return new_window
         else:
             existing_window.activate_window()
             existing_window.raise_()
-
-    def event_filter(self, watched: QtCore.QObject, event: QtCore.QEvent) -> bool:
-        """Delete windows from caches if they're closed."""
-        if event.__class__ is QtGui.QCloseEvent:
-            watched = t.cast(QtWidgets.QWidget, watched)
-            del self._window_cache[self._window_to_cache_entry[watched]]
-            del self._window_to_cache_entry[watched]
-        return False
 
 
 _opened_window_manager = _OpenedWindowManager()
