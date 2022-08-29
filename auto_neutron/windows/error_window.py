@@ -129,7 +129,7 @@ class ErrorWindow(ErrorWindowGUI):
 
         self.error_template = textwrap.dedent(
             """\
-        Please make sure to report the bug at [Github]({issues_url}),
+        Please make sure to report the bug by submitting the session log, or at [Github]({issues_url}),
         and include the {{file_name}} file from [the log directory]({{log_path}}).\\
         You may close this window, but the program may not be fully functional, or it may produce erroneous behaviour.
         """
