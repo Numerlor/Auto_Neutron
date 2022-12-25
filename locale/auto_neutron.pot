@@ -5,16 +5,16 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Auto Neutron 2.2.1\n"
-"Report-Msgid-Bugs-To: Numerlor@gmail.com\n"
-"POT-Creation-Date: 2022-08-29 19:11+0200\n"
+"Project-Id-Version: Auto Neutron 2.2.2\n"
+"Report-Msgid-Bugs-To: numerlor@numerlor.me\n"
+"POT-Creation-Date: 2022-12-25 19:06+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.10.3\n"
+"Generated-By: Babel 2.11.0\n"
 
 #: auto_neutron/self_updater.py:110
 msgid "Downloading new release"
@@ -85,7 +85,7 @@ msgid ""
 "        "
 msgstr ""
 
-#: auto_neutron/windows/license_window.py:75
+#: auto_neutron/windows/license_window.py:72
 msgid ""
 "        Auto_Neutron Copyright (C) 2019 Numerlor\\\n"
 "        This program comes with ABSOLUTELY NO WARRANTY.\\\n"
@@ -99,7 +99,6 @@ msgid ""
 "{pyside_hyperlink}, see {pyside_licenses_hyperlink} and "
 "{qt_licenses_hyperlink} for more details.\n"
 "        - Qt6, click the \"About Qt\" button for more details.\n"
-"        - tomli licensed under the {tomli_hyperlink}\n"
 "        - tomli-w licensed under the {tomli_w_hyperlink}\n"
 "        - more-itertools licensed under the {more_itertools_hyperlink}\n"
 "        - babel licensed under the {babel_hyperlink}\n"
@@ -115,42 +114,41 @@ msgid ""
 "        "
 msgstr ""
 
-#: auto_neutron/windows/license_window.py:100
-#: auto_neutron/windows/license_window.py:106
+#: auto_neutron/windows/license_window.py:96
+#: auto_neutron/windows/license_window.py:102
 msgid "GPLv3 license"
 msgstr ""
 
-#: auto_neutron/windows/license_window.py:103
+#: auto_neutron/windows/license_window.py:99
 msgid "gnu.org/licenses"
 msgstr ""
 
-#: auto_neutron/windows/license_window.py:109
+#: auto_neutron/windows/license_window.py:105
 msgid "doc.qt.io/qtforpython/licenses.html"
 msgstr ""
 
-#: auto_neutron/windows/license_window.py:112
+#: auto_neutron/windows/license_window.py:108
 msgid "qt.io/licensing/"
 msgstr ""
 
+#: auto_neutron/windows/license_window.py:111
 #: auto_neutron/windows/license_window.py:114
-#: auto_neutron/windows/license_window.py:116
-#: auto_neutron/windows/license_window.py:119
 msgid "MIT license"
 msgstr ""
 
-#: auto_neutron/windows/license_window.py:122
+#: auto_neutron/windows/license_window.py:117
 msgid "3-Clause BSD license"
 msgstr ""
 
-#: auto_neutron/windows/license_window.py:125
+#: auto_neutron/windows/license_window.py:120
 msgid "PSF License Agreement"
 msgstr ""
 
-#: auto_neutron/windows/license_window.py:128
+#: auto_neutron/windows/license_window.py:123
 msgid "docs.python.org/license.html"
 msgstr ""
 
-#: auto_neutron/windows/license_window.py:131
+#: auto_neutron/windows/license_window.py:126
 msgid "LGPLv3 license"
 msgstr ""
 
@@ -186,57 +184,57 @@ msgstr ""
 msgid "Selected journal got shut down, available journals refreshed."
 msgstr ""
 
-#: auto_neutron/windows/new_route_window_tabs.py:144
+#: auto_neutron/windows/new_route_window_tabs.py:150
 msgid "CSV file doesn't exist."
 msgstr ""
 
-#: auto_neutron/windows/new_route_window_tabs.py:146
+#: auto_neutron/windows/new_route_window_tabs.py:152
 msgid "Invalid CSV file: "
 msgstr ""
 
-#: auto_neutron/windows/new_route_window_tabs.py:148
+#: auto_neutron/windows/new_route_window_tabs.py:154
 msgid "Truncated data in CSV file."
 msgstr ""
 
-#: auto_neutron/windows/new_route_window_tabs.py:150
+#: auto_neutron/windows/new_route_window_tabs.py:156
 msgid "Invalid data in CSV file."
 msgstr ""
 
-#: auto_neutron/windows/new_route_window_tabs.py:152
+#: auto_neutron/windows/new_route_window_tabs.py:158
 msgid "Invalid path."
 msgstr ""
 
-#: auto_neutron/windows/new_route_window_tabs.py:154
+#: auto_neutron/windows/new_route_window_tabs.py:160
 msgid "Invalid CSV file."
 msgstr ""
 
-#: auto_neutron/windows/new_route_window_tabs.py:164
+#: auto_neutron/windows/new_route_window_tabs.py:170
 msgid "Select CSV file"
 msgstr ""
 
-#: auto_neutron/windows/new_route_window_tabs.py:164
+#: auto_neutron/windows/new_route_window_tabs.py:170
 msgid "CSV (*.csv);;All types (*.*)"
 msgstr ""
 
 #. NOTE: Source system
-#: auto_neutron/windows/new_route_window_tabs.py:199
+#: auto_neutron/windows/new_route_window_tabs.py:205
 msgid "Source: {}"
 msgstr ""
 
-#: auto_neutron/windows/new_route_window_tabs.py:202
+#: auto_neutron/windows/new_route_window_tabs.py:208
 msgid "Saved location: {}"
 msgstr ""
 
 #. NOTE: destination system
-#: auto_neutron/windows/new_route_window_tabs.py:206
+#: auto_neutron/windows/new_route_window_tabs.py:212
 msgid "Destination: {}"
 msgstr ""
 
-#: auto_neutron/windows/new_route_window_tabs.py:218
+#: auto_neutron/windows/new_route_window_tabs.py:224
 msgid "No saved route found."
 msgstr ""
 
-#: auto_neutron/windows/new_route_window_tabs.py:536
+#: auto_neutron/windows/new_route_window_tabs.py:542
 msgid "Invalid ship data in clipboard."
 msgstr ""
 
