@@ -528,13 +528,14 @@ class ExactTab(SpanshTabBase, ExactTabGUI):  # noqa: D101
 
     def _request_params(self) -> dict[str, t.Any] | None:
         if self.use_clipboard_checkbox.checked:
+            clipboard = QtWidgets.QApplication.instance().clipboard().text()
             try:
-                ship = Ship.from_coriolis(
-                    json.loads(QtWidgets.QApplication.instance().clipboard().text())
-                )
-            except (json.JSONDecodeError, KeyError) as e:
+                ship = Ship.from_coriolis(json.loads(clipboard))
+            except Exception as e:
                 self._status_callback(_("Invalid ship data in clipboard."), 5_000)
-                log.warning("Failed to parse ship JSON", exc_info=e)
+                log.warning(
+                    f"Failed to parse ship JSON clipboard: {clipboard!r}", exc_info=e
+                )
                 return
         else:
             ship = self._journal.ship
