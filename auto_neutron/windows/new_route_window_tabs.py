@@ -532,8 +532,9 @@ class ExactTab(SpanshTabBase, ExactTabGUI):  # noqa: D101
                 ship = Ship.from_coriolis(
                     json.loads(QtWidgets.QApplication.instance().clipboard().text())
                 )
-            except (json.JSONDecodeError, KeyError):
+            except (json.JSONDecodeError, KeyError) as e:
                 self._status_callback(_("Invalid ship data in clipboard."), 5_000)
+                log.warning("Failed to parse ship JSON", exc_info=e)
                 return
         else:
             ship = self._journal.ship
