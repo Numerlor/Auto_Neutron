@@ -64,6 +64,7 @@ class TabBase(TabGUIBase):
         self._journal_shutdown_connection: QtCore.QMetaObject.Connection | None = None
         self._status_callback = status_callback
         self.submit_button.pressed.connect(self._get_route)
+        self.destroyed.connect(self._disconnect_journal)
 
     @QtCore.Slot()
     def _set_submit_sensitive(self) -> None:
@@ -97,6 +98,11 @@ class TabBase(TabGUIBase):
         """Set `route`'s index to `index` and emit `result_signal` with it."""
         route.index = index
         self.result_signal.emit(route)
+
+    @QtCore.Slot()
+    def _disconnect_journal(self) -> None:
+        if self._journal is not None:
+            self._journal.disconnect(self._journal_shutdown_connection)
 
 
 class CSVTab(TabBase, CSVTabGUI):  # noqa: D101
@@ -476,6 +482,7 @@ class SpanshTabBase(TabBase, SpanshTabGUIBase):
             QtWidgets.QCompleter.CompletionMode.UnfilteredPopupCompletion
         )
 
+    @QtCore.Slot()
     def _close_cleanup(self) -> None:
         """Abort any requests on close and disconnect signals."""
         if self._completer_request is not None:
