@@ -306,9 +306,9 @@ class RoadToRichesTabGUI(SpanshTabGUIBase):
         # and to avoid having to set a palette on all the children created here, the scroll area is forced to use
         # a an otherwise unused role for the color.
         palette = self.scroll_area.palette
-        palette.set_color(palette.Shadow, QtGui.QColor(0, 0, 0, 0))
+        palette.set_color(QtGui.QPalette.ColorRole.Shadow, QtGui.QColor(0, 0, 0, 0))
         self.scroll_area.palette = palette
-        self.scroll_area.set_background_role(palette.Shadow)
+        self.scroll_area.set_background_role(QtGui.QPalette.ColorRole.Shadow)
 
         self.scroll_widget = QtWidgets.QWidget(self)
         self.scroll_area.set_widget(self.scroll_widget)
