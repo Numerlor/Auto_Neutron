@@ -37,10 +37,10 @@ class Plotter(abc.ABC):
     def update_system(self, system: str, system_index: int | None = None) -> None:
         """Update the plotter with the given system."""
 
-    def refresh_settings(self) -> None:
+    def refresh_settings(self) -> None:  # noqa: B027
         """Refresh the settings."""
 
-    def stop(self) -> None:
+    def stop(self) -> None:  # noqa: B027
         """Stop the plotter."""
 
 

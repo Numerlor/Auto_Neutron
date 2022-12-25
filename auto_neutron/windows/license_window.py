@@ -51,9 +51,6 @@ class LicenseWindow(LicenseWindowGUI):
         python_license_url = (
             base_path() / "third_party_licenses/LICENSE_Python.md"
         ).as_uri()
-        tomli_license_url = (
-            base_path() / "third_party_licenses/LICENSE_tomli.md"
-        ).as_uri()
         tomli_w_license_url = (
             base_path() / "third_party_licenses/LICENSE_tomli-w.md"
         ).as_uri()
@@ -83,7 +80,6 @@ class LicenseWindow(LicenseWindowGUI):
         Auto_Neutron uses the following software:
         -   PySide6 Copyright (C) 2015 The Qt Company Ltd. under the {pyside_hyperlink}, see {pyside_licenses_hyperlink} and {qt_licenses_hyperlink} for more details.
         - Qt6, click the "About Qt" button for more details.
-        - tomli licensed under the {tomli_hyperlink}
         - tomli-w licensed under the {tomli_w_hyperlink}
         - more-itertools licensed under the {more_itertools_hyperlink}
         - babel licensed under the {babel_hyperlink}
@@ -111,7 +107,6 @@ class LicenseWindow(LicenseWindowGUI):
             qt_licenses_hyperlink=self.make_hyperlink(
                 _("qt.io/licensing/"), QT_LICENSING_URL
             ),
-            tomli_hyperlink=self.make_hyperlink(_("MIT license"), tomli_license_url),
             tomli_w_hyperlink=self.make_hyperlink(
                 _("MIT license"), tomli_w_license_url
             ),

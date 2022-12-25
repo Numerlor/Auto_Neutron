@@ -17,11 +17,11 @@ log = logging.getLogger(__name__)
 qt_log = logging.getLogger("<Qt>")
 
 QT_LOG_LEVELS = {
-    0: logging.DEBUG,
-    4: logging.INFO,
-    1: logging.WARNING,
-    2: logging.ERROR,
-    3: logging.CRITICAL,
+    QtCore.QtMsgType.QtDebugMsg: logging.DEBUG,
+    QtCore.QtMsgType.QtInfoMsg: logging.INFO,
+    QtCore.QtMsgType.QtWarningMsg: logging.WARNING,
+    QtCore.QtMsgType.QtFatalMsg: logging.ERROR,
+    QtCore.QtMsgType.QtCriticalMsg: logging.CRITICAL,
 }
 
 

@@ -82,7 +82,10 @@ class Ship:
     def _fsd_boost_from_coriolis_json(json_data: dict) -> float:
         """Extract the jump range boost information from coriolis json, if any."""
         for component in json_data["components"]["internal"]:
-            if component["group"] == "Guardian Frame Shift Drive Booster":
+            if (
+                component is not None
+                and component["group"] == "Guardian Frame Shift Drive Booster"
+            ):
                 return _BOOSTER_NAME_TO_RANGE[
                     f"int_guardianfsdbooster_size{component['class']}"
                 ]

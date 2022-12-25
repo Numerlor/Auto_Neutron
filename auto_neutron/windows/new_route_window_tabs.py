@@ -64,6 +64,7 @@ class TabBase(TabGUIBase):
         self._journal_shutdown_connection: QtCore.QMetaObject.Connection | None = None
         self._status_callback = status_callback
         self.submit_button.pressed.connect(self._get_route)
+        self.destroyed.connect(self._disconnect_journal)
 
     @QtCore.Slot()
     def _set_submit_sensitive(self) -> None:
@@ -97,6 +98,11 @@ class TabBase(TabGUIBase):
         """Set `route`'s index to `index` and emit `result_signal` with it."""
         route.index = index
         self.result_signal.emit(route)
+
+    @QtCore.Slot()
+    def _disconnect_journal(self) -> None:
+        if self._journal is not None:
+            self._journal.disconnect(self._journal_shutdown_connection)
 
 
 class CSVTab(TabBase, CSVTabGUI):  # noqa: D101
@@ -476,6 +482,7 @@ class SpanshTabBase(TabBase, SpanshTabGUIBase):
             QtWidgets.QCompleter.CompletionMode.UnfilteredPopupCompletion
         )
 
+    @QtCore.Slot()
     def _close_cleanup(self) -> None:
         """Abort any requests on close and disconnect signals."""
         if self._completer_request is not None:
@@ -528,12 +535,14 @@ class ExactTab(SpanshTabBase, ExactTabGUI):  # noqa: D101
 
     def _request_params(self) -> dict[str, t.Any] | None:
         if self.use_clipboard_checkbox.checked:
+            clipboard = QtWidgets.QApplication.instance().clipboard().text()
             try:
-                ship = Ship.from_coriolis(
-                    json.loads(QtWidgets.QApplication.instance().clipboard().text())
-                )
-            except (json.JSONDecodeError, KeyError):
+                ship = Ship.from_coriolis(json.loads(clipboard))
+            except Exception as e:
                 self._status_callback(_("Invalid ship data in clipboard."), 5_000)
+                log.warning(
+                    f"Failed to parse ship JSON clipboard: {clipboard!r}", exc_info=e
+                )
                 return
         else:
             ship = self._journal.ship
