@@ -6,11 +6,11 @@ from __future__ import annotations
 import inspect
 import logging
 import shutil
+import tomllib
 import typing as t
 from contextlib import suppress
 
 import tomli_w
-import tomllib
 
 from auto_neutron.utils.recursive_default_dict import RecursiveDefaultDict
 
