@@ -147,7 +147,9 @@ class SettingsWindow(SettingsWindowGUI):
                     else:
                         converter = bool
                     setattr(
-                        settings_category, setting_name, converter(widget.check_state())
+                        settings_category,
+                        setting_name,
+                        converter(widget.check_state().value),
                     )
                 elif isinstance(widget, QtWidgets.QLineEdit):
                     setattr(settings_category, setting_name, widget.text)
