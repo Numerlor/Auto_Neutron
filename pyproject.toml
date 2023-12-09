@@ -16,7 +16,7 @@ more-itertools = "9.0.0"
 [tool.poetry.dev-dependencies]
 typing-extensions = "4.4.0"
 pre-commit = "2.20.0"
-pyinstaller = "5.7"
+pyinstaller = "5.13.1"
 taskipy = "1.10.3"
 python-dotenv = "0.21.0"
 
