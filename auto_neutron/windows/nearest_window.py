@@ -41,8 +41,9 @@ class NearestWindow(NearestWindowGUI):
         self,
         parent: QtWidgets.QWidget,
         start_location: Location,
-        status_callback: collections.abc.Callable[[str]]
-        | collections.abc.Callable[[str, int]],
+        status_callback: (
+            collections.abc.Callable[[str]] | collections.abc.Callable[[str, int]]
+        ),
     ):
         super().__init__(parent)
         self.set_input_values_from_location(start_location)
