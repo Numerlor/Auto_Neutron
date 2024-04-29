@@ -457,9 +457,9 @@ class SpanshTabBase(TabBase, SpanshTabGUIBase):
     ) -> None:
         with suppress(NetworkError):
             response = json_from_network_req(reply)
-            suggestions = self._completer_cache[
-                query_to_cache.casefold()
-            ] = intern_list(response["values"])
+            suggestions = self._completer_cache[query_to_cache.casefold()] = (
+                intern_list(response["values"])
+            )
 
             completer.model().set_string_list(suggestions)
             completer.complete()

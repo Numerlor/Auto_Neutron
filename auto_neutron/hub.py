@@ -119,9 +119,9 @@ class Hub(QtCore.QObject):
         log.debug(
             f"Updating info from edited item at x={table_item.row()} y={table_item.column()}."
         )
-        self.plotter_state.route.entries[table_item.row()][
-            table_item.column()
-        ] = table_item.data(QtCore.Qt.ItemDataRole.DisplayRole)
+        self.plotter_state.route.entries[table_item.row()][table_item.column()] = (
+            table_item.data(QtCore.Qt.ItemDataRole.DisplayRole)
+        )
         if table_item.row() == self.plotter_state.route_index:
             self.plotter_state.route_index = self.plotter_state.route_index
         self.window.update_remaining_count()

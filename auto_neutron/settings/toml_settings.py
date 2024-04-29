@@ -63,8 +63,7 @@ class TOMLSettings:
         *,
         default: t.Any = _MISSING_SENTINEL,
         sync_on_missing: bool = False,
-    ) -> TOMLType:
-        ...
+    ) -> TOMLType: ...
 
     _value_sig_key_and_categories = inspect.Signature.from_callable(value)
 
@@ -75,8 +74,7 @@ class TOMLSettings:
         *,
         default: t.Any = _MISSING_SENTINEL,
         sync_on_missing: bool = False,
-    ) -> TOMLType:
-        ...
+    ) -> TOMLType: ...
 
     _value_sig_key_only = inspect.Signature.from_callable(value)
 
@@ -159,8 +157,7 @@ class TOMLSettings:
     @t.overload
     def set_value(  # noqa: D102
         self, categories: collections.abc.Iterable[str], key: str, value: TOMLType
-    ) -> None:
-        ...
+    ) -> None: ...
 
     _set_value_sig_key_and_categories = inspect.Signature.from_callable(set_value)
 
