@@ -362,6 +362,17 @@ class RoadToRichesTabGUI(SpanshTabGUIBase):
         self.minimum_scan_slider.log_maximum = 1_000_000
         self.minimum_scan_slider.log_value = 100_000
 
+        # Scroll area's role messed up text color
+        for label in (
+            self.cargo_label,
+            self.range_label,
+            self.radius_label,
+            self.max_systems_label,
+            self.maximum_distance_label,
+            self.minimum_scan_label,
+        ):
+            label.set_background_role(QtGui.QPalette.ColorRole.Base)
+
         self.scroll_layout.add_layout(self.system_cargo_layout)
         self.scroll_layout.add_widget(self.range_label)
         self.scroll_layout.add_widget(self.range_spinbox)
