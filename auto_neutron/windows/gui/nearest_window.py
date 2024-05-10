@@ -23,17 +23,17 @@ class NearestWindowGUI(QtWidgets.QDialog):
 
         self.system_name_label = QtWidgets.QLabel(self)
         self.system_name_label.size_policy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
+            QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed
         )
         self.system_name_result_label = QtWidgets.QLabel(self)
         self.system_name_result_label.text_interaction_flags = (
-            QtCore.Qt.TextSelectableByMouse
+            QtCore.Qt.TextInteractionFlag.TextSelectableByMouse
         )
         self.system_name_result_label.cursor = QtCore.Qt.CursorShape.IBeamCursor
 
         self.distance_label = QtWidgets.QLabel(self)
         self.distance_label.size_policy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
+            QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed
         )
         self.distance_result_label = QtWidgets.QLabel(self)
 
@@ -41,7 +41,7 @@ class NearestWindowGUI(QtWidgets.QDialog):
         # NOTE: Coordinate
         self.x_label = QtWidgets.QLabel(self)
         self.x_label.size_policy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
+            QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed
         )
         self.x_result_label = QtWidgets.QLabel(self)
 
@@ -49,7 +49,7 @@ class NearestWindowGUI(QtWidgets.QDialog):
         # NOTE: Coordinate
         self.y_label = QtWidgets.QLabel(self)
         self.y_label.size_policy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
+            QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed
         )
         self.y_result_label = QtWidgets.QLabel(self)
 
@@ -57,16 +57,16 @@ class NearestWindowGUI(QtWidgets.QDialog):
         # NOTE: Coordinate
         self.z_label = QtWidgets.QLabel(self)
         self.z_label.size_policy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
+            QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed
         )
         self.z_result_label = QtWidgets.QLabel(self)
 
         for spinbox in (self.x_spinbox, self.y_spinbox, self.z_spinbox):
             spinbox.minimum = -100000
             spinbox.maximum = 100000
-            spinbox.button_symbols = QtWidgets.QAbstractSpinBox.NoButtons
+            spinbox.button_symbols = QtWidgets.QAbstractSpinBox.ButtonSymbols.NoButtons
             spinbox.size_policy = QtWidgets.QSizePolicy(
-                QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
+                QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed
             )
 
         self.from_location_button = QtWidgets.QPushButton(self)
@@ -96,7 +96,10 @@ class NearestWindowGUI(QtWidgets.QDialog):
 
         self.io_grid_layout.add_item(
             QtWidgets.QSpacerItem(
-                1, 1, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Expanding
+                1,
+                1,
+                QtWidgets.QSizePolicy.Policy.Fixed,
+                QtWidgets.QSizePolicy.Policy.Expanding,
             ),
             5,
             0,

@@ -14,6 +14,7 @@ from __feature__ import snake_case, true_property  # noqa: F401
 from auto_neutron.utils.file import get_file_name
 
 from ..utils.network import NetworkError, json_from_network_req, post_request
+from ..utils.utils import get_application
 from .gui.error_window import ErrorWindowGUI
 
 root_logger = logging.getLogger()
@@ -35,7 +36,7 @@ class ErrorWindow(ErrorWindowGUI):
     def __init__(self, parent: QtWidgets.QWidget):
         self._num_errors = 0
         super().__init__(parent)
-        self.quit_button.pressed.connect(QtWidgets.QApplication.instance().quit)
+        self.quit_button.pressed.connect(get_application().quit)
         self.send_log.pressed.connect(self._send_error_report)
         self.error_template = ""
         self.retranslate()
@@ -43,7 +44,7 @@ class ErrorWindow(ErrorWindowGUI):
     def _set_text(self) -> None:
         """Set the help text to point the user to the current log file."""
         log_path = QtCore.QStandardPaths.writable_location(
-            QtCore.QStandardPaths.AppConfigLocation
+            QtCore.QStandardPaths.StandardLocation.AppConfigLocation
         )
         file_name = self._get_log_file_name().name
         self.text_browser.markdown = self.error_template.format(
@@ -116,7 +117,7 @@ class ErrorWindow(ErrorWindowGUI):
 
     def change_event(self, event: QtCore.QEvent) -> None:
         """Retranslate the GUI when a language change occurs."""
-        if event.type() == QtCore.QEvent.LanguageChange:
+        if event.type() == QtCore.QEvent.Type.LanguageChange:
             self.retranslate()
 
     def retranslate(self) -> None:

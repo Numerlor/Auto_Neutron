@@ -13,6 +13,7 @@ from __feature__ import snake_case, true_property  # noqa: F401
 from auto_neutron import settings
 from auto_neutron.utils.signal import ReconnectingSignal
 
+from ..utils.utils import get_application
 from .gui.main_window import MainWindowGUI
 from .route_table_header import RouteTableHeader, header_from_row_type
 
@@ -52,7 +53,7 @@ class MainWindow(MainWindowGUI):
     def copy_table_item_text(self) -> None:
         """Copy the text of the selected table item into the clipboard."""
         if (item := self.table.current_item()) is not None:
-            QtWidgets.QApplication.instance().clipboard().set_text(item.text())
+            get_application().clipboard().set_text(item.text())
 
     def mass_insert(
         self, data: collections.abc.Iterable[collections.abc.Iterable[t.Any]]
@@ -113,7 +114,7 @@ class MainWindow(MainWindowGUI):
 
     def change_event(self, event: QtCore.QEvent) -> None:
         """Retranslate the GUI when a language change occurs."""
-        if event.type() == QtCore.QEvent.LanguageChange:
+        if event.type() == QtCore.QEvent.Type.LanguageChange:
             self.retranslate()
 
     def event_filter(self, watched: QtCore.QObject, event: QtCore.QEvent) -> bool:

@@ -48,7 +48,9 @@ def make_network_request(
         url += "?" + urllib.parse.urlencode(params)
     qurl = QtCore.QUrl(url)
     request = QtNetwork.QNetworkRequest(qurl)
-    request.set_header(QtNetwork.QNetworkRequest.UserAgentHeader, f"{APP}/{VERSION}")
+    request.set_header(
+        QtNetwork.QNetworkRequest.KnownHeaders.UserAgentHeader, f"{APP}/{VERSION}"
+    )
     reply = auto_neutron.network_mgr.get(request)
     reply.finished.connect(partial(finished_callback, reply))
 
@@ -64,8 +66,12 @@ def post_request(
     """Make a post request to `url` with `json_` as its body. Connect its reply to `finished_callback`."""
     qurl = QtCore.QUrl(url)
     request = QtNetwork.QNetworkRequest(qurl)
-    request.set_header(QtNetwork.QNetworkRequest.UserAgentHeader, f"{APP}/{VERSION}")
-    request.set_header(QtNetwork.QNetworkRequest.ContentTypeHeader, "application/json")
+    request.set_header(
+        QtNetwork.QNetworkRequest.KnownHeaders.UserAgentHeader, f"{APP}/{VERSION}"
+    )
+    request.set_header(
+        QtNetwork.QNetworkRequest.KnownHeaders.ContentTypeHeader, "application/json"
+    )
     reply = auto_neutron.network_mgr.post(
         request,
         json.dumps(json_).encode(),

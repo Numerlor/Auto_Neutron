@@ -15,18 +15,18 @@ class LicenseWindowGUI(QtWidgets.QDialog):
     def __init__(self, parent: QtWidgets.QWidget | None = None):
         super().__init__(parent)
         self.set_fixed_size(600, 500)
-        self.set_window_flag(QtCore.Qt.WindowContextHelpButtonHint, False)
+        self.set_window_flag(QtCore.Qt.WindowType.WindowContextHelpButtonHint, False)
         self.set_attribute(QtCore.Qt.WidgetAttribute.WA_DeleteOnClose, True)
         self.window_title = "Auto_Neutron " + VERSION
 
         self.about_qt_button = QtWidgets.QPushButton(self)
         self.about_qt_button.size_policy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
+            QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed
         )
 
         self.back_button = QtWidgets.QPushButton(self)
         self.back_button.size_policy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
+            QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed
         )
 
         self.text = QtWidgets.QTextBrowser(self)

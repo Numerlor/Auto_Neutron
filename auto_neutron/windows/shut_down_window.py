@@ -10,7 +10,7 @@ from __feature__ import snake_case, true_property  # noqa: F401
 
 from auto_neutron.journal import Journal, get_unique_cmdr_journals
 from auto_neutron.utils.signal import ReconnectingSignal
-from auto_neutron.utils.utils import cmdr_display_name
+from auto_neutron.utils.utils import cmdr_display_name, get_application
 
 from ..workers import GameWorker
 from .gui.shut_down_window import ShutDownWindowGUI
@@ -39,7 +39,7 @@ class ShutDownWindow(ShutDownWindowGUI):
             lambda: self.new_journal_signal.emit(self._selected_journal)
         )
         self.new_journal_button.pressed.connect(self.close)
-        self.quit_button.pressed.connect(QtWidgets.QApplication.instance().quit)
+        self.quit_button.pressed.connect(get_application().quit)
 
         self._populate_journal_combos()
         self.retranslate()
@@ -94,7 +94,7 @@ class ShutDownWindow(ShutDownWindowGUI):
 
     def change_event(self, event: QtCore.QEvent) -> None:
         """Retranslate the GUI when a language change occurs."""
-        if event.type() == QtCore.QEvent.LanguageChange:
+        if event.type() == QtCore.QEvent.Type.LanguageChange:
             self.retranslate()
 
     def retranslate(self) -> None:

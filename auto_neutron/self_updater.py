@@ -24,6 +24,7 @@ from auto_neutron.utils.network import (
     json_from_network_req,
     make_network_request,
 )
+from auto_neutron.utils.utils import get_application
 from auto_neutron.windows import UpdateErrorWindow, VersionDownloadConfirmDialog
 
 log = logging.getLogger(__name__)
@@ -266,4 +267,4 @@ class Updater(QtCore.QObject):
                 return
 
         subprocess.Popen(str(EXECUTABLE_PATH))
-        QtWidgets.QApplication.instance().exit()
+        get_application().exit()

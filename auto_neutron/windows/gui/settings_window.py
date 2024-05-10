@@ -295,7 +295,7 @@ class SettingsWindowGUI(QtWidgets.QDialog):
         self.main_bottom_layout.add_widget(self.ok_button)
         self.main_bottom_layout.add_widget(self.apply_button)
 
-        self.main_bottom_layout.set_spacing(5)
+        self.main_bottom_layout.spacing = 5
 
         self.main_c_layout.add_widget(self.widget_selector)
         self.main_c_layout.add_layout(self.main_bottom_layout)
@@ -303,7 +303,7 @@ class SettingsWindowGUI(QtWidgets.QDialog):
         self.main_layout.add_widget(self.group_selector)
         self.main_layout.add_layout(self.main_c_layout)
         self.main_layout.contents_margins = QtCore.QMargins(4, 4, 4, 4)
-        self.main_layout.set_spacing(0)
+        self.main_layout.spacing = 0
         # endregion
         self.widget_selector.add_widget(self.appearance_widget)
         self.widget_selector.add_widget(self.behaviour_widget)
@@ -348,5 +348,8 @@ class SettingsWindowGUI(QtWidgets.QDialog):
 def get_spacer() -> QtWidgets.QSpacerItem:
     """Get an expanding spacer item."""
     return QtWidgets.QSpacerItem(
-        1, 1, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding
+        1,
+        1,
+        QtWidgets.QSizePolicy.Policy.Expanding,
+        QtWidgets.QSizePolicy.Policy.Expanding,
     )

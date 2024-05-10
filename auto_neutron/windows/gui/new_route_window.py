@@ -57,11 +57,11 @@ class TabGUIBase(QtWidgets.QWidget):
 
         submit_button = QtWidgets.QPushButton(self)
         submit_button.size_policy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Maximum
+            QtWidgets.QSizePolicy.Policy.Maximum, QtWidgets.QSizePolicy.Policy.Maximum
         )
         abort_button = QtWidgets.QPushButton(self)
         abort_button.size_policy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Maximum
+            QtWidgets.QSizePolicy.Policy.Maximum, QtWidgets.QSizePolicy.Policy.Maximum
         )
         abort_button.hide()
         refresh_button = QtWidgets.QPushButton(self)
@@ -70,7 +70,7 @@ class TabGUIBase(QtWidgets.QWidget):
         journal_submit_layout.add_widget(journal_combo)
         journal_submit_layout.add_widget(refresh_button)
         journal_submit_layout.add_spacer_item(
-            QtWidgets.QSpacerItem(1, 1, QtWidgets.QSizePolicy.Expanding)
+            QtWidgets.QSpacerItem(1, 1, QtWidgets.QSizePolicy.Policy.Expanding)
         )
         journal_submit_layout.add_widget(submit_button)
         journal_submit_layout.add_widget(abort_button)
@@ -123,15 +123,15 @@ class SpanshTabGUIBase(TabGUIBase):
 
         self.nearest_button = QtWidgets.QPushButton(self)
         self.nearest_button.size_policy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
+            QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed
         )
         submit_nearest_layout = QtWidgets.QVBoxLayout()
         submit_nearest_layout.add_spacer_item(
             QtWidgets.QSpacerItem(
                 1,
                 1,
-                QtWidgets.QSizePolicy.Fixed,
-                QtWidgets.QSizePolicy.Expanding,
+                QtWidgets.QSizePolicy.Policy.Fixed,
+                QtWidgets.QSizePolicy.Policy.Expanding,
             )
         )
         submit_nearest_layout.add_widget(self.nearest_button)
@@ -147,13 +147,13 @@ class SpanshTabGUIBase(TabGUIBase):
             alignment=QtCore.Qt.AlignmentFlag.AlignBottom,
         )
         self.journal_submit_layout.add_spacer_item(
-            QtWidgets.QSpacerItem(1, 1, QtWidgets.QSizePolicy.Expanding)
+            QtWidgets.QSpacerItem(1, 1, QtWidgets.QSizePolicy.Policy.Expanding)
         )
         spacer = QtWidgets.QSpacerItem(
             45,
             1,
-            QtWidgets.QSizePolicy.Expanding,
-            QtWidgets.QSizePolicy.Fixed,
+            QtWidgets.QSizePolicy.Policy.Expanding,
+            QtWidgets.QSizePolicy.Policy.Fixed,
         )
         self.journal_submit_layout.add_spacer_item(spacer)
         self.journal_submit_layout.add_layout(submit_nearest_layout)
@@ -205,7 +205,7 @@ class NeutronTabGUI(SpanshTabGUIBase):
         self.range_spin.suffix = " Ly"
         self.range_spin.accelerated = True
         self.range_spin.size_policy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
+            QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed
         )
 
         self.efficiency_label = QtWidgets.QLabel(self)
@@ -214,7 +214,7 @@ class NeutronTabGUI(SpanshTabGUIBase):
         self.efficiency_spin.suffix = "%"
         self.efficiency_spin.accelerated = True
         self.efficiency_spin.size_policy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
+            QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed
         )
 
         self.main_layout.add_layout(self.system_cargo_layout)
@@ -226,8 +226,8 @@ class NeutronTabGUI(SpanshTabGUIBase):
             QtWidgets.QSpacerItem(
                 1,
                 1,
-                QtWidgets.QSizePolicy.Fixed,
-                QtWidgets.QSizePolicy.Expanding,
+                QtWidgets.QSizePolicy.Policy.Fixed,
+                QtWidgets.QSizePolicy.Policy.Expanding,
             )
         )
         self.main_layout.add_layout(self.journal_submit_layout)
@@ -265,8 +265,8 @@ class ExactTabGUI(SpanshTabGUIBase):
             QtWidgets.QSpacerItem(
                 1,
                 1,
-                QtWidgets.QSizePolicy.Fixed,
-                QtWidgets.QSizePolicy.Expanding,
+                QtWidgets.QSizePolicy.Policy.Fixed,
+                QtWidgets.QSizePolicy.Policy.Expanding,
             )
         )
         self.main_layout.add_layout(self.journal_submit_layout)
@@ -379,8 +379,8 @@ class RoadToRichesTabGUI(SpanshTabGUIBase):
             QtWidgets.QSpacerItem(
                 1,
                 1,
-                QtWidgets.QSizePolicy.Fixed,
-                QtWidgets.QSizePolicy.Expanding,
+                QtWidgets.QSizePolicy.Policy.Fixed,
+                QtWidgets.QSizePolicy.Policy.Expanding,
             )
         )
         self.scroll_layout.add_layout(self.journal_submit_layout)
@@ -417,7 +417,10 @@ class CSVTabGUI(TabGUIBase):
         self.main_layout.add_layout(self.path_layout)
         self.main_layout.add_spacer_item(
             QtWidgets.QSpacerItem(
-                1, 1, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Expanding
+                1,
+                1,
+                QtWidgets.QSizePolicy.Policy.Fixed,
+                QtWidgets.QSizePolicy.Policy.Expanding,
             )
         )
         self.main_layout.add_layout(self.journal_submit_layout)
@@ -444,7 +447,10 @@ class LastTabGUI(TabGUIBase):
 
         self.main_layout.add_spacer_item(
             QtWidgets.QSpacerItem(
-                1, 1, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Expanding
+                1,
+                1,
+                QtWidgets.QSizePolicy.Policy.Fixed,
+                QtWidgets.QSizePolicy.Policy.Expanding,
             )
         )
         self.main_layout.add_layout(self.journal_submit_layout)
@@ -464,7 +470,7 @@ class NewRouteWindowGUI(QtWidgets.QDialog):
         self.focus_policy = QtCore.Qt.FocusPolicy.ClickFocus
 
         self.main_layout = QtWidgets.QVBoxLayout(self)
-        self.main_layout.set_spacing(1)
+        self.main_layout.spacing = 1
         self.main_layout.contents_margins = QtCore.QMargins(3, 6, 3, 3)
 
         self.tab_widget = QtWidgets.QTabWidget(self)
@@ -482,7 +488,10 @@ class NewRouteWindowGUI(QtWidgets.QDialog):
         self.status_layout.add_widget(self.status_widget)
         self.status_layout.add_spacer_item(
             QtWidgets.QSpacerItem(
-                0, 16, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
+                0,
+                16,
+                QtWidgets.QSizePolicy.Policy.Fixed,
+                QtWidgets.QSizePolicy.Policy.Fixed,
             )
         )
 

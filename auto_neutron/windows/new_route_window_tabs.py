@@ -28,7 +28,11 @@ from auto_neutron.utils.network import (
     json_from_network_req,
     make_network_request,
 )
-from auto_neutron.utils.utils import create_request_delay_iterator, intern_list
+from auto_neutron.utils.utils import (
+    create_request_delay_iterator,
+    get_application,
+    intern_list,
+)
 from auto_neutron.windows import NearestWindow
 from auto_neutron.windows.gui.new_route_window import (
     CSVTabGUI,
@@ -457,9 +461,9 @@ class SpanshTabBase(TabBase, SpanshTabGUIBase):
     ) -> None:
         with suppress(NetworkError):
             response = json_from_network_req(reply)
-            suggestions = self._completer_cache[
-                query_to_cache.casefold()
-            ] = intern_list(response["values"])
+            suggestions = self._completer_cache[query_to_cache.casefold()] = (
+                intern_list(response["values"])
+            )
 
             completer.model().set_string_list(suggestions)
             completer.complete()
@@ -535,7 +539,7 @@ class ExactTab(SpanshTabBase, ExactTabGUI):  # noqa: D101
 
     def _request_params(self) -> dict[str, t.Any] | None:
         if self.use_clipboard_checkbox.checked:
-            clipboard = QtWidgets.QApplication.instance().clipboard().text()
+            clipboard = get_application().clipboard().text()
             try:
                 ship = Ship.from_coriolis(json.loads(clipboard))
             except Exception as e:
@@ -632,7 +636,7 @@ class RoadToRichesTab(SpanshTabBase, RoadToRichesTabGUI):  # noqa: D101
     def event_filter(self, watched: QtWidgets.QWidget, event: QtCore.QEvent) -> bool:
         """Allow scrolling when hovering disabled loop checkbox."""
         if (
-            event.type() is QtCore.QEvent.Wheel
+            event.type() is QtCore.QEvent.Type.Wheel
             and not watched.enabled
             and watched.parent() is not None
         ):

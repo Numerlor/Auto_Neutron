@@ -63,9 +63,11 @@ class _TooltipSliderBase(QtWidgets.QSlider):
         self._value_spinbox.install_event_filter(self)
 
         self._value_spinbox.size_policy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
+            QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed
         )
-        self._value_spinbox.button_symbols = QtWidgets.QAbstractSpinBox.NoButtons
+        self._value_spinbox.button_symbols = (
+            QtWidgets.QAbstractSpinBox.ButtonSymbols.NoButtons
+        )
         self._value_spinbox.minimum = self.tooltip_minimum
         self._value_spinbox.maximum = self.tooltip_maximum
         self._value_spinbox.style_sheet = _SPINBOX_BORDER_STYLESHEET.format(
@@ -187,7 +189,7 @@ class _TooltipSliderBase(QtWidgets.QSlider):
 
             elif event_type is QtCore.QEvent.Type.KeyRelease:
                 key = t.cast("QtGui.QKeyEvent", event).key()
-                if key in {QtCore.Qt.Key_Return, QtCore.Qt.Key.Key_Enter}:
+                if key in {QtCore.Qt.Key.Key_Return, QtCore.Qt.Key.Key_Enter}:
                     self._value_spinbox.clear_focus()
                     self._value_spinbox.hide()
 
@@ -199,9 +201,9 @@ class _TooltipSliderBase(QtWidgets.QSlider):
         self.init_style_option(option)
 
         return self.style().sub_control_rect(
-            QtWidgets.QStyle.CC_Slider,
+            QtWidgets.QStyle.ComplexControl.CC_Slider,
             option,
-            QtWidgets.QStyle.SC_SliderHandle,
+            QtWidgets.QStyle.SubControl.SC_SliderHandle,
             self,
         )
 
