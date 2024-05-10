@@ -5,7 +5,7 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Auto Neutron 2.2.2\n"
+"Project-Id-Version: Auto Neutron 2.3.0\n"
 "Report-Msgid-Bugs-To: numerlor@numerlor.me\n"
 "POT-Creation-Date: 2022-12-25 19:06+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
