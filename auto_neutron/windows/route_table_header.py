@@ -167,7 +167,7 @@ class ExactHeader(RouteTableHeader):
             resize_mode=QtWidgets.QHeaderView.ResizeMode.Stretch,
         ),
         HeaderSection(
-            text=N_("Scoopable"),
+            text=N_("Refuel"),
             delegate_type=CheckBoxDelegate,
         ),
         HeaderSection(
