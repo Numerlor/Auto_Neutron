@@ -17,12 +17,14 @@ a = Analysis(
     win_private_assemblies=False,
     cipher=block_cipher,
     noarchive=False,
+    optimize=2,
 )
 pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 exe = EXE(
     pyz,
     a.scripts,
     filter_binaries(a.binaries),
+    OPTIONS,
     a.zipfiles,
     filter_datas(a.datas),
     [],
