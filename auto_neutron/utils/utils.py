@@ -43,15 +43,6 @@ class ExceptionHandler(QtCore.QObject):
         self.triggered.emit()
 
 
-def create_interrupt_timer(parent: QtCore.QObject) -> QtCore.QTimer:
-    """Interrupt the Qt event loop regularly to let python process signals."""
-    timer = QtCore.QTimer(parent)
-    timer.interval = 50
-    timer.timeout.connect(lambda: None)
-    timer.start()
-    return timer
-
-
 def create_request_delay_iterator() -> collections.abc.Iterator[int]:
     """Create an iterator for re-request delays."""
     return itertools.chain(iter([1, 2, 4, 4, 4, 6, 6]), itertools.cycle([10]))
