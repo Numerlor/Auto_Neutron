@@ -210,7 +210,12 @@ class LastRouteTab(TabBase, LastTabGUI):  # noqa: D101
                 self._loaded_route.entries[0].system
             )
             self.location_label.text = _("Saved location: {}").format(
-                self._loaded_route.entries[settings.General.last_route_index].system
+                self._loaded_route.entries[
+                    min(
+                        settings.General.last_route_index,
+                        len(self._loaded_route.entries) - 1,
+                    )
+                ].system
             )
             # NOTE: destination system
             self.destination_label.text = _("Destination: {}").format(
