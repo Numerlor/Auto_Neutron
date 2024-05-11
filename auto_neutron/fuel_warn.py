@@ -10,6 +10,7 @@ from PySide6 import QtCore, QtMultimedia, QtWidgets
 from __feature__ import snake_case, true_property  # noqa: F401
 
 from auto_neutron import settings
+from auto_neutron.utils.utils import get_application
 
 if t.TYPE_CHECKING:
     from auto_neutron.journal import Journal
@@ -86,9 +87,9 @@ class FuelWarn(QtCore.QObject):
                 self.player.play()
 
             else:
-                QtWidgets.QApplication.instance().beep()
+                get_application().beep()
                 log.info("Application beep for audi alert.")
 
         if settings.Alerts.visual:
-            QtWidgets.QApplication.instance().alert(self._alert_widget, 5000)
+            get_application().alert(self._alert_widget, 5000)
             log.info("Executed flash alert.")

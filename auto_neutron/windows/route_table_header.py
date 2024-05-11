@@ -6,6 +6,7 @@ import typing as t
 from functools import cached_property
 
 from PySide6 import QtWidgets
+from __feature__ import snake_case, true_property  # noqa: F401
 
 from auto_neutron.route import (
     ExactPlotRow,
@@ -166,7 +167,7 @@ class ExactHeader(RouteTableHeader):
             resize_mode=QtWidgets.QHeaderView.ResizeMode.Stretch,
         ),
         HeaderSection(
-            text=N_("Scoopable"),
+            text=N_("Refuel"),
             delegate_type=CheckBoxDelegate,
         ),
         HeaderSection(

@@ -35,7 +35,7 @@ class ExceptionHandler(QtCore.QObject):
     ) -> None:
         """Log the raised exception, and emit `traceback_sig` with the formatted exception."""
         if exctype is KeyboardInterrupt:
-            QtWidgets.QApplication.instance().exit()
+            get_application().exit()
             return
 
         log.critical("Uncaught exception:", exc_info=(exctype, value, tb))
@@ -114,3 +114,15 @@ def intern_list(list_: list[str]) -> list[str]:
     for index, string_to_intern in enumerate(list_):
         list_[index] = sys.intern(string_to_intern)
     return list_
+
+
+_app_instance = None
+
+
+def get_application() -> QtWidgets.QApplication:
+    """Get the application's instance."""
+    global _app_instance
+    if _app_instance is None:
+        _app_instance = QtWidgets.QApplication.instance()
+        assert _app_instance is not None
+    return t.cast(QtWidgets.QApplication, _app_instance)

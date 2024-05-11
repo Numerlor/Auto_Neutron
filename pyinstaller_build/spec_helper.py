@@ -22,6 +22,10 @@ EXCLUDES = [
 ]
 HIDDEN_IMPORTS = ["babel.numbers"]
 
+OPTIONS = [
+    ("OO", None, "OPTION"),
+]
+
 DLL_EXCLUDE = {
     "opengl32sw.dll",
     "qt6opengl.dll",

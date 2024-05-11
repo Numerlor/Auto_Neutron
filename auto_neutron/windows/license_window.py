@@ -11,6 +11,7 @@ from __feature__ import snake_case, true_property  # noqa: F401
 
 from auto_neutron.utils.file import base_path
 
+from ..utils.utils import get_application
 from .gui.license_window import LicenseWindowGUI
 
 PYTHON_LICENSE_URL = "https://docs.python.org/3.10/license.html"
@@ -24,7 +25,7 @@ class LicenseWindow(LicenseWindowGUI):
 
     def __init__(self, parent: QtWidgets.QWidget | None = None):
         super().__init__(parent)
-        self.about_qt_button.pressed.connect(QtWidgets.QApplication.instance().about_qt)
+        self.about_qt_button.pressed.connect(get_application().about_qt)
         self.back_button.pressed.connect(self.retranslate)
         self.back_button.pressed.connect(
             lambda: setattr(self.back_button, "enabled", False)  # noqa: B010
@@ -37,7 +38,7 @@ class LicenseWindow(LicenseWindowGUI):
 
     def change_event(self, event: QtCore.QEvent) -> None:
         """Retranslate the GUI when a language change occurs."""
-        if event.type() == QtCore.QEvent.LanguageChange:
+        if event.type() == QtCore.QEvent.Type.LanguageChange:
             self.retranslate()
 
     @QtCore.Slot()

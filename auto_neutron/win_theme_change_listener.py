@@ -10,7 +10,9 @@ import typing as t
 import winreg
 from types import TracebackType
 
-from PySide6 import QtCore, QtWidgets
+from PySide6 import QtCore
+
+from auto_neutron.utils.utils import get_application
 
 if t.TYPE_CHECKING:
     from shiboken6 import VoidPtr
@@ -107,7 +109,5 @@ def create_listener(
 ) -> WinThemeChangeListener:
     """Create a `WinThemeChangeListener` and register it with the app."""
     listener = WinThemeChangeListener(parent)
-    QtWidgets.QApplication.instance().install_native_event_filter(
-        listener._event_filter
-    )
+    get_application().install_native_event_filter(listener._event_filter)
     return listener

@@ -22,7 +22,7 @@ class ShutDownWindowGUI(QtWidgets.QDialog):
         self.journal_combo = QtWidgets.QComboBox(self)
 
         self.journal_combo.size_policy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
+            QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed
         )
         self.journal_combo.size_adjust_policy = (
             QtWidgets.QComboBox.SizeAdjustPolicy.AdjustToContents
@@ -30,16 +30,16 @@ class ShutDownWindowGUI(QtWidgets.QDialog):
 
         self.new_journal_button = QtWidgets.QPushButton(self)
         self.new_journal_button.size_policy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
+            QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed
         )
 
         self.save_route_button = QtWidgets.QPushButton(self)
         self.save_route_button.size_policy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
+            QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed
         )
         self.quit_button = QtWidgets.QPushButton(self)
         self.quit_button.size_policy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
+            QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed
         )
 
         self.button_layout = QtWidgets.QHBoxLayout()
@@ -47,7 +47,10 @@ class ShutDownWindowGUI(QtWidgets.QDialog):
         self.button_layout.add_widget(self.new_journal_button)
         self.button_layout.add_spacer_item(
             QtWidgets.QSpacerItem(
-                1, 1, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed
+                1,
+                1,
+                QtWidgets.QSizePolicy.Policy.Expanding,
+                QtWidgets.QSizePolicy.Policy.Fixed,
             )
         )
         self.button_layout.add_widget(

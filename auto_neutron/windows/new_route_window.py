@@ -266,7 +266,7 @@ class NewRouteWindow(NewRouteWindowGUI):
 
     def change_event(self, event: QtCore.QEvent) -> None:
         """Retranslate the GUI when a language change occurs."""
-        if event.type() == QtCore.QEvent.LanguageChange:
+        if event.type() == QtCore.QEvent.Type.LanguageChange:
             self.retranslate()
 
     def close_event(self, event: QtGui.QCloseEvent) -> None:

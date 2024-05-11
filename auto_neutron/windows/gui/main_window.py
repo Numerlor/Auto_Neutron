@@ -43,15 +43,23 @@ class MainWindowGUI(QtWidgets.QMainWindow):
         self.table.vertical_header().visible = False
 
         self.table.grid_style = QtCore.Qt.PenStyle.NoPen
-        self.table.selection_mode = QtWidgets.QAbstractItemView.SingleSelection
-        self.table.edit_triggers = QtWidgets.QAbstractItemView.NoEditTriggers
+        self.table.selection_mode = (
+            QtWidgets.QAbstractItemView.SelectionMode.SingleSelection
+        )
+        self.table.edit_triggers = (
+            QtWidgets.QAbstractItemView.EditTrigger.NoEditTriggers
+        )
         self.table.alternating_row_colors = True
         self.table.horizontal_scroll_bar_policy = (
             QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff
         )
         palette = QtGui.QPalette()
-        palette.set_color(QtGui.QPalette.Highlight, QtGui.QColor(255, 255, 255, 0))
-        palette.set_color(QtGui.QPalette.HighlightedText, QtGui.QColor(0, 123, 255))
+        palette.set_color(
+            QtGui.QPalette.ColorRole.Highlight, QtGui.QColor(255, 255, 255, 0)
+        )
+        palette.set_color(
+            QtGui.QPalette.ColorRole.HighlightedText, QtGui.QColor(0, 123, 255)
+        )
         self.table.palette = palette
 
     def inactivate_before_index(self, index: int) -> None:
@@ -105,7 +113,8 @@ class MainWindowGUI(QtWidgets.QMainWindow):
     def scroll_to_index(self, index: int) -> None:
         """Scroll the table to position the row with `index` at the top."""
         self.table.scroll_to_item(
-            self.table.item(index, 0), QtWidgets.QAbstractItemView.PositionAtTop
+            self.table.item(index, 0),
+            QtWidgets.QAbstractItemView.ScrollHint.PositionAtTop,
         )
 
     def retranslate(self) -> None:

@@ -38,7 +38,7 @@ from auto_neutron.workers import StatusWorker
 
 if t.TYPE_CHECKING:
     from auto_neutron.journal import Journal
-    from auto_neutron.utils.utils import ExceptionHandler
+    from auto_neutron.utils.utils import ExceptionHandler, get_application
     from auto_neutron.win_theme_change_listener import WinThemeChangeListener
 
 log = logging.getLogger(__name__)
@@ -119,9 +119,9 @@ class Hub(QtCore.QObject):
         log.debug(
             f"Updating info from edited item at x={table_item.row()} y={table_item.column()}."
         )
-        self.plotter_state.route.entries[table_item.row()][
-            table_item.column()
-        ] = table_item.data(QtCore.Qt.ItemDataRole.DisplayRole)
+        self.plotter_state.route.entries[table_item.row()][table_item.column()] = (
+            table_item.data(QtCore.Qt.ItemDataRole.DisplayRole)
+        )
         if table_item.row() == self.plotter_state.route_index:
             self.plotter_state.route_index = self.plotter_state.route_index
         self.window.update_remaining_count()
@@ -190,8 +190,8 @@ class Hub(QtCore.QObject):
         new_locale = babel.Locale.parse(settings.General.locale)
         if new_locale != auto_neutron.locale.get_active_locale():
             auto_neutron.locale.set_active_locale(new_locale)
-            app = QtWidgets.QApplication.instance()
-            app.post_event(app, QtCore.QEvent(QtCore.QEvent.LanguageChange))
+            app = get_application()
+            app.post_event(app, QtCore.QEvent(QtCore.QEvent.Type.LanguageChange))
 
     @QtCore.Slot()
     def display_settings(self) -> None:

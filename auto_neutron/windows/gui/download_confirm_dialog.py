@@ -31,12 +31,12 @@ class VersionDownloadConfirmDialogGUI(QtWidgets.QDialog):
 
         self._download_button = QtWidgets.QPushButton(self)
         self._download_button.size_policy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
+            QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed
         )
 
         self._skip_button = QtWidgets.QPushButton(self)
         self._skip_button.size_policy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
+            QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed
         )
         self._button_layout.add_widget(self._skip_button)
         self._button_layout.add_widget(self._download_button)

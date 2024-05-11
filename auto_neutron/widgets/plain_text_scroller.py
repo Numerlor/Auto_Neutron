@@ -34,7 +34,7 @@ class PlainTextScroller(QtWidgets.QWidget):
         self._scroll_interval = scroll_interval
 
         self._static_text = QtGui.QStaticText(text)
-        self._static_text.set_text_format(QtCore.Qt.PlainText)
+        self._static_text.set_text_format(QtCore.Qt.TextFormat.PlainText)
 
         self._fade_in_image, self._fade_out_image = self._create_fade_images()
 
@@ -202,14 +202,14 @@ class PlainTextScroller(QtWidgets.QWidget):
         fade_in_image = QtGui.QImage(
             self.fade_width,
             self._text_size.height(),
-            QtGui.QImage.Format_ARGB32_Premultiplied,
+            QtGui.QImage.Format.Format_ARGB32_Premultiplied,
         )
         if fade_in_image.is_null():
             raise MemoryError("Unable to allocate QImage.")
         fade_out_image = QtGui.QImage(
             self.fade_width,
             self._text_size.height(),
-            QtGui.QImage.Format_ARGB32_Premultiplied,
+            QtGui.QImage.Format.Format_ARGB32_Premultiplied,
         )
         if fade_out_image.is_null():
             raise MemoryError("Unable to allocate QImage.")
@@ -218,26 +218,26 @@ class PlainTextScroller(QtWidgets.QWidget):
         background_color = self.palette.window().color().get_rgb()[:-1]
         opaque_color = QtGui.QColor(*background_color, 255)
 
-        fade_in_image.fill(QtCore.Qt.transparent)
-        fade_out_image.fill(QtCore.Qt.transparent)
+        fade_in_image.fill(QtCore.Qt.GlobalColor.transparent)
+        fade_out_image.fill(QtCore.Qt.GlobalColor.transparent)
 
         gradient = QtGui.QLinearGradient(
             QtCore.QPointF(0, 0), QtCore.QPointF(self.fade_width, 0)
         )
 
         painter = QtGui.QPainter(fade_in_image)
-        painter.set_pen(QtCore.Qt.NoPen)
+        painter.set_pen(QtCore.Qt.PenStyle.NoPen)
 
         gradient.set_color_at(0, opaque_color)
-        gradient.set_color_at(1, QtCore.Qt.transparent)
+        gradient.set_color_at(1, QtCore.Qt.GlobalColor.transparent)
 
         painter.fill_rect(fade_in_image.rect(), gradient)
         painter.end()
 
         painter.begin(fade_out_image)
-        painter.set_pen(QtCore.Qt.NoPen)
+        painter.set_pen(QtCore.Qt.PenStyle.NoPen)
 
-        gradient.set_color_at(0, QtCore.Qt.transparent)
+        gradient.set_color_at(0, QtCore.Qt.GlobalColor.transparent)
         gradient.set_color_at(1, opaque_color)
 
         painter.fill_rect(fade_out_image.rect(), gradient)
@@ -246,7 +246,7 @@ class PlainTextScroller(QtWidgets.QWidget):
 
     def change_event(self, event: QtCore.QEvent) -> None:
         """Update the fade images if the palette changed."""
-        if event.type() == QtCore.QEvent.PaletteChange:
+        if event.type() == QtCore.QEvent.Type.PaletteChange:
             self._fade_in_image, self._fade_out_image = self._create_fade_images()
         super().change_event(event)
 

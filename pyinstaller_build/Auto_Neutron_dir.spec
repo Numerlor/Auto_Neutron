@@ -18,13 +18,14 @@ a = Analysis(
     win_private_assemblies=False,
     cipher=block_cipher,
     noarchive=False,
+    optimize=2,
 )
 pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 
 exe = EXE(
     pyz,
     a.scripts,
-    [],
+    OPTIONS,
     exclude_binaries=True,
     name="Auto_Neutron",
     debug=False,
