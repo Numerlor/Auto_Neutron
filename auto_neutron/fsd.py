@@ -5,11 +5,10 @@ from __future__ import annotations
 
 import copy
 import dataclasses
+import typing as t
 
 import more_itertools
 
-_FSD_SIZE_CONSTANTS = {2: 2.0, 3: 2.15, 4: 2.3, 5: 2.45, 6: 2.6, 7: 2.75}
-_FSD_CLASS_CONSTANTS = {1: 11, 2: 10, 3: 8, 4: 10, 5: 12}
 _RATING_TO_CLASS = {"A": 5, "B": 4, "C": 3, "D": 2, "E": 1}
 
 _DEEP_CHARGE_MODIFIER = 1.10  # max fuel usage increased by 10%
@@ -25,15 +24,25 @@ class FrameShiftDrive:
     max_fuel_usage: float
     optimal_mass: float
 
+    _SIZE_CONSTANTS: t.ClassVar[dict[int, float]] = {
+        2: 2.0,
+        3: 2.15,
+        4: 2.3,
+        5: 2.45,
+        6: 2.6,
+        7: 2.75,
+    }
+    _CLASS_CONSTANTS: t.ClassVar[dict[int, int]] = {1: 11, 2: 10, 3: 8, 4: 10, 5: 12}
+
     @property
     def rating_const(self) -> int:
         """Get the linear rating const for the FSD's class rating."""
-        return _FSD_CLASS_CONSTANTS[self.class_]
+        return self._CLASS_CONSTANTS[self.class_]
 
     @property
     def size_const(self) -> float:
         """Get the power constant for the FSD's size."""
-        return _FSD_SIZE_CONSTANTS[self.size]
+        return self._SIZE_CONSTANTS[self.size]
 
     @classmethod
     def from_loadout_dict(cls, loadout: dict) -> FrameShiftDrive:
@@ -86,6 +95,13 @@ class FrameShiftDrive:
         return fsd
 
 
+@dataclasses.dataclass(slots=True, frozen=True)
+class SCOFrameShiftDrive(FrameShiftDrive):
+    """Supercruise overcharge FSD."""
+
+    _CLASS_CONSTANTS = {1: 8, 2: 12, 3: 12, 4: 12, 5: 13}
+
+
 _BASE_FSDS = {  # base unengineered FSDs
     "int_hyperdrive_size2_class1": FrameShiftDrive(2, 1, 0.60, 48),
     "int_hyperdrive_size2_class2": FrameShiftDrive(2, 2, 0.60, 54),
@@ -117,34 +133,34 @@ _BASE_FSDS = {  # base unengineered FSDs
     "int_hyperdrive_size7_class3": FrameShiftDrive(7, 3, 8.50, 1800),
     "int_hyperdrive_size7_class4": FrameShiftDrive(7, 4, 10.60, 2250),
     "int_hyperdrive_size7_class5": FrameShiftDrive(7, 5, 12.80, 2700),
-    "int_hyperdrive_overcharge_size2_class1": FrameShiftDrive(2, 1, 0.60, 60),
-    "int_hyperdrive_overcharge_size2_class2": FrameShiftDrive(2, 2, 0.90, 90),
-    "int_hyperdrive_overcharge_size2_class3": FrameShiftDrive(2, 3, 0.90, 90),
-    "int_hyperdrive_overcharge_size2_class4": FrameShiftDrive(2, 4, 0.90, 90),
-    "int_hyperdrive_overcharge_size2_class5": FrameShiftDrive(2, 5, 1.00, 100),
-    "int_hyperdrive_overcharge_size3_class1": FrameShiftDrive(3, 1, 1.20, 100),
-    "int_hyperdrive_overcharge_size3_class2": FrameShiftDrive(3, 2, 1.80, 150),
-    "int_hyperdrive_overcharge_size3_class3": FrameShiftDrive(3, 3, 1.80, 150),
-    "int_hyperdrive_overcharge_size3_class4": FrameShiftDrive(3, 4, 1.80, 150),
-    "int_hyperdrive_overcharge_size3_class5": FrameShiftDrive(3, 5, 1.90, 167),
-    "int_hyperdrive_overcharge_size4_class1": FrameShiftDrive(4, 1, 2.00, 350),
-    "int_hyperdrive_overcharge_size4_class2": FrameShiftDrive(4, 2, 3.00, 525),
-    "int_hyperdrive_overcharge_size4_class3": FrameShiftDrive(4, 3, 3.00, 525),
-    "int_hyperdrive_overcharge_size4_class4": FrameShiftDrive(4, 4, 3.00, 525),
-    "int_hyperdrive_overcharge_size4_class5": FrameShiftDrive(4, 5, 3.20, 585),
-    "int_hyperdrive_overcharge_size5_class1": FrameShiftDrive(5, 1, 3.30, 700),
-    "int_hyperdrive_overcharge_size5_class2": FrameShiftDrive(5, 2, 5.00, 1050),
-    "int_hyperdrive_overcharge_size5_class3": FrameShiftDrive(5, 3, 5.00, 1050),
-    "int_hyperdrive_overcharge_size5_class4": FrameShiftDrive(5, 4, 5.00, 1050),
-    "int_hyperdrive_overcharge_size5_class5": FrameShiftDrive(5, 5, 5.20, 1175),
-    "int_hyperdrive_overcharge_size6_class1": FrameShiftDrive(6, 1, 5.30, 1200),
-    "int_hyperdrive_overcharge_size6_class2": FrameShiftDrive(6, 2, 8.00, 1800),
-    "int_hyperdrive_overcharge_size6_class3": FrameShiftDrive(6, 3, 8.00, 1800),
-    "int_hyperdrive_overcharge_size6_class4": FrameShiftDrive(6, 4, 8.00, 1800),
-    "int_hyperdrive_overcharge_size6_class5": FrameShiftDrive(6, 5, 8.30, 2000),
-    "int_hyperdrive_overcharge_size7_class1": FrameShiftDrive(7, 1, 8.50, 1800),
-    "int_hyperdrive_overcharge_size7_class2": FrameShiftDrive(7, 2, 12.80, 2700),
-    "int_hyperdrive_overcharge_size7_class3": FrameShiftDrive(7, 3, 12.80, 2700),
-    "int_hyperdrive_overcharge_size7_class4": FrameShiftDrive(7, 4, 12.80, 2700),
-    "int_hyperdrive_overcharge_size7_class5": FrameShiftDrive(7, 5, 13.10, 3000),
+    "int_hyperdrive_overcharge_size2_class1": SCOFrameShiftDrive(2, 1, 0.60, 60),
+    "int_hyperdrive_overcharge_size2_class2": SCOFrameShiftDrive(2, 2, 0.90, 90),
+    "int_hyperdrive_overcharge_size2_class3": SCOFrameShiftDrive(2, 3, 0.90, 90),
+    "int_hyperdrive_overcharge_size2_class4": SCOFrameShiftDrive(2, 4, 0.90, 90),
+    "int_hyperdrive_overcharge_size2_class5": SCOFrameShiftDrive(2, 5, 1.00, 100),
+    "int_hyperdrive_overcharge_size3_class1": SCOFrameShiftDrive(3, 1, 1.20, 100),
+    "int_hyperdrive_overcharge_size3_class2": SCOFrameShiftDrive(3, 2, 1.80, 150),
+    "int_hyperdrive_overcharge_size3_class3": SCOFrameShiftDrive(3, 3, 1.80, 150),
+    "int_hyperdrive_overcharge_size3_class4": SCOFrameShiftDrive(3, 4, 1.80, 150),
+    "int_hyperdrive_overcharge_size3_class5": SCOFrameShiftDrive(3, 5, 1.90, 167),
+    "int_hyperdrive_overcharge_size4_class1": SCOFrameShiftDrive(4, 1, 2.00, 350),
+    "int_hyperdrive_overcharge_size4_class2": SCOFrameShiftDrive(4, 2, 3.00, 525),
+    "int_hyperdrive_overcharge_size4_class3": SCOFrameShiftDrive(4, 3, 3.00, 525),
+    "int_hyperdrive_overcharge_size4_class4": SCOFrameShiftDrive(4, 4, 3.00, 525),
+    "int_hyperdrive_overcharge_size4_class5": SCOFrameShiftDrive(4, 5, 3.20, 585),
+    "int_hyperdrive_overcharge_size5_class1": SCOFrameShiftDrive(5, 1, 3.30, 700),
+    "int_hyperdrive_overcharge_size5_class2": SCOFrameShiftDrive(5, 2, 5.00, 1050),
+    "int_hyperdrive_overcharge_size5_class3": SCOFrameShiftDrive(5, 3, 5.00, 1050),
+    "int_hyperdrive_overcharge_size5_class4": SCOFrameShiftDrive(5, 4, 5.00, 1050),
+    "int_hyperdrive_overcharge_size5_class5": SCOFrameShiftDrive(5, 5, 5.20, 1175),
+    "int_hyperdrive_overcharge_size6_class1": SCOFrameShiftDrive(6, 1, 5.30, 1200),
+    "int_hyperdrive_overcharge_size6_class2": SCOFrameShiftDrive(6, 2, 8.00, 1800),
+    "int_hyperdrive_overcharge_size6_class3": SCOFrameShiftDrive(6, 3, 8.00, 1800),
+    "int_hyperdrive_overcharge_size6_class4": SCOFrameShiftDrive(6, 4, 8.00, 1800),
+    "int_hyperdrive_overcharge_size6_class5": SCOFrameShiftDrive(6, 5, 8.30, 2000),
+    "int_hyperdrive_overcharge_size7_class1": SCOFrameShiftDrive(7, 1, 8.50, 1800),
+    "int_hyperdrive_overcharge_size7_class2": SCOFrameShiftDrive(7, 2, 12.80, 2700),
+    "int_hyperdrive_overcharge_size7_class3": SCOFrameShiftDrive(7, 3, 12.80, 2700),
+    "int_hyperdrive_overcharge_size7_class4": SCOFrameShiftDrive(7, 4, 12.80, 2700),
+    "int_hyperdrive_overcharge_size7_class5": SCOFrameShiftDrive(7, 5, 13.10, 3000),
 }
