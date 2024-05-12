@@ -11,6 +11,7 @@ import winreg
 from types import TracebackType
 
 from PySide6 import QtCore
+from __feature__ import snake_case, true_property  # noqa: F401
 
 from auto_neutron.utils.utils import get_application
 
