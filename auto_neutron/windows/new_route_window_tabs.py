@@ -303,6 +303,8 @@ class SpanshTabBase(TabBase, SpanshTabGUIBase):
             for connection in self._connections:
                 self._journal.disconnect(connection)
             self._connections.clear()
+        super().set_journal(journal)
+
         if journal is not None:
             self._connections.extend(
                 (
@@ -324,8 +326,6 @@ class SpanshTabBase(TabBase, SpanshTabGUIBase):
 
             if journal.cargo is not None:
                 self._update_from_cargo(journal.cargo)
-
-        super().set_journal(journal)
 
     def set_request_manager(self, manager: SpanshRequestManager) -> None:
         """Set the request manager to `manager`."""
