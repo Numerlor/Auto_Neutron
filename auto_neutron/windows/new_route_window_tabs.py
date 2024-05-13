@@ -68,7 +68,7 @@ class TabBase(TabGUIBase):
         self._journal_shutdown_connection: QtCore.QMetaObject.Connection | None = None
         self._status_callback = status_callback
         self.submit_button.pressed.connect(self._get_route)
-        self.destroyed.connect(self._disconnect_journal)
+        self.destroyed.connect(partial(self.__class__._disconnect_journal, self))
 
     @QtCore.Slot()
     def _set_submit_sensitive(self) -> None:
@@ -291,7 +291,7 @@ class SpanshTabBase(TabBase, SpanshTabGUIBase):
         self._completer_cache = self._completer_caches.setdefault(
             self.parent(), DictWeakref()
         )
-        self.destroyed.connect(self._close_cleanup)
+        self.destroyed.connect(partial(self.__class__._close_cleanup, self))
 
     def set_journal(self, journal: Journal | None) -> None:
         """
@@ -303,6 +303,8 @@ class SpanshTabBase(TabBase, SpanshTabGUIBase):
             for connection in self._connections:
                 self._journal.disconnect(connection)
             self._connections.clear()
+        super().set_journal(journal)
+
         if journal is not None:
             self._connections.extend(
                 (
@@ -324,8 +326,6 @@ class SpanshTabBase(TabBase, SpanshTabGUIBase):
 
             if journal.cargo is not None:
                 self._update_from_cargo(journal.cargo)
-
-        super().set_journal(journal)
 
     def set_request_manager(self, manager: SpanshRequestManager) -> None:
         """Set the request manager to `manager`."""
