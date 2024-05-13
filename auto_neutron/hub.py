@@ -206,12 +206,13 @@ class Hub(QtCore.QObject):
     def display_shut_down_window(self) -> None:
         """Display the shut down window and connect it to create a new route and save the current one."""
         log.info("Displaying shut down window.")
-        window = ShutDownWindow(self.window)
-        window.new_journal_signal.connect(
-            partial(self.new_route, route=self.plotter_state.route)
-        )
-        window.save_route_button.pressed.connect(self.save_route)
-        window.show()
+        window = create_or_activate_window(ShutDownWindow, "hub", self.window)
+        if window is not None:
+            window.new_journal_signal.connect(
+                partial(self.new_route, route=self.plotter_state.route)
+            )
+            window.save_route_button.pressed.connect(self.save_route)
+            window.show()
 
     @QtCore.Slot()
     def display_license_window(self) -> None:
