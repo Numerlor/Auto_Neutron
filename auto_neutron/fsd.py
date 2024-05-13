@@ -65,7 +65,9 @@ class FrameShiftDrive:
         return fsd
 
     @classmethod
-    def from_coriolis_dict(cls, coriolis_dict: dict) -> FrameShiftDrive:
+    def from_coriolis_dict(
+        cls, coriolis_dict: dict
+    ) -> FrameShiftDrive:  # TODO: Coriolis doesn't handle SCO yet
         """Create a FrameShiftDrive instance for the FSD in `coriolis_dict`."""
         fsd_dict = coriolis_dict["components"]["standard"]["frameShiftDrive"]
         class_ = _RATING_TO_CLASS[fsd_dict["rating"]]
