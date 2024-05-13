@@ -68,7 +68,7 @@ class TabBase(TabGUIBase):
         self._journal_shutdown_connection: QtCore.QMetaObject.Connection | None = None
         self._status_callback = status_callback
         self.submit_button.pressed.connect(self._get_route)
-        self.destroyed.connect(self._disconnect_journal)
+        self.destroyed.connect(partial(self.__class__._disconnect_journal, self))
 
     @QtCore.Slot()
     def _set_submit_sensitive(self) -> None:
@@ -291,7 +291,7 @@ class SpanshTabBase(TabBase, SpanshTabGUIBase):
         self._completer_cache = self._completer_caches.setdefault(
             self.parent(), DictWeakref()
         )
-        self.destroyed.connect(self._close_cleanup)
+        self.destroyed.connect(partial(self.__class__._close_cleanup, self))
 
     def set_journal(self, journal: Journal | None) -> None:
         """

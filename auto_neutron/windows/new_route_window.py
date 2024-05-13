@@ -3,9 +3,11 @@
 
 from __future__ import annotations
 
+import collections.abc
 import contextlib
 import datetime
 import logging
+from functools import partial
 
 import babel.dates
 from PySide6 import QtCore, QtGui, QtWidgets
@@ -114,6 +116,7 @@ class NewRouteWindow(NewRouteWindowGUI):
 
         self.retranslate()
         self._populate_journal_combos()
+        self.destroyed.connect(partial(self._delete_tabs, self.tabs))
 
     def _set_busy_cursor(self) -> None:
         """Set the cursor to the busy cursor."""
@@ -268,6 +271,12 @@ class NewRouteWindow(NewRouteWindowGUI):
         """Retranslate the GUI when a language change occurs."""
         if event.type() == QtCore.QEvent.Type.LanguageChange:
             self.retranslate()
+
+    @staticmethod
+    @QtCore.Slot()
+    def _delete_tabs(tabs: collections.abc.Iterable[TabBase]) -> None:
+        for tab in tabs:
+            tab.delete_later()
 
     def close_event(self, event: QtGui.QCloseEvent) -> None:
         """Abort any running network request on close."""
