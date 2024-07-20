@@ -50,9 +50,10 @@ else:
     ]
     debug = True
 
-compiled_process = subprocess.run(["poetry", "run", "task", "i18n-compile"])
-if compiled_process.returncode != 0:
-    raise Exception("Failed to compile translation files.")
+if not os.getenv("GITHUB_ACTIONS"):
+    compiled_process = subprocess.run(["poetry", "run", "task", "i18n-compile"])
+    if compiled_process.returncode != 0:
+        raise Exception("Failed to compile translation files.")
 
 for spec_file in spec_files:
     PyInstaller.__main__.run(

@@ -1,0 +1,159 @@
+name: Create release builds
+run-name: ${{ github.ref_name }} build
+on:
+  release:
+    types:
+      - prereleased
+env:
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  get-release:
+    runs-on: windows-latest
+    outputs:
+      id: ${{ steps.release-fetch.outputs.id }}
+    steps:
+      - name: "Get latest release"
+        id: release-fetch
+        run: |
+          $query = @"
+            {
+              repository(owner: "Numerlor", name: "Auto_Neutron") {
+                release(tagName: "${{ github.ref_name }}") {
+                  databaseId
+                }}}
+          "@
+
+          $response = Invoke-WebRequest `
+            -Method Post `
+            -Authentication Bearer `
+            -Token (ConvertTo-SecureString -AsPlainText $Env:GH_TOKEN) `
+            -UserAgent "Numerlor/Auto_Neutron action" `
+            -Uri https://api.github.com/graphql `
+            -Body (ConvertTo-Json @{query=$query})
+
+          $id = (ConvertFrom-Json $response.content).data.repository.release.databaseId
+          "Release id $id"
+          "id=$id" >> $Env:GITHUB_OUTPUT
+
+  build-pyinstaller:
+    runs-on: windows-latest
+    steps:
+      - name: "Get release tag"
+        id: get-tag
+        run: |
+          $response = Invoke-WebRequest `
+           -Authentication Bearer `
+           -Token (ConvertTo-SecureString -AsPlainText $Env:GH_TOKEN) `
+           -UserAgent "Numerlor/Auto_Neutron action" `
+           -Uri "https://raw.githubusercontent.com/Numerlor/Auto_Neutron/${{ github.ref_name }}/requirements-with-dev.txt"
+          $response.content -match "pyinstaller==(.+?) "
+          $tag = "v$($matches[1])"
+          "tag=$tag" >> $Env:GITHUB_OUTPUT
+          Write-Output "Got latest release $tag"
+      - uses: ilammy/msvc-dev-cmd@v1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: "Clone repo"
+        uses: actions/checkout@v4
+        with:
+          repository: pyinstaller/pyinstaller
+          ref: ${{ steps.get-tag.outputs.tag }}
+          path: pyinstaller
+      - name: "Build"
+        run: |
+          cd pyinstaller/bootloader
+          python .\waf all
+      - uses: actions/upload-artifact@master
+        with:
+          name: bootloaders
+          path: pyinstaller\PyInstaller\bootloader\Windows-64bit-intel
+          if-no-files-found: error
+          overwrite: true
+
+  build-app:
+    runs-on: windows-latest
+    needs: [build-pyinstaller, get-release]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+          lfs: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: "Install deps"
+        run: |
+          pip install -r requirements-with-dev.txt
+
+      - name: "Get pyinstaller location"
+        id: pyinstaller-loc
+        run: |
+          $path = ((pip show pyinstaller) -match "Location: (.+)").Substring(10)
+          "path=$path" >> $Env:GITHUB_OUTPUT
+      - name: "Replace bootloader"
+        uses: actions/download-artifact@master
+        with:
+          name: bootloaders
+          path: "${{ steps.pyinstaller-loc.outputs.path }}\\PyInstaller\\bootloader\\Windows-64bit-intel"
+
+      - name: "compile i18n"
+        run: pybabel compile -d locale -D auto_neutron
+      - name: "Get UPX"
+        run: |
+          $release_response = Invoke-WebRequest `
+            -Uri https://api.github.com/repos/upx/upx/releases/latest
+          $download_url = ((ConvertFrom-Json $release_response.content).assets -match "upx.+win64.zip").browser_download_url
+          $download_response = Invoke-WebRequest `
+            -Uri $download_url `
+            -OutFile upx.zip
+          Expand-Archive upx.zip
+          $path = (Get-ChildItem upx).FullName
+          "UPX_DIR=$path" >> $Env:GITHUB_ENV
+
+      - name: "Build"
+        run: python -OO pyinstaller_build/build.py
+
+      - name: "Upload release files"
+        run: |
+          Invoke-WebRequest `
+            -Method Post `
+            -Authentication Bearer `
+            -Token (ConvertTo-SecureString -AsPlainText $Env:GH_TOKEN) `
+            -UserAgent "Numerlor/Auto_Neutron action" `
+            -ContentType "application/vnd.microsoft.portable-executable" `
+            -Uri https://uploads.github.com/repos/Numerlor/Auto_Neutron/releases/${{needs.get-release.outputs.id}}/assets?name=Auto_Neutron.exe `
+            -InFile pyinstaller_build/dist/Auto_Neutron.exe
+          Invoke-WebRequest `
+            -Method Post `
+            -Authentication Bearer `
+            -Token (ConvertTo-SecureString -AsPlainText $Env:GH_TOKEN) `
+            -UserAgent "Numerlor/Auto_Neutron action" `
+            -ContentType "text/plain" `
+            -Uri https://uploads.github.com/repos/Numerlor/Auto_Neutron/releases/${{needs.get-release.outputs.id}}/assets?name=Auto_Neutron.exe.signature.txt `
+            -InFile pyinstaller_build/dist/Auto_Neutron.exe.signature.txt
+          Invoke-WebRequest `
+            -Method Post `
+            -Authentication Bearer `
+            -Token (ConvertTo-SecureString -AsPlainText $Env:GH_TOKEN) `
+            -UserAgent "Numerlor/Auto_Neutron action" `
+            -ContentType "application/zip" `
+            -Uri https://uploads.github.com/repos/Numerlor/Auto_Neutron/releases/${{needs.get-release.outputs.id}}/assets?name=Auto_Neutron.zip `
+            -InFile pyinstaller_build/dist/Auto_Neutron.zip
+          Invoke-WebRequest `
+            -Method Post `
+            -Authentication Bearer `
+            -Token (ConvertTo-SecureString -AsPlainText $Env:GH_TOKEN) `
+            -UserAgent "Numerlor/Auto_Neutron action" `
+            -ContentType "text/plain" `
+            -Uri https://uploads.github.com/repos/Numerlor/Auto_Neutron/releases/${{needs.get-release.outputs.id}}/assets?name=Auto_Neutron.zip.signature.txt `
+            -InFile pyinstaller_build/dist/Auto_Neutron.zip.signature.txt
+          Invoke-WebRequest `
+            -Method Patch `
+            -Authentication Bearer `
+            -Token (ConvertTo-SecureString -AsPlainText $Env:GH_TOKEN) `
+            -UserAgent "Numerlor/Auto_Neutron action" `
+            -ContentType "text/json" `
+            -Uri https://api.github.com/repos/Numerlor/Auto_Neutron/releases/${{needs.get-release.outputs.id}} `
+            -Body (ConvertTo-Json @{prerelease=$false})

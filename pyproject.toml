@@ -41,6 +41,7 @@ pyside-pyi = "pyside6-genpyi all --feature snake_case true_property"
 build = "python -OO pyinstaller_build/build.py"
 build-debug = "python pyinstaller_build/build.py"
 convert-icon = "python pyinstaller_build/svg_to_ico.py -i resources/icon.svg -o resources/icons_libary.ico"
+dump-requirements = "poetry export --with dev -f requirements.txt --output requirements-with-dev.txt && poetry export -f requirements.txt --output requirements.txt"
 
 i18n-init = "pybabel init -i .\\locale\\auto_neutron.pot -d .\\locale -D auto_neutron -l"
 i18n-compile = "pybabel compile -d locale -D auto_neutron"
