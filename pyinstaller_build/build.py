@@ -15,6 +15,7 @@ dotenv.load_dotenv()
 
 
 BASE_PATH = Path("pyinstaller_build")
+IS_CI = os.getenv("GITHUB_ACTIONS")
 
 
 def sha256sum(file: Path) -> str:
@@ -50,7 +51,7 @@ else:
     ]
     debug = True
 
-if not os.getenv("GITHUB_ACTIONS"):
+if not IS_CI:
     compiled_process = subprocess.run(["poetry", "run", "task", "i18n-compile"])
     if compiled_process.returncode != 0:
         raise Exception("Failed to compile translation files.")
@@ -70,7 +71,7 @@ for spec_file in spec_files:
 directory_path = Path(f"{BASE_PATH}/dist/Auto_Neutron")
 exe_path = directory_path.with_name("Auto_Neutron.exe")
 
-if not debug:
+if not debug and not IS_CI:
     archive_path = Path(
         shutil.make_archive(
             str(directory_path),
