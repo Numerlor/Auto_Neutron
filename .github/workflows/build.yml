@@ -115,6 +115,59 @@ jobs:
       - name: "Build"
         run: python -OO pyinstaller_build/build.py
 
+      - name: "Upload onefile artifact"
+        id: "onefile-upload"
+        uses: actions/upload-artifact@master
+        with:
+          name: "Onefile exe"
+          path: pyinstaller_build/dist/Auto_Neutron.exe
+          if-no-files-found: error
+
+      - name: "Upload directory artifact"
+        id: "directory-upload"
+        uses: actions/upload-artifact@master
+        with:
+          name: "Onefile exe"
+          path: pyinstaller_build/dist/Auto_Neutron/Auto_Neutron.exe
+          if-no-files-found: error
+
+      - name: "Sign onefile"
+        uses: signpath/github-action-submit-signing-request@v0.4
+        with:
+          api-token: "${{secrets.SIGNPATH_API_TOKEN}}"
+          organization-id: "f0f5136e-b307-4650-9ee6-ccff22d46830"
+          project-slug: "Auto_Neutron"
+          signing-policy-slug: "test-signing"
+          github-artifact-id: "${{steps.onefile-upload.outputs.artifact-id}}"
+          wait-for-completion: true
+          output-artifact-directory: "pyinstaller_build/dist"
+
+      - name: "Sign directory"
+        uses: signpath/github-action-submit-signing-request@v0.4
+        with:
+          api-token: "${{secrets.SIGNPATH_API_TOKEN}}"
+          organization-id: "f0f5136e-b307-4650-9ee6-ccff22d46830"
+          project-slug: "Auto_Neutron"
+          signing-policy-slug: "test-signing"
+          github-artifact-id: "${{steps.directory-upload.outputs.artifact-id}}"
+          wait-for-completion: true
+          output-artifact-directory: "pyinstaller_build/dist/Auto_Neutron"
+
+      - name: "Zip directory"
+        run: |
+          Compress-Archive `
+            -Path "pyinstaller_build/dist/Auto_Neutron"`
+            -DestinationPath "pyinstaller_build/dist/Auto_Neutron.zip"
+      - name: "Get hashes"
+        run: |
+          Set-Content `
+            -Path pyinstaller_build/dist/Auto_Neutron.exe.signature.txt `
+            -Value (Get-FileHash -Path pyinstaller_build/dist/Auto_Neutron.exe -Algorithm SHA256).hash.toLower()
+
+          Set-Content `
+            -Path pyinstaller_build/dist/Auto_Neutron.zip.signature.txt `
+            -Value (Get-FileHash -Path pyinstaller_build/dist/Auto_Neutron.zip -Algorithm SHA256).hash.toLower()
+
       - name: "Upload release files"
         run: |
           Invoke-WebRequest `
@@ -149,11 +202,11 @@ jobs:
             -ContentType "text/plain" `
             -Uri https://uploads.github.com/repos/Numerlor/Auto_Neutron/releases/${{needs.get-release.outputs.id}}/assets?name=Auto_Neutron.zip.signature.txt `
             -InFile pyinstaller_build/dist/Auto_Neutron.zip.signature.txt
-          Invoke-WebRequest `
-            -Method Patch `
-            -Authentication Bearer `
-            -Token (ConvertTo-SecureString -AsPlainText $Env:GH_TOKEN) `
-            -UserAgent "Numerlor/Auto_Neutron action" `
-            -ContentType "text/json" `
-            -Uri https://api.github.com/repos/Numerlor/Auto_Neutron/releases/${{needs.get-release.outputs.id}} `
-            -Body (ConvertTo-Json @{prerelease=$false})
+#          Invoke-WebRequest `
+#            -Method Patch `
+#            -Authentication Bearer `
+#            -Token (ConvertTo-SecureString -AsPlainText $Env:GH_TOKEN) `
+#            -UserAgent "Numerlor/Auto_Neutron action" `
+#            -ContentType "text/json" `
+#            -Uri https://api.github.com/repos/Numerlor/Auto_Neutron/releases/${{needs.get-release.outputs.id}} `
+#            -Body (ConvertTo-Json @{prerelease=$false})
