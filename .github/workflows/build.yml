@@ -127,7 +127,7 @@ jobs:
         id: "directory-upload"
         uses: actions/upload-artifact@master
         with:
-          name: "Onefile exe"
+          name: "Directory exe"
           path: pyinstaller_build/dist/Auto_Neutron/Auto_Neutron.exe
           if-no-files-found: error
 
