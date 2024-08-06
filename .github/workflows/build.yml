@@ -151,25 +151,9 @@ jobs:
             -Authentication Bearer `
             -Token (ConvertTo-SecureString -AsPlainText $Env:GH_TOKEN) `
             -UserAgent "Numerlor/Auto_Neutron action" `
-            -ContentType "text/plain" `
-            -Uri https://uploads.github.com/repos/Numerlor/Auto_Neutron/releases/${{needs.get-release.outputs.id}}/assets?name=Auto_Neutron.exe.signature.txt `
-            -InFile pyinstaller_build/dist/Auto_Neutron.exe.signature.txt
-          Invoke-WebRequest `
-            -Method Post `
-            -Authentication Bearer `
-            -Token (ConvertTo-SecureString -AsPlainText $Env:GH_TOKEN) `
-            -UserAgent "Numerlor/Auto_Neutron action" `
             -ContentType "application/zip" `
             -Uri https://uploads.github.com/repos/Numerlor/Auto_Neutron/releases/${{needs.get-release.outputs.id}}/assets?name=Auto_Neutron.zip `
             -InFile pyinstaller_build/dist/Auto_Neutron.zip
-          Invoke-WebRequest `
-            -Method Post `
-            -Authentication Bearer `
-            -Token (ConvertTo-SecureString -AsPlainText $Env:GH_TOKEN) `
-            -UserAgent "Numerlor/Auto_Neutron action" `
-            -ContentType "text/plain" `
-            -Uri https://uploads.github.com/repos/Numerlor/Auto_Neutron/releases/${{needs.get-release.outputs.id}}/assets?name=Auto_Neutron.zip.signature.txt `
-            -InFile pyinstaller_build/dist/Auto_Neutron.zip.signature.txt
 #          Invoke-WebRequest `
 #            -Method Patch `
 #            -Authentication Bearer `
