@@ -59,7 +59,6 @@ for spec_file in spec_files:
     PyInstaller.__main__.run(
         [
             str(spec_file),
-            f"--upx-dir={os.environ['UPX_DIR']}",
             "-y",
             f"--workpath={BASE_PATH}/build",
             f"--distpath={BASE_PATH}/dist",
