@@ -4,25 +4,23 @@ version = "2.3.1"
 description = "An automatic neutron route plotter for Elite Dangerous"
 authors = ["Numerlor <numerlor@numerlor.me>"]
 license = "GPL-3.0-or-later"
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "3.12.*"
 
-PySide6 = "6.7.0"
+PySide6 = "6.7.2"
 tomli-w = "1.0.0"
-babel = "2.15.0"
-more-itertools = "10.2.0"
+babel = "2.16.0"
+more-itertools = "10.4.0"
+signify = "0.6.1"
 
 [tool.poetry.dev-dependencies]
-typing-extensions = "4.1.0"
-pre-commit = "3.7.0"
-pyinstaller = "6.6.0"
-taskipy = "1.12.2"
+typing-extensions = "4.12.2"
+pre-commit = "3.8.0"
+pyinstaller = "6.10.0"
+taskipy = "1.13.0"
 python-dotenv = "1.0.1"
-
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
 
 [tool.isort]
 atomic = true
