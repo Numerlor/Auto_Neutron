@@ -28,31 +28,6 @@ from auto_neutron.utils.network import (
 from auto_neutron.utils.utils import get_application
 from auto_neutron.windows import UpdateErrorWindow, VersionDownloadConfirmDialog
 
-IGNORE_UNSIGNED_DIR_FILES = {
-    "_internal/babel/locale-data/en_001.dat",
-    "_internal/babel/locale-data/en_150.dat",
-    "_internal/babel/locale-data/en.dat",
-    "_internal/babel/locale-data/root.dat",
-    "_internal/babel/global.dat",
-    "_internal/babel/py.typed",
-    "_internal/locale/en/LC_MESSAGES/auto_neutron.mo",
-    "_internal/locale/en/LC_MESSAGES/auto_neutron.po",
-    "_internal/locale/auto_neutron.pot",
-    "_internal/locale/README.md",
-    "_internal/resources/icon.svg",
-    "_internal/resources/icons_library.ico",
-    "_internal/resources/refresh-dark.svg",
-    "_internal/resources/refresh.svg",
-    "_internal/third_party_licenses/LICENSE_babel.md",
-    "_internal/third_party_licenses/LICENSE_breeze-icons.md",
-    "_internal/third_party_licenses/LICENSE_more-itertools.md",
-    "_internal/third_party_licenses/LICENSE_PySide6.md",
-    "_internal/third_party_licenses/LICENSE_Python.md",
-    "_internal/third_party_licenses/LICENSE_tomli-w.md",
-    "_internal/base_library.zip",
-    "_internal/LICENSE.md",
-}
-
 log = logging.getLogger(__name__)
 
 LATEST_RELEASE_URL = (
@@ -240,7 +215,7 @@ class Updater(QtCore.QObject):
         else:
             zip_file = ZipFile(io.BytesIO(download_bytes))
             for file in zip_file.namelist():
-                if file not in IGNORE_UNSIGNED_DIR_FILES:
+                if Path(file).suffix in {".exe", ".dll", ".pyd"}:
                     try:
                         SignedPEFile(io.BytesIO(zip_file.read(file))).verify()
                     except SignifyError as e:
