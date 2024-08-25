@@ -1,7 +1,7 @@
 # This file uses the MIT license.
 # Copyright (C) 2021  Numerlor
+
 import argparse
-import hashlib
 import os
 import re
 import shutil
@@ -21,19 +21,6 @@ BASE_PATH = Path(__file__).parent
 FILE_INFO_FLAG_RELEASE = 0x0
 FILE_INFO_FLAG_PRERELEASE = 0x3  # VS_FF_PRERELEASE & VS_FF_DEBUG
 VERSION_REGEX = re.compile(r"^v\d.\d.\d$")
-
-
-def sha256sum(file: Path) -> str:
-    """Get the SHA256 checksum of `file`."""
-    hash_ = hashlib.sha256()
-    buffer = memoryview(bytearray(128 * 1024))
-    with file.open("rb", buffering=0) as f:
-        while True:
-            num_read = f.readinto(buffer)
-            if num_read == 0:
-                break
-            hash_.update(buffer[:num_read])
-    return hash_.hexdigest()
 
 
 def create_version_info_file(flags: int) -> None:
@@ -108,12 +95,4 @@ if not debug:
             "zip",
             directory_path,
         )
-    )
-
-    Path(archive_path.with_name(archive_path.name + ".signature.txt")).write_text(
-        sha256sum(archive_path) + "\n"
-    )
-
-    Path(exe_path.with_name(exe_path.name + ".signature.txt")).write_text(
-        sha256sum(exe_path) + "\n"
     )
