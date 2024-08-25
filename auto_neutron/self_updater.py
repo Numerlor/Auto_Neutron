@@ -58,6 +58,7 @@ log = logging.getLogger(__name__)
 LATEST_RELEASE_URL = (
     "https://api.github.com/repos/Numerlor/Auto_Neutron/releases/latest"
 )
+
 IS_ONEFILE = Path(getattr(sys, "_MEIPASS", "")) != Path(sys.executable).parent
 
 TEMP_NAME = "temp_auto_neutron"
@@ -79,7 +80,7 @@ class Updater(QtCore.QObject):
 
         The current executable's file will be renamed to a temporary name, and deleted by this method on the next run.
         """
-        if not __debug__:
+        if __debug__:
             log.info("Requesting version info.")
             make_network_request(
                 LATEST_RELEASE_URL, finished_callback=self._check_new_version
@@ -216,6 +217,7 @@ class Updater(QtCore.QObject):
             try:
                 SignedPEFile(io.BytesIO(download_bytes)).verify()
             except SignifyError as e:
+                log.warning("Invalid file signature", exc_info=e)
                 self._show_error_window(
                     _("Unable to verify downloaded file signature: " + str(e))
                 )
@@ -225,11 +227,13 @@ class Updater(QtCore.QObject):
             try:
                 EXECUTABLE_PATH.rename(temp_path)
             except OSError as e:
+                log.warning("Failed to rename executable.", exc_info=e)
                 self._show_error_window(_("Unable to rename executable: ") + str(e))
                 return
             try:
                 Path(EXECUTABLE_PATH).write_bytes(download_bytes)
             except OSError as e:
+                log.warning("Failed to write new executable.", exc_info=e)
                 self._show_error_window(_("Unable to create new executable: ") + str(e))
                 return
 
@@ -240,6 +244,7 @@ class Updater(QtCore.QObject):
                     try:
                         SignedPEFile(io.BytesIO(zip_file.read(file))).verify()
                     except SignifyError as e:
+                        log.warning("Invalid file signature", exc_info=e)
                         self._show_error_window(
                             _(
                                 "Unable to verify downloaded file signature for file {}: {}"
@@ -253,6 +258,7 @@ class Updater(QtCore.QObject):
             try:
                 temp_path.mkdir(exist_ok=True)
             except OSError as e:
+                log.warning("Failed to create temp directory.", exc_info=e)
                 self._show_error_window(
                     _("Unable to create temporary directory: ") + str(e)
                 )
@@ -262,6 +268,7 @@ class Updater(QtCore.QObject):
                 try:
                     shutil.move(file, temp_path)
                 except OSError as e:
+                    log.warning("Failed to move files to temp directory.", exc_info=e)
                     self._show_error_window(
                         _("Unable to move files into temporary directory: ") + str(e)
                     )
@@ -270,6 +277,7 @@ class Updater(QtCore.QObject):
             try:
                 zip_file.extractall(path=dir_path)
             except OSError as e:
+                log.warning("Failed to extract release.", exc_info=e)
                 self._show_error_window(
                     _("Unable to extract new release files: ") + str(e)
                 )
