@@ -3,7 +3,6 @@
 
 from __future__ import annotations
 
-import hashlib
 import io
 import logging
 import shutil
@@ -15,6 +14,8 @@ from pathlib import Path
 from zipfile import ZipFile
 
 from PySide6 import QtCore, QtNetwork, QtWidgets
+from signify.authenticode import SignedPEFile
+from signify.exceptions import SignifyError
 from __feature__ import snake_case, true_property  # noqa: F401
 
 from auto_neutron.constants import VERSION
@@ -26,6 +27,31 @@ from auto_neutron.utils.network import (
 )
 from auto_neutron.utils.utils import get_application
 from auto_neutron.windows import UpdateErrorWindow, VersionDownloadConfirmDialog
+
+IGNORE_UNSIGNED_DIR_FILES = {
+    "_internal/babel/locale-data/en_001.dat",
+    "_internal/babel/locale-data/en_150.dat",
+    "_internal/babel/locale-data/en.dat",
+    "_internal/babel/locale-data/root.dat",
+    "_internal/babel/global.dat",
+    "_internal/babel/py.typed",
+    "_internal/locale/en/LC_MESSAGES/auto_neutron.mo",
+    "_internal/locale/en/LC_MESSAGES/auto_neutron.po",
+    "_internal/locale/auto_neutron.pot",
+    "_internal/locale/README.md",
+    "_internal/resources/icon.svg",
+    "_internal/resources/icons_library.ico",
+    "_internal/resources/refresh-dark.svg",
+    "_internal/resources/refresh.svg",
+    "_internal/third_party_licenses/LICENSE_babel.md",
+    "_internal/third_party_licenses/LICENSE_breeze-icons.md",
+    "_internal/third_party_licenses/LICENSE_more-itertools.md",
+    "_internal/third_party_licenses/LICENSE_PySide6.md",
+    "_internal/third_party_licenses/LICENSE_Python.md",
+    "_internal/third_party_licenses/LICENSE_tomli-w.md",
+    "_internal/base_library.zip",
+    "_internal/LICENSE.md",
+}
 
 log = logging.getLogger(__name__)
 
@@ -152,46 +178,15 @@ class Updater(QtCore.QObject):
             self._show_error_window(_("Unable to find appropriate new release."))
         else:
             download_url = asset_json["browser_download_url"]
-            hash_download_url = download_url + ".signature.txt"
-            log.info(f"Downloading hash from {download_url}.")
-            make_network_request(
-                hash_download_url,
-                finished_callback=partial(
-                    self._set_hash_and_download, asset_download_url=download_url
-                ),
+            log.info(f"Downloading release from {download_url}.")
+            self._download_started.emit(
+                make_network_request(
+                    download_url,
+                    finished_callback=partial(self._create_new_and_restart),
+                )
             )
 
-    def _set_hash_and_download(
-        self, network_reply: QtNetwork.QNetworkReply, asset_download_url: str
-    ) -> None:
-        """Schedule the file to be downloaded and pass it the checksum hash from the reply."""
-        try:
-            if network_reply.error() is QtNetwork.QNetworkReply.NetworkError.NoError:
-                hash_ = network_reply.read_all().data().decode().strip()
-                log.info(f"Downloading release from {asset_download_url}.")
-                self._download_started.emit(
-                    make_network_request(
-                        asset_download_url,
-                        finished_callback=partial(
-                            self._create_new_and_restart, hash_to_check=hash_
-                        ),
-                    )
-                )
-            elif (
-                network_reply.error()
-                is QtNetwork.QNetworkReply.NetworkError.OperationCanceledError
-            ):
-                return
-            else:
-                self._show_error_window(network_reply.error_string())
-                return
-
-        finally:
-            network_reply.delete_later()
-
-    def _create_new_and_restart(
-        self, reply: QtNetwork.QNetworkReply, hash_to_check: str
-    ) -> None:
+    def _create_new_and_restart(self, reply: QtNetwork.QNetworkReply) -> None:
         """
         Create the new executable/directory from the reply data and start it.
 
@@ -217,14 +212,15 @@ class Updater(QtCore.QObject):
         finally:
             reply.delete_later()
 
-        downloaded_hash = hashlib.sha256(download_bytes)
-        if downloaded_hash.hexdigest() != hash_to_check:
-            self._show_error_window(
-                _("Downloaded file does not match expected checksum.")
-            )
-            return
-
         if IS_ONEFILE:
+            try:
+                SignedPEFile(io.BytesIO(download_bytes)).verify()
+            except SignifyError as e:
+                self._show_error_window(
+                    _("Unable to verify downloaded file signature: " + str(e))
+                )
+                return
+
             temp_path = EXECUTABLE_PATH.with_stem(TEMP_NAME)
             try:
                 EXECUTABLE_PATH.rename(temp_path)
@@ -238,6 +234,19 @@ class Updater(QtCore.QObject):
                 return
 
         else:
+            zip_file = ZipFile(io.BytesIO(download_bytes))
+            for file in zip_file.namelist():
+                if file not in IGNORE_UNSIGNED_DIR_FILES:
+                    try:
+                        SignedPEFile(io.BytesIO(zip_file.read(file))).verify()
+                    except SignifyError as e:
+                        self._show_error_window(
+                            _(
+                                "Unable to verify downloaded file signature for file {}: {}"
+                            ).format(file, str(e))
+                        )
+                        return
+
             dir_path = EXECUTABLE_PATH.parent
             temp_path = dir_path / TEMP_NAME
 
@@ -259,7 +268,7 @@ class Updater(QtCore.QObject):
                     return
 
             try:
-                ZipFile(io.BytesIO(download_bytes)).extractall(path=dir_path)
+                zip_file.extractall(path=dir_path)
             except OSError as e:
                 self._show_error_window(
                     _("Unable to extract new release files: ") + str(e)
