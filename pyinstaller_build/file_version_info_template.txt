@@ -32,12 +32,8 @@ VSVersionInfo(
                     "040904B0",
                     [
                         StringStruct("CompanyName", "Numerlor"),
-                        StringStruct(
-                            "FileDescription",
-                            "Auto_Neutron Elite Dangerous companion app",
-                        ),
+                        StringStruct("FileDescription", "Auto_Neutron"),
                         StringStruct("FileVersion", "${version}"),
-                        StringStruct("InternalName", "Auto_Neutron"),
                         StringStruct("LegalCopyright", "Copyright (C) 2019  Numerlor"),
                         StringStruct("OriginalFilename", "Auto_Neutron.exe"),
                         StringStruct("ProductName", "Auto_Neutron"),
