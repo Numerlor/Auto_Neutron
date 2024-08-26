@@ -17,7 +17,6 @@ EXCLUDES = [
     "lzma",
     "pkg_resources",
     "ssl",
-    "unicodedata",
     "xml.parsers.expat",
 ]
 HIDDEN_IMPORTS = ["babel.numbers"]
