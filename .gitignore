@@ -49,3 +49,4 @@ venv.bak/
 logs/
 
 *.mo
+pyinstaller_build/file_version_info.txt
