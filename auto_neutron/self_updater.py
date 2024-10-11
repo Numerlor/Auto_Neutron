@@ -1,6 +1,21 @@
 # This file is part of Auto_Neutron. See the main.py file for more details.
 # Copyright (C) 2019  Numerlor
 
+"""
+Auto updater for the application.
+
+If a new release tag is found on GitHub's release API, and wasn't ignored previously by the user,
+the relevant file/directory release is downloaded depending on the running instance.
+
+After download, the release's signature is verified with signify, either the main .exe for the file release,
+or all .exe, .pyd, and .dll files for the zip file.
+
+After successful verification, the old release file/directory is moved to `TEMP_NAME`,
+the new release written to the original path, then it's started as a subprocess and the outdated instance quits.
+
+Once the new instance starts the temporary files are deleted by it.
+"""
+
 from __future__ import annotations
 
 import io
