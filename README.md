@@ -89,6 +89,12 @@ The `from target` button will copy your current target's coordinates into the in
 
 After searching for a system you can copy the result system's name into the source or destination text inputs with their respective buttons.
 
+## Code signing policy
+Free code signing provided by [SignPath.io](https://about.signpath.io/), certificate by [SignPath Foundation](https://signpath.org/)
+All code is reviewed and approved by [Numerlor](https://github.com/Numerlor)
+
+This program will not transfer any information to other networked systems unless specifically requested by the user or the person installing or operating it
+
 ## Running directly
 To run the application directly with Python, clone the repository and install from requirements.txt.
 ```shell
