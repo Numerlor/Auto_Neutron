@@ -70,7 +70,7 @@ class Updater(QtCore.QObject):
 
         The current executable's file will be renamed to a temporary name, and deleted by this method on the next run.
         """
-        if __debug__:
+        if not __debug__:
             log.info("Requesting version info.")
             make_network_request(
                 LATEST_RELEASE_URL, finished_callback=self._check_new_version
