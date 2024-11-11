@@ -65,7 +65,7 @@ jobs:
         run: |
           cd pyinstaller/bootloader
           python .\waf all
-      - uses: actions/upload-artifact@master
+      - uses: actions/upload-artifact@v4.4.3
         with:
           name: bootloaders
           path: pyinstaller\PyInstaller\bootloader\Windows-64bit-intel
@@ -93,7 +93,7 @@ jobs:
           $path = ((pip show pyinstaller) -match "Location: (.+)").Substring(10)
           "path=$path" >> $Env:GITHUB_OUTPUT
       - name: "Replace bootloader"
-        uses: actions/download-artifact@master
+        uses: actions/download-artifact@v4.1.8
         with:
           name: bootloaders
           path: "${{ steps.pyinstaller-loc.outputs.path }}\\PyInstaller\\bootloader\\Windows-64bit-intel"
@@ -106,7 +106,7 @@ jobs:
 
       - name: "Build artifact upload"
         id: "build-artifact"
-        uses: actions/upload-artifact@master
+        uses: actions/upload-artifact@v4.4.3
         with:
           path: |
             pyinstaller_build/dist/Auto_Neutron.exe
