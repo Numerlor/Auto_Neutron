@@ -120,7 +120,7 @@ jobs:
           api-token: "${{secrets.SIGNPATH_API_TOKEN}}"
           organization-id: "f0f5136e-b307-4650-9ee6-ccff22d46830"
           project-slug: "Auto_Neutron"
-          signing-policy-slug: "test-signing"
+          signing-policy-slug: "release-signing"
           github-artifact-id: "${{steps.build-artifact.outputs.artifact-id}}"
           wait-for-completion: true
           output-artifact-directory: "pyinstaller_build/dist/"
