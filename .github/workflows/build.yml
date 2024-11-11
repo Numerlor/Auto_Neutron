@@ -88,8 +88,10 @@ jobs:
         run: |
           $version = python -c "import tomllib, pathlib; print(tomllib.read(pathlib.Path('pyproject.toml').open('rb'))['tool']['poetry']['version'])"
           "version=$version" >> $Env:GITHUB_OUTPUT
-      - if: "${{ steps.project-ver.outputs.version }}" != "${{ github.ref_name }}"
-        run: exit 1
+      - run: |
+          if ("${{ steps.project-ver.outputs.version }}"  -ne "${{ github.ref_name }}") {
+            exit 1
+          }
 
       - name: "Install deps"
         run: |
