@@ -98,9 +98,10 @@ This program will not transfer any information to other networked systems unless
 ## Running directly
 To run the application directly with Python, clone the repository and install from requirements.txt.
 ```shell
-$ git clone git@github.com:Numerlor/Auto_Neutron.git  # Clone the project
+$ git clone https://github.com/Numerlor/Auto_Neutron.git  # Clone the project
 $ cd Auto_Neutron  # Switch to the cloned folder
 $ pip install -r requirements.txt
+$ pybabel compile -d locale -D auto_neutron
 $ python main.py
 ```
 Or install and run through poetry.
