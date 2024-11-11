@@ -83,6 +83,14 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: "Get app version from pyproject"
+        id: project-ver
+        run: |
+          $version = python -c "import tomllib, pathlib; print(tomllib.read(pathlib.Path('pyproject.toml').open('rb'))['tool']['poetry']['version'])"
+          "version=$version" >> $Env:GITHUB_OUTPUT
+      - if: "${{ steps.project-ver.outputs.version }}" != "${{ github.ref_name }}"
+        run: exit 1
+
       - name: "Install deps"
         run: |
           pip install -r requirements-with-dev.txt
@@ -124,6 +132,8 @@ jobs:
           github-artifact-id: "${{steps.build-artifact.outputs.artifact-id}}"
           wait-for-completion: true
           output-artifact-directory: "pyinstaller_build/dist/"
+          parameters: |
+            version: "${{steps.project-ver.outputs.version}}"
 
       - name: "Upload release files"
         run: |
