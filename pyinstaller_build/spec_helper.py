@@ -4,11 +4,14 @@
 """Constants and filter helper functions to be used in spec files."""
 from pathlib import Path
 
+from PyInstaller.utils.hooks import collect_data_files
+
 DATAS = [
     ("../resources/*", "./resources"),
     ("../third_party_licenses/*", "./third_party_licenses"),
     ("../locale", "./locale"),
     ("../LICENSE.md", "."),
+    *collect_data_files("mscerts"),
 ]
 EXCLUDES = [
     "_decimal",
@@ -17,7 +20,6 @@ EXCLUDES = [
     "lzma",
     "pkg_resources",
     "ssl",
-    "unicodedata",
     "xml.parsers.expat",
 ]
 HIDDEN_IMPORTS = ["babel.numbers"]

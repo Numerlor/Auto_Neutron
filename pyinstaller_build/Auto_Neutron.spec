@@ -36,4 +36,5 @@ exe = EXE(
     upx=True,
     runtime_tmpdir=None,
     console=False,
+    version="file_version_info.txt",
 )

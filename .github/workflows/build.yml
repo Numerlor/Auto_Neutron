@@ -65,7 +65,7 @@ jobs:
         run: |
           cd pyinstaller/bootloader
           python .\waf all
-      - uses: actions/upload-artifact@master
+      - uses: actions/upload-artifact@v4.4.3
         with:
           name: bootloaders
           path: pyinstaller\PyInstaller\bootloader\Windows-64bit-intel
@@ -83,6 +83,17 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: "Get app version from pyproject"
+        id: project-ver
+        run: |
+          $version = python -c "import tomllib, pathlib; print(tomllib.load(pathlib.Path('pyproject.toml').open('rb'))['tool']['poetry']['version'])"
+          "version=$version" >> $Env:GITHUB_OUTPUT
+      - name: "Tag same as version"
+        run: |
+          if ("${{ steps.project-ver.outputs.version }}"  -ne "${{ github.ref_name }}") {
+            exit 1
+          }
+
       - name: "Install deps"
         run: |
           pip install -r requirements-with-dev.txt
@@ -93,27 +104,39 @@ jobs:
           $path = ((pip show pyinstaller) -match "Location: (.+)").Substring(10)
           "path=$path" >> $Env:GITHUB_OUTPUT
       - name: "Replace bootloader"
-        uses: actions/download-artifact@master
+        uses: actions/download-artifact@v4.1.8
         with:
           name: bootloaders
           path: "${{ steps.pyinstaller-loc.outputs.path }}\\PyInstaller\\bootloader\\Windows-64bit-intel"
 
       - name: "compile i18n"
         run: pybabel compile -d locale -D auto_neutron
-      - name: "Get UPX"
-        run: |
-          $release_response = Invoke-WebRequest `
-            -Uri https://api.github.com/repos/upx/upx/releases/latest
-          $download_url = ((ConvertFrom-Json $release_response.content).assets -match "upx.+win64.zip").browser_download_url
-          $download_response = Invoke-WebRequest `
-            -Uri $download_url `
-            -OutFile upx.zip
-          Expand-Archive upx.zip
-          $path = (Get-ChildItem upx).FullName
-          "UPX_DIR=$path" >> $Env:GITHUB_ENV
 
       - name: "Build"
         run: python -OO pyinstaller_build/build.py
+
+      - name: "Build artifact upload"
+        id: "build-artifact"
+        uses: actions/upload-artifact@v4.4.3
+        with:
+          path: |
+            pyinstaller_build/dist/Auto_Neutron.exe
+            pyinstaller_build/dist/Auto_Neutron.zip
+          if-no-files-found: error
+          compression-level: 0
+
+      - name: "Sign"
+        uses: signpath/github-action-submit-signing-request@v1
+        with:
+          api-token: "${{secrets.SIGNPATH_API_TOKEN}}"
+          organization-id: "f0f5136e-b307-4650-9ee6-ccff22d46830"
+          project-slug: "Auto_Neutron"
+          signing-policy-slug: "release-signing"
+          github-artifact-id: "${{steps.build-artifact.outputs.artifact-id}}"
+          wait-for-completion: true
+          output-artifact-directory: "pyinstaller_build/dist/"
+          parameters: |
+            version: "${{steps.project-ver.outputs.version}}"
 
       - name: "Upload release files"
         run: |
@@ -130,25 +153,9 @@ jobs:
             -Authentication Bearer `
             -Token (ConvertTo-SecureString -AsPlainText $Env:GH_TOKEN) `
             -UserAgent "Numerlor/Auto_Neutron action" `
-            -ContentType "text/plain" `
-            -Uri https://uploads.github.com/repos/Numerlor/Auto_Neutron/releases/${{needs.get-release.outputs.id}}/assets?name=Auto_Neutron.exe.signature.txt `
-            -InFile pyinstaller_build/dist/Auto_Neutron.exe.signature.txt
-          Invoke-WebRequest `
-            -Method Post `
-            -Authentication Bearer `
-            -Token (ConvertTo-SecureString -AsPlainText $Env:GH_TOKEN) `
-            -UserAgent "Numerlor/Auto_Neutron action" `
             -ContentType "application/zip" `
             -Uri https://uploads.github.com/repos/Numerlor/Auto_Neutron/releases/${{needs.get-release.outputs.id}}/assets?name=Auto_Neutron.zip `
             -InFile pyinstaller_build/dist/Auto_Neutron.zip
-          Invoke-WebRequest `
-            -Method Post `
-            -Authentication Bearer `
-            -Token (ConvertTo-SecureString -AsPlainText $Env:GH_TOKEN) `
-            -UserAgent "Numerlor/Auto_Neutron action" `
-            -ContentType "text/plain" `
-            -Uri https://uploads.github.com/repos/Numerlor/Auto_Neutron/releases/${{needs.get-release.outputs.id}}/assets?name=Auto_Neutron.zip.signature.txt `
-            -InFile pyinstaller_build/dist/Auto_Neutron.zip.signature.txt
           Invoke-WebRequest `
             -Method Patch `
             -Authentication Bearer `

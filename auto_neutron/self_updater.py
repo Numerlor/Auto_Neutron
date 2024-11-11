@@ -1,9 +1,23 @@
 # This file is part of Auto_Neutron. See the main.py file for more details.
 # Copyright (C) 2019  Numerlor
 
+"""
+Auto updater for the application.
+
+If a new release tag is found on GitHub's release API, and wasn't ignored previously by the user,
+the relevant file/directory release is downloaded depending on the running instance.
+
+After download, the release's signature is verified with signify, either the main .exe for the file release,
+or all .exe, .pyd, and .dll files for the zip file.
+
+After successful verification, the old release file/directory is moved to `TEMP_NAME`,
+the new release written to the original path, then it's started as a subprocess and the outdated instance quits.
+
+Once the new instance starts the temporary files are deleted by it.
+"""
+
 from __future__ import annotations
 
-import hashlib
 import io
 import logging
 import shutil
@@ -15,6 +29,8 @@ from pathlib import Path
 from zipfile import ZipFile
 
 from PySide6 import QtCore, QtNetwork, QtWidgets
+from signify.authenticode import SignedPEFile
+from signify.exceptions import SignifyError
 from __feature__ import snake_case, true_property  # noqa: F401
 
 from auto_neutron.constants import VERSION
@@ -32,6 +48,7 @@ log = logging.getLogger(__name__)
 LATEST_RELEASE_URL = (
     "https://api.github.com/repos/Numerlor/Auto_Neutron/releases/latest"
 )
+
 IS_ONEFILE = Path(getattr(sys, "_MEIPASS", "")) != Path(sys.executable).parent
 
 TEMP_NAME = "temp_auto_neutron"
@@ -53,7 +70,7 @@ class Updater(QtCore.QObject):
 
         The current executable's file will be renamed to a temporary name, and deleted by this method on the next run.
         """
-        if not __debug__:
+        if __debug__:
             log.info("Requesting version info.")
             make_network_request(
                 LATEST_RELEASE_URL, finished_callback=self._check_new_version
@@ -152,46 +169,15 @@ class Updater(QtCore.QObject):
             self._show_error_window(_("Unable to find appropriate new release."))
         else:
             download_url = asset_json["browser_download_url"]
-            hash_download_url = download_url + ".signature.txt"
-            log.info(f"Downloading hash from {download_url}.")
-            make_network_request(
-                hash_download_url,
-                finished_callback=partial(
-                    self._set_hash_and_download, asset_download_url=download_url
-                ),
+            log.info(f"Downloading release from {download_url}.")
+            self._download_started.emit(
+                make_network_request(
+                    download_url,
+                    finished_callback=partial(self._create_new_and_restart),
+                )
             )
 
-    def _set_hash_and_download(
-        self, network_reply: QtNetwork.QNetworkReply, asset_download_url: str
-    ) -> None:
-        """Schedule the file to be downloaded and pass it the checksum hash from the reply."""
-        try:
-            if network_reply.error() is QtNetwork.QNetworkReply.NetworkError.NoError:
-                hash_ = network_reply.read_all().data().decode().strip()
-                log.info(f"Downloading release from {asset_download_url}.")
-                self._download_started.emit(
-                    make_network_request(
-                        asset_download_url,
-                        finished_callback=partial(
-                            self._create_new_and_restart, hash_to_check=hash_
-                        ),
-                    )
-                )
-            elif (
-                network_reply.error()
-                is QtNetwork.QNetworkReply.NetworkError.OperationCanceledError
-            ):
-                return
-            else:
-                self._show_error_window(network_reply.error_string())
-                return
-
-        finally:
-            network_reply.delete_later()
-
-    def _create_new_and_restart(
-        self, reply: QtNetwork.QNetworkReply, hash_to_check: str
-    ) -> None:
+    def _create_new_and_restart(self, reply: QtNetwork.QNetworkReply) -> None:
         """
         Create the new executable/directory from the reply data and start it.
 
@@ -217,33 +203,52 @@ class Updater(QtCore.QObject):
         finally:
             reply.delete_later()
 
-        downloaded_hash = hashlib.sha256(download_bytes)
-        if downloaded_hash.hexdigest() != hash_to_check:
-            self._show_error_window(
-                _("Downloaded file does not match expected checksum.")
-            )
-            return
-
         if IS_ONEFILE:
+            try:
+                SignedPEFile(io.BytesIO(download_bytes)).verify()
+            except SignifyError as e:
+                log.warning("Invalid file signature", exc_info=e)
+                self._show_error_window(
+                    _("Unable to verify downloaded file signature: " + str(e))
+                )
+                return
+
             temp_path = EXECUTABLE_PATH.with_stem(TEMP_NAME)
             try:
                 EXECUTABLE_PATH.rename(temp_path)
             except OSError as e:
+                log.warning("Failed to rename executable.", exc_info=e)
                 self._show_error_window(_("Unable to rename executable: ") + str(e))
                 return
             try:
                 Path(EXECUTABLE_PATH).write_bytes(download_bytes)
             except OSError as e:
+                log.warning("Failed to write new executable.", exc_info=e)
                 self._show_error_window(_("Unable to create new executable: ") + str(e))
                 return
 
         else:
+            zip_file = ZipFile(io.BytesIO(download_bytes))
+            for file in zip_file.namelist():
+                if Path(file).suffix in {".exe", ".dll", ".pyd"}:
+                    try:
+                        SignedPEFile(io.BytesIO(zip_file.read(file))).verify()
+                    except SignifyError as e:
+                        log.warning("Invalid file signature", exc_info=e)
+                        self._show_error_window(
+                            _(
+                                "Unable to verify downloaded file signature for file {}: {}"
+                            ).format(file, str(e))
+                        )
+                        return
+
             dir_path = EXECUTABLE_PATH.parent
             temp_path = dir_path / TEMP_NAME
 
             try:
                 temp_path.mkdir(exist_ok=True)
             except OSError as e:
+                log.warning("Failed to create temp directory.", exc_info=e)
                 self._show_error_window(
                     _("Unable to create temporary directory: ") + str(e)
                 )
@@ -253,14 +258,16 @@ class Updater(QtCore.QObject):
                 try:
                     shutil.move(file, temp_path)
                 except OSError as e:
+                    log.warning("Failed to move files to temp directory.", exc_info=e)
                     self._show_error_window(
                         _("Unable to move files into temporary directory: ") + str(e)
                     )
                     return
 
             try:
-                ZipFile(io.BytesIO(download_bytes)).extractall(path=dir_path)
+                zip_file.extractall(path=dir_path)
             except OSError as e:
+                log.warning("Failed to extract release.", exc_info=e)
                 self._show_error_window(
                     _("Unable to extract new release files: ") + str(e)
                 )
