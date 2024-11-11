@@ -10,7 +10,7 @@ from string import Template
 from PySide6 import QtCore
 from __feature__ import snake_case, true_property  # noqa: F401
 
-VERSION = "v2.3.1"
+VERSION = "v2.4.0"
 APP = "Auto_Neutron"
 ORG = "Numerlor"
 APPID = f"{ORG}|{APP}|{VERSION}"
