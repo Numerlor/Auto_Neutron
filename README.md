@@ -107,5 +107,6 @@ $ python main.py
 Or install and run through poetry.
 ```shell
 $ poetry install --no-dev
-$ poetry run start
+$ poetry run task i18n-compile
+$ poetry run task start
 ```
