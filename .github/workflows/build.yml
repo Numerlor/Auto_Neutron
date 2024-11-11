@@ -126,7 +126,7 @@ jobs:
           compression-level: 0
 
       - name: "Sign"
-        uses: signpath/github-action-submit-signing-request@v0.4
+        uses: signpath/github-action-submit-signing-request@v1
         with:
           api-token: "${{secrets.SIGNPATH_API_TOKEN}}"
           organization-id: "f0f5136e-b307-4650-9ee6-ccff22d46830"
