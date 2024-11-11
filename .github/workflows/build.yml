@@ -100,17 +100,6 @@ jobs:
 
       - name: "compile i18n"
         run: pybabel compile -d locale -D auto_neutron
-      - name: "Get UPX"
-        run: |
-          $release_response = Invoke-WebRequest `
-            -Uri https://api.github.com/repos/upx/upx/releases/latest
-          $download_url = ((ConvertFrom-Json $release_response.content).assets -match "upx.+win64.zip").browser_download_url
-          $download_response = Invoke-WebRequest `
-            -Uri $download_url `
-            -OutFile upx.zip
-          Expand-Archive upx.zip
-          $path = (Get-ChildItem upx).FullName
-          "UPX_DIR=$path" >> $Env:GITHUB_ENV
 
       - name: "Build"
         run: python -OO pyinstaller_build/build.py
