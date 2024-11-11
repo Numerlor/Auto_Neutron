@@ -88,7 +88,8 @@ jobs:
         run: |
           $version = python -c "import tomllib, pathlib; print(tomllib.load(pathlib.Path('pyproject.toml').open('rb'))['tool']['poetry']['version'])"
           "version=$version" >> $Env:GITHUB_OUTPUT
-      - run: |
+      - name: "Tag same as version"
+        run: |
           if ("${{ steps.project-ver.outputs.version }}"  -ne "${{ github.ref_name }}") {
             exit 1
           }
