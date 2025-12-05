@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "Auto_Neutron"
-version = "v2.4.0"
+version = "v2.3.2"
 description = "An automatic neutron route plotter for Elite Dangerous"
 authors = ["Numerlor <numerlor@numerlor.me>"]
 license = "GPL-3.0-or-later"
