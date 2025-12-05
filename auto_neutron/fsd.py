@@ -31,6 +31,7 @@ class FrameShiftDrive:
         5: 2.45,
         6: 2.6,
         7: 2.75,
+        8: 2.9,
     }
     _CLASS_CONSTANTS: t.ClassVar[dict[int, int]] = {1: 11, 2: 10, 3: 8, 4: 10, 5: 12}
 
@@ -165,4 +166,10 @@ _BASE_FSDS = {  # base unengineered FSDs
     "int_hyperdrive_overcharge_size7_class3": SCOFrameShiftDrive(7, 3, 12.80, 2700),
     "int_hyperdrive_overcharge_size7_class4": SCOFrameShiftDrive(7, 4, 12.80, 2700),
     "int_hyperdrive_overcharge_size7_class5": SCOFrameShiftDrive(7, 5, 13.10, 3000),
+    "int_hyperdrive_overcharge_size8_class1": SCOFrameShiftDrive(8, 1, 13.60, 2800),
+    "int_hyperdrive_overcharge_size8_class2": SCOFrameShiftDrive(8, 2, 20.40, 4200),
+    "int_hyperdrive_overcharge_size8_class3": SCOFrameShiftDrive(8, 3, 20.40, 4200),
+    "int_hyperdrive_overcharge_size8_class4": SCOFrameShiftDrive(8, 4, 20.40, 4200),
+    "int_hyperdrive_overcharge_size8_class5": SCOFrameShiftDrive(8, 5, 20.70, 4670),
+    "int_hyperdrive_overcharge_size8_class5_overchargebooster_mkii": SCOFrameShiftDrive(8, 5, 6.80, 4670),
 }
