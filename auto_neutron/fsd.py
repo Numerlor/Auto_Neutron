@@ -105,6 +105,13 @@ class SCOFrameShiftDrive(FrameShiftDrive):
     _CLASS_CONSTANTS = {1: 8, 2: 12, 3: 12, 4: 12, 5: 13}
 
 
+@dataclasses.dataclass(slots=True, frozen=True)
+class SCOFrameShiftDriveMkII(FrameShiftDrive):
+    """Supercruise overcharge FSD."""
+
+    _CLASS_CONSTANTS = {5: 4}
+
+
 _BASE_FSDS = {  # base unengineered FSDs
     "int_hyperdrive_size2_class1": FrameShiftDrive(2, 1, 0.60, 48),
     "int_hyperdrive_size2_class2": FrameShiftDrive(2, 2, 0.60, 54),
@@ -171,5 +178,7 @@ _BASE_FSDS = {  # base unengineered FSDs
     "int_hyperdrive_overcharge_size8_class3": SCOFrameShiftDrive(8, 3, 20.40, 4200),
     "int_hyperdrive_overcharge_size8_class4": SCOFrameShiftDrive(8, 4, 20.40, 4200),
     "int_hyperdrive_overcharge_size8_class5": SCOFrameShiftDrive(8, 5, 20.70, 4670),
-    "int_hyperdrive_overcharge_size8_class5_overchargebooster_mkii": SCOFrameShiftDrive(8, 5, 6.80, 4670),
+    "int_hyperdrive_overcharge_size8_class5_overchargebooster_mkii": SCOFrameShiftDriveMkII(
+        8, 5, 6.80, 4670
+    ),
 }
