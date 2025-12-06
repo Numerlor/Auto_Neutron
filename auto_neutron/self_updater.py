@@ -31,7 +31,6 @@ from zipfile import ZipFile
 from PySide6 import QtCore, QtNetwork, QtWidgets
 from signify.authenticode import SignedPEFile
 from signify.exceptions import SignifyError
-from __feature__ import snake_case, true_property  # noqa: F401
 
 from auto_neutron.constants import VERSION
 from auto_neutron.settings import General
@@ -117,15 +116,15 @@ class Updater(QtCore.QObject):
         dialog = QtWidgets.QProgressDialog(self.parent())
         dialog.canceled.connect(reply.abort)
         dialog.canceled.connect(dialog.close)
-        dialog.set_modal(True)
+        dialog.setModal(True)
 
         @QtCore.Slot(int, int)
         def update_progress(received_bytes: int, total_bytes: int) -> None:
-            dialog.maximum = total_bytes
-            dialog.value = received_bytes
+            dialog.setMaximum(total_bytes)
+            dialog.setValue(received_bytes)
 
         reply.downloadProgress.connect(update_progress)
-        dialog.label_text = _("Downloading new release")
+        dialog.setLabelText(_("Downloading new release"))
         dialog.show()
 
     def _show_error_window(self, error: str) -> None:
@@ -191,17 +190,17 @@ class Updater(QtCore.QObject):
         """
         try:
             if reply.error() is QtNetwork.QNetworkReply.NetworkError.NoError:
-                download_bytes = reply.read_all().data()
+                download_bytes = reply.readAll().data()
             elif (
                 reply.error()
                 is QtNetwork.QNetworkReply.NetworkError.OperationCanceledError
             ):
                 return
             else:
-                self._show_error_window(reply.error_string())
+                self._show_error_window(reply.errorString())
                 return
         finally:
-            reply.delete_later()
+            reply.deleteLater()
 
         if IS_ONEFILE:
             try:

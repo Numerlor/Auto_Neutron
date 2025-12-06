@@ -6,7 +6,6 @@ import typing as t
 from functools import partial
 
 from PySide6 import QtWidgets
-from __feature__ import snake_case, true_property  # noqa: F401
 
 _WindowT = t.TypeVar("_WindowT", bound=QtWidgets.QWidget)
 
@@ -34,5 +33,5 @@ def create_or_activate_window(
         new_window.destroyed.connect(partial(_window_cache.pop, window_key))
         return new_window
     else:
-        existing_window.activate_window()
+        existing_window.activateWindow()
         existing_window.raise_()

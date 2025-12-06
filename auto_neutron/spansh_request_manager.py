@@ -9,7 +9,6 @@ import typing as t
 from functools import partial
 
 from PySide6 import QtCore, QtNetwork
-from __feature__ import snake_case, true_property  # noqa: F401
 
 from auto_neutron.constants import SPANSH_API_URL
 from auto_neutron.route import Route
@@ -28,7 +27,7 @@ class SpanshRequestManager:
     def __init__(self, parent: QtCore.QObject):
         self._current_reply = None
         self._delay_timer = QtCore.QTimer(parent)
-        self._delay_timer.single_shot_ = True
+        self._delay_timer.setSingleShot(True)
         self._timer_connection = None
 
     def _reply_callback(
@@ -71,7 +70,7 @@ class SpanshRequestManager:
             if job_response.get("status") == "queued":
                 sec_delay = next(delay_iterator)
                 log.debug(f"Re-requesting queued job result in {sec_delay} seconds.")
-                self._delay_timer.interval = 2000
+                self._delay_timer.setInterval(sec_delay * 1000)
                 self._timer_connection = self._delay_timer.timeout.connect(
                     partial(
                         self.make_request,

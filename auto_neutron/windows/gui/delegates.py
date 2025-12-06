@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 from PySide6 import QtCore, QtGui, QtWidgets
-from __feature__ import snake_case, true_property  # noqa: F401
 
 
 class SpinBoxDelegate(QtWidgets.QStyledItemDelegate):
@@ -17,10 +16,10 @@ class SpinBoxDelegate(QtWidgets.QStyledItemDelegate):
         index: QtCore.QModelIndex | QtCore.QPersistentModelIndex,
     ) -> QtWidgets.QWidget:
         editor = QtWidgets.QSpinBox(parent)
-        editor.frame = False
-        editor.minimum = 1
-        editor.maximum = 10_000
-        editor.button_symbols = QtWidgets.QAbstractSpinBox.ButtonSymbols.NoButtons
+        editor.setFrame(False)
+        editor.setMinimum(1)
+        editor.setMaximum(10_000)
+        editor.setButtonSymbols(QtWidgets.QAbstractSpinBox.ButtonSymbols.NoButtons)
         return editor
 
 
@@ -34,11 +33,11 @@ class DoubleSpinBoxDelegate(QtWidgets.QStyledItemDelegate):
         index: QtCore.QModelIndex | QtCore.QPersistentModelIndex,
     ) -> QtWidgets.QWidget:
         editor = QtWidgets.QDoubleSpinBox(parent)
-        editor.frame = False
-        editor.minimum = 0
-        editor.maximum = 1_000_000
-        editor.decimals = 2
-        editor.button_symbols = QtWidgets.QAbstractSpinBox.ButtonSymbols.NoButtons
+        editor.setFrame(False)
+        editor.setMinimum(0)
+        editor.setMaximum(1_000_000)
+        editor.setDecimals(2)
+        editor.setButtonSymbols(QtWidgets.QAbstractSpinBox.ButtonSymbols.NoButtons)
         return editor
 
 
@@ -53,23 +52,23 @@ class CheckBoxDelegate(QtWidgets.QStyledItemDelegate):
     ) -> QtWidgets.QWidget:
         editor = QtWidgets.QCheckBox(parent)
         palette = QtGui.QPalette()
-        palette.set_color(
-            QtGui.QPalette.ColorRole.Text, option.palette.highlighted_text().color()
+        palette.setColor(
+            QtGui.QPalette.ColorRole.Text, option.palette().highlightedText().color()
         )
-        palette.set_color(
-            QtGui.QPalette.ColorRole.Window, option.palette.highlighted_text().color()
+        palette.setColor(
+            QtGui.QPalette.ColorRole.Window, option.palette().highlightedText().color()
         )
-        editor.palette = palette
+        editor.setPalette(palette)
         return editor
 
-    def update_editor_geometry(
+    def updateEditorGeometry(
         self,
         editor: QtWidgets.QWidget,
         option: QtWidgets.QStyleOptionViewItem,
         index: QtCore.QModelIndex | QtCore.QPersistentModelIndex,
     ) -> None:
         """Move the editor to the middle."""
-        editor.geometry = self.get_checkbox_rect(option)
+        editor.setGeometry(self.getCheckboxRect(option))
 
     def paint(
         self,
@@ -85,32 +84,33 @@ class CheckBoxDelegate(QtWidgets.QStyledItemDelegate):
         else:
             check_box_style_option.state |= QtWidgets.QStyle.StateFlag.State_Off
 
-        check_box_style_option.rect = self.get_checkbox_rect(option)
+        check_box_style_option.rect = self.getCheckboxRect(option)
         if option.state & QtWidgets.QStyle.StateFlag.State_HasFocus:
-            self.draw_focus_rect(painter, option)
-            check_box_style_option.palette.set_color(
-                QtGui.QPalette.ColorRole.Text, option.palette.highlighted_text().color()
+            self.drawFocusRect(painter, option)
+            check_box_style_option.palette.setColor(
+                QtGui.QPalette.ColorRole.Text,
+                option.palette().highlightedText().color(),
             )
 
         elif (
             foreground_brush := index.data(QtCore.Qt.ItemDataRole.ForegroundRole)
         ) is not None:
-            check_box_style_option.palette.set_color(
+            check_box_style_option.palette.setColor(
                 QtGui.QPalette.ColorRole.Text, foreground_brush.color()
             )
 
-        check_box_style_option.palette.set_color(
+        check_box_style_option.palette.setColor(
             QtGui.QPalette.ColorRole.Window, QtGui.QColor(100, 100, 0, 0)
         )
-        check_box_style_option.palette.set_color(
+        check_box_style_option.palette.setColor(
             QtGui.QPalette.ColorRole.Base, QtGui.QColor(100, 100, 0, 0)
         )
 
-        QtWidgets.QApplication.style().draw_control(
+        QtWidgets.QApplication.style().drawControl(
             QtWidgets.QStyle.ControlElement.CE_CheckBox, check_box_style_option, painter
         )
 
-    def draw_focus_rect(
+    def drawFocusRect(
         self, painter: QtGui.QPainter, option: QtWidgets.QStyleOptionViewItem
     ) -> None:
         """Draw a rectangle over the table item indicating it is in focus."""
@@ -119,18 +119,18 @@ class CheckBoxDelegate(QtWidgets.QStyledItemDelegate):
         focus_option.rect = option.rect
         focus_option.state |= QtWidgets.QStyle.StateFlag.State_KeyboardFocusChange
         focus_option.state |= QtWidgets.QStyle.StateFlag.State_Item
-        focus_option.palette = option.palette
-        QtWidgets.QApplication.style().draw_primitive(
+        focus_option.setPalette(option.palette())
+        QtWidgets.QApplication.style().drawPrimitive(
             QtWidgets.QStyle.PrimitiveElement.PE_FrameFocusRect,
             focus_option,
             painter,
             None,
         )
 
-    def get_checkbox_rect(self, option: QtWidgets.QStyleOptionViewItem) -> QtCore.QRect:
+    def getCheckboxRect(self, option: QtWidgets.QStyleOptionViewItem) -> QtCore.QRect:
         """Get the rect for a checkbox in the item's center."""
         check_box_style_option = QtWidgets.QStyleOptionButton()
-        check_box_rect = QtWidgets.QApplication.style().sub_element_rect(
+        check_box_rect = QtWidgets.QApplication.style().subElementRect(
             QtWidgets.QStyle.SubElement.SE_CheckBoxIndicator,
             check_box_style_option,
             None,

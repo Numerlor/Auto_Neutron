@@ -63,7 +63,7 @@ BABEL_INCLUDE = {"root.dat", "en.dat", "en_001.dat", "en_150.dat"}
 
 
 def filter_binaries(
-    to_filter: list[tuple[str, str, str]]
+    to_filter: list[tuple[str, str, str]],
 ) -> list[tuple[str, str, str]]:
     """Filter out any binaries that are in DLL_EXCLUDE."""
     filtered = []

@@ -9,7 +9,6 @@ import typing as t
 from pathlib import Path
 
 from PySide6 import QtCore
-from __feature__ import snake_case, true_property  # noqa: F401
 
 from auto_neutron.utils.file import create_delete_share_file
 

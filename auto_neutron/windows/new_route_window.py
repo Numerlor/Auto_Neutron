@@ -11,7 +11,6 @@ from functools import partial
 
 import babel.dates
 from PySide6 import QtCore, QtGui, QtWidgets
-from __feature__ import snake_case, true_property  # noqa: F401
 
 from auto_neutron.journal import Journal, get_unique_cmdr_journals
 from auto_neutron.locale import get_active_locale
@@ -120,7 +119,7 @@ class NewRouteWindow(NewRouteWindowGUI):
 
     def _set_busy_cursor(self) -> None:
         """Set the cursor to the busy cursor."""
-        self.cursor = QtGui.QCursor(QtCore.Qt.CursorShape.BusyCursor)
+        self.setCursor(QtGui.QCursor(QtCore.Qt.CursorShape.BusyCursor))
 
     @QtCore.Slot()
     def _abort_request(self) -> None:
@@ -128,7 +127,7 @@ class NewRouteWindow(NewRouteWindowGUI):
         self._request_manager.abort()
         self.switch_submit_abort()
         self.status_widget.show_message("Cancelled route plot.", 2_500)
-        self.cursor = QtGui.QCursor(QtCore.Qt.CursorShape.ArrowCursor)
+        self.setCursor(QtGui.QCursor(QtCore.Qt.CursorShape.ArrowCursor))
 
     @QtCore.Slot(int)
     def _sync_journal_combos(self, index: int) -> None:
@@ -138,7 +137,7 @@ class NewRouteWindow(NewRouteWindowGUI):
             for signal in self.combo_signals:
                 exit_stack.enter_context(signal.temporarily_disconnect())
             for tab in self.tabs:
-                tab.journal_combo.current_index = index
+                tab.journal_combo.setCurrentIndex(index)
         self._change_journal(index)
 
     @QtCore.Slot(str)
@@ -150,9 +149,9 @@ class NewRouteWindow(NewRouteWindowGUI):
                 exit_stack.enter_context(signal.temporarily_disconnect())
             for tab in self.tabs:
                 if isinstance(tab, SpanshTabBase) and (
-                    not tab.source_edit.modified or not tab.source_edit.text
+                    not tab.source_edit.isModified() or not tab.source_edit.text()
                 ):
-                    tab.source_edit.text = text
+                    tab.source_edit.setText(text)
 
     @QtCore.Slot(str)
     def _sync_destination_line_edits(self, text: str) -> None:
@@ -163,9 +162,9 @@ class NewRouteWindow(NewRouteWindowGUI):
                 exit_stack.enter_context(signal.temporarily_disconnect())
             for tab in self.tabs:
                 if isinstance(tab, SpanshTabBase) and (
-                    not tab.target_edit.modified or not tab.target_edit.text
+                    not tab.target_edit.isModified() or not tab.target_edit.text()
                 ):
-                    tab.target_edit.text = text
+                    tab.target_edit.setText(text)
 
     @QtCore.Slot()
     def _populate_journal_combos(self, *, show_change_message: bool = True) -> None:
@@ -174,13 +173,13 @@ class NewRouteWindow(NewRouteWindowGUI):
 
         The journals they're referring to are stored in `self._journals`.
         """
-        font_metrics = self.tabs[0].journal_combo.font_metrics()
+        font_metrics = self.tabs[0].journal_combo.fontMetrics()
 
         combo_items = []
         self._journals = get_unique_cmdr_journals()
         for journal in self._journals:
             combo_items.append(
-                font_metrics.elided_text(
+                font_metrics.elidedText(
                     cmdr_display_name(journal.cmdr),
                     QtCore.Qt.TextElideMode.ElideRight,
                     80,
@@ -199,7 +198,7 @@ class NewRouteWindow(NewRouteWindowGUI):
                     f"Populating journal combos with {len(self._journals)} journals."
                 )
                 for tab in self.tabs:
-                    tab.journal_combo.add_items(combo_items)
+                    tab.journal_combo.addItems(combo_items)
 
                 self._change_journal(0, show_change_message=show_change_message)
             else:
@@ -267,7 +266,7 @@ class NewRouteWindow(NewRouteWindowGUI):
         self.route_created_signal.emit(self.selected_journal, route)
         self.close()
 
-    def change_event(self, event: QtCore.QEvent) -> None:
+    def changeEvent(self, event: QtCore.QEvent) -> None:
         """Retranslate the GUI when a language change occurs."""
         if event.type() == QtCore.QEvent.Type.LanguageChange:
             self.retranslate()
@@ -276,9 +275,9 @@ class NewRouteWindow(NewRouteWindowGUI):
     @QtCore.Slot()
     def _delete_tabs(tabs: collections.abc.Iterable[TabBase]) -> None:
         for tab in tabs:
-            tab.delete_later()
+            tab.deleteLater()
 
-    def close_event(self, event: QtGui.QCloseEvent) -> None:
+    def closeEvent(self, event: QtGui.QCloseEvent) -> None:
         """Abort any running network request on close."""
         self._request_manager.abort()
         if self._journal_worker is not None:

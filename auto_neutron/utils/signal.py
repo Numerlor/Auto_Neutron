@@ -7,7 +7,6 @@ import typing as t
 from contextlib import contextmanager
 
 from PySide6 import QtCore
-from __feature__ import snake_case, true_property  # noqa: F401
 
 if t.TYPE_CHECKING:
     import collections.abc

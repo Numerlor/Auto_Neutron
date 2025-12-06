@@ -7,7 +7,6 @@ import sys
 import textwrap
 
 from PySide6 import QtCore, QtWidgets
-from __feature__ import snake_case, true_property  # noqa: F401
 
 from auto_neutron.utils.file import base_path
 
@@ -34,9 +33,9 @@ class LicenseWindow(LicenseWindowGUI):
             lambda: setattr(self.back_button, "enabled", True)  # noqa: B010
         )
 
-        self.back_button.enabled = False
+        self.back_button.setEnabled(False)
 
-    def change_event(self, event: QtCore.QEvent) -> None:
+    def changeEvent(self, event: QtCore.QEvent) -> None:
         """Retranslate the GUI when a language change occurs."""
         if event.type() == QtCore.QEvent.Type.LanguageChange:
             self.retranslate()
@@ -45,7 +44,7 @@ class LicenseWindow(LicenseWindowGUI):
     def retranslate(self) -> None:
         """Set the text browser text."""
         super().retranslate()
-        self.text.markdown = self.get_license_text()
+        self.text.setMarkdown(self.get_license_text())
 
     def get_license_text(self) -> str:
         """Create the license text to show to the user."""

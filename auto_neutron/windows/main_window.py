@@ -8,7 +8,6 @@ import time
 import typing as t
 
 from PySide6 import QtCore, QtGui, QtWidgets
-from __feature__ import snake_case, true_property  # noqa: F401
 
 from auto_neutron import settings
 from auto_neutron.utils.signal import ReconnectingSignal
@@ -29,7 +28,7 @@ class MainWindow(MainWindowGUI):
     def __init__(self):
         super().__init__()
         self.change_action.triggered.connect(
-            lambda: self.table.edit_item(self.table.current_item())
+            lambda: self.table.editItem(self.table.currentItem())
         )
         self.copy_action.triggered.connect(self.copy_table_item_text)
         self.resize_connection = ReconnectingSignal(
@@ -38,7 +37,7 @@ class MainWindow(MainWindowGUI):
         )
         self.resize_connection.connect()
 
-        self.table.vertical_scroll_bar().install_event_filter(self)
+        self.table.verticalScrollBar().installEventFilter(self)
         self._last_scroll_time = float("-inf")
 
         self._route: Route | None = None
@@ -52,8 +51,8 @@ class MainWindow(MainWindowGUI):
     @QtCore.Slot()
     def copy_table_item_text(self) -> None:
         """Copy the text of the selected table item into the clipboard."""
-        if (item := self.table.current_item()) is not None:
-            get_application().clipboard().set_text(item.text())
+        if (item := self.table.currentItem()) is not None:
+            get_application().clipboard().setText(item.text)
 
     def mass_insert(
         self, data: collections.abc.Iterable[collections.abc.Iterable[t.Any]]
@@ -62,15 +61,15 @@ class MainWindow(MainWindowGUI):
         with self.resize_connection.temporarily_disconnect():
             for row in data:
                 self.insert_row(row)
-        self.table.resize_columns_to_contents()
-        self.table.resize_rows_to_contents()
+        self.table.resizeColumnsToContents()
+        self.table.resizeRowsToContents()
 
     def initialize_table(self, route: Route) -> None:
         """Clear the table and insert plot rows from `Route` into it with appropriate columns."""
         self._route = route
 
         self.table.clear()
-        self.table.row_count = 0
+        self.table.setRowCount(0)
 
         self._header_type = header = header_from_row_type(route.row_type)(self.table)
         header.initialize_headers()
@@ -110,17 +109,17 @@ class MainWindow(MainWindowGUI):
 
     def restore_window(self) -> None:
         """Restore the size and position from the settings."""
-        self.restore_geometry(settings.Window.geometry)
+        self.restoreGeometry(settings.Window.geometry)
 
-    def change_event(self, event: QtCore.QEvent) -> None:
+    def changeEvent(self, event: QtCore.QEvent) -> None:
         """Retranslate the GUI when a language change occurs."""
         if event.type() == QtCore.QEvent.Type.LanguageChange:
             self.retranslate()
 
-    def event_filter(self, watched: QtCore.QObject, event: QtCore.QEvent) -> bool:
+    def eventFilter(self, watched: QtCore.QObject, event: QtCore.QEvent) -> bool:
         """Set the last scrolled time on table scroll events."""
         if (
-            watched is self.table.vertical_scroll_bar()
+            watched is self.table.verticalScrollBar()
             and event.__class__ is QtGui.QWheelEvent
         ):
             self._last_scroll_time = time.monotonic()

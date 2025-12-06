@@ -11,7 +11,6 @@ from functools import partial
 import babel
 import more_itertools
 from PySide6 import QtCore, QtWidgets
-from __feature__ import snake_case, true_property  # noqa: F401
 
 import auto_neutron.locale
 from auto_neutron import Theme, settings
@@ -59,11 +58,11 @@ class Hub(QtCore.QObject):
         Updater(self.window).check_update()
 
         exception_handler.triggered.connect(self.error_window.show)
-        exception_handler.set_parent(self)
+        exception_handler.setParent(self)
 
         self._theme_listener = theme_listener
         self._theme_listener.theme_changed.connect(self.set_theme_from_os)
-        self._theme_listener.set_parent(self)
+        self._theme_listener.setParent(self)
 
         self.window.show()
 
@@ -167,7 +166,7 @@ class Hub(QtCore.QObject):
     def apply_settings(self) -> None:
         """Update the appearance and plotter with new settings."""
         log.debug("Refreshing settings.")
-        self.window.table.font = settings.Window.font
+        self.window.table.setFont(settings.Window.font)
         if settings.Window.dark_mode is Theme.OS_THEME:
             dark = self._theme_listener.dark_theme
         else:
@@ -231,7 +230,7 @@ class Hub(QtCore.QObject):
     def save_on_exit(self) -> None:
         """Save necessary settings when exiting."""
         with delay_sync():
-            settings.Window.geometry = self.window.save_geometry()
+            settings.Window.geometry = self.window.saveGeometry()
             if settings.General.save_on_quit:
                 self.save_route()
 

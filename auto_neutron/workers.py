@@ -10,7 +10,6 @@ import typing as t
 from functools import partial
 
 from PySide6 import QtCore
-from __feature__ import snake_case, true_property  # noqa: F401
 
 from auto_neutron import settings
 from auto_neutron.constants import STATUS_PATH
@@ -37,7 +36,7 @@ class _WorkerBase(QtCore.QObject):
         super().__init__(parent)
         self._generator = generator
         self._timer = QtCore.QTimer(self)
-        self._timer.interval = interval
+        self._timer.setInterval(interval)
         self._timer.timeout.connect(partial(next, self._generator))
         self._stopped = False
 

@@ -7,7 +7,6 @@ import logging
 import typing as t
 
 from PySide6 import QtCore, QtMultimedia, QtWidgets
-from __feature__ import snake_case, true_property  # noqa: F401
 
 from auto_neutron import settings
 from auto_neutron.utils.utils import get_application
@@ -34,7 +33,8 @@ class FuelWarn(QtCore.QObject):
         self._alert_widget = alert_widget
         self._journal = None
         self.player = QtMultimedia.QMediaPlayer(self)
-        self.player.audio_output = self.audio_output = QtMultimedia.QAudioOutput(self)
+        self.audio_output = QtMultimedia.QAudioOutput(self)
+        self.player.setAudioOutput(self.audio_output)
 
     def set_journal(self, journal: Journal) -> None:
         """Set the journal to get the ship values from."""
@@ -80,9 +80,9 @@ class FuelWarn(QtCore.QObject):
         log.info("Attempting to execute fuel alert.")
         if settings.Alerts.audio:
             if settings.Paths.alert_sound:
-                new_url = QtCore.QUrl.from_local_file(str(settings.Paths.alert_sound))
-                if new_url != self.player.source:
-                    self.player.source = new_url
+                new_url = QtCore.QUrl.fromLocalFile(str(settings.Paths.alert_sound))
+                if new_url != self.player.source():
+                    self.player.setSource(new_url)
                 log.info(f"Playing file {settings.Paths.alert_sound} for alert.")
                 self.player.play()
 

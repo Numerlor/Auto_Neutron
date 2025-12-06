@@ -6,7 +6,6 @@ from __future__ import annotations
 from functools import partial
 
 from PySide6 import QtCore, QtWidgets
-from __feature__ import snake_case, true_property  # noqa: F401
 
 from auto_neutron.journal import Journal, get_unique_cmdr_journals
 from auto_neutron.utils.signal import ReconnectingSignal
@@ -50,13 +49,13 @@ class ShutDownWindow(ShutDownWindowGUI):
 
         The journals they're referring to are stored in `self._journals`.
         """
-        font_metrics = self.journal_combo.font_metrics()
+        font_metrics = self.journal_combo.fontMetrics()
 
         combo_items = []
         self._journals = get_unique_cmdr_journals()
 
         if not self._journals:
-            self.new_journal_button.enabled = False
+            self.new_journal_button.setEnabled(False)
             return
 
         for journal in self._journals:
@@ -70,14 +69,14 @@ class ShutDownWindow(ShutDownWindowGUI):
         self._change_journal(0)
         with self.journal_changed_signal.temporarily_disconnect():
             self.journal_combo.clear()
-            self.journal_combo.add_items(combo_items)
+            self.journal_combo.addItems(combo_items)
 
     @QtCore.Slot(int)
     def _change_journal(self, index: int) -> None:
         """Change the selected journal, enable/disable the button depending on its shut down state."""
         journal = self._journals[index]
         journal.parse()
-        self.new_journal_button.enabled = not journal.shut_down
+        self.new_journal_button.setEnabled(not journal.shut_down)
 
         if self._journal_worker is not None:
             self._journal_worker.stop()
@@ -92,7 +91,7 @@ class ShutDownWindow(ShutDownWindowGUI):
         )
         self._selected_journal = journal
 
-    def change_event(self, event: QtCore.QEvent) -> None:
+    def changeEvent(self, event: QtCore.QEvent) -> None:
         """Retranslate the GUI when a language change occurs."""
         if event.type() == QtCore.QEvent.Type.LanguageChange:
             self.retranslate()
