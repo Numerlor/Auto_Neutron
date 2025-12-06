@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 from PySide6 import QtCore, QtGui, QtWidgets
-from __feature__ import snake_case, true_property  # noqa: F401
 
 from auto_neutron.widgets import PlainTextScroller
 
@@ -29,7 +28,7 @@ class ScrolledStatus(PlainTextScroller):
             scroll_interval=scroll_interval,
         )
         self._hide_timer = QtCore.QTimer(self)
-        self._hide_timer.single_shot_ = True
+        self._hide_timer.setSingleShot(True)
         self._hide_timer.timeout.connect(self._reset_text)
 
         self._hovered = False
@@ -43,7 +42,7 @@ class ScrolledStatus(PlainTextScroller):
         """
         self._hide_timer.stop()
         if duration:
-            self._hide_timer.interval = duration
+            self._hide_timer.setInterval(duration)
             self._hide_timer.start()
 
         self.text = message
@@ -62,19 +61,19 @@ class ScrolledStatus(PlainTextScroller):
         self._hide_timer.stop()
         self._scheduled_reset = False
 
-    def mouse_release_event(self, event: QtGui.QMouseEvent) -> None:
+    def mouseReleaseEvent(self, event: QtGui.QMouseEvent) -> None:
         """Reset text on click."""
-        super().mouse_release_event(event)
+        super().mouseReleaseEvent(event)
         self._force_reset_text()
 
-    def enter_event(self, event: QtGui.QEnterEvent) -> None:
+    def enterEvent(self, event: QtGui.QEnterEvent) -> None:
         """Set hovered status to true."""
-        super().enter_event(event)
+        super().enterEvent(event)
         self._hovered = True
 
-    def leave_event(self, event: QtGui.QEnterEvent) -> None:
+    def leaveEvent(self, event: QtGui.QEnterEvent) -> None:
         """Reset hovered status to false, and reset text if its reset is scheduled."""
-        super().leave_event(event)
+        super().leaveEvent(event)
         self._hovered = False
         if self._scheduled_reset:
             self.text = ""

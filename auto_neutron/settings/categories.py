@@ -9,7 +9,6 @@ from pathlib import Path
 
 from PySide6.QtCore import QByteArray
 from PySide6.QtGui import QFont
-from __feature__ import snake_case, true_property  # noqa: F401
 
 from auto_neutron import Theme
 from auto_neutron.constants import AHK_USER_SCRIPT_TEMPLATE
@@ -126,7 +125,7 @@ class Paths(metaclass=SettingsCategory):  # noqa: D101
 
 def _font_deserializer(val: str) -> QFont:
     font = QFont()
-    font.from_string(val)
+    font.fromString(val)
     return font
 
 
@@ -145,7 +144,7 @@ class Window(metaclass=SettingsCategory):  # noqa: D101
         QFont,
         SettingsParams(
             "Arial,9,-1,5,700,0,0,0,0,0,0,0,0,0,0,1",
-            lambda val: val.to_string(),
+            lambda val: val.toString(),
             _font_deserializer,
         ),
     ]

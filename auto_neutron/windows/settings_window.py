@@ -8,7 +8,6 @@ from operator import attrgetter
 from pathlib import Path
 
 from PySide6 import QtCore, QtWidgets
-from __feature__ import snake_case, true_property  # noqa: F401
 
 from auto_neutron import settings
 from auto_neutron.locale import code_from_locale, get_available_locales
@@ -64,8 +63,8 @@ class SettingsWindow(SettingsWindowGUI):
         self.refresh_widgets()
 
         if settings.Paths.ahk is None or not settings.Paths.ahk.exists():
-            self.behaviour_widget.copy_mode_checkbox.enabled = False
-            self.behaviour_widget.copy_mode_checkbox.checked = True
+            self.behaviour_widget.copy_mode_checkbox.setEnabled(False)
+            self.behaviour_widget.copy_mode_checkbox.setChecked(True)
 
         self.behaviour_widget.ahk_path_button.pressed.connect(self.get_ahk_path)
         self.alerts_widget.alert_path_button.pressed.connect(self.get_sound_path)
@@ -81,15 +80,15 @@ class SettingsWindow(SettingsWindowGUI):
         active_locale_index = [code_from_locale(locale) for locale in locales].index(
             settings.General.locale
         )
-        self.appearance_widget.language_combo.add_items(
+        self.appearance_widget.language_combo.addItems(
             [locale.get_display_name() for locale in locales]
         )
-        self.appearance_widget.language_combo.current_index = active_locale_index
+        self.appearance_widget.language_combo.setCurrentIndex(active_locale_index)
 
     @QtCore.Slot()
     def get_ahk_path(self) -> None:
         """Ask the user for the AHK executable file path and save it to the setting."""
-        path, __ = QtWidgets.QFileDialog.get_open_file_name(
+        path, __ = QtWidgets.QFileDialog.getOpenFileName(
             self,
             _("Select AHK executable"),
             filter=_("Executable files (*.exe)"),
@@ -97,19 +96,19 @@ class SettingsWindow(SettingsWindowGUI):
         if path:
             settings.Paths.ahk = Path(path)
             log.info(f"Setting ahk path to {path}")
-            self.behaviour_widget.copy_mode_checkbox.enabled = True
+            self.behaviour_widget.copy_mode_checkbox.setEnabled(True)
 
     @QtCore.Slot()
     def get_sound_path(self) -> None:
         """Ask the user for the alert file path and save it to the line edit."""
-        path, __ = QtWidgets.QFileDialog.get_open_file_name(
+        path, __ = QtWidgets.QFileDialog.getOpenFileName(
             self,
             _("Select alert file"),
             "",
             filter=_("Audio files (*.wav *.mp3);;All types (*.*)"),
         )
         if path:
-            self.alerts_widget.alert_path_line_edit.text = str(Path(path))
+            self.alerts_widget.alert_path_line_edit.setText(str(Path(path)))
             settings.Paths.alert_sound = Path(path)
 
     def refresh_widgets(self) -> None:
@@ -117,23 +116,23 @@ class SettingsWindow(SettingsWindowGUI):
         for widget, (setting_group, setting_name) in self.settings_pairs:
             setting_value = attrgetter(f"{setting_group}.{setting_name}")(settings)
             if isinstance(widget, QtWidgets.QCheckBox):
-                if not widget.tristate and setting_value:
+                if not widget.isTristate() and setting_value:
                     # We're saving bools but Qt has PartiallyChecked for 1 in the enum
                     setting_value = QtCore.Qt.CheckState.Checked
-                widget.set_check_state(QtCore.Qt.CheckState(setting_value))
+                widget.setCheckState(QtCore.Qt.CheckState(setting_value))
             elif isinstance(widget, QtWidgets.QLineEdit):
-                widget.text = (
+                widget.setText(
                     str(setting_value) if setting_value is not None else ""
                 )  # Sometimes this is a Path
             elif isinstance(widget, QtWidgets.QTextEdit):
-                widget.plain_text = setting_value
+                widget.setPlainText(setting_value)
             else:
-                widget.value = setting_value
+                widget.setValue(setting_value)
 
         font = settings.Window.font
-        self.appearance_widget.font_bold_checkbox.checked = font.bold()
-        self.appearance_widget.font_size_chooser.value = font.point_size()
-        self.appearance_widget.font_chooser.current_font = font
+        self.appearance_widget.font_bold_checkbox.setChecked(font.bold())
+        self.appearance_widget.font_size_chooser.setValue(font.pointSize())
+        self.appearance_widget.font_chooser.setCurrentFont(font)
 
     @QtCore.Slot()
     def save_settings(self) -> None:
@@ -142,34 +141,34 @@ class SettingsWindow(SettingsWindowGUI):
             for widget, (setting_group, setting_name) in self.settings_pairs:
                 settings_category = getattr(settings, setting_group)
                 if isinstance(widget, QtWidgets.QCheckBox):
-                    if widget.tristate:
+                    if widget.isTristate():
                         converter = int
                     else:
                         converter = bool
                     setattr(
                         settings_category,
                         setting_name,
-                        converter(widget.check_state().value),
+                        converter(widget.checkState().value),
                     )
                 elif isinstance(widget, QtWidgets.QLineEdit):
-                    setattr(settings_category, setting_name, widget.text)
+                    setattr(settings_category, setting_name, widget.text())
                 elif isinstance(widget, QtWidgets.QTextEdit):
-                    setattr(settings_category, setting_name, widget.plain_text)
+                    setattr(settings_category, setting_name, widget.toPlainText())
                 else:
-                    setattr(settings_category, setting_name, widget.value)
+                    setattr(settings_category, setting_name, widget.value())
 
-            font = self.appearance_widget.font_chooser.current_font
-            font.set_point_size(self.appearance_widget.font_size_chooser.value)
-            font.set_bold(self.appearance_widget.font_bold_checkbox.checked)
+            font = self.appearance_widget.font_chooser.currentFont()
+            font.setPointSize(self.appearance_widget.font_size_chooser.value())
+            font.setBold(self.appearance_widget.font_bold_checkbox.isChecked())
             settings.Window.font = font
 
             settings.General.locale = code_from_locale(
                 get_available_locales()[
-                    self.appearance_widget.language_combo.current_index
+                    self.appearance_widget.language_combo.currentIndex()
                 ]
             )
 
-    def change_event(self, event: QtCore.QEvent) -> None:
+    def changeEvent(self, event: QtCore.QEvent) -> None:
         """Retranslate the GUI when a language change occurs."""
         if event.type() == QtCore.QEvent.Type.LanguageChange:
             self.retranslate()

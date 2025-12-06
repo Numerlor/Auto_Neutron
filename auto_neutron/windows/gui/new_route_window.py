@@ -11,7 +11,6 @@ if t.TYPE_CHECKING:
     import collections.abc
 
 from PySide6 import QtCore, QtGui, QtWidgets
-from __feature__ import snake_case, true_property  # noqa: F401
 
 from auto_neutron.dark_theme import is_dark
 from auto_neutron.utils.file import base_path
@@ -51,29 +50,35 @@ class TabGUIBase(QtWidgets.QWidget):
         journal_submit_layout = QtWidgets.QHBoxLayout()
 
         journal_combo = QtWidgets.QComboBox(self)
-        journal_combo.size_adjust_policy = (
+        journal_combo.setSizeAdjustPolicy(
             QtWidgets.QComboBox.SizeAdjustPolicy.AdjustToContents
         )
 
         submit_button = QtWidgets.QPushButton(self)
-        submit_button.size_policy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Policy.Maximum, QtWidgets.QSizePolicy.Policy.Maximum
+        submit_button.setSizePolicy(
+            QtWidgets.QSizePolicy(
+                QtWidgets.QSizePolicy.Policy.Maximum,
+                QtWidgets.QSizePolicy.Policy.Maximum,
+            )
         )
         abort_button = QtWidgets.QPushButton(self)
-        abort_button.size_policy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Policy.Maximum, QtWidgets.QSizePolicy.Policy.Maximum
+        abort_button.setSizePolicy(
+            QtWidgets.QSizePolicy(
+                QtWidgets.QSizePolicy.Policy.Maximum,
+                QtWidgets.QSizePolicy.Policy.Maximum,
+            )
         )
         abort_button.hide()
         refresh_button = QtWidgets.QPushButton(self)
-        refresh_button.icon = QtGui.QIcon(self.get_refresh_icon(is_dark()))
+        refresh_button.setIcon(QtGui.QIcon(self.get_refresh_icon(is_dark())))
 
-        journal_submit_layout.add_widget(journal_combo)
-        journal_submit_layout.add_widget(refresh_button)
-        journal_submit_layout.add_spacer_item(
+        journal_submit_layout.addWidget(journal_combo)
+        journal_submit_layout.addWidget(refresh_button)
+        journal_submit_layout.addSpacerItem(
             QtWidgets.QSpacerItem(1, 1, QtWidgets.QSizePolicy.Policy.Expanding)
         )
-        journal_submit_layout.add_widget(submit_button)
-        journal_submit_layout.add_widget(abort_button)
+        journal_submit_layout.addWidget(submit_button)
+        journal_submit_layout.addWidget(abort_button)
 
         return (
             journal_submit_layout,
@@ -91,19 +96,19 @@ class TabGUIBase(QtWidgets.QWidget):
             path = base_path() / "resources/refresh.svg"
         return QtGui.QIcon(str(path))
 
-    def change_event(self, event: QtCore.QEvent) -> None:
+    def changeEvent(self, event: QtCore.QEvent) -> None:
         """Update the tooltip's colors when the palette changes."""
         if event.type() == QtCore.QEvent.Type.PaletteChange:
-            self.refresh_button.icon = self.get_refresh_icon(is_dark())
+            self.refresh_button.setIcon(self.get_refresh_icon(is_dark()))
 
-        super().change_event(event)
+        super().changeEvent(event)
 
     def retranslate(self) -> None:
         """Retranslate text that is always on display."""
-        self.submit_button.text = _("Submit")
-        self.abort_button.text = _("Abort")
-        self.abort_button.tool_tip = _("Cancel the current route plot")
-        self.refresh_button.tool_tip = _("Refresh journals")
+        self.submit_button.setText(_("Submit"))
+        self.abort_button.setText(_("Abort"))
+        self.abort_button.setToolTip(_("Cancel the current route plot"))
+        self.refresh_button.setToolTip(_("Refresh journals"))
 
 
 class SpanshTabGUIBase(TabGUIBase):
@@ -122,11 +127,13 @@ class SpanshTabGUIBase(TabGUIBase):
         self.journal_submit_layout = QtWidgets.QHBoxLayout()
 
         self.nearest_button = QtWidgets.QPushButton(self)
-        self.nearest_button.size_policy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed
+        self.nearest_button.setSizePolicy(
+            QtWidgets.QSizePolicy(
+                QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed
+            )
         )
         submit_nearest_layout = QtWidgets.QVBoxLayout()
-        submit_nearest_layout.add_spacer_item(
+        submit_nearest_layout.addSpacerItem(
             QtWidgets.QSpacerItem(
                 1,
                 1,
@@ -134,19 +141,19 @@ class SpanshTabGUIBase(TabGUIBase):
                 QtWidgets.QSizePolicy.Policy.Expanding,
             )
         )
-        submit_nearest_layout.add_widget(self.nearest_button)
-        submit_nearest_layout.add_widget(self.submit_button)
-        submit_nearest_layout.add_widget(self.abort_button)
+        submit_nearest_layout.addWidget(self.nearest_button)
+        submit_nearest_layout.addWidget(self.submit_button)
+        submit_nearest_layout.addWidget(self.abort_button)
 
-        self.journal_submit_layout.add_widget(
+        self.journal_submit_layout.addWidget(
             self.journal_combo,
             alignment=QtCore.Qt.AlignmentFlag.AlignBottom,
         )
-        self.journal_submit_layout.add_widget(
+        self.journal_submit_layout.addWidget(
             self.refresh_button,
             alignment=QtCore.Qt.AlignmentFlag.AlignBottom,
         )
-        self.journal_submit_layout.add_spacer_item(
+        self.journal_submit_layout.addSpacerItem(
             QtWidgets.QSpacerItem(1, 1, QtWidgets.QSizePolicy.Policy.Expanding)
         )
         spacer = QtWidgets.QSpacerItem(
@@ -155,17 +162,17 @@ class SpanshTabGUIBase(TabGUIBase):
             QtWidgets.QSizePolicy.Policy.Expanding,
             QtWidgets.QSizePolicy.Policy.Fixed,
         )
-        self.journal_submit_layout.add_spacer_item(spacer)
-        self.journal_submit_layout.add_layout(submit_nearest_layout)
+        self.journal_submit_layout.addSpacerItem(spacer)
+        self.journal_submit_layout.addLayout(submit_nearest_layout)
 
     def retranslate(self) -> None:
         """Retranslate text that is always on display."""
         super().retranslate()
-        self.nearest_button.text = _("Nearest")
-        self.source_edit.placeholder_text = _("Source system")
-        self.target_edit.placeholder_text = _("Destination system")
+        self.nearest_button.setText(_("Nearest"))
+        self.source_edit.setPlaceholderText(_("Source system"))
+        self.target_edit.setPlaceholderText(_("Destination system"))
 
-        self.cargo_label.text = _("Cargo")
+        self.cargo_label.setText(_("Cargo"))
 
     def _create_system_and_cargo_layout(
         self,
@@ -185,11 +192,11 @@ class SpanshTabGUIBase(TabGUIBase):
         cargo_label = QtWidgets.QLabel(self)
         cargo_slider = TooltipSlider(QtCore.Qt.Orientation.Horizontal, self)
 
-        layout.add_widget(source_system_edit)
-        layout.add_widget(target_system_edit)
+        layout.addWidget(source_system_edit)
+        layout.addWidget(target_system_edit)
 
-        layout.add_widget(cargo_label, alignment=QtCore.Qt.AlignmentFlag.AlignTop)
-        layout.add_widget(cargo_slider, alignment=QtCore.Qt.AlignmentFlag.AlignTop)
+        layout.addWidget(cargo_label, alignment=QtCore.Qt.AlignmentFlag.AlignTop)
+        layout.addWidget(cargo_slider, alignment=QtCore.Qt.AlignmentFlag.AlignTop)
 
         return layout, source_system_edit, target_system_edit, cargo_label, cargo_slider
 
@@ -202,27 +209,31 @@ class NeutronTabGUI(SpanshTabGUIBase):
 
         self.range_label = QtWidgets.QLabel(self)
         self.range_spin = QtWidgets.QDoubleSpinBox(self)
-        self.range_spin.suffix = " Ly"
-        self.range_spin.accelerated = True
-        self.range_spin.size_policy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed
+        self.range_spin.setSuffix(" Ly")
+        self.range_spin.setAccelerated(True)
+        self.range_spin.setSizePolicy(
+            QtWidgets.QSizePolicy(
+                QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed
+            )
         )
 
         self.efficiency_label = QtWidgets.QLabel(self)
         self.efficiency_spin = QtWidgets.QSpinBox(self)
-        self.efficiency_spin.maximum = 100
-        self.efficiency_spin.suffix = "%"
-        self.efficiency_spin.accelerated = True
-        self.efficiency_spin.size_policy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed
+        self.efficiency_spin.setMaximum(100)
+        self.efficiency_spin.setSuffix("%")
+        self.efficiency_spin.setAccelerated(True)
+        self.efficiency_spin.setSizePolicy(
+            QtWidgets.QSizePolicy(
+                QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed
+            )
         )
 
-        self.main_layout.add_layout(self.system_cargo_layout)
-        self.main_layout.add_widget(self.range_label)
-        self.main_layout.add_widget(self.range_spin)
-        self.main_layout.add_widget(self.efficiency_label)
-        self.main_layout.add_widget(self.efficiency_spin)
-        self.main_layout.add_spacer_item(
+        self.main_layout.addLayout(self.system_cargo_layout)
+        self.main_layout.addWidget(self.range_label)
+        self.main_layout.addWidget(self.range_spin)
+        self.main_layout.addWidget(self.efficiency_label)
+        self.main_layout.addWidget(self.efficiency_spin)
+        self.main_layout.addSpacerItem(
             QtWidgets.QSpacerItem(
                 1,
                 1,
@@ -230,13 +241,13 @@ class NeutronTabGUI(SpanshTabGUIBase):
                 QtWidgets.QSizePolicy.Policy.Expanding,
             )
         )
-        self.main_layout.add_layout(self.journal_submit_layout)
+        self.main_layout.addLayout(self.journal_submit_layout)
 
     def retranslate(self) -> None:
         """Retranslate text that is always on display."""
         super().retranslate()
-        self.range_label.text = _("Range")
-        self.efficiency_label.text = _("Efficiency")
+        self.range_label.setText(_("Range"))
+        self.efficiency_label.setText(_("Efficiency"))
 
 
 class ExactTabGUI(SpanshTabGUIBase):
@@ -244,7 +255,7 @@ class ExactTabGUI(SpanshTabGUIBase):
 
     def __init__(self, *args: object, **kwargs: object):
         super().__init__(*args, **kwargs)
-        self.cargo_slider.maximum = (
+        self.cargo_slider.setMaximum(
             999  # static value because ship may come from outside source
         )
 
@@ -255,13 +266,13 @@ class ExactTabGUI(SpanshTabGUIBase):
 
         self.use_clipboard_checkbox = QtWidgets.QCheckBox(self)
 
-        self.main_layout.add_layout(self.system_cargo_layout)
-        self.main_layout.add_widget(self.is_supercharged_checkbox)
-        self.main_layout.add_widget(self.supercarge_checkbox)
-        self.main_layout.add_widget(self.fsd_injections_checkbox)
-        self.main_layout.add_widget(self.exclude_secondary_checkbox)
-        self.main_layout.add_widget(self.use_clipboard_checkbox)
-        self.main_layout.add_spacer_item(
+        self.main_layout.addLayout(self.system_cargo_layout)
+        self.main_layout.addWidget(self.is_supercharged_checkbox)
+        self.main_layout.addWidget(self.supercarge_checkbox)
+        self.main_layout.addWidget(self.fsd_injections_checkbox)
+        self.main_layout.addWidget(self.exclude_secondary_checkbox)
+        self.main_layout.addWidget(self.use_clipboard_checkbox)
+        self.main_layout.addSpacerItem(
             QtWidgets.QSpacerItem(
                 1,
                 1,
@@ -269,16 +280,16 @@ class ExactTabGUI(SpanshTabGUIBase):
                 QtWidgets.QSizePolicy.Policy.Expanding,
             )
         )
-        self.main_layout.add_layout(self.journal_submit_layout)
+        self.main_layout.addLayout(self.journal_submit_layout)
 
     def retranslate(self) -> None:
         """Retranslate text that is always on display."""
         super().retranslate()
-        self.is_supercharged_checkbox.text = _("Already supercharged")
-        self.supercarge_checkbox.text = _("Use supercharge")
-        self.fsd_injections_checkbox.text = _("Use FSD injections")
-        self.exclude_secondary_checkbox.text = _("Exclude secondary stars")
-        self.use_clipboard_checkbox.text = _("Use ship from clipboard")
+        self.is_supercharged_checkbox.setText(_("Already supercharged"))
+        self.supercarge_checkbox.setText(_("Use supercharge"))
+        self.fsd_injections_checkbox.setText(_("Use FSD injections"))
+        self.exclude_secondary_checkbox.setText(_("Exclude secondary stars"))
+        self.use_clipboard_checkbox.setText(_("Use ship from clipboard"))
 
 
 class RoadToRichesTabGUI(SpanshTabGUIBase):
@@ -286,63 +297,69 @@ class RoadToRichesTabGUI(SpanshTabGUIBase):
 
     def __init__(self, *args: object, **kwargs: object):
         super().__init__(*args, **kwargs)
-        self.main_layout.contents_margins = QtCore.QMargins(
-            0, 0, 0, 0
-        )  # Holds only the scroll area.
+        self.main_layout.setContentsMargins(0, 0, 0, 0)  # Holds only the scroll area.
 
         self.scroll_area = QtWidgets.QScrollArea(self)
-        self.scroll_area.frame_shape = QtWidgets.QFrame.Shape.NoFrame
-        self.scroll_area.horizontal_scroll_bar_policy = (
-            QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff
+        self.scroll_area.setFrameShape(QtWidgets.QFrame.Shape.NoFrame)
+        self.scroll_area.setHorizontalScrollBarPolicy(
+            (QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         )
-        self.scroll_area.size_policy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Policy.Ignored,
-            QtWidgets.QSizePolicy.Policy.Ignored,
+        self.scroll_area.setSizePolicy(
+            QtWidgets.QSizePolicy(
+                QtWidgets.QSizePolicy.Policy.Ignored,
+                QtWidgets.QSizePolicy.Policy.Ignored,
+            )
         )
-        self.scroll_area.widget_resizable = True
+        self.scroll_area.setWidgetResizable(True)
         # The widget in the scroll area renders its background with the Window color even with
         # auto_fill_background set to False, and changing the Window role color affects how child widgets are rendered.
         # Because the tab widget this is in has its own background color,
         # and to avoid having to set a palette on all the children created here, the scroll area is forced to use
         # a an otherwise unused role for the color.
-        palette = self.scroll_area.palette
-        palette.set_color(QtGui.QPalette.ColorRole.Shadow, QtGui.QColor(0, 0, 0, 0))
-        self.scroll_area.palette = palette
-        self.scroll_area.set_background_role(QtGui.QPalette.ColorRole.Shadow)
+        palette = self.scroll_area.palette()
+        palette.setColor(QtGui.QPalette.ColorRole.Shadow, QtGui.QColor(0, 0, 0, 0))
+        self.scroll_area.setPalette(palette)
+        self.scroll_area.setBackgroundRole(QtGui.QPalette.ColorRole.Shadow)
 
         self.scroll_widget = QtWidgets.QWidget(self)
-        self.scroll_area.set_widget(self.scroll_widget)
+        self.scroll_area.setWidget(self.scroll_widget)
         self.scroll_layout = QtWidgets.QVBoxLayout(self.scroll_widget)
 
         self.range_label = QtWidgets.QLabel(self.scroll_widget)
         self.range_spinbox = QtWidgets.QDoubleSpinBox(self.scroll_widget)
-        self.range_spinbox.size_policy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Policy.Fixed,
-            QtWidgets.QSizePolicy.Policy.Fixed,
+        self.range_spinbox.setSizePolicy(
+            QtWidgets.QSizePolicy(
+                QtWidgets.QSizePolicy.Policy.Fixed,
+                QtWidgets.QSizePolicy.Policy.Fixed,
+            )
         )
-        self.range_spinbox.maximum = 100
-        self.range_spinbox.accelerated = True
-        self.range_spinbox.suffix = " Ly"
+        self.range_spinbox.setMaximum(100)
+        self.range_spinbox.setAccelerated(True)
+        self.range_spinbox.setSuffix(" Ly")
 
         self.radius_label = QtWidgets.QLabel(self.scroll_widget)
         self.radius_spinbox = QtWidgets.QSpinBox(self.scroll_widget)
-        self.radius_spinbox.size_policy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Policy.Fixed,
-            QtWidgets.QSizePolicy.Policy.Fixed,
+        self.radius_spinbox.setSizePolicy(
+            QtWidgets.QSizePolicy(
+                QtWidgets.QSizePolicy.Policy.Fixed,
+                QtWidgets.QSizePolicy.Policy.Fixed,
+            )
         )
-        self.radius_spinbox.accelerated = True
-        self.radius_spinbox.suffix = " Ly"
-        self.radius_spinbox.value = 25
+        self.radius_spinbox.setAccelerated(True)
+        self.radius_spinbox.setSuffix(" Ly")
+        self.radius_spinbox.setValue(25)
 
         self.max_systems_label = QtWidgets.QLabel(self.scroll_widget)
         self.max_systems_spinbox = QtWidgets.QSpinBox(self.scroll_widget)
-        self.max_systems_spinbox.size_policy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Policy.Fixed,
-            QtWidgets.QSizePolicy.Policy.Fixed,
+        self.max_systems_spinbox.setSizePolicy(
+            QtWidgets.QSizePolicy(
+                QtWidgets.QSizePolicy.Policy.Fixed,
+                QtWidgets.QSizePolicy.Policy.Fixed,
+            )
         )
-        self.max_systems_spinbox.accelerated = True
-        self.max_systems_spinbox.maximum = 500
-        self.max_systems_spinbox.value = 50
+        self.max_systems_spinbox.setAccelerated(True)
+        self.max_systems_spinbox.setMaximum(500)
+        self.max_systems_spinbox.setValue(50)
 
         self.use_mapping_value_checkbox = QtWidgets.QCheckBox(self.scroll_widget)
         self.loop_checkbox = QtWidgets.QCheckBox(self.scroll_widget)
@@ -371,22 +388,22 @@ class RoadToRichesTabGUI(SpanshTabGUIBase):
             self.maximum_distance_label,
             self.minimum_scan_label,
         ):
-            label.set_background_role(QtGui.QPalette.ColorRole.Base)
+            label.setBackgroundRole(QtGui.QPalette.ColorRole.Base)
 
-        self.scroll_layout.add_layout(self.system_cargo_layout)
-        self.scroll_layout.add_widget(self.range_label)
-        self.scroll_layout.add_widget(self.range_spinbox)
-        self.scroll_layout.add_widget(self.radius_label)
-        self.scroll_layout.add_widget(self.radius_spinbox)
-        self.scroll_layout.add_widget(self.max_systems_label)
-        self.scroll_layout.add_widget(self.max_systems_spinbox)
-        self.scroll_layout.add_widget(self.use_mapping_value_checkbox)
-        self.scroll_layout.add_widget(self.loop_checkbox)
-        self.scroll_layout.add_widget(self.maximum_distance_label)
-        self.scroll_layout.add_widget(self.max_distance_slider)
-        self.scroll_layout.add_widget(self.minimum_scan_label)
-        self.scroll_layout.add_widget(self.minimum_scan_slider)
-        self.scroll_layout.add_spacer_item(
+        self.scroll_layout.addLayout(self.system_cargo_layout)
+        self.scroll_layout.addWidget(self.range_label)
+        self.scroll_layout.addWidget(self.range_spinbox)
+        self.scroll_layout.addWidget(self.radius_label)
+        self.scroll_layout.addWidget(self.radius_spinbox)
+        self.scroll_layout.addWidget(self.max_systems_label)
+        self.scroll_layout.addWidget(self.max_systems_spinbox)
+        self.scroll_layout.addWidget(self.use_mapping_value_checkbox)
+        self.scroll_layout.addWidget(self.loop_checkbox)
+        self.scroll_layout.addWidget(self.maximum_distance_label)
+        self.scroll_layout.addWidget(self.max_distance_slider)
+        self.scroll_layout.addWidget(self.minimum_scan_label)
+        self.scroll_layout.addWidget(self.minimum_scan_slider)
+        self.scroll_layout.addSpacerItem(
             QtWidgets.QSpacerItem(
                 1,
                 1,
@@ -394,19 +411,19 @@ class RoadToRichesTabGUI(SpanshTabGUIBase):
                 QtWidgets.QSizePolicy.Policy.Expanding,
             )
         )
-        self.scroll_layout.add_layout(self.journal_submit_layout)
-        self.main_layout.add_widget(self.scroll_area)
+        self.scroll_layout.addLayout(self.journal_submit_layout)
+        self.main_layout.addWidget(self.scroll_area)
 
     def retranslate(self) -> None:
         """Retranslate text that is always on display."""
         super().retranslate()
-        self.range_label.text = _("Range")
-        self.radius_label.text = _("Radius")
-        self.max_systems_label.text = _("Maximum systems")
-        self.use_mapping_value_checkbox.text = _("Use mapping value")
-        self.loop_checkbox.text = _("Loop back to start")
-        self.maximum_distance_label.text = _("Maximum distance to arrival")
-        self.minimum_scan_label.text = _("Minimum scan value")
+        self.range_label.setText(_("Range"))
+        self.radius_label.setText(_("Radius"))
+        self.max_systems_label.setText(_("Maximum systems"))
+        self.use_mapping_value_checkbox.setText(_("Use mapping value"))
+        self.loop_checkbox.setText(_("Loop back to start"))
+        self.maximum_distance_label.setText(_("Maximum distance to arrival"))
+        self.minimum_scan_label.setText(_("Minimum scan value"))
 
 
 class CSVTabGUI(TabGUIBase):
@@ -420,13 +437,13 @@ class CSVTabGUI(TabGUIBase):
         self.path_edit = QtWidgets.QLineEdit(self)
 
         self.path_popup_button = QtWidgets.QPushButton("...", self)
-        self.path_popup_button.maximum_width = 24
+        self.path_popup_button.setMaximumWidth(24)
 
-        self.path_layout.add_widget(self.path_edit)
-        self.path_layout.add_widget(self.path_popup_button)
+        self.path_layout.addWidget(self.path_edit)
+        self.path_layout.addWidget(self.path_popup_button)
 
-        self.main_layout.add_layout(self.path_layout)
-        self.main_layout.add_spacer_item(
+        self.main_layout.addLayout(self.path_layout)
+        self.main_layout.addSpacerItem(
             QtWidgets.QSpacerItem(
                 1,
                 1,
@@ -434,12 +451,12 @@ class CSVTabGUI(TabGUIBase):
                 QtWidgets.QSizePolicy.Policy.Expanding,
             )
         )
-        self.main_layout.add_layout(self.journal_submit_layout)
+        self.main_layout.addLayout(self.journal_submit_layout)
 
     def retranslate(self) -> None:
         """Retranslate text that is always on display."""
         super().retranslate()
-        self.path_edit.placeholder_text = _("CSV path")
+        self.path_edit.setPlaceholderText(_("CSV path"))
 
 
 class LastTabGUI(TabGUIBase):
@@ -452,11 +469,11 @@ class LastTabGUI(TabGUIBase):
         self.location_label = QtWidgets.QLabel(self)
         self.destination_label = QtWidgets.QLabel(self)
 
-        self.main_layout.add_widget(self.source_label)
-        self.main_layout.add_widget(self.location_label)
-        self.main_layout.add_widget(self.destination_label)
+        self.main_layout.addWidget(self.source_label)
+        self.main_layout.addWidget(self.location_label)
+        self.main_layout.addWidget(self.destination_label)
 
-        self.main_layout.add_spacer_item(
+        self.main_layout.addSpacerItem(
             QtWidgets.QSpacerItem(
                 1,
                 1,
@@ -464,7 +481,7 @@ class LastTabGUI(TabGUIBase):
                 QtWidgets.QSizePolicy.Policy.Expanding,
             )
         )
-        self.main_layout.add_layout(self.journal_submit_layout)
+        self.main_layout.addLayout(self.journal_submit_layout)
 
 
 class NewRouteWindowGUI(QtWidgets.QDialog):
@@ -477,12 +494,12 @@ class NewRouteWindowGUI(QtWidgets.QDialog):
         tabs: collections.abc.Sequence[tuple[TabGUIBase, str]],
     ):
         super().__init__(parent)
-        self.set_attribute(QtCore.Qt.WidgetAttribute.WA_DeleteOnClose)
-        self.focus_policy = QtCore.Qt.FocusPolicy.ClickFocus
+        self.setAttribute(QtCore.Qt.WidgetAttribute.WA_DeleteOnClose)
+        self.setFocusPolicy(QtCore.Qt.FocusPolicy.ClickFocus)
 
         self.main_layout = QtWidgets.QVBoxLayout(self)
-        self.main_layout.spacing = 1
-        self.main_layout.contents_margins = QtCore.QMargins(3, 6, 3, 3)
+        self.main_layout.setSpacing(1)
+        self.main_layout.setContentsMargins(QtCore.QMargins(3, 6, 3, 3))
 
         self.tab_widget = QtWidgets.QTabWidget(self)
 
@@ -491,13 +508,13 @@ class NewRouteWindowGUI(QtWidgets.QDialog):
         for tab, tab_name in tabs:
             self.tabs.append(tab)
             self.tab_names.append(tab_name)
-            self.tab_widget.add_tab(tab, "")
+            self.tab_widget.addTab(tab, "")
 
         self.status_layout = QtWidgets.QHBoxLayout()
         self.status_widget = ScrolledStatus(self)
         # FIXME: layout with spacer won't be necessary after PySide6 is fixed to properly call the widget's size hint
-        self.status_layout.add_widget(self.status_widget)
-        self.status_layout.add_spacer_item(
+        self.status_layout.addWidget(self.status_widget)
+        self.status_layout.addSpacerItem(
             QtWidgets.QSpacerItem(
                 0,
                 16,
@@ -506,13 +523,13 @@ class NewRouteWindowGUI(QtWidgets.QDialog):
             )
         )
 
-        self.main_layout.add_widget(self.tab_widget)
-        self.main_layout.add_layout(self.status_layout)
+        self.main_layout.addWidget(self.tab_widget)
+        self.main_layout.addLayout(self.status_layout)
 
     @QtCore.Slot()
     def switch_submit_abort(self) -> None:
         """Switches the currently appearing submit/abort buttons for the other one."""
-        abort_hidden = self.tabs[0].abort_button.is_hidden()
+        abort_hidden = self.tabs[0].abort_button.isHidden()
         for tab in self.tabs:
             if abort_hidden:
                 tab.abort_button.show()
@@ -525,4 +542,4 @@ class NewRouteWindowGUI(QtWidgets.QDialog):
         """Retranslate text that is always on display."""
         for tab_pos, (tab, tab_title) in enumerate(zip(self.tabs, self.tab_names)):
             tab.retranslate()
-            self.tab_widget.set_tab_text(tab_pos, _(tab_title))
+            self.tab_widget.setTabText(tab_pos, _(tab_title))

@@ -4,7 +4,6 @@
 import math
 
 from PySide6 import QtCore, QtWidgets
-from __feature__ import snake_case, true_property  # noqa: F401
 
 
 class LogSlider(QtWidgets.QSlider):
@@ -24,33 +23,34 @@ class LogSlider(QtWidgets.QSlider):
         self._manual_set = False
         self._last_val = None
 
-        self.minimum = 0
-        self.maximum = steps
+        self.setMinimum(0)
+        self.setMaximum(steps)
         self.valueChanged.connect(self._on_value_changed)
 
     @property
     def log_value(self) -> int:
         """The current value selected by the slider."""  # noqa: D401
-        if self._last_val != self.value:
+        if self._last_val != self.value():
             # Update value if the slider's position changed.
             # The class can't rely purely on the valueChanged connection
             # because this may run between the update and when the event loop actually handles the slots.
             self._log_value = self._log_value_from_slider_pos()
-        self._last_val = self.value
+        self._last_val = self.value()
         return self._log_value
 
     @log_value.setter
     def log_value(self, value: int) -> None:
         """Set the current value to `value`."""
         # Prevent slider's valueChanged from rewriting `log_value` when `log_value` is set,
-        # as it'll be emitted after self.value is assigned here.
+        # as it'll be emitted after self.value() is assigned here.
         self._manual_set = True
         self._log_value = value
         log_min = math.log1p(self._log_min)
         log_max = math.log1p(self._log_max)
 
         scale = (log_max - log_min) / self.steps
-        self.value = self._last_val = round((math.log1p(value) - log_min) / scale)
+        self._last_val = round((math.log1p(value) - log_min) / scale)
+        self.setValue(self._last_val)
 
     @property
     def log_maximum(self) -> int:
@@ -89,12 +89,12 @@ class LogSlider(QtWidgets.QSlider):
     @property
     def steps(self) -> int:
         """Number of steps on the slider."""  # noqa: D401
-        return self.maximum
+        return self.maximum()
 
     @steps.setter
     def steps(self, step_count: int) -> None:
         """Set the number of steps on the slider."""
-        self.maximum = step_count
+        self.setMaximum(step_count)
 
     def _log_value_from_slider_pos(self) -> int:
         log_min = math.log1p(self._log_min)
@@ -102,7 +102,7 @@ class LogSlider(QtWidgets.QSlider):
 
         scale = (log_max - log_min) / self.steps
 
-        return round(math.e ** (log_min + scale * self.value) - 1)
+        return round(math.e ** (log_min + scale * self.value()) - 1)
 
     @QtCore.Slot()
     def _on_value_changed(self) -> None:

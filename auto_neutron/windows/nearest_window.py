@@ -7,7 +7,6 @@ import logging
 import typing as t
 
 from PySide6 import QtCore, QtGui, QtNetwork, QtWidgets
-from __feature__ import snake_case, true_property  # noqa: F401
 
 from auto_neutron.constants import SPANSH_API_URL
 from auto_neutron.utils.network import (
@@ -58,9 +57,9 @@ class NearestWindow(NearestWindowGUI):
         """Set the input spinboxes to x, y, z."""
         if location is not None:
             log.debug(f"Applying spinbox values from {location=}")
-            self.x_spinbox.value = location.x
-            self.y_spinbox.value = location.y
-            self.z_spinbox.value = location.z
+            self.x_spinbox.setValue(location.x)
+            self.y_spinbox.setValue(location.y)
+            self.z_spinbox.setValue(location.z)
 
     @QtCore.Slot()
     def _make_nearest_request(self) -> None:
@@ -69,17 +68,17 @@ class NearestWindow(NearestWindowGUI):
         self._current_network_request = make_network_request(
             SPANSH_API_URL + "/nearest",
             params={
-                "x": self.x_spinbox.value,
-                "y": self.y_spinbox.value,
-                "z": self.z_spinbox.value,
+                "x": self.x_spinbox.value(),
+                "y": self.y_spinbox.value(),
+                "z": self.z_spinbox.value(),
             },
             finished_callback=self._assign_from_reply,
         )
-        self.cursor = QtGui.QCursor(QtCore.Qt.CursorShape.BusyCursor)
+        self.setCursor(QtGui.QCursor(QtCore.Qt.CursorShape.BusyCursor))
 
     def _assign_from_reply(self, reply: QtNetwork.QNetworkReply) -> None:
         """Decode the spansh JSON reply and display the data to the user."""
-        self.cursor = QtGui.QCursor(QtCore.Qt.CursorShape.ArrowCursor)
+        self.setCursor(QtGui.QCursor(QtCore.Qt.CursorShape.ArrowCursor))
         self._current_network_request = None
 
         try:
@@ -98,19 +97,19 @@ class NearestWindow(NearestWindowGUI):
                 message = e.error_message
             self._status_callback(message, 10_000)
         else:
-            self.system_name_result_label.text = data["system"]["name"]
-            self.distance_result_label.text = (
+            self.system_name_result_label.setText(data["system"]["name"])
+            self.distance_result_label.setText(
                 format(data["system"]["distance"], ".2f").rstrip("0").rstrip(".")
                 + " Ly"
             )
 
-            self.x_result_label.text = (
+            self.x_result_label.setText(
                 format(data["system"]["x"], ".2f").rstrip("0").rstrip(".")
             )
-            self.y_result_label.text = (
+            self.y_result_label.setText(
                 format(data["system"]["y"], ".2f").rstrip("0").rstrip(".")
             )
-            self.z_result_label.text = (
+            self.z_result_label.setText(
                 format(data["system"]["z"], ".2f").rstrip("0").rstrip(".")
             )
 
@@ -118,23 +117,23 @@ class NearestWindow(NearestWindowGUI):
         """Abort the currently running network request, if any."""
         if self._current_network_request is not None:
             self._current_network_request.abort()
-        self.cursor = QtGui.QCursor(QtCore.Qt.CursorShape.ArrowCursor)
+        self.setCursor(QtGui.QCursor(QtCore.Qt.CursorShape.ArrowCursor))
 
-    def close_event(self, event: QtGui.QCloseEvent) -> None:
+    def closeEvent(self, event: QtGui.QCloseEvent) -> None:
         """Abort any running network request on close."""
         self._abort_request()
 
-    def change_event(self, event: QtCore.QEvent) -> None:
+    def changeEvent(self, event: QtCore.QEvent) -> None:
         """Retranslate the GUI when a language change occurs."""
         if event.type() == QtCore.QEvent.Type.LanguageChange:
             self.retranslate()
 
     @QtCore.Slot()
     def _emit_source_copy(self) -> None:  # noqa: D402
-        if self.system_name_result_label.text:
-            self.copy_source.emit(self.system_name_result_label.text)
+        if self.system_name_result_label.text():
+            self.copy_source.emit(self.system_name_result_label.text())
 
     @QtCore.Slot()
     def _emit_destination_copy(self) -> None:  # noqa: D402
-        if self.system_name_result_label.text:
-            self.copy_destination.emit(self.system_name_result_label.text)
+        if self.system_name_result_label.text():
+            self.copy_destination.emit(self.system_name_result_label.text())

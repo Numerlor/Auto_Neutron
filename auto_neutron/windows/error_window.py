@@ -9,7 +9,6 @@ import uuid
 from pathlib import Path
 
 from PySide6 import QtCore, QtGui, QtNetwork, QtWidgets
-from __feature__ import snake_case, true_property  # noqa: F401
 
 from auto_neutron.utils.file import get_file_name
 
@@ -43,17 +42,17 @@ class ErrorWindow(ErrorWindowGUI):
 
     def _set_text(self) -> None:
         """Set the help text to point the user to the current log file."""
-        log_path = QtCore.QStandardPaths.writable_location(
+        log_path = QtCore.QStandardPaths.writableLocation(
             QtCore.QStandardPaths.StandardLocation.AppConfigLocation
         )
         file_name = self._get_log_file_name().name
-        self.text_browser.markdown = self.error_template.format(
-            log_path=log_path, file_name=file_name
+        self.text_browser.setMarkdown(
+            self.error_template.format(log_path=log_path, file_name=file_name)
         )
 
     def _send_error_report(self) -> None:
         """Send error to the api with the log attached."""
-        self.cursor = QtCore.Qt.CursorShape.BusyCursor
+        self.setCursor(QtCore.Qt.CursorShape.BusyCursor)
         log_file = self._get_log_file_name()
         log.info("Sending session log to api.")
         if log_file is not None:
@@ -70,7 +69,7 @@ class ErrorWindow(ErrorWindowGUI):
 
     def _receive_reply(self, reply: QtNetwork.QNetworkReply) -> None:
         """Receive response from the error api, if failed display a warning to the user."""
-        self.cursor = QtCore.Qt.CursorShape.ArrowCursor
+        self.setCursor(QtCore.Qt.CursorShape.ArrowCursor)
         try:
             json_from_network_req(reply)
             log.debug("Successfully sent log to api.")
@@ -89,13 +88,15 @@ class ErrorWindow(ErrorWindowGUI):
         self._set_text()
         self._num_errors += 1
         if self._num_errors > 1:
-            self.info_label.text = _(
-                "Multiple unexpected errors have occurred (x{})"
-            ).format(self._num_errors)
+            self.info_label.setText(
+                _("Multiple unexpected errors have occurred (x{})").format(
+                    self._num_errors
+                )
+            )
         else:
             super().show()
 
-    def close_event(self, event: QtGui.QCloseEvent) -> None:
+    def closeEvent(self, event: QtGui.QCloseEvent) -> None:
         """Reset the error count to zero when the window is closed."""
         self._num_errors = 0
 
@@ -115,7 +116,7 @@ class ErrorWindow(ErrorWindowGUI):
         else:
             return None
 
-    def change_event(self, event: QtCore.QEvent) -> None:
+    def changeEvent(self, event: QtCore.QEvent) -> None:
         """Retranslate the GUI when a language change occurs."""
         if event.type() == QtCore.QEvent.Type.LanguageChange:
             self.retranslate()
@@ -124,9 +125,11 @@ class ErrorWindow(ErrorWindowGUI):
         """Retranslate text that is always on display."""
         super().retranslate()
         if self._num_errors > 1:
-            self.info_label.text = _(
-                "Multiple unexpected errors have occurred (x{})"
-            ).format(self._num_errors)
+            self.info_label.setText(
+                _("Multiple unexpected errors have occurred (x{})").format(
+                    self._num_errors
+                )
+            )
 
         self.error_template = textwrap.dedent(
             _(

@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 from PySide6 import QtCore, QtGui, QtWidgets
-from __feature__ import snake_case, true_property  # noqa: F401
 
 
 class ShutDownWindowGUI(QtWidgets.QDialog):
@@ -12,40 +11,48 @@ class ShutDownWindowGUI(QtWidgets.QDialog):
 
     def __init__(self, parent: QtWidgets.QWidget):
         super().__init__(parent)
-        self.set_attribute(QtCore.Qt.WidgetAttribute.WA_DeleteOnClose)
+        self.setAttribute(QtCore.Qt.WidgetAttribute.WA_DeleteOnClose)
 
         self.info_label = QtWidgets.QLabel(self)
         font = QtGui.QFont()
-        font.set_point_size(18)
-        self.info_label.font = font
+        font.setPointSize(18)
+        self.info_label.setFont(font)
 
         self.journal_combo = QtWidgets.QComboBox(self)
 
-        self.journal_combo.size_policy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed
+        self.journal_combo.setSizePolicy(
+            QtWidgets.QSizePolicy(
+                QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed
+            )
         )
-        self.journal_combo.size_adjust_policy = (
+        self.journal_combo.setSizeAdjustPolicy(
             QtWidgets.QComboBox.SizeAdjustPolicy.AdjustToContents
         )
 
         self.new_journal_button = QtWidgets.QPushButton(self)
-        self.new_journal_button.size_policy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed
+        self.new_journal_button.setSizePolicy(
+            QtWidgets.QSizePolicy(
+                QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed
+            )
         )
 
         self.save_route_button = QtWidgets.QPushButton(self)
-        self.save_route_button.size_policy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed
+        self.save_route_button.setSizePolicy(
+            QtWidgets.QSizePolicy(
+                QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed
+            )
         )
         self.quit_button = QtWidgets.QPushButton(self)
-        self.quit_button.size_policy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed
+        self.quit_button.setSizePolicy(
+            QtWidgets.QSizePolicy(
+                QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed
+            )
         )
 
         self.button_layout = QtWidgets.QHBoxLayout()
-        self.button_layout.add_widget(self.journal_combo)
-        self.button_layout.add_widget(self.new_journal_button)
-        self.button_layout.add_spacer_item(
+        self.button_layout.addWidget(self.journal_combo)
+        self.button_layout.addWidget(self.new_journal_button)
+        self.button_layout.addSpacerItem(
             QtWidgets.QSpacerItem(
                 1,
                 1,
@@ -53,22 +60,22 @@ class ShutDownWindowGUI(QtWidgets.QDialog):
                 QtWidgets.QSizePolicy.Policy.Fixed,
             )
         )
-        self.button_layout.add_widget(
+        self.button_layout.addWidget(
             self.save_route_button, alignment=QtCore.Qt.AlignmentFlag.AlignRight
         )
-        self.button_layout.add_widget(
+        self.button_layout.addWidget(
             self.quit_button, alignment=QtCore.Qt.AlignmentFlag.AlignRight
         )
 
         self.main_layout = QtWidgets.QVBoxLayout(self)
-        self.main_layout.add_widget(
+        self.main_layout.addWidget(
             self.info_label, alignment=QtCore.Qt.AlignmentFlag.AlignCenter
         )
-        self.main_layout.add_layout(self.button_layout)
+        self.main_layout.addLayout(self.button_layout)
 
     def retranslate(self) -> None:
         """Retranslate text that is always on display."""
-        self.info_label.text = _("Game shut down")
-        self.new_journal_button.text = _("New journal")
-        self.save_route_button.text = _("Save route")
-        self.quit_button.text = _("Quit")
+        self.info_label.setText(_("Game shut down"))
+        self.new_journal_button.setText(_("New journal"))
+        self.save_route_button.setText(_("Save route"))
+        self.quit_button.setText(_("Quit"))

@@ -9,7 +9,6 @@ import sys
 import typing as t
 
 from PySide6 import QtCore, QtWidgets
-from __feature__ import snake_case, true_property  # noqa: F401
 
 if t.TYPE_CHECKING:
     import collections.abc

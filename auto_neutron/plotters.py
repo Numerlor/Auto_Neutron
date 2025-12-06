@@ -13,7 +13,6 @@ import typing as t
 from pathlib import Path
 
 from PySide6 import QtCore, QtWidgets
-from __feature__ import snake_case, true_property  # noqa: F401
 
 from auto_neutron import settings
 from auto_neutron.constants import AHK_TEMPLATE
@@ -52,7 +51,7 @@ class CopyPlotter(Plotter):
     def update_system(self, system: str, system_index: int | None = None) -> None:
         """Set the system clipboard to `system`."""
         log.info(f"Pasting {system!r} to clipboard.")
-        QtWidgets.QApplication.clipboard().set_text(system)
+        QtWidgets.QApplication.clipboard().setText(system)
 
 
 class AhkPlotter(Plotter):

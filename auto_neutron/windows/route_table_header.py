@@ -6,7 +6,6 @@ import typing as t
 from functools import cached_property
 
 from PySide6 import QtWidgets
-from __feature__ import snake_case, true_property  # noqa: F401
 
 from auto_neutron.route import (
     ExactPlotRow,
@@ -54,18 +53,18 @@ class RouteTableHeader:
 
     def initialize_headers(self) -> None:
         """Initialize the table's columns and headers."""
-        self._table.column_count = self.column_count
+        self._table.setColumnCount(self.column_count)
         for column in range(self.column_count):
-            if self._table.horizontal_header_item(column) is None:
-                self._table.set_horizontal_header_item(
+            if self._table.horizontalHeaderItem(column) is None:
+                self._table.setHorizontalHeaderItem(
                     column, QtWidgets.QTableWidgetItem()
                 )
 
-        header = self._table.horizontal_header()
+        header = self._table.horizontalHeader()
         for index, header_section in enumerate(self._header_sections):
-            header.set_section_resize_mode(index, header_section.resize_mode)
+            header.setSectionResizeMode(index, header_section.resize_mode)
             delegate = header_section.delegate_type()
-            self._table.set_item_delegate_for_column(index, delegate)
+            self._table.setItemDelegateForColumn(index, delegate)
             self._delegates.append(delegate)
 
     def set_jumps(self, *, remaining: int, total: int) -> None:
@@ -78,9 +77,9 @@ class RouteTableHeader:
         for index, header_section in enumerate(self._header_sections):
             if (
                 not header_section.has_jumps
-                and (header := self._table.horizontal_header_item(index)) is not None
+                and (header := self._table.horizontalHeaderItem(index)) is not None
             ):
-                header.set_text(_(header_section.text))
+                header.setText(_(header_section.text))
 
         self.format_jump_header()
 
@@ -91,17 +90,17 @@ class RouteTableHeader:
         By default resizes the first column if the changes was in that column.
         """
         if item.column() == 0:
-            self._table.resize_column_to_contents(0)
+            self._table.resizeColumnToContents(0)
 
     def format_jump_header(self) -> None:
         """Update the header with the jump information."""
-        self._table.horizontal_header_item(self._jump_col_index).set_text(
+        self._table.horizontalHeaderItem(self._jump_col_index).setText(
             _(self._header_sections[self._jump_col_index].text).format(
                 self._remaining_jumps,
                 self._total_jumps,
             )
         )
-        self._table.resize_column_to_contents(self._jump_col_index)
+        self._table.resizeColumnToContents(self._jump_col_index)
 
     @property
     def column_count(self) -> int:

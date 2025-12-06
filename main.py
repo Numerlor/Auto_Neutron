@@ -24,7 +24,6 @@ from pathlib import Path
 
 import babel
 from PySide6 import QtGui, QtNetwork, QtWidgets
-from __feature__ import snake_case, true_property  # noqa: F401
 
 import auto_neutron.locale
 from auto_neutron import hub, win_theme_change_listener
@@ -41,10 +40,10 @@ from auto_neutron.utils.utils import ExceptionHandler
 
 ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(APPID)
 app = QtWidgets.QApplication(sys.argv)
-app.window_icon = QtGui.QIcon(str(base_path() / "resources/icons_library.ico"))
-app.application_name = APP
-app.organization_name = ORG
-app.set_style("Fusion")
+app.setWindowIcon(QtGui.QIcon(str(base_path() / "resources/icons_library.ico")))
+app.setApplicationName(APP)
+app.setOrganizationName(ORG)
+app.setStyle("Fusion")
 
 auto_neutron.network_mgr = QtNetwork.QNetworkAccessManager()
 

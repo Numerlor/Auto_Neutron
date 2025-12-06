@@ -10,7 +10,6 @@ import urllib.parse
 from functools import partial
 
 from PySide6 import QtCore, QtNetwork
-from __feature__ import snake_case, true_property  # noqa: F401
 
 import auto_neutron
 from auto_neutron.constants import APP, VERSION
@@ -48,7 +47,7 @@ def make_network_request(
         url += "?" + urllib.parse.urlencode(params)
     qurl = QtCore.QUrl(url)
     request = QtNetwork.QNetworkRequest(qurl)
-    request.set_header(
+    request.setHeader(
         QtNetwork.QNetworkRequest.KnownHeaders.UserAgentHeader, f"{APP}/{VERSION}"
     )
     reply = auto_neutron.network_mgr.get(request)
@@ -66,10 +65,10 @@ def post_request(
     """Make a post request to `url` with `json_` as its body. Connect its reply to `finished_callback`."""
     qurl = QtCore.QUrl(url)
     request = QtNetwork.QNetworkRequest(qurl)
-    request.set_header(
+    request.setHeader(
         QtNetwork.QNetworkRequest.KnownHeaders.UserAgentHeader, f"{APP}/{VERSION}"
     )
-    request.set_header(
+    request.setHeader(
         QtNetwork.QNetworkRequest.KnownHeaders.ContentTypeHeader, "application/json"
     )
     reply = auto_neutron.network_mgr.post(
@@ -87,15 +86,15 @@ def json_from_network_req(
     """Decode bytes from the `QNetworkReply` object or raise an error on failed requests."""
     try:
         if reply.error() is QtNetwork.QNetworkReply.NetworkError.NoError:
-            return json.loads(reply.read_all().data())
+            return json.loads(reply.readAll().data())
 
         elif (
             reply.error() is QtNetwork.QNetworkReply.NetworkError.OperationCanceledError
         ):
-            raise NetworkError(reply.error(), reply.error_string(), None)
+            raise NetworkError(reply.error(), reply.errorString(), None)
 
         else:
-            text_response = reply.read_all().data()
+            text_response = reply.readAll().data()
             if text_response:
                 if json_error_key is not None:
                     reply_error = json.loads(text_response)[json_error_key]
@@ -103,6 +102,6 @@ def json_from_network_req(
                     reply_error = text_response
             else:
                 reply_error = None
-            raise NetworkError(reply.error(), reply.error_string(), reply_error)
+            raise NetworkError(reply.error(), reply.errorString(), reply_error)
     finally:
-        reply.delete_later()
+        reply.deleteLater()

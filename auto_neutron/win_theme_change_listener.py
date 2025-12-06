@@ -11,7 +11,6 @@ import winreg
 from types import TracebackType
 
 from PySide6 import QtCore
-from __feature__ import snake_case, true_property  # noqa: F401
 
 from auto_neutron.utils.utils import get_application
 
@@ -32,7 +31,7 @@ class _EventFilter(QtCore.QAbstractNativeEventFilter):
         super().__init__()
         self._callbacks = callbacks
 
-    def native_event_filter(self, event_type: bytes, message_ptr: VoidPtr) -> bool:
+    def nativeEventFilter(self, event_type: bytes, message_ptr: VoidPtr) -> bool:
         """Call the callback with the MSG object."""
         msg = ctypes.wintypes.MSG.from_address(int(message_ptr))
         callback = self._callbacks.get(msg.message)
@@ -54,8 +53,8 @@ class WinThemeChangeListener(QtCore.QObject):
     def __init__(self, parent: QtCore.QObject | None = None):
         super().__init__(parent)
         self._change_timer = QtCore.QTimer(parent)
-        self._change_timer.single_shot_ = True
-        self._change_timer.interval = 500
+        self._change_timer.setSingleShot(True)
+        self._change_timer.setInterval(500)
         self._change_timer.timeout.connect(self._emit_if_changed)
         self._registry_key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, _REGISTRY_PATH)
         self._dark_theme = self._os_dark_theme()
@@ -110,5 +109,5 @@ def create_listener(
 ) -> WinThemeChangeListener:
     """Create a `WinThemeChangeListener` and register it with the app."""
     listener = WinThemeChangeListener(parent)
-    get_application().install_native_event_filter(listener._event_filter)
+    get_application().installNativeEventFilter(listener._event_filter)
     return listener

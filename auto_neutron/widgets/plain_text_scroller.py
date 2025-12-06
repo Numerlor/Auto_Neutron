@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 from PySide6 import QtCore, QtGui, QtWidgets
-from __feature__ import snake_case, true_property  # noqa: F401
 
 
 class PlainTextScroller(QtWidgets.QWidget):
@@ -34,23 +33,23 @@ class PlainTextScroller(QtWidgets.QWidget):
         self._scroll_interval = scroll_interval
 
         self._static_text = QtGui.QStaticText(text)
-        self._static_text.set_text_format(QtCore.Qt.TextFormat.PlainText)
+        self._static_text.setTextFormat(QtCore.Qt.TextFormat.PlainText)
 
         self._fade_in_image, self._fade_out_image = self._create_fade_images()
 
         self._scroll_timer = QtCore.QTimer(self)
-        self._scroll_timer.interval = scroll_interval
-        self._scroll_timer.timer_type = QtCore.Qt.TimerType.PreciseTimer
+        self._scroll_timer.setInterval(scroll_interval)
+        self._scroll_timer.setTimerType(QtCore.Qt.TimerType.PreciseTimer)
         self._scroll_timer.timeout.connect(self._reposition)
 
         self._reset_timer = QtCore.QTimer(self)
-        self._reset_timer.interval = 2000
-        self._reset_timer.single_shot_ = True
+        self._reset_timer.setInterval(2000)
+        self._reset_timer.setSingleShot(True)
         self._reset_timer.timeout.connect(self._reset_pos)
 
         self._delay_scroll_start_timer = QtCore.QTimer(self)
-        self._delay_scroll_start_timer.interval = 750
-        self._delay_scroll_start_timer.single_shot_ = True
+        self._delay_scroll_start_timer.setInterval(750)
+        self._delay_scroll_start_timer.setSingleShot(True)
         self._delay_scroll_start_timer.timeout.connect(self._scroll_timer.start)
 
     @property
@@ -61,8 +60,8 @@ class PlainTextScroller(QtWidgets.QWidget):
     @text.setter
     def text(self, text: str) -> None:
         """Set widget's text to `text`."""
-        self._static_text.set_text(text)
-        self.update_geometry()
+        self._static_text.setText(text)
+        self.updateGeometry()
         self.update()
 
     @property
@@ -95,11 +94,10 @@ class PlainTextScroller(QtWidgets.QWidget):
     @scroll_interval.setter
     def scroll_interval(self, interval: int) -> None:
         """Set a new scroll interval."""
-        self._scroll_timer.interval = interval
+        self._scroll_timer.setInterval(interval)
         self._scroll_interval = interval
 
-    @property
-    def size_hint(self) -> QtCore.QSize:
+    def sizeHint(self) -> QtCore.QSize:
         """
         Return the size hint.
 
@@ -107,8 +105,7 @@ class PlainTextScroller(QtWidgets.QWidget):
         """
         return self._text_size
 
-    @property
-    def minimum_size_hint(self) -> QtCore.QSize:
+    def minimumSizeHint(self) -> QtCore.QSize:
         """
         Return the minimum size hint.
 
@@ -117,16 +114,16 @@ class PlainTextScroller(QtWidgets.QWidget):
         text_size = self._text_size
         return QtCore.QSize(max(40, text_size.width()), text_size.height())
 
-    def enter_event(self, event: QtGui.QEnterEvent) -> None:
+    def enterEvent(self, event: QtGui.QEnterEvent) -> None:
         """Start scrolling if text doesn't fit on entry."""
-        super().enter_event(event)
-        if self._text_size.width() > self.size.width():
-            self._delay_scroll_start_timer.interval = 500
+        super().enterEvent(event)
+        if self._text_size.width() > self.size().width():
+            self._delay_scroll_start_timer.setInterval(500)
             self._delay_scroll_start_timer.start()
 
-    def leave_event(self, event: QtCore.QEvent) -> None:
+    def leaveEvent(self, event: QtCore.QEvent) -> None:
         """Cancel any scrolling on leave."""
-        super().leave_event(event)
+        super().leaveEvent(event)
         self._scroll_pos = 0
         self._scroll_timer.stop()
         self._reset_timer.stop()
@@ -153,23 +150,23 @@ class PlainTextScroller(QtWidgets.QWidget):
         """Reset the text to its initial position, and start the scroll timer which will start scrolling in 750ms."""
         self._scroll_pos = 0
         self.update()
-        self._delay_scroll_start_timer.interval = 750
+        self._delay_scroll_start_timer.setInterval(750)
         self._delay_scroll_start_timer.start()
 
-    def paint_event(self, paint_event: QtGui.QPaintEvent) -> None:
+    def paintEvent(self, paint_event: QtGui.QPaintEvent) -> None:
         """Paint the text at its current scroll position with the fade-out gradients on both sides."""
-        text_y = (self.height - self._text_size.height()) // 2
+        text_y = (self.height() - self._text_size.height()) // 2
 
         painter = QtGui.QPainter(self)
 
-        painter.set_clip_rect(
+        painter.setClipRect(
             QtCore.QRect(
                 QtCore.QPoint(0, text_y),
                 self._text_size,
             )
         )
 
-        painter.draw_static_text(
+        painter.drawStaticText(
             QtCore.QPointF(-self._scroll_pos, text_y),
             self._static_text,
         )
@@ -181,18 +178,18 @@ class PlainTextScroller(QtWidgets.QWidget):
                 self._scroll_pos + self.fade_width // 2, self.fade_width
             )
 
-        painter.draw_image(
+        painter.drawImage(
             -self.fade_width + fade_in_width,
             text_y,
             self._fade_in_image,
         )
 
-        fade_out_width = self._text_size.width() - self.width - self._scroll_pos
+        fade_out_width = self._text_size.width() - self.width() - self._scroll_pos
         if fade_out_width > 0:
             fade_out_width = min(self.fade_width, fade_out_width + self.fade_width // 2)
 
-        painter.draw_image(
-            self.width - fade_out_width,
+        painter.drawImage(
+            self.width() - fade_out_width,
             text_y,
             self._fade_out_image,
         )
@@ -204,18 +201,18 @@ class PlainTextScroller(QtWidgets.QWidget):
             self._text_size.height(),
             QtGui.QImage.Format.Format_ARGB32_Premultiplied,
         )
-        if fade_in_image.is_null():
+        if fade_in_image.isNull():
             raise MemoryError("Unable to allocate QImage.")
         fade_out_image = QtGui.QImage(
             self.fade_width,
             self._text_size.height(),
             QtGui.QImage.Format.Format_ARGB32_Premultiplied,
         )
-        if fade_out_image.is_null():
+        if fade_out_image.isNull():
             raise MemoryError("Unable to allocate QImage.")
 
         # FIXME: use actual transparency instead of using the background color
-        background_color = self.palette.window().color().get_rgb()[:-1]
+        background_color = self.palette().window().color().getRgb()[:-1]
         opaque_color = QtGui.QColor(*background_color, 255)
 
         fade_in_image.fill(QtCore.Qt.GlobalColor.transparent)
@@ -226,33 +223,33 @@ class PlainTextScroller(QtWidgets.QWidget):
         )
 
         painter = QtGui.QPainter(fade_in_image)
-        painter.set_pen(QtCore.Qt.PenStyle.NoPen)
+        painter.setPen(QtCore.Qt.PenStyle.NoPen)
 
-        gradient.set_color_at(0, opaque_color)
-        gradient.set_color_at(1, QtCore.Qt.GlobalColor.transparent)
+        gradient.setColorAt(0, opaque_color)
+        gradient.setColorAt(1, QtCore.Qt.GlobalColor.transparent)
 
-        painter.fill_rect(fade_in_image.rect(), gradient)
+        painter.fillRect(fade_in_image.rect(), gradient)
         painter.end()
 
         painter.begin(fade_out_image)
-        painter.set_pen(QtCore.Qt.PenStyle.NoPen)
+        painter.setPen(QtCore.Qt.PenStyle.NoPen)
 
-        gradient.set_color_at(0, QtCore.Qt.GlobalColor.transparent)
-        gradient.set_color_at(1, opaque_color)
+        gradient.setColorAt(0, QtCore.Qt.GlobalColor.transparent)
+        gradient.setColorAt(1, opaque_color)
 
-        painter.fill_rect(fade_out_image.rect(), gradient)
+        painter.fillRect(fade_out_image.rect(), gradient)
 
         return fade_in_image, fade_out_image
 
-    def change_event(self, event: QtCore.QEvent) -> None:
+    def changeEvent(self, event: QtCore.QEvent) -> None:
         """Update the fade images if the palette changed."""
         if event.type() == QtCore.QEvent.Type.PaletteChange:
             self._fade_in_image, self._fade_out_image = self._create_fade_images()
-        super().change_event(event)
+        super().changeEvent(event)
 
     @property
     def _text_size(self) -> QtCore.QSize:
         return QtCore.QSize(
-            self.font_metrics().horizontal_advance(self.text),
-            self.font_metrics().height(),
+            self.fontMetrics().horizontalAdvance(self._static_text.text()),
+            self.fontMetrics().height(),
         )
