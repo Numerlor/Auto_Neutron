@@ -23,6 +23,7 @@ class FrameShiftDrive:
     class_: int
     max_fuel_usage: float
     optimal_mass: float
+    supercharge_multiplier: int = 4
 
     _SIZE_CONSTANTS: t.ClassVar[dict[int, float]] = {
         2: 2.0,
@@ -107,7 +108,9 @@ class SCOFrameShiftDrive(FrameShiftDrive):
 
 @dataclasses.dataclass(slots=True, frozen=True)
 class SCOFrameShiftDriveMkII(FrameShiftDrive):
-    """Supercruise overcharge FSD."""
+    """Supercruise overcharge FSD MkII."""
+
+    supercharge_multiplier: int = 6
 
     _CLASS_CONSTANTS = {5: 4}
 
