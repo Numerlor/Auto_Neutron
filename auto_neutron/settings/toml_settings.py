@@ -43,6 +43,31 @@ if not t.TYPE_CHECKING:
 log = logging.getLogger(__name__)
 
 
+def _is_toml_serializable(obj: t.Any) -> bool:
+    """Check if an object is TOML serializable."""
+    try:
+        tomli_w.dumps({"test": obj})
+        return True
+    except TypeError:
+        return False
+
+
+def _filter_serializable(obj: t.Any) -> t.Any:
+    """Recursively filter out non-TOML serializable objects from a data structure."""
+    if isinstance(obj, dict):
+        return {
+            k: _filter_serializable(v)
+            for k, v in obj.items()
+            if _is_toml_serializable(v)
+        }
+    elif isinstance(obj, (list, tuple)):
+        return type(obj)(
+            _filter_serializable(item) for item in obj if _is_toml_serializable(item)
+        )
+    else:
+        return obj if _is_toml_serializable(obj) else None
+
+
 class TOMLSettings:
     """Provide an interface to a TOML settings file."""
 
@@ -177,6 +202,11 @@ class TOMLSettings:
         If only the key and value is specified, the key may contain a dotted path containing categories.
         """
         categories, key, value = self._set_value_arguments(self, *args, **kwargs)
+        if not _is_toml_serializable(value):
+            log.warning(
+                f"Attempted to store non-serializable value of type {type(value)} for key {key}"
+            )
+            return
         category_dict = self._get_category_dict(self._settings_dict, categories)
         category_dict[key] = value
 
@@ -243,15 +273,22 @@ class TOMLSettings:
         )
         self._settings_dict = file_settings
 
+        # Filter out non-serializable objects before saving
+        serializable_dict = _filter_serializable(self._settings_dict)
+
         if atomic:
             temp_path = self.path.with_stem("_TEMP" + self.path.stem)
             with temp_path.open("wb") as settings_file:
-                tomli_w.dump(self._settings_dict, settings_file, multiline_strings=True)
+                tomli_w.dump(serializable_dict, settings_file, multiline_strings=True)
 
             shutil.move(temp_path, self.path)
         else:
             with self.path.open("wb") as settings_file:
-                tomli_w.dump(self._settings_dict, settings_file, multiline_strings=True)
+                tomli_w.dump(serializable_dict, settings_file, multiline_strings=True)
+
+        # Update in-memory dict to remove non-serializable objects
+        self._settings_dict = RecursiveDefaultDict()
+        self._settings_dict.update_from_dict_recursive(serializable_dict)
 
     def load_from_file(self) -> None:
         """Load new settings from the file path of the settings object."""
