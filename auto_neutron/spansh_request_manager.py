@@ -71,7 +71,7 @@ class SpanshRequestManager:
             if job_response.get("status") == "queued":
                 sec_delay = next(delay_iterator)
                 log.debug(f"Re-requesting queued job result in {sec_delay} seconds.")
-                self._delay_timer.interval = 2000
+                self._delay_timer.interval = sec_delay * 1000
                 self._timer_connection = self._delay_timer.timeout.connect(
                     partial(
                         self.make_request,
