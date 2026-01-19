@@ -128,13 +128,9 @@ class ErrorWindow(ErrorWindowGUI):
                 "Multiple unexpected errors have occurred (x{})"
             ).format(self._num_errors)
 
-        self.error_template = textwrap.dedent(
-            _(
-                """\
+        self.error_template = textwrap.dedent(_("""\
         Please make sure to report the bug by submitting the session log, or at [Github]({issues_url}),
         and include the {{file_name}} file from [the log directory]({{log_path}}).\\
         You may close this window, but the program may not be fully functional, or it may produce erroneous behaviour.
-        """
-            )
-        ).format(issues_url=ISSUES_URL)
+        """)).format(issues_url=ISSUES_URL)
         self._set_text()
