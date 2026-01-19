@@ -2,6 +2,7 @@
 # Copyright (C) 2022  Numerlor
 
 """Utility script to convert a svg file into an icon library."""
+
 import argparse
 import shutil
 import subprocess
