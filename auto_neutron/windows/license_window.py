@@ -69,9 +69,7 @@ class LicenseWindow(LicenseWindowGUI):
         ).as_uri()
         auto_neutron_license_url = (base_path() / "LICENSE.md").as_uri()
 
-        return textwrap.dedent(
-            _(
-                """\
+        return textwrap.dedent(_("""\
         Auto_Neutron Copyright (C) 2019 Numerlor\\
         This program comes with ABSOLUTELY NO WARRANTY.\\
         This is free software, and you are welcome to redistribute it
@@ -90,9 +88,7 @@ class LicenseWindow(LicenseWindowGUI):
           Python is licensed under the {psf_license_agreement_hyperlink}, see {python_licenses_hyperlink} for more details.
 
         And The Breeze Icons Theme Copyright (C) 2014 Uri Herrera <uri_herrera@nitrux.in> and others, licensed under the {breeze_hyperlink}.
-        """
-            )
-        ).format(
+        """)).format(
             auto_neutron_hyperlink=self.make_hyperlink(
                 _("GPLv3 license"), auto_neutron_license_url
             ),
