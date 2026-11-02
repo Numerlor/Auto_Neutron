@@ -33,8 +33,7 @@ JOURNAL_PATH = (
 )
 STATUS_PATH = JOURNAL_PATH / "Status.json"
 ROUTE_FILE_NAME = "route.csv"
-AHK_TEMPLATE = Template(
-    """\
+AHK_TEMPLATE = Template("""\
 stdin := FileOpen("*", "r")
 
 ${hotkey}::
@@ -43,8 +42,7 @@ ${hotkey}::
         system := Trim(stdin.ReadLine(),"`n ")
     }
     ${user_script}
-"""
-)
+""")
 
 AHK_USER_SCRIPT_TEMPLATE = """\
 SetKeyDelay, 50, 50
